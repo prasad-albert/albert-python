@@ -1,0 +1,306 @@
+version: 2.1
+
+default: &defaults
+  parallelism: 1
+
+k6_performance_tests: &k6_performance_tests
+  run:
+    name: Running k6 tests
+    command: |
+      docker pull loadimpact/k6:latest
+      docker run --env ENV -i -v $HOME/project:/load/ loadimpact/k6:latest run /load/test/perf/perf.js
+
+parameters:
+  teams_hook:
+    type: string
+    default: "https://albertinventcom.webhook.office.com/webhookb2/35a36a3d-fc25-4899-a1dd-ad9c7d77b5b3@98aab90e-764b-48f1-afaa-02e3c7300653/IncomingWebhook/1be1aec4fcf54cd28f991a5f5c636692/d2de23d0-ed4f-4c43-870a-c56a8ef39c37"
+
+orbs:
+  aws-ecr: circleci/aws-ecr@7.3.0
+  aws-ecs: circleci/aws-ecs@2.3.0
+  snyk: snyk/snyk@1.1.2
+  ms-teams-notifier: oktapodia/ms-teams-notifier@3.0.0
+  browser-tools: circleci/browser-tools@1.2.3
+  aws-cli: circleci/aws-cli@4.0.0
+
+jobs:
+  prebuild-installation:
+    docker:
+      - image: cimg/node:lts
+    resource_class: small
+    steps:
+      - checkout
+      - run: npm install
+      - persist_to_workspace:
+          root: .
+          paths:
+            - "*"
+
+  unit-test:
+    docker:
+      - image: cimg/node:lts
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: .
+      - run: npm run test
+
+  functional-tests:
+    docker:
+      - image: cimg/node:lts
+    resource_class: large
+    parallelism: 10
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          command: |
+            TEST=$(circleci tests glob "test/functional/*.js" | circleci tests split)
+            npm run $TEST
+      - when:
+          condition:
+            equal: [main, <<pipeline.git.branch>>]
+          steps:
+            - ms-teams-notifier/report:
+                only_on_fail: true
+                webhook_url: <<pipeline.parameters.teams_hook>>
+
+  integration-tests:
+    parameters:
+      repos:
+        type: string
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
+    steps:
+      - run: mkdir ~/.ssh
+      - run: ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run: git clone git@github.com:MoleculeEngineering/<<parameters.repos>>.git
+      - run: cd /home/circleci/project/<<parameters.repos>> && npm install
+      - run: cd /home/circleci/project/<<parameters.repos>> && npm run func
+      - when:
+          condition:
+            equal: [ main, <<pipeline.git.branch>> ]
+          steps:
+            - ms-teams-notifier/report:
+                only_on_fail: true
+                webhook_url: <<pipeline.parameters.teams_hook>>
+
+  acl-tests:
+    docker:
+      - image: cimg/node:lts
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: .
+      - run: npm run acl
+
+  performance-tests:
+    <<: *defaults
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+    steps:
+      - checkout
+      - *k6_performance_tests
+      - when:
+          condition:
+            equal: [main, <<pipeline.git.branch>>]
+          steps:
+            - ms-teams-notifier/report:
+                only_on_fail: true
+                webhook_url: <<pipeline.parameters.teams_hook>>
+
+  snyk-app-scan:
+    docker:
+      - image: cimg/node:16.19.1
+    resource_class: small
+    steps:
+      - checkout
+      - run: npm install
+      - snyk/scan:
+          fail-on-issues: false
+          monitor-on-build: true
+          severity-threshold: high
+          token-variable: SNYK_TOKEN
+
+  update-invicti-profile: 
+    docker:
+      - image: cimg/node:lts 
+    resource_class: small
+    steps:
+      - checkout
+      - aws-cli/setup
+      - run:
+          name: Update invicti profile if API contract file gets updated
+          command: |
+            npm install
+            GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone -b main --single-branch --depth 1 git@github.com:MoleculeEngineering/scripts-sre.git
+            cp scripts-sre/invicti/invicti.js invicti.js 
+            node invicti.js
+
+workflows:
+  test-build-n-deploy-image:
+    jobs:
+      - prebuild-installation:
+          name: run-prebuild-installation
+      - unit-test:
+          name: run-unit-tests
+          requires:
+            - run-prebuild-installation
+      - aws-ecr/build-and-push-image:
+          context: dev
+          name: build-n-push-image
+          requires:
+            - run-unit-tests
+          account-url: AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          attach-workspace: true
+          dockerfile: Dockerfile
+          path: .
+          region: AWS_REGION
+          repo: "albert-sdk"
+          create-repo: true
+          tag: "${CIRCLE_SHA1}"
+      - aws-ecs/deploy-service-update:
+          context: dev
+          name: deploy-2-dev
+          requires:
+            - build-n-push-image
+          aws-region: AWS_REGION
+          force-new-deployment: true
+          verify-revision-is-deployed: true
+          family: "${AWS_ECS_CLUSTER_NAME}-albert-sdk" # task name
+          service-name: "albert-sdk" # service name
+          cluster-name: "${AWS_ECS_CLUSTER_NAME}-cluster"
+          container-image-name-updates: "container=albert-sdk,tag=${CIRCLE_SHA1}"
+      - functional-tests:
+          context: dev
+          name: run-functional-tests
+          requires:
+            - deploy-2-dev
+      - performance-tests:
+          context: dev
+          name: run-performance-tests
+          requires:
+            - deploy-2-dev
+      - hold:
+          name: approve-staging
+          type: approval
+          requires:
+            - deploy-2-dev
+            - run-functional-tests
+            - run-performance-tests
+      - aws-ecs/deploy-service-update:
+          context: staging
+          name: deploy-2-staging
+          requires:
+            - approve-staging
+          aws-region: AWS_REGION
+          force-new-deployment: true
+          verify-revision-is-deployed: true
+          family: "${AWS_ECS_CLUSTER_NAME}-albert-sdk" # task name
+          service-name: "albert-sdk" # service name
+          cluster-name: "${AWS_ECS_CLUSTER_NAME}-cluster"
+          container-image-name-updates: "container=albert-sdk,tag=${CIRCLE_SHA1}"
+      - integration-tests:
+          context: staging
+          name: run-integration-tests-staging
+          requires:
+            - deploy-2-staging
+          matrix:
+            parameters:
+              repos: [""]
+      - functional-tests:
+          context: staging
+          name: run-functional-tests-staging
+          requires:
+            - deploy-2-staging
+      - hold:
+          name: approve-demo
+          type: approval
+          requires:
+            - run-integration-tests-staging
+            - run-functional-tests-staging
+          filters:
+            branches:
+              only:
+                - main
+      - aws-ecs/deploy-service-update:
+          context: demo
+          name: deploy-2-demo
+          requires:
+            - approve-demo
+          aws-region: AWS_REGION
+          force-new-deployment: true
+          verify-revision-is-deployed: true
+          family: "${AWS_ECS_CLUSTER_NAME}-albert-sdk" # task name
+          service-name: "albert-sdk" # service name
+          cluster-name: "${AWS_ECS_CLUSTER_NAME}-cluster"
+          container-image-name-updates: "container=albert-sdk,tag=${CIRCLE_SHA1}"
+          filters:
+            branches:
+              only:
+                - main
+      - functional-tests:
+          context: demo
+          name: run-functional-tests-demo
+          requires:
+            - deploy-2-demo
+          filters:
+            branches:
+              only:
+                - main
+      - hold:
+          name: approve-prod
+          type: approval
+          requires:
+            - run-functional-tests-demo
+            - deploy-2-demo
+          filters:
+            branches:
+              only:
+                - main
+      - aws-ecs/deploy-service-update:
+          context: prod
+          name: deploy-2-prod
+          requires:
+            - approve-prod
+          aws-region: AWS_REGION
+          force-new-deployment: true
+          verify-revision-is-deployed: true
+          family: "${AWS_ECS_CLUSTER_NAME}-albert-sdk" # task name
+          service-name: "albert-sdk" # service name
+          cluster-name: "${AWS_ECS_CLUSTER_NAME}-cluster"
+          container-image-name-updates: "container=albert-sdk,tag=${CIRCLE_SHA1}"
+          filters:
+            branches:
+              only:
+                - main
+      - aws-ecs/deploy-service-update:
+          context: prod-dr
+          name: deploy-2-prod-dr
+          requires:
+            - approve-prod
+          force-new-deployment: true
+          verify-revision-is-deployed: false
+          aws-region: AWS_REGION
+          family: "${AWS_ECS_CLUSTER_NAME}-albert-sdk" # task name
+          service-name: "albert-sdk" # service name
+          cluster-name: "${AWS_ECS_CLUSTER_NAME}-cluster"
+          container-image-name-updates: "container=albert-sdk,tag=${CIRCLE_SHA1}"
+          filters:
+            branches:
+              only:
+                - main
+      - update-invicti-profile:
+          context: dev
+          name: update-invicti-profile  
+          requires:
+            - deploy-2-prod
+            - deploy-2-prod-dr
+          filters:
+            branches:
+              only:
+                - main
