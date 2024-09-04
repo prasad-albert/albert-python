@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "albert"
+version = "0.1.0"
+description = "A Python SDK for interacting with the Albert API"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = """
+Copyright (C) 2010-2024 Albert Invent Corp <support@albertinvent.com>
+
+This file is part of Albert-SDK
+
+Albert-SDK can not be copied and/or distributed without the express
+permission of Albert Invent Corp
+""" }
+authors = [
+    { name = "Albert Invent", email = "support@albertinvent.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+keywords = ["SDK", "API", "Albert"]  # Add any relevant keywords
+urls = { 
+    "Homepage" = "https://github.com/MoleculeEngineering/albert_api"
+}
+
+[project.urls]
+Homepage = "https://github.com/MoleculeEngineering/albert_api"
+
+[project.dependencies]
+pandas = "==2.2.2"
+pydantic = "==2.8.2"
+
+[project.optional-dependencies]
+test = [
+    "black==24.4.2",
+    "pytest==8.3.2"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
