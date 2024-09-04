@@ -67,8 +67,8 @@ class TagCollection(BaseCollection):
 
     Parameters
     ----------
-    client : Any
-        The Albert client instance.
+    session : AlbertSession
+        The Albert session instance.
 
     Attributes
     ----------
@@ -95,18 +95,18 @@ class TagCollection(BaseCollection):
         Renames an existing tag entity.
     """
 
-    def __init__(self, client):
+    def __init__(self, session):
         """
-        Initializes the TagCollection with the provided client.
+        Initializes the TagCollection with the provided session.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
+        super().__init__(session=session)
         self.tag_cache = {}
-        self.base_url = f"{self.client.base_url}/api/v3/tags"
+        self.base_url = "/api/v3/tags"
 
     def _remove_from_cache_by_id(self, id):
         name = None
@@ -154,8 +154,8 @@ class TagCollection(BaseCollection):
             params["startKey"] = start_key
 
         while True:
-            response = requests.get(
-                self.base_url, headers=self.client.headers, params=params
+            response =  self.session.get(
+                self.base_url, params=params
             )
             if response.status_code != 200:
                 self.handle_api_error(response=response)
@@ -219,8 +219,8 @@ class TagCollection(BaseCollection):
             return True
         params = {"limit": "2", "name": [tag], "exactMatch": str(exact_match).lower()}
 
-        response = requests.get(
-            self.base_url, headers=self.client.headers, params=params
+        response = self.session.get(
+            self.base_url, params=params
         )
         if response.status_code != 200:
             self.handle_api_error(response=response)
@@ -253,8 +253,8 @@ class TagCollection(BaseCollection):
             print(f"Tag {existing_tag.tag} already exists with id {existing_tag.id}")
             return existing_tag
         payload = {"name": tag.tag}
-        response = requests.post(
-            self.base_url, headers=self.client.headers, json=payload
+        response = self.session.post(
+            self.base_url, json=payload
         )
         if response.status_code != 201:
             self.handle_api_error(response=response)
@@ -277,7 +277,7 @@ class TagCollection(BaseCollection):
             The Tag object if found, None otherwise.
         """
         url = f"{self.base_url}/{tag_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code != 200:
             self.handle_api_error(response=response)
         tag = Tag(**response.json())
@@ -320,7 +320,7 @@ class TagCollection(BaseCollection):
             True if the tag was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{tag_id}"
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
         if response.status_code != 204:
             self.handle_api_error(response=response)
             return False
@@ -362,8 +362,8 @@ class TagCollection(BaseCollection):
                 "id": tag_id,
             }
         ]
-        response = requests.patch(
-            self.base_url, headers=self.client.headers, json=payload
+        response = self.session.patch(
+            self.base_url, json=payload
         )
 
         if response.status_code != 204:

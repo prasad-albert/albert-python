@@ -13,21 +13,20 @@ class Role(BaseAlbertModel):
 
 
 class RoleCollection(BaseCollection):
-    def __init__(self, client):
+    def __init__(self, session):
         """
-        Initializes the TagCollection with the provided client.
+        Initializes the RoleCollection with the provided session.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
-        self.tag_cache = {}
-        self.base_url = f"{self.client.base_url}/api/v3/acl/roles"
+        super().__init__(session=session)
+        self.base_url = "/api/v3/acl/roles"
 
     def list(self, params={}) -> List[Role]:
-        """Lists the available roles
+        """Lists the available Roles
 
         Parameters
         ----------
@@ -39,8 +38,8 @@ class RoleCollection(BaseCollection):
         List
             List of available Roles
         """
-        response = requests.get(
-            self.base_url, headers=self.client.headers, params=params
+        response = self.session.get(
+            self.base_url, params=params
         )
         if response.status_code != 200:
             self.handle_api_error(response=response)

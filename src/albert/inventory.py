@@ -1,9 +1,9 @@
 import requests
 from typing import List, Optional, Union, Dict, Any, Generator
 from enum import Enum
-from albert.entity.tags import Tag
+from albert.entity.tags import Tag, TagCollection
 from albert.entity.cas import Cas
-from albert.entity.companies import Company
+from albert.entity.companies import Company, CompanyCollection
 from albert.base_collection import BaseCollection, OrderBy
 from pydantic import Field, model_validator, PrivateAttr
 from albert.base_tagged_entity import BaseTaggedEntity
@@ -109,8 +109,8 @@ class InventoryItem(BaseTaggedEntity):
         The Albert ID of the inventory item.
     company : Optional[Company]
         The company associated with the inventory item.
-    client : Optional[Any]
-        The client instance for API interactions.
+    session : Optional[AlbertSession]
+        The session instance for API interactions.
     """
 
     name: Optional[str] = None
@@ -309,8 +309,8 @@ class InventoryCollection(BaseCollection):
 
     Parameters
     ----------
-    client : Albert
-        The Albert client instance.
+    session : Albert
+        The Albert session instance.
 
     Attributes
     ----------
@@ -333,9 +333,9 @@ class InventoryCollection(BaseCollection):
         Handles API errors by raising an exception.
     """
 
-    def __init__(self, client):
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/inventories"
+    def __init__(self, session):
+        super().__init__(session=session)
+        self.base_url = "/api/v3/inventories"
 
     def inventory_exists(self, inventory_item: InventoryItem) -> bool:
         """
@@ -402,13 +402,15 @@ class InventoryCollection(BaseCollection):
         if category == InventoryCategory.FORMULAS.value:
             # This will need to interact with worksheets
             raise NotImplementedError("Registrations of formulas not yet implemented")
+        tag_collection = TagCollection(session=self.session)
         all_tags = [
-            self.client.tags.create(t) if t.id is None else t
+            tag_collection.create(t) if t.id is None else t
             for t in inventory_item.tags
         ]
         inventory_item.tags = all_tags
         if inventory_item.company and inventory_item.company.id is None:
-            inventory_item.company = self.client.companies.create(
+            company_collection = CompanyCollection(session=self.session)
+            inventory_item.company = company_collection.create(
                 inventory_item.company
             )
         # Check to see if there is a match on name + Company already
@@ -418,10 +420,9 @@ class InventoryCollection(BaseCollection):
                 print("Inventory Item Already Exists")
                 return existing
 
-        response = requests.post(
+        response = self.session.post(
             self.base_url,
-            json=inventory_item._to_create_api(),  # This endpoint has some custom payload configurations so I don't use the normal model_dump() method
-            headers=self.client.headers,
+            json=inventory_item._to_create_api()  # This endpoint has some custom payload configurations so I don't use the normal model_dump() method
         )
         if response.status_code == 201:
             return InventoryItem(**response.json())
@@ -445,7 +446,7 @@ class InventoryCollection(BaseCollection):
         if not inventory_id.startswith("INV"):
             inventory_id = "INV" + inventory_id
         url = f"{self.base_url}/{inventory_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code == 200:
             return InventoryItem(**response.json())
         elif response.status_code == 404:
@@ -471,7 +472,7 @@ class InventoryCollection(BaseCollection):
             inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
         )
         url = f"{self.base_url}/{inventory_id}"
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
         if response.status_code == 204:
             return True
         elif response.status_code == 404:
@@ -532,8 +533,8 @@ class InventoryCollection(BaseCollection):
         if company:
             params["manufacturer"] = [c.name for c in company if isinstance(c, Company)]
         while True:
-            response = requests.get(
-                self.base_url + "/search", headers=self.client.headers, params=params
+            response = self.session.get(
+                self.base_url + "/search", params=params
             )
             if response.status_code == 200:
                 raw_inventory = response.json().get("Items", [])
@@ -795,9 +796,8 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_url}/{updated_object.id}"
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
-            response = requests.patch(
-                url, json=change_payload, headers=self.client.headers
-            )
+            response = self.session.patch(
+                url, json=change_payload)
             if response.status_code != 204:
                 return self.handle_api_error(response)
         updated_inv = self.get_by_id(inventory_id=updated_object.id)

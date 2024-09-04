@@ -144,8 +144,8 @@ class UnitCollection(BaseCollection):
 
     Parameters
     ----------
-    client : Any
-        The Albert client instance.
+    session : AlbertSession
+        The Albert session instance.
 
     Attributes
     ----------
@@ -172,17 +172,17 @@ class UnitCollection(BaseCollection):
 
     _updatable_attributes = {"symbol", "synonyms", "category"}
 
-    def __init__(self, client):
+    def __init__(self, session):
         """
-        Initializes the UnitCollection with the provided client.
+        Initializes the UnitCollection with the provided session.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/units"
+        super().__init__(session=session)
+        self.base_url = "/api/v3/units"
         self.unit_cache = {}
 
     def _remove_from_cache_by_id(self, id):
@@ -210,10 +210,9 @@ class UnitCollection(BaseCollection):
         """
         if self.unit_exists(unit.name):
             return self.unit_cache[unit.name]
-        response = requests.post(
+        response = self.session.post(
             self.base_url,
-            json=unit.model_dump(by_alias=True, exclude_unset=True),
-            headers=self.client.headers,
+            json=unit.model_dump(by_alias=True, exclude_unset=True)
         )
         if response.status_code == 201:
             this_unit = Unit(**response.json())
@@ -237,7 +236,7 @@ class UnitCollection(BaseCollection):
             The Unit object if found, None otherwise.
         """
         url = f"{self.base_url}/{unit_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code == 200:
             this_unit = Unit(**response.json())
             self.unit_cache[this_unit.name] = this_unit
@@ -263,7 +262,7 @@ class UnitCollection(BaseCollection):
         original_unit = self.get_by_id(unit_id)
         patch_data = self._generate_patch_payload(original_unit, updated_unit)
         url = f"{self.base_url}/{unit_id}"
-        response = requests.patch(url, json=patch_data, headers=self.client.headers)
+        response = self.session.patch(url, json=patch_data)
         if response.status_code == 204:
             updated_unit = self.get_by_id(unit_id=unit_id)
             self._remove_from_cache_by_id(unit_id)
@@ -287,7 +286,7 @@ class UnitCollection(BaseCollection):
             True if the unit was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{unit_id}"
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
         if response.status_code == 204:
             self._remove_from_cache_by_id(unit_id)
             return True
@@ -378,8 +377,8 @@ class UnitCollection(BaseCollection):
         if not verified is None:
             params["verified"] = str(verified).lower()
         while True:
-            response = requests.get(
-                self.base_url, headers=self.client.headers, params=params
+            response = self.session.get(
+                self.base_url, params=params
             )
             if response.status_code == 200:
                 # found_units = []

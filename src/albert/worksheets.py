@@ -1,4 +1,5 @@
-from albert.base_entity import BaseAlbertModel, BaseModel, Status
+from albert.base_entity import BaseAlbertModel, Status
+from albert.albert_session import AlbertSession
 from albert.base_collection import BaseCollection
 from typing import List, Optional, Union, Any, Dict, Generator
 import requests
@@ -42,7 +43,7 @@ class DesignType(Enum):
     RESULTS = "results"
 
 
-class Cell(BaseModel):
+class Cell(BaseAlbertModel):
     column_id: str = Field(alias="colId")
     row_id: str = Field(alias="rowId")
     value: Union[str, dict] = ""
@@ -64,7 +65,7 @@ class Cell(BaseModel):
         return self.format.get("bgColor", None)
 
 
-class Component(BaseModel):
+class Component(BaseAlbertModel):
     inventory_item: InventoryItem
     amt_cell: float
     _cell: Cell = None  # read only property set on registrstion
@@ -74,11 +75,11 @@ class Component(BaseModel):
         return self._cell
 
 
-class DesignState(BaseModel):
+class DesignState(BaseAlbertModel):
     collapsed: Optional[bool] = False
 
 
-class Formulations(BaseModel):
+class Formulations(BaseAlbertModel):
     id: str = Field(alias="formulaId")
     name: str
 
@@ -87,7 +88,7 @@ class Design(BaseAlbertModel):
     state: Optional[DesignState] = Field({})
     id: str = Field(alias="albertId")
     design_type: DesignType = Field(alias="designType")
-    client: Any
+    session: AlbertSession
     _grid: pd.DataFrame = PrivateAttr(default=None)
     _rows: List["Row"] = PrivateAttr(default=None)
     _columns: List["Column"] = PrivateAttr(default=None)
@@ -139,7 +140,7 @@ class Design(BaseAlbertModel):
                     colId=v["colId"],
                     name=v["name"],
                     type=v["type"],
-                    client=self.client,
+                    session=self.session,
                     sheet=self.sheet,
                 )
             )
@@ -155,7 +156,7 @@ class Design(BaseAlbertModel):
                     name=v["name"],
                     rowId=v["rowId"],
                     type=v["type"],
-                    client=self.client,
+                    session=self.session,
                     design=self,
                     sheet=self.sheet,
                     manufacturer=getattr(v, "manufacturer", None),
@@ -166,9 +167,9 @@ class Design(BaseAlbertModel):
 
     def _get_grid(self):
         endpoint = (
-            f"{self.client.base_url}/api/v3/worksheet/{self.id}/{self.design_type}/grid"
+            f"/api/v3/worksheet/{self.id}/{self.design_type}/grid"
         )
-        response = requests.get(endpoint, headers=self.client.headers)
+        response = self.session.get(endpoint)
         if response.status_code == 200:
             resp_json = response.json()
             # print(resp_json)
@@ -201,7 +202,7 @@ class Sheet(BaseAlbertModel):
     product_design: Design
     result_design: Design
     designs: List[Design] = Field(alias="Designs")
-    client: Any
+    session: AlbertSession
     project_id: str
     _grid: pd.DataFrame = PrivateAttr(default=None)
 
@@ -211,7 +212,7 @@ class Sheet(BaseAlbertModel):
         category_raw = data.get("Designs", None)
         if category_raw:
             for c in category_raw:
-                c["client"] = data["client"]
+                c["session"] = data["session"]
                 if c["designType"] == "apps":
                     data["app_design"] = c
                 elif c["designType"] == "products":
@@ -279,11 +280,11 @@ class Sheet(BaseAlbertModel):
             return self.result_design
 
     def rename(self, new_name):
-        endpoint = f"{self.client.base_url}/api/v3/worksheet/sheet/{self.id}"
+        endpoint = f"/api/v3/worksheet/sheet/{self.id}"
 
         payload = [{"attribute": "name", "operation": "update", "newValue": new_name}]
 
-        response = requests.patch(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.patch(endpoint, json=payload)
 
         if response.status_code == 200 or response.status_code == 204:
             self.name = new_name
@@ -304,7 +305,7 @@ class Sheet(BaseAlbertModel):
                 ],
                 "name": item["name"],
                 "type": item["type"],
-                "client": self.client,
+                "session": self.session,
                 "sheet": self,
             }
             new_dicts.append(this_dict)
@@ -318,7 +319,7 @@ class Sheet(BaseAlbertModel):
 
         sheet_id = self.id
 
-        endpoint = f"{self.client.base_url}/api/v3/worksheet/sheet/{sheet_id}/columns"
+        endpoint = f"/api/v3/worksheet/sheet/{sheet_id}/columns"
 
         # In case a user supplied a single formulation name instead of a list
         formulation_names = (
@@ -345,7 +346,7 @@ class Sheet(BaseAlbertModel):
                 }
             )
 
-        response = requests.post(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.post(endpoint, json=payload)
 
         if response.status_code == 200:
             self.grid = None
@@ -363,7 +364,7 @@ class Sheet(BaseAlbertModel):
         position: dict = {"reference_id": "ROW1", "position": "above"},
     ):
 
-        endpoint = f"{self.client.base_url}/api/v3/worksheet/design/{self._get_design_id(design=design)}/rows"
+        endpoint = f"/api/v3/worksheet/design/{self._get_design_id(design=design)}/rows"
 
         payload = [
             {
@@ -374,7 +375,7 @@ class Sheet(BaseAlbertModel):
             }
         ]
 
-        response = requests.post(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.post(endpoint, json=payload)
 
         if response.status_code == 200:
             self.grid = None
@@ -382,7 +383,7 @@ class Sheet(BaseAlbertModel):
             return Row(
                 rowId=row_dict["rowId"],
                 type=row_dict["type"],
-                client=self.client,
+                session=self.session,
                 design=self._get_design(design=design),
                 name=row_dict["name"],
                 sheet=self,
@@ -397,7 +398,7 @@ class Sheet(BaseAlbertModel):
     ):
 
         design_id = self.product_design.id
-        endpoint = f"{self.client.base_url}/api/v3/worksheet/design/{design_id}/rows"
+        endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
 
         payload = {
             "type": "INV",
@@ -410,7 +411,7 @@ class Sheet(BaseAlbertModel):
             "position": position["position"],
         }
 
-        response = requests.post(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.post(endpoint, json=payload)
 
         if response.status_code == 200:
             self.grid = None
@@ -418,7 +419,7 @@ class Sheet(BaseAlbertModel):
             return Row(
                 rowId=row_dict["rowId"],
                 type=row_dict["type"],
-                client=self.client,
+                session=self.session,
                 design=self.product_design,
                 sheet=self,
                 name=row_dict["name"],
@@ -547,11 +548,10 @@ class Sheet(BaseAlbertModel):
             if payload == []:
                 continue
 
-            this_url = f"{self.client.base_url}/api/v3/worksheet/{design_id}/values"
+            this_url = f"/api/v3/worksheet/{design_id}/values"
 
-            response = requests.patch(
+            response = self.session.patch(
                 this_url,
-                headers=self.client.headers,
                 json=payload,
             )
             if response.status_code == 204:
@@ -573,7 +573,7 @@ class Sheet(BaseAlbertModel):
         name: str,
         position: dict = {"reference_id": "COL5", "position": "rightOf"},
     ):
-        endpoint = f"{self.client.base_url}/api/v3/worksheet/sheet/{self.id}/columns"
+        endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [
             {
                 "type": "BLK",
@@ -582,11 +582,11 @@ class Sheet(BaseAlbertModel):
                 "position": position["position"],
             }
         ]
-        response = requests.post(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.post(endpoint, json=payload)
         if response.status_code == 200:
             data = response.json()
             data[0]["sheet"] = self
-            data[0]["client"] = self.client
+            data[0]["session"] = self.session
             self.grid = (
                 None  # reset the known grid. We could probably make this nicer later.
             )
@@ -595,9 +595,9 @@ class Sheet(BaseAlbertModel):
             BaseCollection.handle_api_error(response=response)
 
     def delete_column(self, column_id: str):
-        endpoint = f"{self.client.base_url}/api/v3/worksheet/sheet/{self.id}/columns"
+        endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [{"colId": column_id}]
-        response = requests.delete(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.delete(endpoint, json=payload)
         if response.status_code == 204:
             if (
                 self._grid is not None
@@ -609,9 +609,9 @@ class Sheet(BaseAlbertModel):
         return False
 
     def delete_row(self, row_id: str, design_id: str):
-        endpoint = f"{self.client.base_url}/api/v3/worksheet/design/{design_id}/rows"
+        endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
         payload = [{"rowId": row_id}]
-        response = requests.delete(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.delete(endpoint, json=payload)
         if response.status_code == 204:
             if (
                 self._grid is not None
@@ -653,7 +653,7 @@ class Sheet(BaseAlbertModel):
                 colId=first_item.column_id,
                 type=first_item.type,
                 sheet=self,
-                client=self.client,
+                session=self.session,
             )
 
 
@@ -661,41 +661,41 @@ class Worksheet(BaseAlbertModel):
     sheets: List[Sheet] = Field(alias="Sheets")
     project_name: Optional[str] = Field(None, alias="projectName")
     sheets_enabled: bool = Field(True, alias="sheetEnabled")
-    client: Any
+    session: AlbertSession
     project_id: str = Field(alias="projectId")
 
 
 class WorksheetCollection(BaseCollection):
-    def __init__(self, client):
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/worksheet"
+    def __init__(self, session):
+        super().__init__(session=session)
+        self.base_url = "/api/v3/worksheet"
 
     def get_by_project_id(self, project_id):
         params = {"type": "project", "id": "PRO" + project_id}
-        response = requests.get(
-            self.base_url, headers=self.client.headers, params=params
+        response = self.session.get(
+            self.base_url, params=params
         )
         if response.status_code != 200:
             self.handle_api_error(response=response)
         response_json = response.json()
 
-        # Sheets are themselves collections, and therefore need access to the client
+        # Sheets are themselves collections, and therefore need access to the session
         sheets = response_json.get("Sheets", None)
         if sheets:
             for s in sheets:
-                s["client"] = self.client
+                s["session"] = self.session
                 s["project_id"] = response_json["projectId"]
-        response_json["client"] = self.client
+        response_json["session"] = self.session
 
         return Worksheet(**response_json)
 
 
-class Column(BaseModel):
+class Column(BaseAlbertModel):
     column_id: str = Field(alias="colId")
     formulas: List[Formulations] = Field(default=None, alias="Formulas")
     name: str
     type: CellType
-    client: Any
+    session: AlbertSession
     sheet: Sheet
     _cells: Union[List[Cell], None] = PrivateAttr(default=None)
 
@@ -721,11 +721,9 @@ class Column(BaseModel):
             ]
         }
 
-        response = requests.patch(
-            url=self.client.base_url
-            + f"/api/v3/worksheet/sheet/{self.sheet.id}/columns",
+        response = self.session.patch(
+            url=f"/api/v3/worksheet/sheet/{self.sheet.id}/columns",
             json=payload,
-            headers=self.client.headers,
         )
 
         if response.status_code == 204:
@@ -748,10 +746,10 @@ class Column(BaseModel):
         return self.sheet.update_cells(new_cells)
 
 
-class Row(BaseModel):
+class Row(BaseAlbertModel):
     row_id: str = Field(alias="rowId")
     type: CellType
-    client: Any
+    session: AlbertSession
     design: Design
     sheet: Sheet
     name: str

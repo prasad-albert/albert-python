@@ -23,9 +23,9 @@ class UnNumberCollection(BaseCollection):
     Creating UN Numbers is not supported via the SDK, as UN Numbers are highly controlled by Albert.
     """
 
-    def __init__(self, client):
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/unnumbers"
+    def __init__(self, session):
+        super().__init__(session=session)
+        self.base_url = "/api/v3/unnumbers"
 
     def create(self) -> None:
         """
@@ -35,7 +35,7 @@ class UnNumberCollection(BaseCollection):
 
     def get_by_id(self, lot_id: str) -> Union[UnNumber, None]:
         url = f"{self.base_url}/{lot_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code != 200:
             return self.handle_api_error(response)
         return UnNumber(**response.json())
@@ -54,8 +54,8 @@ class UnNumberCollection(BaseCollection):
             if exact_match:
                 params["exactMatch"] = str(exact_match).lower()
         while True:
-            response = requests.get(
-                self.base_url, headers=self.client.headers, params=params
+            response = self.session.get(
+                self.base_url, params=params
             )
             if response.status_code == 200:
                 un_numbers = response.json().get("Items", [])

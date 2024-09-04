@@ -109,15 +109,14 @@ class Lot(BaseAlbertModel):
 
 class LotCollection(BaseCollection):
 
-    def __init__(self, client):
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/lots"
+    def __init__(self, session):
+        super().__init__(session=session)
+        self.base_url = "/api/v3/lots"
 
     def create(self, lots: List[Lot]) -> List[Lot]:
         payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
-        response = requests.post(
-            self.base_url, json=payload, headers=self.client.headers
-        )
+        response = self.session.post(
+            self.base_url, json=payload)
         if response.status_code == 201:
             return [
                 self._rehydrate_lot(lot)
@@ -128,7 +127,7 @@ class LotCollection(BaseCollection):
 
     def get_by_id(self, lot_id: str) -> Lot:
         url = f"{self.base_url}/{lot_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code != 200:
             return self.handle_api_error(response)
         return Lot(**response.json())
@@ -136,7 +135,7 @@ class LotCollection(BaseCollection):
     # def update(self, lot_id: str, patch_data: Dict[str, Any]) -> bool:
     #     """TODO: Follow pattern for other Update methods. This will need a custom Patch creation method."""
     #     url = f"{self.base_url}/{lot_id}"
-    #     response = requests.patch(url, json=patch_data, headers=self.client.headers)
+    #     response = self.session.patch(url, json=patch_data)
     #     if response.status_code == 204:
     #         return lot_id
     #     else:
@@ -144,7 +143,7 @@ class LotCollection(BaseCollection):
 
     def delete(self, lot_id: str) -> bool:
         url = f"{self.base_url}/{lot_id}"
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
         if response.status_code == 204:
             return True
         else:
@@ -178,8 +177,8 @@ class LotCollection(BaseCollection):
 #     if locationName:
 #         params["locationName"] = locationName
 
-#     response = requests.get(
-#         self.base_url, headers=self.client.headers, params=params
+#     response = self.session.get(
+#         self.base_url, params=params
 #     )
 #     if response.status_code == 200:
 #         lots = response.json().get("Items", [])

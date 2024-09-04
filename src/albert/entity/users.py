@@ -18,17 +18,17 @@ class User(BaseAlbertModel):
 
 
 class UserCollection(BaseCollection):
-    def __init__(self, client):
+    def __init__(self, session):
         """
-        Initializes the UserCollection with the provided client.
+        Initializes the UserCollection with the provided session.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/users"
+        super().__init__(session=session)
+        self.base_url = "/api/v3/users"
 
     def _list_generator(
         self,
@@ -52,9 +52,8 @@ class UserCollection(BaseCollection):
                 params["offset"] = offset
         while True:
             # status=active&limit=50&text=Lenore&searchFields=name
-            response = requests.get(
-                self.base_url + "/search", params=params, headers=self.client.headers
-            )
+            response = self.session.get(
+                self.base_url + "/search", params=params)
             if response.status_code != 200:
                 self.handle_api_error(response=response)
                 break
@@ -109,7 +108,7 @@ class UserCollection(BaseCollection):
             The User object if found, None otherwise.
         """
         url = f"{self.base_url}/{user_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code != 200:
             self.handle_api_error(response=response)
         user = User(**response.json())
@@ -139,8 +138,8 @@ class UserCollection(BaseCollection):
         }
 
         # build and run query
-        response = requests.post(
-            self.base_url, headers=self.client.headers, json=payload
+        response = self.session.post(
+            self.base_url, json=payload
         )
         if response.status_code != 201:
             self.handle_api_error(response=response)
@@ -149,7 +148,7 @@ class UserCollection(BaseCollection):
 
     def delete(self, user_id) -> bool:
         url = f"{self.base_url}/{user_id}"
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
         if response.status_code != 204:
             self.handle_api_error(response=response)
             return False

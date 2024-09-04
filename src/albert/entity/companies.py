@@ -50,8 +50,8 @@ class CompanyCollection(BaseCollection):
 
     Parameters
     ----------
-    client : Any
-        The Albert client instance.
+    session : AlbertSession
+        The Albert session instance.
 
     Attributes
     ----------
@@ -78,17 +78,17 @@ class CompanyCollection(BaseCollection):
 
     _updatable_attributes = {"name"}
 
-    def __init__(self, client):
+    def __init__(self, session):
         """
-        Initializes the CompanyCollection with the provided client.
+        Initializes the CompanyCollection with the provided session.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/companies"
+        super().__init__(session=session)
+        self.base_url = "/api/v3/companies"
         self.company_cache = {}
 
     def _remove_from_cache_by_id(self, id):
@@ -131,8 +131,8 @@ class CompanyCollection(BaseCollection):
         if start_key:
             params["startKey"] = start_key
         while True:
-            companies = requests.get(
-                self.base_url, headers=self.client.headers, params=params
+            companies = self.session.get(
+                self.base_url, params=params
             )
 
             if companies.status_code != 200:
@@ -212,7 +212,7 @@ class CompanyCollection(BaseCollection):
             The Company object if found, None otherwise.
         """
         url = f"{self.base_url}/{id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code != 200:
             self.handle_api_error(response=response)
         company = response.json()
@@ -275,8 +275,8 @@ class CompanyCollection(BaseCollection):
             return company
 
         payload = company.model_dump(by_alias=True, exclude_unset=True)
-        response = requests.post(
-            self.base_url, headers=self.client.headers, json=payload
+        response = self.session.post(
+            self.base_url, json=payload
         )
         if response.status_code == 201:
             this_company = Company(**response.json())
@@ -288,7 +288,7 @@ class CompanyCollection(BaseCollection):
 
     def delete(self, id: str) -> bool:
         url = f"{self.base_url}/{id}"
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
         if response.status_code == 204:
             self._remove_from_cache_by_id(id)
             return True
@@ -327,7 +327,7 @@ class CompanyCollection(BaseCollection):
                 }
             ]
         }
-        response = requests.patch(endpoint, headers=self.client.headers, json=payload)
+        response = self.session.patch(endpoint, json=payload)
         if response.status_code != 204:
             self.handle_api_error(response=response)
         updated_company = self.get_by_id(company_id)
@@ -345,7 +345,7 @@ class CompanyCollection(BaseCollection):
         )
 
         url = f"{self.base_url}/{updated_object.id}"
-        response = requests.patch(url, json=patch_payload, headers=self.client.headers)
+        response = self.session.patch(url, json=patch_payload)
         if response.status_code == 204:
             updated_company = self.get_by_id(cas_id=updated_object.id)
             self._remove_from_cache_by_id(updated_object.id)

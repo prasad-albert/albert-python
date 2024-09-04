@@ -47,4 +47,9 @@ class BaseAlbertModel(BaseModel):
     def status(self) -> Optional[Status]:
         return self._status
 
-    model_config = ConfigDict(populate_by_name=True, use_enum_values=True)
+    model_config = ConfigDict(
+            populate_by_name=True,
+            use_enum_values=True,
+            exclude={"session"},
+            arbitrary_types_allowed=True
+        )

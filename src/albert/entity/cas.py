@@ -106,13 +106,13 @@ class CasCollection(BaseCollection):
 
     Parameters
     ----------
-    client : Any
-        The Albert client instance.
+    session : AlbertSession
+        The Albert session instance.
 
     Attributes
     ----------
     base_url : str
-        The base URL for CAS API requests.
+        The base URL for CAS API self.session.
     cas_cache : dict
         A cache of CAS objects.
 
@@ -136,17 +136,17 @@ class CasCollection(BaseCollection):
 
     _updatable_attributes = {"notes", "description", "smiles"}
 
-    def __init__(self, client):
+    def __init__(self, session):
         """
-        Initializes the CasCollection with the provided client.
+        Initializes the CasCollection with the provided session.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/cas"
+        super().__init__(session=session)
+        self.base_url = "/api/v3/cas"
         self.cas_cache = {}
 
     def _remove_from_cache_by_id(self, id):
@@ -195,8 +195,8 @@ class CasCollection(BaseCollection):
         if id:
             params["albertId"] = id
         while True:
-            response = requests.get(
-                self.base_url, headers=self.client.headers, params=params
+            response = self.session.get(
+                self.base_url, params=params
             )
             if response.status_code != 200:
                 self.handle_api_error(response=response)
@@ -287,8 +287,8 @@ class CasCollection(BaseCollection):
             return existing_cas
         else:
             payload = cas.model_dump(by_alias=True, exclude_unset=True)
-            response = requests.post(
-                self.base_url, headers=self.client.headers, json=payload
+            response = self.session.post(
+                self.base_url, json=payload
             )
             if response.status_code != 201:
                 self.handle_api_error(response=response)
@@ -311,7 +311,7 @@ class CasCollection(BaseCollection):
             The Cas object if found, None otherwise.
         """
         url = f"{self.base_url}/{cas_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code != 200:
             self.handle_api_error(response=response)
         cas = Cas(**response.json())
@@ -358,7 +358,7 @@ class CasCollection(BaseCollection):
             True if the CAS was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{cas_id}"
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
         if response.status_code == 204:
             self._remove_from_cache_by_id(cas_id)
             return True
@@ -375,7 +375,7 @@ class CasCollection(BaseCollection):
         )
 
         url = f"{self.base_url}/{updated_object.id}"
-        response = requests.patch(url, json=patch_payload, headers=self.client.headers)
+        response = self.session.patch(url, json=patch_payload)
         if response.status_code == 204:
             updated_cas = self.get_by_id(cas_id=updated_object.id)
             self._remove_from_cache_by_id(updated_object.id)

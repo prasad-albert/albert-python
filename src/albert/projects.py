@@ -3,9 +3,9 @@ from enum import Enum
 from typing import Optional, List, Any, Union, Dict, Generator
 from pydantic import model_validator, Field
 from albert.base_tagged_entity import BaseTaggedEntity
-from albert.entity.tags import Tag
+from albert.entity.tags import Tag, TagCollection
 from albert.base_collection import BaseCollection, OrderBy
-from albert.entity.companies import Company
+from albert.entity.companies import Company, CompanyCollection
 
 
 class ProjectCategory(Enum):
@@ -77,8 +77,8 @@ class ProjectCollection(BaseCollection):
 
     Parameters
     ----------
-    client : Any
-        The Albert client instance.
+    session : AlbertSession
+        The Albert session instance.
 
     Attributes
     ----------
@@ -99,17 +99,17 @@ class ProjectCollection(BaseCollection):
         Lists projects with optional filters.
     """
 
-    def __init__(self, client):
+    def __init__(self, session):
         """
         Initialize a ProjectCollection object.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/projects"
+        super().__init__(session=session)
+        self.base_url = "/api/v3/projects"
 
     def create(self, project: Project) -> Optional[Project]:
         """
@@ -126,16 +126,17 @@ class ProjectCollection(BaseCollection):
             The created project object if successful, None otherwise.
         """
         all_tags = []
+        tag_collection = TagCollection(session=self.session)
         for t in project.tags:
             if t.id is None:
-                t = self.client.tags.create(t)
+                t = tag_collection.create(t)
             all_tags.append(t)
         project.tags = all_tags
         if project.company and project.company.id is None:
-            project.company = self.client.companies.create(project.company)
-        response = requests.post(
-            self.base_url, json=project.to_dict(), headers=self.client.headers
-        )
+            company_collection = CompanyCollection(session=self.session)
+            project.company = company_collection.create(project.company)
+        response = self.session.post(
+            self.base_url, json=project.to_dict())
 
         if response.status_code == 201:
             return Project(**response.json())
@@ -157,7 +158,7 @@ class ProjectCollection(BaseCollection):
             The project object if found, None otherwise.
         """
         url = f"{self.base_url}/{project_id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code == 200:
             return Project(**response.json())
         elif response.status_code == 404:
@@ -183,7 +184,7 @@ class ProjectCollection(BaseCollection):
         """
         url = f"{self.base_url}/{project_id}"
 
-        response = requests.patch(url, json=patch_data, headers=self.client.headers)
+        response = self.session.patch(url, json=patch_data)
         if response.status_code == 204:
             return True
         else:
@@ -205,7 +206,7 @@ class ProjectCollection(BaseCollection):
         """
         url = f"{self.base_url}/{project_id}"
 
-        response = requests.delete(url, headers=self.client.headers)
+        response = self.session.delete(url)
 
         if response.status_code == 204:
             return True
@@ -258,8 +259,8 @@ class ProjectCollection(BaseCollection):
         if category:
             params["category"] = category
         while True:
-            response = requests.get(
-                self.base_url, headers=self.client.headers, params=params
+            response = self.session.get(
+                self.base_url, params=params
             )
             if response.status_code == 200:
                 raw_projects = response.json().get("Items", [])

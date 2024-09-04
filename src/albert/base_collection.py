@@ -1,4 +1,5 @@
 import requests
+from albert.albert_session import AlbertSession
 from albert.exceptions import (
     AlbertAPIError,
     BadRequestError,
@@ -24,17 +25,13 @@ class BaseCollection:
 
     Parameters
     ----------
-    client : Albert
-        The Albert client instance.
+    session : Albert
+        The Albert API Session instance.
 
-    Attributes
-    ----------
-    client : Albert
-        The Albert client instance.
     """
 
-    def __init__(self, client: "Albert"):
-        self.client = client
+    def __init__(self, session: AlbertSession):
+        self.session = session
 
     @classmethod
     def handle_api_error(cls, response: requests.Response) -> None:

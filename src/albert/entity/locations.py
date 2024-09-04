@@ -17,17 +17,17 @@ class Location(BaseAlbertModel):
 class LocationCollection(BaseCollection):
     _updatable_attributes = {"latitude", "longitude", "address", "country", "name"}
 
-    def __init__(self, client):
+    def __init__(self, session):
         """
-        Initializes the LocationCollection with the provided client.
+        Initializes the LocationCollection with the provided session.
 
         Parameters
         ----------
-        client : Any
-            The Albert client instance.
+        session : AlbertSession
+            The Albert session instance.
         """
-        super().__init__(client=client)
-        self.base_url = f"{self.client.base_url}/api/v3/locations"
+        super().__init__(session=session)
+        self.base_url = "/api/v3/locations"
 
     def _list_generator(
         self,
@@ -45,8 +45,8 @@ class LocationCollection(BaseCollection):
             params["country"] = country
 
         while True:
-            response = requests.get(
-                self.base_url, headers=self.client.headers, params=params
+            response = self.session.get(
+                self.base_url, params=params
             )
             if response.status_code != 200:
                 self.handle_api_error(response=response)
@@ -80,7 +80,7 @@ class LocationCollection(BaseCollection):
             The Location object if found, None otherwise.
         """
         url = f"{self.base_url}/{id}"
-        response = requests.get(url, headers=self.client.headers)
+        response = self.session.get(url)
         if response.status_code != 200:
             self.handle_api_error(response=response)
         loc = response.json()
@@ -96,7 +96,7 @@ class LocationCollection(BaseCollection):
             existing=current_object, updated=updated_object
         )
         url = f"{self.base_url}/{updated_object.id}"
-        response = requests.patch(url, json=patch_payload, headers=self.client.headers)
+        response = self.session.patch(url, json=patch_payload)
         if response.status_code == 204:
             return self.get_by_id(id=updated_object.id)
         else:

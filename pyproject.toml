@@ -24,9 +24,6 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 keywords = ["SDK", "API", "Albert"]  # Add any relevant keywords
-urls = { 
-    "Homepage" = "https://github.com/MoleculeEngineering/albert_api"
-}
 
 [project.urls]
 Homepage = "https://github.com/MoleculeEngineering/albert_api"
