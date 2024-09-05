@@ -1,4 +1,5 @@
 import requests
+from albert.utils.error_utils.exceptions import handle_api_error
 
 class AlbertSession(requests.Session):
     """
@@ -17,4 +18,6 @@ class AlbertSession(requests.Session):
     def request(self, method, url, *args, **kwargs):
         # Prefix the base URL if not a fully hard-coded URL
         full_url = f'{self.base_url}{url}' if not url.startswith('http') else url
-        return super().request(method, full_url, *args, **kwargs)
+        response = super().request(method, full_url, *args, **kwargs)
+        handle_api_error(response=response)
+        return response

@@ -11,6 +11,7 @@ from albert.base_collection import BaseCollection
 from albert.inventory import InventoryCategory
 
 
+
 class LotStatus(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
@@ -117,37 +118,31 @@ class LotCollection(BaseCollection):
         payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
         response = self.session.post(
             self.base_url, json=payload)
-        if response.status_code == 201:
-            return [
-                self._rehydrate_lot(lot)
-                for lot in response.json().get("CreatedLots", [])
-            ]
-        else:
-            return self.handle_api_error(response)
-
+        
+        return [
+            self._rehydrate_lot(lot)
+            for lot in response.json().get("CreatedLots", [])
+        ]
+       
     def get_by_id(self, lot_id: str) -> Lot:
         url = f"{self.base_url}/{lot_id}"
         response = self.session.get(url)
-        if response.status_code != 200:
-            return self.handle_api_error(response)
+        
         return Lot(**response.json())
 
     # def update(self, lot_id: str, patch_data: Dict[str, Any]) -> bool:
     #     """TODO: Follow pattern for other Update methods. This will need a custom Patch creation method."""
     #     url = f"{self.base_url}/{lot_id}"
     #     response = self.session.patch(url, json=patch_data)
-    #     if response.status_code == 204:
-    #         return lot_id
-    #     else:
-    #         return self.handle_api_error(response)
+    #     
+    #     return lot_id
+
 
     def delete(self, lot_id: str) -> bool:
         url = f"{self.base_url}/{lot_id}"
         response = self.session.delete(url)
-        if response.status_code == 204:
-            return True
-        else:
-            return self.handle_api_error(response)
+        
+        return True
 
 
 # TODO: Add generator logic
@@ -180,8 +175,7 @@ class LotCollection(BaseCollection):
 #     response = self.session.get(
 #         self.base_url, params=params
 #     )
-#     if response.status_code == 200:
-#         lots = response.json().get("Items", [])
-#         return [Lot(**x) for x in lots]
-#     else:
-#         return self.handle_api_error(response)
+#     
+#    
+#     lots = response.json().get("Items", [])
+#     return [Lot(**x) for x in lots]

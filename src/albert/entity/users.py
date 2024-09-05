@@ -1,6 +1,6 @@
 from albert.base_collection import BaseCollection
 from albert.base_entity import BaseAlbertModel
-import requests
+
 from typing import Union, Generator, Optional, List
 from pydantic import Field
 from albert.entity.locations import Location
@@ -54,9 +54,6 @@ class UserCollection(BaseCollection):
             # status=active&limit=50&text=Lenore&searchFields=name
             response = self.session.get(
                 self.base_url + "/search", params=params)
-            if response.status_code != 200:
-                self.handle_api_error(response=response)
-                break
             user_data = response.json().get("Items", [])
             if not user_data or user_data == []:
                 break
@@ -109,8 +106,6 @@ class UserCollection(BaseCollection):
         """
         url = f"{self.base_url}/{user_id}"
         response = self.session.get(url)
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
         user = User(**response.json())
         return user
 
@@ -141,15 +136,10 @@ class UserCollection(BaseCollection):
         response = self.session.post(
             self.base_url, json=payload
         )
-        if response.status_code != 201:
-            self.handle_api_error(response=response)
         user = User(**response.json())
         return user
 
     def delete(self, user_id) -> bool:
         url = f"{self.base_url}/{user_id}"
         response = self.session.delete(url)
-        if response.status_code != 204:
-            self.handle_api_error(response=response)
-            return False
         return True

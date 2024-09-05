@@ -1,6 +1,6 @@
 from typing import Optional, List, Any, Union, Generator
 from pydantic import Field, PrivateAttr
-import requests
+
 from albert.base_collection import BaseCollection, OrderBy
 from albert.base_entity import BaseAlbertModel
 from enum import Enum
@@ -214,12 +214,9 @@ class UnitCollection(BaseCollection):
             self.base_url,
             json=unit.model_dump(by_alias=True, exclude_unset=True)
         )
-        if response.status_code == 201:
-            this_unit = Unit(**response.json())
-            self.unit_cache[this_unit.name] = this_unit
-            return this_unit
-        else:
-            return self.handle_api_error(response)
+        this_unit = Unit(**response.json())
+        self.unit_cache[this_unit.name] = this_unit
+        return this_unit
 
     def get_by_id(self, unit_id: str) -> Unit:
         """
@@ -237,12 +234,9 @@ class UnitCollection(BaseCollection):
         """
         url = f"{self.base_url}/{unit_id}"
         response = self.session.get(url)
-        if response.status_code == 200:
-            this_unit = Unit(**response.json())
-            self.unit_cache[this_unit.name] = this_unit
-            return this_unit
-        else:
-            return self.handle_api_error(response)
+        this_unit = Unit(**response.json())
+        self.unit_cache[this_unit.name] = this_unit
+        return this_unit
 
     def update(self, updated_unit: Unit) -> Unit:
         """
@@ -263,13 +257,10 @@ class UnitCollection(BaseCollection):
         patch_data = self._generate_patch_payload(original_unit, updated_unit)
         url = f"{self.base_url}/{unit_id}"
         response = self.session.patch(url, json=patch_data)
-        if response.status_code == 204:
-            updated_unit = self.get_by_id(unit_id=unit_id)
-            self._remove_from_cache_by_id(unit_id)
-            self.unit_cache[updated_unit.name] = updated_unit
-            return updated_unit
-        else:
-            return self.handle_api_error(response)
+        updated_unit = self.get_by_id(unit_id=unit_id)
+        self._remove_from_cache_by_id(unit_id)
+        self.unit_cache[updated_unit.name] = updated_unit
+        return updated_unit
 
     def delete(self, unit_id: str) -> bool:
         """
@@ -287,11 +278,8 @@ class UnitCollection(BaseCollection):
         """
         url = f"{self.base_url}/{unit_id}"
         response = self.session.delete(url)
-        if response.status_code == 204:
-            self._remove_from_cache_by_id(unit_id)
-            return True
-        else:
-            return self.handle_api_error(response)
+        self._remove_from_cache_by_id(unit_id)
+        return True
 
     def list(
         self,
@@ -380,20 +368,16 @@ class UnitCollection(BaseCollection):
             response = self.session.get(
                 self.base_url, params=params
             )
-            if response.status_code == 200:
-                # found_units = []
-                units = response.json().get("Items", [])
-                if not units or units == []:
-                    break
-                for u in units:
-                    this_unit = Unit(**u)
-                    self.unit_cache[this_unit.name] = this_unit
-                    yield this_unit
-                start_key = response.json().get("lastKey")
-                if not start_key:
-                    break
-            else:
-                return self.handle_api_error(response)
+            units = response.json().get("Items", [])
+            if not units or units == []:
+                break
+            for u in units:
+                this_unit = Unit(**u)
+                self.unit_cache[this_unit.name] = this_unit
+                yield this_unit
+            start_key = response.json().get("lastKey")
+            if not start_key:
+                break
             params["startKey"] = start_key
 
     def get_by_name(self, name: str, exact_match: bool = False) -> Optional[Unit]:

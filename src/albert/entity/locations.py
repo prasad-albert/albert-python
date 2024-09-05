@@ -2,7 +2,6 @@ from albert.base_entity import BaseAlbertModel
 from albert.base_collection import BaseCollection
 from pydantic import Field
 from typing import Union, List, Optional
-import requests
 
 
 class Location(BaseAlbertModel):
@@ -48,9 +47,6 @@ class LocationCollection(BaseCollection):
             response = self.session.get(
                 self.base_url, params=params
             )
-            if response.status_code != 200:
-                self.handle_api_error(response=response)
-                break
             loc_data = response.json().get("Items", [])
             if not loc_data or loc_data == []:
                 break
@@ -81,8 +77,6 @@ class LocationCollection(BaseCollection):
         """
         url = f"{self.base_url}/{id}"
         response = self.session.get(url)
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
         loc = response.json()
         found_company = Location(**loc)
         return found_company
@@ -97,7 +91,4 @@ class LocationCollection(BaseCollection):
         )
         url = f"{self.base_url}/{updated_object.id}"
         response = self.session.patch(url, json=patch_payload)
-        if response.status_code == 204:
-            return self.get_by_id(id=updated_object.id)
-        else:
-            return self.handle_api_error(response)
+        return self.get_by_id(id=updated_object.id)

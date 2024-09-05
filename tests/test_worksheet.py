@@ -1,7 +1,7 @@
 from albert.worksheets import WorksheetCollection, Worksheet, Sheet, Column, Cell
 import pytest
 from albert.albert import Albert
-from albert.exceptions import NotFoundError
+from albert.utils.error_utils.exceptions import NotFoundError
 import pandas as pd
 
 

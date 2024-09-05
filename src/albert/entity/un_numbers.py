@@ -1,7 +1,7 @@
 from albert.base_entity import BaseAlbertModel
 from albert.base_collection import BaseCollection
 from pydantic import Field
-import requests
+
 from typing import List, Optional, Generator, Union
 
 
@@ -36,8 +36,6 @@ class UnNumberCollection(BaseCollection):
     def get_by_id(self, lot_id: str) -> Union[UnNumber, None]:
         url = f"{self.base_url}/{lot_id}"
         response = self.session.get(url)
-        if response.status_code != 200:
-            return self.handle_api_error(response)
         return UnNumber(**response.json())
 
     def _list_generator(
@@ -57,19 +55,15 @@ class UnNumberCollection(BaseCollection):
             response = self.session.get(
                 self.base_url, params=params
             )
-            if response.status_code == 200:
-                un_numbers = response.json().get("Items", [])
-                if not un_numbers or un_numbers == []:
-                    break
-                for x in un_numbers:
-                    yield UnNumber(**x)
-                start_key = response.json().get("lastKey")
-                if not start_key:
-                    break
-                params["startKey"] = start_key
-            else:
-                self.handle_api_error(response)
+            un_numbers = response.json().get("Items", [])
+            if not un_numbers or un_numbers == []:
                 break
+            for x in un_numbers:
+                yield UnNumber(**x)
+            start_key = response.json().get("lastKey")
+            if not start_key:
+                break
+            params["startKey"] = start_key
 
     def list(
         self,

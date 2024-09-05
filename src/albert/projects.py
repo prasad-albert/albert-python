@@ -137,13 +137,10 @@ class ProjectCollection(BaseCollection):
             project.company = company_collection.create(project.company)
         response = self.session.post(
             self.base_url, json=project.to_dict())
+        
+        return Project(**response.json())
 
-        if response.status_code == 201:
-            return Project(**response.json())
-        else:
-            return self.handle_api_error(response)
-
-    def get_by_id(self, project_id: str) -> Optional[Project]:
+    def get_by_id(self, project_id: str) -> Project:
         """
         Retrieve a project by its ID.
 
@@ -154,17 +151,13 @@ class ProjectCollection(BaseCollection):
 
         Returns
         -------
-        Optional[Project]
-            The project object if found, None otherwise.
+        Project
+            The project object if found
         """
         url = f"{self.base_url}/{project_id}"
         response = self.session.get(url)
-        if response.status_code == 200:
-            return Project(**response.json())
-        elif response.status_code == 404:
-            return None  # Project not found
-        else:
-            return self.handle_api_error(response)
+        
+        return Project(**response.json())
 
     def update(self, project_id: str, patch_data: dict) -> bool:
         """
@@ -185,10 +178,8 @@ class ProjectCollection(BaseCollection):
         url = f"{self.base_url}/{project_id}"
 
         response = self.session.patch(url, json=patch_data)
-        if response.status_code == 204:
-            return True
-        else:
-            return self.handle_api_error(response)
+        
+        return True
 
     def delete(self, project_id: str) -> bool:
         """
@@ -202,18 +193,13 @@ class ProjectCollection(BaseCollection):
         Returns
         -------
         bool
-            True if the deletion was successful, False otherwise.
+            True if the deletion was successful
         """
         url = f"{self.base_url}/{project_id}"
 
         response = self.session.delete(url)
-
-        if response.status_code == 204:
-            return True
-        elif response.status_code == 404:
-            return False  # Project not found
-        else:
-            return self.handle_api_error(response)
+        
+        return True
 
     def _list_generator(
         self,
@@ -262,20 +248,17 @@ class ProjectCollection(BaseCollection):
             response = self.session.get(
                 self.base_url, params=params
             )
-            if response.status_code == 200:
-                raw_projects = response.json().get("Items", [])
-                if not raw_projects or raw_projects == []:
-                    break
-                for x in raw_projects:
-                    yield Project(**x)
-                start_key = response.json().get("lastKey")
-                if not start_key or len(raw_projects) < limit:
-                    break
-                params["startKey"] = start_key
-            else:
-                self.handle_api_error(response)
+            
+            raw_projects = response.json().get("Items", [])
+            if not raw_projects or raw_projects == []:
                 break
-
+            for x in raw_projects:
+                yield Project(**x)
+            start_key = response.json().get("lastKey")
+            if not start_key or len(raw_projects) < limit:
+                break
+            params["startKey"] = start_key
+        
     def list(
         self,
         name: Optional[List[str]] = None,

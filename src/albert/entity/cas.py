@@ -6,6 +6,7 @@ from albert.base_entity import BaseAlbertModel
 from enum import Enum
 
 
+
 class WGK(Enum):
     ONE = "1"
     TWO = "2"
@@ -198,9 +199,6 @@ class CasCollection(BaseCollection):
             response = self.session.get(
                 self.base_url, params=params
             )
-            if response.status_code != 200:
-                self.handle_api_error(response=response)
-                break
             cas_data = response.json().get("Items", [])
             if not cas_data or cas_data == []:
                 break
@@ -290,8 +288,6 @@ class CasCollection(BaseCollection):
             response = self.session.post(
                 self.base_url, json=payload
             )
-            if response.status_code != 201:
-                self.handle_api_error(response=response)
             cas = Cas(**response.json())
             self.cas_cache[cas.number] = cas
             return cas
@@ -312,8 +308,6 @@ class CasCollection(BaseCollection):
         """
         url = f"{self.base_url}/{cas_id}"
         response = self.session.get(url)
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
         cas = Cas(**response.json())
         self.cas_cache[cas.number] = cas
         return cas
@@ -359,11 +353,10 @@ class CasCollection(BaseCollection):
         """
         url = f"{self.base_url}/{cas_id}"
         response = self.session.delete(url)
-        if response.status_code == 204:
-            self._remove_from_cache_by_id(cas_id)
-            return True
-        else:
-            return self.handle_api_error(response)
+        
+        self._remove_from_cache_by_id(cas_id)
+        return True
+
 
     def update(self, updated_object: BaseAlbertModel) -> BaseAlbertModel:
         # Fetch the current object state from the server or database
@@ -376,10 +369,9 @@ class CasCollection(BaseCollection):
 
         url = f"{self.base_url}/{updated_object.id}"
         response = self.session.patch(url, json=patch_payload)
-        if response.status_code == 204:
-            updated_cas = self.get_by_id(cas_id=updated_object.id)
-            self._remove_from_cache_by_id(updated_object.id)
-            self.cas_cache[updated_cas.number] = updated_cas
-            return updated_cas
-        else:
-            return self.handle_api_error(response)
+        
+        updated_cas = self.get_by_id(cas_id=updated_object.id)
+        self._remove_from_cache_by_id(updated_object.id)
+        self.cas_cache[updated_cas.number] = updated_cas
+        return updated_cas
+

@@ -3,6 +3,7 @@ from albert.entity.cas import Cas, CasCategory, CasCollection
 from albert.base_collection import OrderBy
 import pytest
 from typing import Generator
+from albert.utils.error_utils.exceptions import AlbertAPIError
 
 # Developer Note: We need more test here once we better uunderstand this collection's behavior.
 # The startKey / "lastKey" appear broken :(
@@ -28,6 +29,10 @@ def test_simple_cas_list(client):
     simple_list = client.cas_numbers.list()
     assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
+
+def test_cas_not_found(client:Albert):
+    with pytest.raises(AlbertAPIError):
+        client.cas_numbers.get_by_id("foo bar")
 
 
 def test_advanced_cas_list(client):

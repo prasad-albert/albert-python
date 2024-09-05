@@ -329,8 +329,6 @@ class InventoryCollection(BaseCollection):
         Deletes an inventory item by its ID.
     list(limit: int, start_key: Optional[str], name: Optional[List[str]], category: Optional[str], order_by: OrderBy, exact_match: bool) -> Optional[List[InventoryItem]]
         Lists inventory items with optional filters.
-    handle_api_error(response: requests.Response) -> None
-        Handles API errors by raising an exception.
     """
 
     def __init__(self, session):
@@ -424,12 +422,10 @@ class InventoryCollection(BaseCollection):
             self.base_url,
             json=inventory_item._to_create_api()  # This endpoint has some custom payload configurations so I don't use the normal model_dump() method
         )
-        if response.status_code == 201:
-            return InventoryItem(**response.json())
-        else:
-            return self.handle_api_error(response)
+        return InventoryItem(**response.json())
 
-    def get_by_id(self, inventory_id: str) -> Optional[InventoryItem]:
+
+    def get_by_id(self, inventory_id: str) -> InventoryItem:
         """
         Retrieve an inventory item by its ID.
 
@@ -440,19 +436,14 @@ class InventoryCollection(BaseCollection):
 
         Returns
         -------
-        Optional[InventoryItem]
-            The retrieved inventory item or None if not found.
+        InventoryItem
+            The retrieved inventory item.
         """
         if not inventory_id.startswith("INV"):
             inventory_id = "INV" + inventory_id
         url = f"{self.base_url}/{inventory_id}"
         response = self.session.get(url)
-        if response.status_code == 200:
-            return InventoryItem(**response.json())
-        elif response.status_code == 404:
-            return None
-        else:
-            return self.handle_api_error(response)
+        return InventoryItem(**response.json())
 
     def delete(self, inventory_id: str) -> bool:
         """
@@ -473,12 +464,7 @@ class InventoryCollection(BaseCollection):
         )
         url = f"{self.base_url}/{inventory_id}"
         response = self.session.delete(url)
-        if response.status_code == 204:
-            return True
-        elif response.status_code == 404:
-            return False
-        else:
-            return self.handle_api_error(response)
+        return True
 
     def _list_generator(
         self,
@@ -536,25 +522,23 @@ class InventoryCollection(BaseCollection):
             response = self.session.get(
                 self.base_url + "/search", params=params
             )
-            if response.status_code == 200:
-                raw_inventory = response.json().get("Items", [])
-                if (
-                    not raw_inventory
-                    or raw_inventory == []
-                    or len(raw_inventory) < limit
-                ):
-                    break
-                for item in raw_inventory:
-                    # Unfortunetly, list only returns partial objects, so I need to do a GET on each.
-                    this_aid = (
-                        item["albertId"]
-                        if item["albertId"].startswith("INV")
-                        else "INV" + item["albertId"]
-                    )
-                    yield self.get_by_id(this_aid)
-            else:
-                self.handle_api_error(response)
+            
+            raw_inventory = response.json().get("Items", [])
+            if (
+                not raw_inventory
+                or raw_inventory == []
+                or len(raw_inventory) < limit
+            ):
                 break
+            for item in raw_inventory:
+                # Unfortunetly, list only returns partial objects, so I need to do a GET on each.
+                this_aid = (
+                    item["albertId"]
+                    if item["albertId"].startswith("INV")
+                    else "INV" + item["albertId"]
+                )
+                yield self.get_by_id(this_aid)
+
 
     def list(
         self,
@@ -798,7 +782,5 @@ class InventoryCollection(BaseCollection):
             change_payload = {"data": [change]}
             response = self.session.patch(
                 url, json=change_payload)
-            if response.status_code != 204:
-                return self.handle_api_error(response)
         updated_inv = self.get_by_id(inventory_id=updated_object.id)
         return updated_inv

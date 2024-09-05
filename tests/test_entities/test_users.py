@@ -54,7 +54,7 @@ def test_user_get(client):
     assert isinstance(user_from_get, User)
 
 
-def test_user_crud(client):
+def test_user_crud(client:Albert):
     existing_role = Role(id="ROL95", tenant="TEN1", name="Myrole")
     existing_loc = Location(
         name="(D123) Duesseldorf, Germany",

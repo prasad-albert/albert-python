@@ -1,11 +1,12 @@
 import requests
 from typing import Optional, List, Dict, Union, Any
-from albert.exceptions import AlbertAPIError
+from albert.utils.error_utils.exceptions import AlbertAPIError
 from albert.base_collection import BaseCollection, OrderBy
 from albert.base_entity import BaseAlbertModel
 from pydantic import Field, PrivateAttr
 from albert.base_entity import Status
 from typing import Generator
+
 
 
 class Company(BaseAlbertModel):
@@ -131,14 +132,11 @@ class CompanyCollection(BaseCollection):
         if start_key:
             params["startKey"] = start_key
         while True:
-            companies = self.session.get(
+            response = self.session.get(
                 self.base_url, params=params
             )
-
-            if companies.status_code != 200:
-                self.handle_api_error(companies)
-                break
-            company_data = companies.json().get("Items", [])
+            
+            company_data = response.json().get("Items", [])
             if not company_data or company_data == []:
                 break
 
@@ -146,7 +144,7 @@ class CompanyCollection(BaseCollection):
                 this_company = Company(**company)
                 self.company_cache[this_company.name] = this_company
                 yield this_company
-            start_key = companies.json().get("lastKey")
+            start_key = response.json().get("lastKey")
             if not start_key or len(company_data) < limit:
                 break
             params["startKey"] = start_key
@@ -213,20 +211,10 @@ class CompanyCollection(BaseCollection):
         """
         url = f"{self.base_url}/{id}"
         response = self.session.get(url)
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
-        company = response.json()
-        if response.status_code == 200:
-            found_company = Company(**company)
-            self.company_cache[found_company.name] = found_company
-            return found_company
-        elif response.status_code == 404:
-            print(f"No company with id {id} found")
-            return None
-        else:
-            self.handle_api_error(response=response)
-
-            return None
+        company = response.json()     
+        found_company = Company(**company)
+        self.company_cache[found_company.name] = found_company
+        return found_company
 
     def get_by_name(self, name: str, exact_match: bool = True) -> Union[Company, None]:
         """
@@ -278,22 +266,15 @@ class CompanyCollection(BaseCollection):
         response = self.session.post(
             self.base_url, json=payload
         )
-        if response.status_code == 201:
-            this_company = Company(**response.json())
-            self.company_cache[this_company.name] = this_company
-            return this_company
-        else:
-            self.handle_api_error(response=response)
-            return None
+        this_company = Company(**response.json())
+        self.company_cache[this_company.name] = this_company
+        return this_company
 
     def delete(self, id: str) -> bool:
         url = f"{self.base_url}/{id}"
         response = self.session.delete(url)
-        if response.status_code == 204:
-            self._remove_from_cache_by_id(id)
-            return True
-        else:
-            return self.handle_api_error(response)
+        self._remove_from_cache_by_id(id)
+        return True
 
     def rename(self, old_name: str, new_name: str) -> Optional[Company]:
         """
@@ -328,8 +309,6 @@ class CompanyCollection(BaseCollection):
             ]
         }
         response = self.session.patch(endpoint, json=payload)
-        if response.status_code != 204:
-            self.handle_api_error(response=response)
         updated_company = self.get_by_id(company_id)
         self._remove_from_cache_by_id(updated_company.id)
         self.company_cache[updated_company.name] = updated_company
@@ -343,13 +322,9 @@ class CompanyCollection(BaseCollection):
         patch_payload = self._generate_patch_payload(
             existing=current_object, updated=updated_object
         )
-
         url = f"{self.base_url}/{updated_object.id}"
         response = self.session.patch(url, json=patch_payload)
-        if response.status_code == 204:
-            updated_company = self.get_by_id(cas_id=updated_object.id)
-            self._remove_from_cache_by_id(updated_object.id)
-            self.company_cache[updated_company.id] = updated_company
-            return updated_company
-        else:
-            return self.handle_api_error(response)
+        updated_company = self.get_by_id(cas_id=updated_object.id)
+        self._remove_from_cache_by_id(updated_object.id)
+        self.company_cache[updated_company.id] = updated_company
+        return updated_company

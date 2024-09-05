@@ -157,9 +157,6 @@ class TagCollection(BaseCollection):
             response =  self.session.get(
                 self.base_url, params=params
             )
-            if response.status_code != 200:
-                self.handle_api_error(response=response)
-                break
             tags_data = response.json().get("Items", [])
             if not tags_data or tags_data == []:
                 break
@@ -222,8 +219,6 @@ class TagCollection(BaseCollection):
         response = self.session.get(
             self.base_url, params=params
         )
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
         tags = response.json().get("Items", [])
         for t in tags:
             found_tag = Tag(**t)
@@ -256,8 +251,6 @@ class TagCollection(BaseCollection):
         response = self.session.post(
             self.base_url, json=payload
         )
-        if response.status_code != 201:
-            self.handle_api_error(response=response)
         tag = Tag(**response.json())
         self.tag_cache[tag.tag] = tag
         return tag
@@ -278,8 +271,6 @@ class TagCollection(BaseCollection):
         """
         url = f"{self.base_url}/{tag_id}"
         response = self.session.get(url)
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
         tag = Tag(**response.json())
         self.tag_cache[tag.tag] = tag
         return tag
@@ -321,9 +312,6 @@ class TagCollection(BaseCollection):
         """
         url = f"{self.base_url}/{tag_id}"
         response = self.session.delete(url)
-        if response.status_code != 204:
-            self.handle_api_error(response=response)
-            return False
         self._remove_from_cache_by_id(tag_id)
         return True
 
@@ -365,9 +353,6 @@ class TagCollection(BaseCollection):
         response = self.session.patch(
             self.base_url, json=payload
         )
-
-        if response.status_code != 204:
-            self.handle_api_error(response=response)
         self._remove_from_cache_by_id(tag_id)
         updated_tag = self.get_by_id(tag_id)
         self.tag_cache[updated_tag.tag] = updated_tag

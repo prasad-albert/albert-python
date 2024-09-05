@@ -10,6 +10,7 @@ import pandas as pd
 import copy
 
 
+
 class CellColor(Enum):
     WHITE = "RGB(255, 255, 255)"
     RED = "RGB(255, 161, 161)"
@@ -170,15 +171,12 @@ class Design(BaseAlbertModel):
             f"/api/v3/worksheet/{self.id}/{self.design_type}/grid"
         )
         response = self.session.get(endpoint)
-        if response.status_code == 200:
-            resp_json = response.json()
-            # print(resp_json)
-            self._columns = self._get_columns(resp_json)
-            self._rows = self._get_rows(resp_json)
-            return self._grid_to_cell_df(resp_json)
+             
+        resp_json = response.json()
+        self._columns = self._get_columns(resp_json)
+        self._rows = self._get_rows(resp_json)
+        return self._grid_to_cell_df(resp_json)
 
-        else:
-            BaseCollection.handle_api_error(response=response)
 
     @property
     def columns(self) -> List["Column"]:
@@ -285,12 +283,9 @@ class Sheet(BaseAlbertModel):
         payload = [{"attribute": "name", "operation": "update", "newValue": new_name}]
 
         response = self.session.patch(endpoint, json=payload)
-
-        if response.status_code == 200 or response.status_code == 204:
-            self.name = new_name
-            return self
-        else:
-            BaseCollection.handle_api_error(response=response)
+        
+        self.name = new_name
+        return self
 
     def _reformat_formulation_addition_payload(self, response_json: dict) -> dict:
         new_dicts = []
@@ -347,15 +342,13 @@ class Sheet(BaseAlbertModel):
             )
 
         response = self.session.post(endpoint, json=payload)
+        
+        self.grid = None
+        new_dicts = self._reformat_formulation_addition_payload(
+            response_json=response.json()
+        )
+        return [Column(**x) for x in new_dicts]
 
-        if response.status_code == 200:
-            self.grid = None
-            new_dicts = self._reformat_formulation_addition_payload(
-                response_json=response.json()
-            )
-            return [Column(**x) for x in new_dicts]
-        else:
-            BaseCollection.handle_api_error(response=response)
 
     def add_blank_row(
         self,
@@ -376,20 +369,18 @@ class Sheet(BaseAlbertModel):
         ]
 
         response = self.session.post(endpoint, json=payload)
-
-        if response.status_code == 200:
-            self.grid = None
-            row_dict = response.json()[0]
-            return Row(
-                rowId=row_dict["rowId"],
-                type=row_dict["type"],
-                session=self.session,
-                design=self._get_design(design=design),
-                name=row_dict["name"],
-                sheet=self,
-            )
-        else:
-            BaseCollection.handle_api_error(response=response)
+        
+       
+        self.grid = None
+        row_dict = response.json()[0]
+        return Row(
+            rowId=row_dict["rowId"],
+            type=row_dict["type"],
+            session=self.session,
+            design=self._get_design(design=design),
+            name=row_dict["name"],
+            sheet=self,
+        )
 
     def add_inventory_row(
         self,
@@ -412,22 +403,20 @@ class Sheet(BaseAlbertModel):
         }
 
         response = self.session.post(endpoint, json=payload)
+        
+        self.grid = None
+        row_dict = response.json()
+        return Row(
+            rowId=row_dict["rowId"],
+            type=row_dict["type"],
+            session=self.session,
+            design=self.product_design,
+            sheet=self,
+            name=row_dict["name"],
+            id=row_dict["id"],
+            manufacturer=row_dict["manufacturer"],
+        )
 
-        if response.status_code == 200:
-            self.grid = None
-            row_dict = response.json()
-            return Row(
-                rowId=row_dict["rowId"],
-                type=row_dict["type"],
-                session=self.session,
-                design=self.product_design,
-                sheet=self,
-                name=row_dict["name"],
-                id=row_dict["id"],
-                manufacturer=row_dict["manufacturer"],
-            )
-        else:
-            BaseCollection.handle_api_error(response=response)
 
     def _filter_cells(self, cells: List[Cell], response_dict: dict):
         updated = []
@@ -554,6 +543,7 @@ class Sheet(BaseAlbertModel):
                 this_url,
                 json=payload,
             )
+            
             if response.status_code == 204:
                 # They all updated
                 updated.extend(cell_list)
@@ -564,8 +554,6 @@ class Sheet(BaseAlbertModel):
                 )
                 updated.extend(cell_results[0])
                 failed.extend(cell_results[1])
-            else:
-                BaseCollection.handle_api_error(response)
         return (updated, failed)
 
     def add_blank_column(
@@ -583,44 +571,38 @@ class Sheet(BaseAlbertModel):
             }
         ]
         response = self.session.post(endpoint, json=payload)
-        if response.status_code == 200:
-            data = response.json()
-            data[0]["sheet"] = self
-            data[0]["session"] = self.session
-            self.grid = (
-                None  # reset the known grid. We could probably make this nicer later.
-            )
-            return Column(**data[0])
-        else:
-            BaseCollection.handle_api_error(response=response)
+        
+        data = response.json()
+        data[0]["sheet"] = self
+        data[0]["session"] = self.session
+        self.grid = (
+            None  # reset the known grid. We could probably make this nicer later.
+        )
+        return Column(**data[0])
+
 
     def delete_column(self, column_id: str):
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [{"colId": column_id}]
         response = self.session.delete(endpoint, json=payload)
-        if response.status_code == 204:
-            if (
-                self._grid is not None
-            ):  # if I have a grid loaded into memory, adjust it.
-                self.grid = None
-            return True
-        else:
-            BaseCollection.handle_api_error(response=response)
-        return False
+        
+        if (
+            self._grid is not None
+        ):  # if I have a grid loaded into memory, adjust it.
+            self.grid = None
+        return True
 
     def delete_row(self, row_id: str, design_id: str):
         endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
         payload = [{"rowId": row_id}]
         response = self.session.delete(endpoint, json=payload)
-        if response.status_code == 204:
-            if (
-                self._grid is not None
-            ):  # if I have a grid loaded into memory, adjust it.
-                self.grid = None
-            return True
-        else:
-            BaseCollection.handle_api_error(response=response)
-        return False
+        
+        if (
+            self._grid is not None
+        ):  # if I have a grid loaded into memory, adjust it.
+            self.grid = None
+        return True
+
 
     def _find_column(self, column_id: str = "", column_name: str = ""):
         if column_id == None:
@@ -675,8 +657,7 @@ class WorksheetCollection(BaseCollection):
         response = self.session.get(
             self.base_url, params=params
         )
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
+        
         response_json = response.json()
 
         # Sheets are themselves collections, and therefore need access to the session
@@ -725,17 +706,14 @@ class Column(BaseAlbertModel):
             url=f"/api/v3/worksheet/sheet/{self.sheet.id}/columns",
             json=payload,
         )
-
-        if response.status_code == 204:
-            if (
-                self.sheet._grid is not None
-            ):  # if I have a grid loaded into memory, adjust it.
-                self.sheet.grid = None
-                # self.sheet._grid.rename(axis=1, mapper={self.name:new_name})
-            self.name = new_name
-            return self
-        else:
-            BaseCollection.handle_api_error(response=response)
+        
+        if (
+            self.sheet._grid is not None
+        ):  # if I have a grid loaded into memory, adjust it.
+            self.sheet.grid = None
+            # self.sheet._grid.rename(axis=1, mapper={self.name:new_name})
+        self.name = new_name
+        return self
 
     def recolor_cells(self, color: CellColor):
         new_cells = []

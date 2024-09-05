@@ -1,6 +1,6 @@
 import requests
 from albert.albert_session import AlbertSession
-from albert.exceptions import (
+from albert.utils.error_utils.exceptions import (
     AlbertAPIError,
     BadRequestError,
     UnauthorizedError,
@@ -33,36 +33,6 @@ class BaseCollection:
     def __init__(self, session: AlbertSession):
         self.session = session
 
-    @classmethod
-    def handle_api_error(cls, response: requests.Response) -> None:
-
-        error_message = ""
-        try:
-            response_json = response.json()
-            error_details = response_json
-            error_message += f": {error_details.get('title', 'Unknown Error')}"
-            error_message += f"\n {response.reason}"
-        except ValueError:
-            response_json = {}
-            error_details = {}
-            error_message += ": Unknown Error"
-        error_message = f"API request failed with status code {response.status_code} \n {response.reason} \n {response_json.get("errors", None)}"
-        logging.error(
-            f"Failed to perform the request to {response.request.url}. \n {error_message} \n Body sent: {response.request.body}"
-        )
-        if response.status_code == 400:
-            raise BadRequestError(error_message, error_details)
-        elif response.status_code == 401:
-            raise UnauthorizedError(error_message, error_details)
-        elif response.status_code == 403:
-            raise ForbiddenError(error_message, error_details)
-        elif response.status_code == 404:
-            raise NotFoundError(error_message, error_details)
-        elif response.status_code == 500:
-            raise InternalServerError(error_message, error_details)
-        else:
-            raise AlbertAPIError(error_message, error_details)
-        return None
 
     # Class property specifying updatable attributes
     _updatable_attributes = {}

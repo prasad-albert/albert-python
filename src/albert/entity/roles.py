@@ -2,7 +2,7 @@ from albert.base_entity import BaseAlbertModel
 from albert.base_collection import BaseCollection
 from pydantic import Field
 from typing import Any, List, Optional
-import requests
+
 
 
 class Role(BaseAlbertModel):
@@ -41,8 +41,5 @@ class RoleCollection(BaseCollection):
         response = self.session.get(
             self.base_url, params=params
         )
-        if response.status_code != 200:
-            self.handle_api_error(response=response)
-            return None
         role_data = response.json().get("Items", [])
         return [Role(**r) for r in role_data]
