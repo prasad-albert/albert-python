@@ -211,8 +211,7 @@ class UnitCollection(BaseCollection):
         if self.unit_exists(unit.name):
             return self.unit_cache[unit.name]
         response = self.session.post(
-            self.base_url,
-            json=unit.model_dump(by_alias=True, exclude_unset=True)
+            self.base_url, json=unit.model_dump(by_alias=True, exclude_unset=True)
         )
         this_unit = Unit(**response.json())
         self.unit_cache[this_unit.name] = this_unit
@@ -365,9 +364,7 @@ class UnitCollection(BaseCollection):
         if not verified is None:
             params["verified"] = str(verified).lower()
         while True:
-            response = self.session.get(
-                self.base_url, params=params
-            )
+            response = self.session.get(self.base_url, params=params)
             units = response.json().get("Items", [])
             if not units or units == []:
                 break

@@ -4,7 +4,6 @@ from pydantic import Field
 from typing import Any, List, Optional
 
 
-
 class Role(BaseAlbertModel):
     id: str = Field(alias="albertId")
     name: str
@@ -38,8 +37,6 @@ class RoleCollection(BaseCollection):
         List
             List of available Roles
         """
-        response = self.session.get(
-            self.base_url, params=params
-        )
+        response = self.session.get(self.base_url, params=params)
         role_data = response.json().get("Items", [])
         return [Role(**r) for r in role_data]

@@ -44,9 +44,7 @@ class LocationCollection(BaseCollection):
             params["country"] = country
 
         while True:
-            response = self.session.get(
-                self.base_url, params=params
-            )
+            response = self.session.get(self.base_url, params=params)
             loc_data = response.json().get("Items", [])
             if not loc_data or loc_data == []:
                 break

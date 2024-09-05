@@ -3,7 +3,7 @@ from typing import List, Dict, Optional, Union, Generator
 from albert.base_collection import BaseCollection, OrderBy
 from pydantic import Field
 from albert.base_entity import BaseAlbertModel
-
+import logging
 from enum import Enum
 
 
@@ -154,9 +154,7 @@ class TagCollection(BaseCollection):
             params["startKey"] = start_key
 
         while True:
-            response =  self.session.get(
-                self.base_url, params=params
-            )
+            response = self.session.get(self.base_url, params=params)
             tags_data = response.json().get("Items", [])
             if not tags_data or tags_data == []:
                 break
@@ -216,9 +214,7 @@ class TagCollection(BaseCollection):
             return True
         params = {"limit": "2", "name": [tag], "exactMatch": str(exact_match).lower()}
 
-        response = self.session.get(
-            self.base_url, params=params
-        )
+        response = self.session.get(self.base_url, params=params)
         tags = response.json().get("Items", [])
         for t in tags:
             found_tag = Tag(**t)
@@ -245,12 +241,12 @@ class TagCollection(BaseCollection):
             tag = Tag(tag=tag)
         if self.tag_exists(tag.tag):
             existing_tag = self.tag_cache[tag.tag]
-            print(f"Tag {existing_tag.tag} already exists with id {existing_tag.id}")
+            logging.warning(
+                f"Tag {existing_tag.tag} already exists with id {existing_tag.id}"
+            )
             return existing_tag
         payload = {"name": tag.tag}
-        response = self.session.post(
-            self.base_url, json=payload
-        )
+        response = self.session.post(self.base_url, json=payload)
         tag = Tag(**response.json())
         self.tag_cache[tag.tag] = tag
         return tag
@@ -334,7 +330,7 @@ class TagCollection(BaseCollection):
         found_tag = self.get_by_tag(tag=old_name, exact_match=True)
 
         if not found_tag:
-            print(f'Tag "{old_name}" not found.')
+            logging.error(f'Tag "{old_name}" not found.')
             return None
         tag_id = found_tag.id
         payload = [
@@ -350,9 +346,7 @@ class TagCollection(BaseCollection):
                 "id": tag_id,
             }
         ]
-        response = self.session.patch(
-            self.base_url, json=payload
-        )
+        response = self.session.patch(self.base_url, json=payload)
         self._remove_from_cache_by_id(tag_id)
         updated_tag = self.get_by_id(tag_id)
         self.tag_cache[updated_tag.tag] = updated_tag

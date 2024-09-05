@@ -33,7 +33,6 @@ class BaseCollection:
     def __init__(self, session: AlbertSession):
         self.session = session
 
-
     # Class property specifying updatable attributes
     _updatable_attributes = {}
 

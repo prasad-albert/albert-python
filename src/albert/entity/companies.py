@@ -6,7 +6,7 @@ from albert.base_entity import BaseAlbertModel
 from pydantic import Field, PrivateAttr
 from albert.base_entity import Status
 from typing import Generator
-
+import logging
 
 
 class Company(BaseAlbertModel):
@@ -132,10 +132,8 @@ class CompanyCollection(BaseCollection):
         if start_key:
             params["startKey"] = start_key
         while True:
-            response = self.session.get(
-                self.base_url, params=params
-            )
-            
+            response = self.session.get(self.base_url, params=params)
+
             company_data = response.json().get("Items", [])
             if not company_data or company_data == []:
                 break
@@ -211,7 +209,7 @@ class CompanyCollection(BaseCollection):
         """
         url = f"{self.base_url}/{id}"
         response = self.session.get(url)
-        company = response.json()     
+        company = response.json()
         found_company = Company(**company)
         self.company_cache[found_company.name] = found_company
         return found_company
@@ -259,13 +257,11 @@ class CompanyCollection(BaseCollection):
             company = Company(name=company)
         if check_if_exists and self.company_exists(name=company.name):
             company = self.company_cache[company.name]
-            print(f"Company {company.name} already exists with id {company.id}.")
+            logging.warn(f"Company {company.name} already exists with id {company.id}.")
             return company
 
         payload = company.model_dump(by_alias=True, exclude_unset=True)
-        response = self.session.post(
-            self.base_url, json=payload
-        )
+        response = self.session.post(self.base_url, json=payload)
         this_company = Company(**response.json())
         self.company_cache[this_company.name] = this_company
         return this_company
@@ -294,7 +290,7 @@ class CompanyCollection(BaseCollection):
         """
         company = self.get_by_name(old_name, exact_match=True)
         if not company:
-            print(f'Company "{old_name}" not found.')
+            logging.error(f'Company "{old_name}" not found.')
             return None
         company_id = company.id
         endpoint = f"{self.base_url}/{company_id}"

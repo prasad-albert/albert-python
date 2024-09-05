@@ -10,7 +10,6 @@ import pandas as pd
 import copy
 
 
-
 class CellColor(Enum):
     WHITE = "RGB(255, 255, 255)"
     RED = "RGB(255, 161, 161)"
@@ -167,16 +166,13 @@ class Design(BaseAlbertModel):
         return rows
 
     def _get_grid(self):
-        endpoint = (
-            f"/api/v3/worksheet/{self.id}/{self.design_type}/grid"
-        )
+        endpoint = f"/api/v3/worksheet/{self.id}/{self.design_type}/grid"
         response = self.session.get(endpoint)
-             
+
         resp_json = response.json()
         self._columns = self._get_columns(resp_json)
         self._rows = self._get_rows(resp_json)
         return self._grid_to_cell_df(resp_json)
-
 
     @property
     def columns(self) -> List["Column"]:
@@ -283,7 +279,7 @@ class Sheet(BaseAlbertModel):
         payload = [{"attribute": "name", "operation": "update", "newValue": new_name}]
 
         response = self.session.patch(endpoint, json=payload)
-        
+
         self.name = new_name
         return self
 
@@ -342,13 +338,12 @@ class Sheet(BaseAlbertModel):
             )
 
         response = self.session.post(endpoint, json=payload)
-        
+
         self.grid = None
         new_dicts = self._reformat_formulation_addition_payload(
             response_json=response.json()
         )
         return [Column(**x) for x in new_dicts]
-
 
     def add_blank_row(
         self,
@@ -369,8 +364,7 @@ class Sheet(BaseAlbertModel):
         ]
 
         response = self.session.post(endpoint, json=payload)
-        
-       
+
         self.grid = None
         row_dict = response.json()[0]
         return Row(
@@ -403,7 +397,7 @@ class Sheet(BaseAlbertModel):
         }
 
         response = self.session.post(endpoint, json=payload)
-        
+
         self.grid = None
         row_dict = response.json()
         return Row(
@@ -416,7 +410,6 @@ class Sheet(BaseAlbertModel):
             id=row_dict["id"],
             manufacturer=row_dict["manufacturer"],
         )
-
 
     def _filter_cells(self, cells: List[Cell], response_dict: dict):
         updated = []
@@ -543,7 +536,7 @@ class Sheet(BaseAlbertModel):
                 this_url,
                 json=payload,
             )
-            
+
             if response.status_code == 204:
                 # They all updated
                 updated.extend(cell_list)
@@ -571,7 +564,7 @@ class Sheet(BaseAlbertModel):
             }
         ]
         response = self.session.post(endpoint, json=payload)
-        
+
         data = response.json()
         data[0]["sheet"] = self
         data[0]["session"] = self.session
@@ -580,15 +573,12 @@ class Sheet(BaseAlbertModel):
         )
         return Column(**data[0])
 
-
     def delete_column(self, column_id: str):
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [{"colId": column_id}]
         response = self.session.delete(endpoint, json=payload)
-        
-        if (
-            self._grid is not None
-        ):  # if I have a grid loaded into memory, adjust it.
+
+        if self._grid is not None:  # if I have a grid loaded into memory, adjust it.
             self.grid = None
         return True
 
@@ -596,13 +586,10 @@ class Sheet(BaseAlbertModel):
         endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
         payload = [{"rowId": row_id}]
         response = self.session.delete(endpoint, json=payload)
-        
-        if (
-            self._grid is not None
-        ):  # if I have a grid loaded into memory, adjust it.
+
+        if self._grid is not None:  # if I have a grid loaded into memory, adjust it.
             self.grid = None
         return True
-
 
     def _find_column(self, column_id: str = "", column_name: str = ""):
         if column_id == None:
@@ -654,10 +641,8 @@ class WorksheetCollection(BaseCollection):
 
     def get_by_project_id(self, project_id):
         params = {"type": "project", "id": "PRO" + project_id}
-        response = self.session.get(
-            self.base_url, params=params
-        )
-        
+        response = self.session.get(self.base_url, params=params)
+
         response_json = response.json()
 
         # Sheets are themselves collections, and therefore need access to the session
@@ -706,7 +691,7 @@ class Column(BaseAlbertModel):
             url=f"/api/v3/worksheet/sheet/{self.sheet.id}/columns",
             json=payload,
         )
-        
+
         if (
             self.sheet._grid is not None
         ):  # if I have a grid loaded into memory, adjust it.

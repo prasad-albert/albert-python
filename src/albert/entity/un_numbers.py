@@ -52,9 +52,7 @@ class UnNumberCollection(BaseCollection):
             if exact_match:
                 params["exactMatch"] = str(exact_match).lower()
         while True:
-            response = self.session.get(
-                self.base_url, params=params
-            )
+            response = self.session.get(self.base_url, params=params)
             un_numbers = response.json().get("Items", [])
             if not un_numbers or un_numbers == []:
                 break

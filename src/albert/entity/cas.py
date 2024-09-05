@@ -6,7 +6,6 @@ from albert.base_entity import BaseAlbertModel
 from enum import Enum
 
 
-
 class WGK(Enum):
     ONE = "1"
     TWO = "2"
@@ -196,9 +195,7 @@ class CasCollection(BaseCollection):
         if id:
             params["albertId"] = id
         while True:
-            response = self.session.get(
-                self.base_url, params=params
-            )
+            response = self.session.get(self.base_url, params=params)
             cas_data = response.json().get("Items", [])
             if not cas_data or cas_data == []:
                 break
@@ -281,13 +278,10 @@ class CasCollection(BaseCollection):
             cas = Cas(number=cas)
         if self.cas_exists(cas.number):
             existing_cas = self.cas_cache[cas.number]
-            print(f"CAS {existing_cas.number} already exists with id {existing_cas.id}")
             return existing_cas
         else:
             payload = cas.model_dump(by_alias=True, exclude_unset=True)
-            response = self.session.post(
-                self.base_url, json=payload
-            )
+            response = self.session.post(self.base_url, json=payload)
             cas = Cas(**response.json())
             self.cas_cache[cas.number] = cas
             return cas
@@ -353,10 +347,9 @@ class CasCollection(BaseCollection):
         """
         url = f"{self.base_url}/{cas_id}"
         response = self.session.delete(url)
-        
+
         self._remove_from_cache_by_id(cas_id)
         return True
-
 
     def update(self, updated_object: BaseAlbertModel) -> BaseAlbertModel:
         # Fetch the current object state from the server or database
@@ -369,9 +362,8 @@ class CasCollection(BaseCollection):
 
         url = f"{self.base_url}/{updated_object.id}"
         response = self.session.patch(url, json=patch_payload)
-        
+
         updated_cas = self.get_by_id(cas_id=updated_object.id)
         self._remove_from_cache_by_id(updated_object.id)
         self.cas_cache[updated_cas.number] = updated_cas
         return updated_cas
-

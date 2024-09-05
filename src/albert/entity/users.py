@@ -52,8 +52,7 @@ class UserCollection(BaseCollection):
                 params["offset"] = offset
         while True:
             # status=active&limit=50&text=Lenore&searchFields=name
-            response = self.session.get(
-                self.base_url + "/search", params=params)
+            response = self.session.get(self.base_url + "/search", params=params)
             user_data = response.json().get("Items", [])
             if not user_data or user_data == []:
                 break
@@ -133,9 +132,7 @@ class UserCollection(BaseCollection):
         }
 
         # build and run query
-        response = self.session.post(
-            self.base_url, json=payload
-        )
+        response = self.session.post(self.base_url, json=payload)
         user = User(**response.json())
         return user
 

@@ -135,9 +135,8 @@ class ProjectCollection(BaseCollection):
         if project.company and project.company.id is None:
             company_collection = CompanyCollection(session=self.session)
             project.company = company_collection.create(project.company)
-        response = self.session.post(
-            self.base_url, json=project.to_dict())
-        
+        response = self.session.post(self.base_url, json=project.to_dict())
+
         return Project(**response.json())
 
     def get_by_id(self, project_id: str) -> Project:
@@ -156,7 +155,7 @@ class ProjectCollection(BaseCollection):
         """
         url = f"{self.base_url}/{project_id}"
         response = self.session.get(url)
-        
+
         return Project(**response.json())
 
     def update(self, project_id: str, patch_data: dict) -> bool:
@@ -178,7 +177,7 @@ class ProjectCollection(BaseCollection):
         url = f"{self.base_url}/{project_id}"
 
         response = self.session.patch(url, json=patch_data)
-        
+
         return True
 
     def delete(self, project_id: str) -> bool:
@@ -198,7 +197,7 @@ class ProjectCollection(BaseCollection):
         url = f"{self.base_url}/{project_id}"
 
         response = self.session.delete(url)
-        
+
         return True
 
     def _list_generator(
@@ -245,10 +244,8 @@ class ProjectCollection(BaseCollection):
         if category:
             params["category"] = category
         while True:
-            response = self.session.get(
-                self.base_url, params=params
-            )
-            
+            response = self.session.get(self.base_url, params=params)
+
             raw_projects = response.json().get("Items", [])
             if not raw_projects or raw_projects == []:
                 break
@@ -258,7 +255,7 @@ class ProjectCollection(BaseCollection):
             if not start_key or len(raw_projects) < limit:
                 break
             params["startKey"] = start_key
-        
+
     def list(
         self,
         name: Optional[List[str]] = None,

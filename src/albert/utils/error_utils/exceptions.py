@@ -9,7 +9,7 @@ def handle_api_error(response: requests.Response) -> None:
     except requests.HTTPError as e:
         # Log the initial error with status code and reason
         error_message = f"API request failed with status code {response.status_code}: {response.reason}"
-        
+
         try:
             # Attempt to extract additional error details from the response JSON, if available
             response_json = response.json()
@@ -39,7 +39,9 @@ def handle_api_error(response: requests.Response) -> None:
         else:
             raise AlbertAPIError(error_message, error_details) from e
 
+
 # Custom Exception classes for API errors
+
 
 class AlbertAPIError(Exception):
     """Base class for all API-related errors."""
@@ -51,24 +53,29 @@ class AlbertAPIError(Exception):
 
 class BadRequestError(AlbertAPIError):
     """Exception raised for a 400 Bad Request response."""
+
     pass
 
 
 class UnauthorizedError(AlbertAPIError):
     """Exception raised for a 401 Unauthorized response."""
+
     pass
 
 
 class ForbiddenError(AlbertAPIError):
     """Exception raised for a 403 Forbidden response."""
+
     pass
 
 
 class NotFoundError(AlbertAPIError):
     """Exception raised for a 404 Not Found response."""
+
     pass
 
 
 class InternalServerError(AlbertAPIError):
     """Exception raised for a 500 Internal Server Error response."""
+
     pass

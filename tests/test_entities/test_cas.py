@@ -30,7 +30,8 @@ def test_simple_cas_list(client):
     assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
-def test_cas_not_found(client:Albert):
+
+def test_cas_not_found(client: Albert):
     with pytest.raises(AlbertAPIError):
         client.cas_numbers.get_by_id("foo bar")
 

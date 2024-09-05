@@ -5,11 +5,10 @@ from albert.base_entity import BaseAlbertModel
 from enum import Enum
 
 
-import requests
+import logging
 from typing import List, Optional, Dict, Any
 from albert.base_collection import BaseCollection
 from albert.inventory import InventoryCategory
-
 
 
 class LotStatus(Enum):
@@ -59,7 +58,7 @@ class Lot(BaseAlbertModel):
             elif data["hasAttachments"] == "2":
                 self._has_attachments == False
             else:
-                print(
+                logging.error(
                     f"Unknown response for hasAttachments given: {data['hasAttachments']}"
                 )
                 pass
@@ -69,7 +68,10 @@ class Lot(BaseAlbertModel):
             elif data["hasNotes"] == "2":
                 self._has_notes == False
             else:
-                print(f"Unknown response for hasNotes given: {data['hasNotes']}")
+
+                logging.error(
+                    f"Unknown response for hasNotes given: {data['hasNotes']}"
+                )
                 pass
         if "parentName" in data:
             self._parent_name = data["parentName"]
@@ -116,32 +118,29 @@ class LotCollection(BaseCollection):
 
     def create(self, lots: List[Lot]) -> List[Lot]:
         payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
-        response = self.session.post(
-            self.base_url, json=payload)
-        
+        response = self.session.post(self.base_url, json=payload)
+
         return [
-            self._rehydrate_lot(lot)
-            for lot in response.json().get("CreatedLots", [])
+            self._rehydrate_lot(lot) for lot in response.json().get("CreatedLots", [])
         ]
-       
+
     def get_by_id(self, lot_id: str) -> Lot:
         url = f"{self.base_url}/{lot_id}"
         response = self.session.get(url)
-        
+
         return Lot(**response.json())
 
     # def update(self, lot_id: str, patch_data: Dict[str, Any]) -> bool:
     #     """TODO: Follow pattern for other Update methods. This will need a custom Patch creation method."""
     #     url = f"{self.base_url}/{lot_id}"
     #     response = self.session.patch(url, json=patch_data)
-    #     
+    #
     #     return lot_id
-
 
     def delete(self, lot_id: str) -> bool:
         url = f"{self.base_url}/{lot_id}"
         response = self.session.delete(url)
-        
+
         return True
 
 
@@ -175,7 +174,7 @@ class LotCollection(BaseCollection):
 #     response = self.session.get(
 #         self.base_url, params=params
 #     )
-#     
-#    
+#
+#
 #     lots = response.json().get("Items", [])
 #     return [Lot(**x) for x in lots]

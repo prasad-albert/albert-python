@@ -20,6 +20,13 @@ class BaseAlbertModel(BaseModel):
     _updated: Optional[AuditFields] = PrivateAttr(default=None)
     _status: Optional[Status] = PrivateAttr(default=None)
 
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        exclude={"session"},
+        arbitrary_types_allowed=True,
+    )
+
     @model_validator(mode="before")
     @classmethod
     def initialize_private_attrs(cls, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -46,10 +53,3 @@ class BaseAlbertModel(BaseModel):
     @property
     def status(self) -> Optional[Status]:
         return self._status
-
-    model_config = ConfigDict(
-            populate_by_name=True,
-            use_enum_values=True,
-            exclude={"session"},
-            arbitrary_types_allowed=True
-        )

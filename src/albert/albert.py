@@ -13,14 +13,18 @@ from albert.entity.locations import LocationCollection
 from albert.entity.roles import RoleCollection
 from albert.worksheets import WorksheetCollection
 import albert
+
 try:
     import tomllib  # Python 3.11 and later
 except ModuleNotFoundError:
     import tomli as tomllib  # Python 3.10 and earlier
 
+
 def get_version_from_pyproject():
     # Define the path to your pyproject.toml file
-    pyproject_path = os.path.join(os.path.dirname(__file__), "..", "..","pyproject.toml")
+    pyproject_path = os.path.join(
+        os.path.dirname(__file__), "..", "..", "pyproject.toml"
+    )
 
     with open(pyproject_path, "rb") as f:
         pyproject_data = tomllib.load(f)
@@ -28,6 +32,7 @@ def get_version_from_pyproject():
     # Access the version from the parsed TOML data
     version = pyproject_data["project"]["version"]
     return version
+
 
 class Albert:
     """
@@ -61,12 +66,14 @@ class Albert:
     ):
         self.bearer_token = bearer_token
         self.session = AlbertSession(base_url=base_url)
-        self.session.headers.update({
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": f"Bearer {self.bearer_token}",
-            "User-Agent": f"albert-SDK V.{get_version_from_pyproject()}",
-        })
+        self.session.headers.update(
+            {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": f"Bearer {self.bearer_token}",
+                "User-Agent": f"albert-SDK V.{get_version_from_pyproject()}",
+            }
+        )
 
     @property
     def projects(self) -> ProjectCollection:

@@ -9,6 +9,7 @@ from pydantic import Field, model_validator, PrivateAttr
 from albert.base_tagged_entity import BaseTaggedEntity
 from albert.base_entity import BaseAlbertModel
 from albert.entity.un_numbers import UnNumber
+import logging
 
 
 class InventoryCategory(Enum):
@@ -402,28 +403,24 @@ class InventoryCollection(BaseCollection):
             raise NotImplementedError("Registrations of formulas not yet implemented")
         tag_collection = TagCollection(session=self.session)
         all_tags = [
-            tag_collection.create(t) if t.id is None else t
-            for t in inventory_item.tags
+            tag_collection.create(t) if t.id is None else t for t in inventory_item.tags
         ]
         inventory_item.tags = all_tags
         if inventory_item.company and inventory_item.company.id is None:
             company_collection = CompanyCollection(session=self.session)
-            inventory_item.company = company_collection.create(
-                inventory_item.company
-            )
+            inventory_item.company = company_collection.create(inventory_item.company)
         # Check to see if there is a match on name + Company already
         if avoid_duplicates:
             existing = self.get_match_or_none(inventory_item=inventory_item)
             if isinstance(existing, InventoryItem):
-                print("Inventory Item Already Exists")
+                logging.warning("Inventory Item Already Exists")
                 return existing
 
         response = self.session.post(
             self.base_url,
-            json=inventory_item._to_create_api()  # This endpoint has some custom payload configurations so I don't use the normal model_dump() method
+            json=inventory_item._to_create_api(),  # This endpoint has some custom payload configurations so I don't use the normal model_dump() method
         )
         return InventoryItem(**response.json())
-
 
     def get_by_id(self, inventory_id: str) -> InventoryItem:
         """
@@ -519,16 +516,10 @@ class InventoryCollection(BaseCollection):
         if company:
             params["manufacturer"] = [c.name for c in company if isinstance(c, Company)]
         while True:
-            response = self.session.get(
-                self.base_url + "/search", params=params
-            )
-            
+            response = self.session.get(self.base_url + "/search", params=params)
+
             raw_inventory = response.json().get("Items", [])
-            if (
-                not raw_inventory
-                or raw_inventory == []
-                or len(raw_inventory) < limit
-            ):
+            if not raw_inventory or raw_inventory == [] or len(raw_inventory) < limit:
                 break
             for item in raw_inventory:
                 # Unfortunetly, list only returns partial objects, so I need to do a GET on each.
@@ -538,7 +529,6 @@ class InventoryCollection(BaseCollection):
                     else "INV" + item["albertId"]
                 )
                 yield self.get_by_id(this_aid)
-
 
     def list(
         self,
@@ -780,7 +770,6 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_url}/{updated_object.id}"
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
-            response = self.session.patch(
-                url, json=change_payload)
+            response = self.session.patch(url, json=change_payload)
         updated_inv = self.get_by_id(inventory_id=updated_object.id)
         return updated_inv
