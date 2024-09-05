@@ -7,7 +7,7 @@ import logging
 from enum import Enum
 
 
-class TagEntity(Enum):
+class TagEntity(str, Enum):
     """
     TagEntity is an enumeration of possible tag entities.
 
@@ -36,7 +36,7 @@ class Tag(BaseAlbertModel):
 
     Methods
     -------
-    from_str(tag: str) -> "Tag"
+    from_string(tag: str) -> "Tag"
         Creates a Tag object from a string.
     """
 
@@ -44,7 +44,7 @@ class Tag(BaseAlbertModel):
     id: Optional[str] = Field(None, alias="albertId")
 
     @classmethod
-    def from_str(cls, tag: str) -> "Tag":
+    def from_string(cls, tag: str) -> "Tag":
         """
         Creates a Tag object from a string.
 
@@ -143,7 +143,7 @@ class TagCollection(BaseCollection):
 
         Returns
         -------
-        Generator[Tag]
+        Generator
             A generator of Tag objects.
         """
         params = {"limit": limit, "orderBy": order_by.value}
@@ -187,7 +187,7 @@ class TagCollection(BaseCollection):
 
         Returns
         -------
-        Generator[Tag]
+        Generator
             A generator of Tag objects.
         """
         return self._list_generator(

@@ -10,7 +10,7 @@ import pandas as pd
 import copy
 
 
-class CellColor(Enum):
+class CellColor(str, Enum):
     WHITE = "RGB(255, 255, 255)"
     RED = "RGB(255, 161, 161)"
     GREEN = "RGB(130, 222, 198)"
@@ -20,7 +20,7 @@ class CellColor(Enum):
     PURPLE = "RGB(238, 215, 255)"
 
 
-class CellType(Enum):
+class CellType(str, Enum):
     INVENTORY = "INV"
     APP = "APP"
     BLANK = "BLK"
@@ -37,7 +37,7 @@ class CellType(Enum):
     EXTINV = "EXTINV"
 
 
-class DesignType(Enum):
+class DesignType(str, Enum):
     APPS = "apps"
     PRODUCTS = "products"
     RESULTS = "results"

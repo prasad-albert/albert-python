@@ -8,13 +8,13 @@ from albert.base_collection import BaseCollection, OrderBy
 from albert.entity.companies import Company, CompanyCollection
 
 
-class ProjectCategory(Enum):
+class ProjectCategory(str, Enum):
     DEVELOPMENT = "Development"
     RESEARCH = "Research"
     PRODUCTION = "Production"
 
 
-class ProjectClass(Enum):
+class ProjectClass(str, Enum):
     PUBLIC = "public"
     PRIVATE = "private"
     CONFIDENTIAL = "confidential"

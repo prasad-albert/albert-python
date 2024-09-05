@@ -149,7 +149,7 @@ class CompanyCollection(BaseCollection):
 
     def list(
         self, name: Union[str, List[str]] = None, exact_match=False
-    ) -> List[Company]:
+    ) -> Generator[Company, None, None]:
         """
         Lists company entities with optional filters.
 
@@ -164,8 +164,8 @@ class CompanyCollection(BaseCollection):
 
         Returns
         -------
-        List[Company]
-            A list of Company objects.
+        Geberator[Company]
+            A generator that yields Company.
         """
         return self._list_generator(name=name, exact_match=exact_match)
 
@@ -257,7 +257,9 @@ class CompanyCollection(BaseCollection):
             company = Company(name=company)
         if check_if_exists and self.company_exists(name=company.name):
             company = self.company_cache[company.name]
-            logging.warn(f"Company {company.name} already exists with id {company.id}.")
+            logging.warning(
+                f"Company {company.name} already exists with id {company.id}."
+            )
             return company
 
         payload = company.model_dump(by_alias=True, exclude_unset=True)

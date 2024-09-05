@@ -14,7 +14,7 @@ from albert.base_entity import BaseAlbertModel
 import logging
 
 
-class OrderBy(Enum):
+class OrderBy(str, Enum):
     DESCENDING = "desc"
     ASCENDING = "asc"
 

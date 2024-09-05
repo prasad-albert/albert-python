@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 
 
-class Status(Enum):
+class Status(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
 

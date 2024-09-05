@@ -11,7 +11,7 @@ from albert.base_collection import BaseCollection
 from albert.inventory import InventoryCategory
 
 
-class LotStatus(Enum):
+class LotStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     QUARANTINED = "quarantined"

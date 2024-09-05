@@ -6,7 +6,7 @@ from albert.base_entity import BaseAlbertModel
 from enum import Enum
 
 
-class UnitCategory(Enum):
+class UnitCategory(str, Enum):
     """
     UnitCategory is an enumeration of possible unit categories.
 
@@ -308,7 +308,7 @@ class UnitCollection(BaseCollection):
 
         Returns
         -------
-        Generator[Unit]
+        Generator
             A generator of Unit objects.
         """
         return self._list_generator(
@@ -348,7 +348,7 @@ class UnitCollection(BaseCollection):
 
         Returns
         -------
-        Generator[Unit]
+        Generator
             A generator of Unit objects.
         """
         params = {

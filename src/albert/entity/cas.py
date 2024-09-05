@@ -6,13 +6,13 @@ from albert.base_entity import BaseAlbertModel
 from enum import Enum
 
 
-class WGK(Enum):
+class WGK(str, Enum):
     ONE = "1"
     TWO = "2"
     THREE = "3"
 
 
-class CasCategory(Enum):
+class CasCategory(str, Enum):
     USER = "User"
     VERISK = "Verisk"
     TSCA_PUBLIC = "TSCA - Public"
@@ -83,7 +83,7 @@ class Cas(BaseAlbertModel):
         return self._status
 
     @classmethod
-    def from_str(cls, number: str) -> "Cas":
+    def from_string(cls, number: str) -> "Cas":
         """
         Creates a Cas object from a string.
 
@@ -158,7 +158,7 @@ class CasCollection(BaseCollection):
         if name:
             del self.cas_cache[name]
 
-    def _list_genertor(
+    def _list_generator(
         self,
         limit: int = 50,
         start_key: Optional[str] = None,
@@ -235,7 +235,7 @@ class CasCollection(BaseCollection):
         Generator
             A generator of Cas objects.
         """
-        return self._list_genertor(number=number, order_by=order_by, id=id)
+        return self._list_generator(number=number, order_by=order_by, id=id)
 
     def cas_exists(self, number: str, exact_match: bool = True) -> bool:
         """

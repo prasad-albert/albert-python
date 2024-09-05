@@ -32,7 +32,7 @@ class BaseTaggedEntity(BaseAlbertModel):
                 if isinstance(t, Tag):
                     new_tags.append(t)
                 elif isinstance(t, str):
-                    new_tags.append(Tag.from_str(t))
+                    new_tags.append(Tag.from_string(t))
                 else:
                     # We do not expect this else to be hit because tags should only be Tag or str
                     logging.warning(f"Unexpected value for Tag. {t} of type {type(t)}")

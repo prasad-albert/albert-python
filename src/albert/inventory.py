@@ -12,14 +12,14 @@ from albert.entity.un_numbers import UnNumber
 import logging
 
 
-class InventoryCategory(Enum):
+class InventoryCategory(str, Enum):
     RAW_MATERIALS = "RawMaterials"
     CONSUMABLES = "Consumables"
     EQUIPMENT = "Equipment"
     FORMULAS = "Formulas"
 
 
-class UnitCategory(Enum):
+class UnitCategory(str, Enum):
     MASS = "mass"
     VOLUME = "volume"
     LENGTH = "length"
@@ -27,7 +27,7 @@ class UnitCategory(Enum):
     UNITS = "units"
 
 
-class InventoryClass(Enum):
+class InventoryClass(str, Enum):
     SHARED = "shared"
     RESTRICTED = "restricted"
     CONFIDENTIAL = "confidential"
