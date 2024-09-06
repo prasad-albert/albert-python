@@ -1,5 +1,5 @@
 from typing import Optional, List, Union, Generator, Iterator
-from albert.collections.base_collection import BaseCollection, OrderBy
+from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.units import Unit, UnitCategory
 from albert.albert_session import AlbertSession
 

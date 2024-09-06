@@ -5,7 +5,7 @@ The Albert SDK provides a comprehensive and easy-to-use interface for interactin
 To install the Albert SDK, use pip:
 
 ```bash
-git clone xxxxxx [url here]
+git clone git@github.com:MoleculeEngineering/albert-sdk.git
 cd albert-sdk
 pip install ./
 ```
@@ -21,7 +21,7 @@ The SDK is built around two main concepts:
 Resource Models represent the data structure of individual resources. They encapsulate the attributes and behaviors of a single resource. For example, an `InventoryItem` has attributes like `name`, `description`, `category`, and `tags`.
 
 ### Resource Collections
-Resource Collections act as managers for Resource Models. They provide methods for performing CRUD operations (Create, Read, Update, Delete) on the resources. For example, the `InventoryCollection` class has methods like create, `get_by_id`, `list`, `update`, and `delete`. `list()` methods generally accept parameters to narrow the query to use it like a search.
+Resource Collections act as managers for Resource Models. They provide methods for performing CRUD operations (Create, Read, Update, Delete) on the resources. For example, the `InventoryCollection` class has methods like create, `get_by_id()`, `list()`, `update()`, and `delete()`. `list()` methods generally accept parameters to narrow the query to use it like a search.
 
 ## Usage
 ### Initialization
@@ -44,8 +44,8 @@ You can interact with inventory items using the InventoryCollection class. Here 
 
 ```python
 from albert.albert import Albert
-from albert.inventory import InventoryItem, InventoryCategory, UnitCategory
-from alber.base_collection import OrderBy
+from albert.resources.inventory import InventoryItem, InventoryCategory, UnitCategory
+from albert.collections.base import OrderBy
 
 client = Albert()
 
@@ -58,16 +58,16 @@ new_inventory = InventoryItem(
     tags=["safety", "equipment"],
     company="Company ABC"
 )
-created_inventory = client.inventory.create(new_inventory)
+created_inventory = client.inventory.create(inventory=new_inventory)
 
 # List all inventory items
-all_inventories = inventory_collection.list()
+all_inventories = client.inventory.list()
 
 # Fetch an inventory item by ID
 inventory_id = "INVE1"
-inventory_item = inventory_collection.get_by_id(inventory_id)
+inventory_item = client.inventory.get_by_id(inventory_id=inventory_id)
 
 # Search an inventory item by name
 inventory_id = "INVE1"
-inventory_item = inventory_collection.list(name = "Acetone", order = OrderBy.ACCENDING)
+inventory_item = inventory_collection.list(name="Acetone", order=OrderBy.ACCENDING)
 ```

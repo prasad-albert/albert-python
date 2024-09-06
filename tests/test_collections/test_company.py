@@ -1,6 +1,6 @@
 from albert.collections.companies import Company, CompanyCollection
 from albert.albert import Albert
-from albert.collections.base_collection import OrderBy
+from albert.collections.base import OrderBy
 import pytest
 from typing import Generator
 

@@ -1,5 +1,5 @@
 from typing import Optional, List, Union
-from albert.collections.base_collection import BaseCollection
+from albert.collections.base import BaseCollection
 from typing import Generator, Iterator
 import logging
 from albert.resources.companies import Company

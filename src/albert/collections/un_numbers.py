@@ -1,4 +1,4 @@
-from albert.collections.base_collection import BaseCollection
+from albert.collections.base import BaseCollection
 from typing import Optional, Generator, Union, Iterator
 from albert.resources.un_numbers import UnNumber
 from albert.albert_session import AlbertSession

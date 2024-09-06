@@ -2,7 +2,7 @@ from typing import List, Optional, Union, Generator, Iterator
 from albert.collections.tags import TagCollection
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
-from albert.collections.base_collection import BaseCollection, OrderBy
+from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.base import BaseAlbertModel
 import logging
 from albert.resources.inventory import InventoryItem, InventoryCategory

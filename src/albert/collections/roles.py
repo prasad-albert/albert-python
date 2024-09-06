@@ -1,4 +1,4 @@
-from albert.collections.base_collection import BaseCollection
+from albert.collections.base import BaseCollection
 from typing import List, Dict
 from albert.resources.roles import Role
 from albert.albert_session import AlbertSession

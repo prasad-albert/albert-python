@@ -1,7 +1,7 @@
 from albert.albert import Albert
 from albert.collections.cas import CasCollection
 from albert.resources.cas import Cas, CasCategory
-from albert.collections.base_collection import OrderBy
+from albert.collections.base import OrderBy
 import pytest
 from typing import Generator
 from albert.utils.error_utils.exceptions import AlbertAPIError

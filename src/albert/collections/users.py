@@ -1,4 +1,4 @@
-from albert.collections.base_collection import BaseCollection
+from albert.collections.base import BaseCollection
 from typing import Union, Generator, Optional, Iterator
 from albert.resources.users import User
 from albert.albert_session import AlbertSession

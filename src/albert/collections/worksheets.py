@@ -1,4 +1,4 @@
-from albert.collections.base_collection import BaseCollection
+from albert.collections.base import BaseCollection
 from albert.resources.worksheets import Worksheet
 from albert.albert_session import AlbertSession
 

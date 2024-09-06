@@ -1,5 +1,5 @@
 from typing import List
-from albert.collections.base_collection import BaseCollection
+from albert.collections.base import BaseCollection
 from albert.resources.lots import Lot
 from albert.albert_session import AlbertSession
 

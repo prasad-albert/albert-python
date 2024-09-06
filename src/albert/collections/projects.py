@@ -1,6 +1,6 @@
 from typing import Optional, List, Union, Generator, Iterator
 from albert.collections.tags import TagCollection
-from albert.collections.base_collection import BaseCollection, OrderBy
+from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.companies import CompanyCollection
 from albert.resources.projects import Project
 from albert.albert_session import AlbertSession

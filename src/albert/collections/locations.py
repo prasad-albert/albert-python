@@ -1,4 +1,4 @@
-from albert.collections.base_collection import BaseCollection
+from albert.collections.base import BaseCollection
 from typing import Union, List, Generator, Iterator
 from albert.resources.locations import Location
 from albert.albert_session import AlbertSession
