@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "albert"
-version = "0.0.0" # Leave this blank for dynamic versioning
+version = "0.0.0" # Adjust version in src/albert/__init__.py
 description = "A Python SDK for interacting with the Albert API"
 authors = ["Albert Invent <support@albertinvent.com>"]
 readme = "README.md"

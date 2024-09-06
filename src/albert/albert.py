@@ -1,6 +1,6 @@
 import os
 
-from albert import __version__
+import albert
 from albert.albert_session import AlbertSession
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
@@ -43,6 +43,7 @@ class Albert:
 
     def __init__(
         self,
+        *,
         base_url: str = "https://dev.albertinventdev.com",
         bearer_token: str = os.getenv("ALBERT_BEARER_TOKEN"),
     ):
@@ -53,7 +54,7 @@ class Albert:
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": f"Bearer {self.bearer_token}",
-                "User-Agent": f"albert-SDK V.{__version__}",
+                "User-Agent": f"albert-SDK V.{albert.__version__}",
             }
         )
 
