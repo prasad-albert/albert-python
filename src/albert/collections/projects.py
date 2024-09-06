@@ -112,7 +112,7 @@ class ProjectCollection(BaseCollection):
         """
         url = f"{self.base_url}/{project_id}"
 
-        response = self.session.patch(url, json=patch_data)
+        self.session.patch(url, json=patch_data)
 
         return True
 
@@ -132,7 +132,7 @@ class ProjectCollection(BaseCollection):
         """
         url = f"{self.base_url}/{project_id}"
 
-        response = self.session.delete(url)
+        self.session.delete(url)
 
         return True
 

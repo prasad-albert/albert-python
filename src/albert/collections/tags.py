@@ -164,9 +164,7 @@ class TagCollection(BaseCollection):
         for t in tags:
             found_tag = Tag(**t)
             self.tag_cache[found_tag.tag] = found_tag
-        if len(tags) > 0:
-            return True
-        return False
+        return len(tags) > 0
 
     def create(self, *, tag: str | Tag) -> Tag:
         """
@@ -250,7 +248,7 @@ class TagCollection(BaseCollection):
             True if the tag was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{tag_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         self._remove_from_cache_by_id(id=tag_id)
         return True
 
@@ -289,7 +287,7 @@ class TagCollection(BaseCollection):
                 "id": tag_id,
             }
         ]
-        response = self.session.patch(self.base_url, json=payload)
+        self.session.patch(self.base_url, json=payload)
         self._remove_from_cache_by_id(id=tag_id)
         updated_tag = self.get_by_id(tag_id=tag_id)
         self.tag_cache[updated_tag.tag] = updated_tag

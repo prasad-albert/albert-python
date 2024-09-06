@@ -1,5 +1,4 @@
 from collections.abc import Generator
-from typing import Union
 
 import pytest
 
@@ -7,7 +6,7 @@ from albert.albert import Albert
 from albert.collections.inventory import (
     InventoryCategory,
 )
-from albert.resources.inventory import CasAmount, InventoryCategory, InventoryItem
+from albert.resources.inventory import CasAmount, InventoryItem
 from albert.resources.units import UnitCategory
 
 
@@ -21,7 +20,7 @@ def _list_asserts(returned_list):
         if i == 100:
             break
         assert isinstance(u, InventoryItem)
-        assert isinstance(u.name, Union[str, None])
+        assert isinstance(u.name, str | None)
         assert isinstance(u.id, str)
 
 

@@ -150,10 +150,7 @@ class CompanyCollection(BaseCollection):
         if name in self.company_cache:
             return True
         companies = self.get_by_name(name=name, exact_match=exact_match)
-        if companies:
-            return True
-        else:
-            return False
+        return bool(companies)
 
     def get_by_id(self, *, id: str) -> Company | None:
         """
@@ -228,7 +225,7 @@ class CompanyCollection(BaseCollection):
 
     def delete(self, *, id: str) -> bool:
         url = f"{self.base_url}/{id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         self._remove_from_cache_by_id(id=id)
         return True
 
@@ -264,7 +261,7 @@ class CompanyCollection(BaseCollection):
                 }
             ]
         }
-        response = self.session.patch(endpoint, json=payload)
+        self.session.patch(endpoint, json=payload)
         updated_company = self.get_by_id(id=company_id)
         self._remove_from_cache_by_id(id=updated_company.id)
         self.company_cache[updated_company.name] = updated_company
@@ -279,7 +276,7 @@ class CompanyCollection(BaseCollection):
             existing=current_object, updated=updated_object
         )
         url = f"{self.base_url}/{updated_object.id}"
-        response = self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=patch_payload)
         updated_company = self.get_by_id(cas_id=updated_object.id)
         self._remove_from_cache_by_id(id=updated_object.id)
         self.company_cache[updated_company.id] = updated_company

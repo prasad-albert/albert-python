@@ -29,7 +29,7 @@ class LotCollection(BaseCollection):
 
     def delete(self, *, lot_id: str) -> bool:
         url = f"{self.base_url}/{lot_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
 
         return True
 

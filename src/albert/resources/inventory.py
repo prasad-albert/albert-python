@@ -262,10 +262,9 @@ class InventoryItem(BaseTaggedEntity):
         )
         if category == "Formulas":
             this_project = data.get("project_id")
-            if not this_project:
+            if not this_project and not data.get("albertId"):
                 # Some on platform formulas somehow don't have a project_id so check if its already on platform
-                if not data.get("albertId"):
-                    raise AttributeError("A project_id must be supplied for all formulas.")
+                raise AttributeError("A project_id must be supplied for all formulas.")
         return data
 
     def _to_create_api(self):
@@ -278,9 +277,8 @@ class InventoryItem(BaseTaggedEntity):
             A dictionary representation of the model suitable for API requests.
         """
         dumped_model = self.model_dump(by_alias=True, exclude_none=True)
-        if "Company" in dumped_model:
-            if "albertId" in dumped_model["Company"]:
-                dumped_model["Company"] = {"id": dumped_model["Company"]["albertId"]}
+        if "Company" in dumped_model and "albertId" in dumped_model["Company"]:
+            dumped_model["Company"] = {"id": dumped_model["Company"]["albertId"]}
         if "Tags" in dumped_model:
             new_tags = []
             for t in dumped_model["Tags"]:

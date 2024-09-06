@@ -254,7 +254,7 @@ class CasCollection(BaseCollection):
             True if the CAS was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{cas_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
 
         self._remove_from_cache_by_id(cas_id)
         return True
@@ -269,7 +269,7 @@ class CasCollection(BaseCollection):
         )
 
         url = f"{self.base_url}/{updated_object.id}"
-        response = self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=patch_payload)
 
         updated_cas = self.get_by_id(cas_id=updated_object.id)
         self._remove_from_cache_by_id(updated_object.id)

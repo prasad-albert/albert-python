@@ -100,7 +100,7 @@ class Design(BaseSessionModel):
             row = {}
             this_row_id = item["rowId"]
             row_type = item["type"]
-            row_name = item["name"]
+            # row_name = item["name"]
             this_index = item["rowUniqueId"]
             all_index.append(this_index)
             # "rowHeight": "0",# These are also available if I need them
@@ -213,8 +213,11 @@ class Sheet(BaseSessionModel):
 
     @model_validator(mode="after")
     def set_sheet_fields(self) -> "Sheet":
-        for i, d in enumerate(self.designs):
-            self.designs[i]._sheet = self
+        sheet_set_designs = []
+        for d in self.designs:
+            d._sheet = self
+            sheet_set_designs.append(d)
+        self.designs = sheet_set_designs
         self.app_design._sheet = self
         self.product_design._sheet = self
         self.result_design._sheet = self
@@ -274,7 +277,7 @@ class Sheet(BaseSessionModel):
 
         payload = [{"attribute": "name", "operation": "update", "newValue": new_name}]
 
-        response = self.session.patch(endpoint, json=payload)
+        self.session.patch(endpoint, json=payload)
 
         self.name = new_name
         return self
@@ -301,8 +304,10 @@ class Sheet(BaseSessionModel):
     def add_formulation_columns(
         self,
         formulation_names: list[str],
-        starting_position: dict = {"reference_id": "COL5", "position": "rightOf"},
+        starting_position: dict | None = None,
     ):
+        if starting_position is None:
+            starting_position = {"reference_id": "COL5", "position": "rightOf"}
         sheet_id = self.id
 
         endpoint = f"/api/v3/worksheet/sheet/{sheet_id}/columns"
@@ -336,8 +341,10 @@ class Sheet(BaseSessionModel):
         self,
         row_name: str,
         design: DesignType | str | None = DesignType.PRODUCTS,
-        position: dict = {"reference_id": "ROW1", "position": "above"},
+        position: dict | None = None,
     ):
+        if position is None:
+            position = {"reference_id": "ROW1", "position": "above"}
         endpoint = f"/api/v3/worksheet/design/{self._get_design_id(design=design)}/rows"
 
         payload = [
@@ -365,8 +372,10 @@ class Sheet(BaseSessionModel):
     def add_inventory_row(
         self,
         inventory_id: str,
-        position: dict = {"reference_id": "ROW1", "position": "above"},
+        position: dict | None = None,
     ):
+        if position is None:
+            position = {"reference_id": "ROW1", "position": "above"}
         design_id = self.product_design.id
         endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
 
@@ -527,11 +536,9 @@ class Sheet(BaseSessionModel):
                 failed.extend(cell_results[1])
         return (updated, failed)
 
-    def add_blank_column(
-        self,
-        name: str,
-        position: dict = {"reference_id": "COL5", "position": "rightOf"},
-    ):
+    def add_blank_column(self, name: str, position: dict = None):
+        if position is None:
+            position = {"reference_id": "COL5", "position": "rightOf"}
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [
             {
@@ -552,7 +559,7 @@ class Sheet(BaseSessionModel):
     def delete_column(self, column_id: str):
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [{"colId": column_id}]
-        response = self.session.delete(endpoint, json=payload)
+        self.session.delete(endpoint, json=payload)
 
         if self._grid is not None:  # if I have a grid loaded into memory, adjust it.
             self.grid = None
@@ -561,7 +568,7 @@ class Sheet(BaseSessionModel):
     def delete_row(self, row_id: str, design_id: str):
         endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
         payload = [{"rowId": row_id}]
-        response = self.session.delete(endpoint, json=payload)
+        self.session.delete(endpoint, json=payload)
 
         if self._grid is not None:  # if I have a grid loaded into memory, adjust it.
             self.grid = None
@@ -627,7 +634,7 @@ class Column(BaseSessionModel):
             ]
         }
 
-        response = self.session.patch(
+        self.session.patch(
             url=f"/api/v3/worksheet/sheet/{self.sheet.id}/columns",
             json=payload,
         )

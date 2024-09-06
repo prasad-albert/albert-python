@@ -17,7 +17,7 @@ class RoleCollection(BaseCollection):
         self.base_url = "/api/v3/acl/roles"
 
     # TODO: move from params to kwargs
-    def list(self, *, params: dict = {}) -> list[Role]:
+    def list(self, *, params: dict | None = None) -> list[Role]:
         """Lists the available Roles
 
         Parameters
@@ -30,6 +30,8 @@ class RoleCollection(BaseCollection):
         List
             List of available Roles
         """
+        if params is None:
+            params = {}
         response = self.session.get(self.base_url, params=params)
         role_data = response.json().get("Items", [])
         return [Role(**r) for r in role_data]

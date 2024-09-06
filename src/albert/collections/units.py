@@ -123,7 +123,7 @@ class UnitCollection(BaseCollection):
         original_unit = self.get_by_id(unit_id=unit_id)
         patch_data = self._generate_patch_payload(existing=original_unit, updated=updated_unit)
         url = f"{self.base_url}/{unit_id}"
-        response = self.session.patch(url, json=patch_data)
+        self.session.patch(url, json=patch_data)
         updated_unit = self.get_by_id(unit_id=unit_id)
         self._remove_from_cache_by_id(id=unit_id)
         self.unit_cache[updated_unit.name] = updated_unit
@@ -144,7 +144,7 @@ class UnitCollection(BaseCollection):
             True if the unit was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{unit_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         self._remove_from_cache_by_id(id=unit_id)
         return True
 
@@ -282,6 +282,4 @@ class UnitCollection(BaseCollection):
         bool
             True if the unit exists, False otherwise.
         """
-        if self.get_by_name(name=name, exact_match=exact_match):
-            return True
-        return False
+        return bool(self.get_by_name(name=name, exact_match=exact_match))

@@ -114,7 +114,7 @@ class UserCollection(BaseCollection):
         payload = {
             "name": user.name,
             "email": user.email,
-            "Roles": [{"id": r.tenant + "#" + r.id for r in user.roles}],
+            "Roles": [{"id": r.tenant + "#" + r.id} for r in user.roles],
             "Location": {"id": user.location.id},
             "userClass": "standard",
         }
@@ -126,5 +126,5 @@ class UserCollection(BaseCollection):
 
     def delete(self, *, user_id: str) -> bool:
         url = f"{self.base_url}/{user_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         return True

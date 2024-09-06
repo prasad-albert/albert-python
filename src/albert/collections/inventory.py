@@ -57,10 +57,7 @@ class InventoryCollection(BaseCollection):
             True if the inventory item exists, False otherwise.
         """
         hit = self.get_match_or_none(inventory_item)
-        if hit:
-            return True
-        else:
-            return False
+        return bool(hit)
 
     def get_match_or_none(self, *, inventory_item: InventoryItem) -> InventoryItem | None:
         """
@@ -162,7 +159,7 @@ class InventoryCollection(BaseCollection):
         """
         inventory_id = inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
         url = f"{self.base_url}/{inventory_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         return True
 
     def _list_generator(
@@ -473,6 +470,6 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_url}/{updated_object.id}"
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
-            response = self.session.patch(url, json=change_payload)
+            self.session.patch(url, json=change_payload)
         updated_inv = self.get_by_id(inventory_id=updated_object.id)
         return updated_inv

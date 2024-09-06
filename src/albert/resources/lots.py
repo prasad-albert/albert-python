@@ -21,7 +21,6 @@ class Lot(BaseAlbertModel):
     task_id: str | None = Field(default=None, alias="taskId")
 
     expiration_date: datetime | None = Field(None, alias="expirationDate")
-    notes: str | None = None
     manufacturer_lot_number: str | None = Field(None, alias="manufacturerLotNumber")
     # location: Optional[Location] = {} #need to make Location Class
     # storageLocation: Optional[StorageLocation] = {} #need to make StorageLocation Class
@@ -54,7 +53,7 @@ class Lot(BaseAlbertModel):
             if data["hasAttachments"] == "1":
                 self._has_attachments = True
             elif data["hasAttachments"] == "2":
-                self._has_attachments == False
+                self._has_attachments = False
             else:
                 logging.error(
                     f"Unknown response for hasAttachments given: {data['hasAttachments']}"
@@ -64,7 +63,7 @@ class Lot(BaseAlbertModel):
             if data["hasNotes"] == "1":
                 self._has_notes = True
             elif data["hasNotes"] == "2":
-                self._has_notes == False
+                self._has_notes = False
             else:
                 logging.error(f"Unknown response for hasNotes given: {data['hasNotes']}")
                 pass

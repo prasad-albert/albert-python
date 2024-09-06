@@ -81,5 +81,5 @@ class LocationCollection(BaseCollection):
             existing=current_object, updated=updated_object
         )
         url = f"{self.base_url}/{updated_object.id}"
-        response = self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=patch_payload)
         return self.get_by_id(id=updated_object.id)
