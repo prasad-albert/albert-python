@@ -1,11 +1,13 @@
+from collections.abc import Generator
+
+import pytest
+
 from albert.albert import Albert
 from albert.collections.inventory import (
     InventoryCategory,
 )
+from albert.resources.inventory import CasAmount, InventoryItem
 from albert.resources.units import UnitCategory
-from albert.resources.inventory import InventoryItem, InventoryCategory, CasAmount
-import pytest
-from typing import Generator, Union
 
 
 @pytest.fixture(scope="module")
@@ -18,7 +20,7 @@ def _list_asserts(returned_list):
         if i == 100:
             break
         assert isinstance(u, InventoryItem)
-        assert isinstance(u.name, Union[str, None])
+        assert isinstance(u.name, str | None)
         assert isinstance(u.id, str)
 
 
@@ -41,7 +43,7 @@ def test_advanced_inventory_list(client):
         assert "goggles" in x.name.lower()
 
 
-def test_get_by_id(client:Albert):
+def test_get_by_id(client: Albert):
     first_inv = next(client.inventory.list())
     inv_id = first_inv.id if first_inv.id.startswith("INV") else "INV" + first_inv.id
     get_by_id = client.inventory.get_by_id(inventory_id=inv_id)

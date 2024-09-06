@@ -1,7 +1,8 @@
-from typing import Optional
-from pydantic import Field
-from albert.resources.base import BaseAlbertModel
 from enum import Enum
+
+from pydantic import Field
+
+from albert.resources.base import BaseAlbertModel
 
 
 class TagEntity(str, Enum):
@@ -38,7 +39,7 @@ class Tag(BaseAlbertModel):
     """
 
     tag: str = Field(alias="name")
-    id: Optional[str] = Field(None, alias="albertId")
+    id: str | None = Field(None, alias="albertId")
 
     @classmethod
     def from_string(cls, tag: str) -> "Tag":

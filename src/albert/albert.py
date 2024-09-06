@@ -1,19 +1,19 @@
 import os
-from albert.albert_session import AlbertSession
-from albert.collections.projects import ProjectCollection
-from albert.collections.inventory import InventoryCollection
-from albert.collections.lots import LotCollection
-from albert.collections.companies import CompanyCollection
-from albert.collections.tags import TagCollection
-from albert.collections.units import UnitCollection
-from albert.collections.cas import CasCollection
-from albert.collections.un_numbers import UnNumberCollection
-from albert.collections.users import UserCollection
-from albert.collections.locations import LocationCollection
-from albert.collections.roles import RoleCollection
-from albert.collections.worksheets import WorksheetCollection
-from albert.__version__ import version
 
+import albert
+from albert.albert_session import AlbertSession
+from albert.collections.cas import CasCollection
+from albert.collections.companies import CompanyCollection
+from albert.collections.inventory import InventoryCollection
+from albert.collections.locations import LocationCollection
+from albert.collections.lots import LotCollection
+from albert.collections.projects import ProjectCollection
+from albert.collections.roles import RoleCollection
+from albert.collections.tags import TagCollection
+from albert.collections.un_numbers import UnNumberCollection
+from albert.collections.units import UnitCollection
+from albert.collections.users import UserCollection
+from albert.collections.worksheets import WorksheetCollection
 
 
 class Albert:
@@ -43,6 +43,7 @@ class Albert:
 
     def __init__(
         self,
+        *,
         base_url: str = "https://dev.albertinventdev.com",
         bearer_token: str = os.getenv("ALBERT_BEARER_TOKEN"),
     ):
@@ -53,7 +54,7 @@ class Albert:
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": f"Bearer {self.bearer_token}",
-                "User-Agent": f"albert-SDK V.{version}",
+                "User-Agent": f"albert-SDK V.{albert.__version__}",
             }
         )
 

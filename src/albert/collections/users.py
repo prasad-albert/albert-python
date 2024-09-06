@@ -1,11 +1,12 @@
-from albert.collections.base import BaseCollection
-from typing import Union, Generator, Optional, Iterator
-from albert.resources.users import User
+from collections.abc import Generator, Iterator
+
 from albert.albert_session import AlbertSession
+from albert.collections.base import BaseCollection
+from albert.resources.users import User
 
 
 class UserCollection(BaseCollection):
-    def __init__(self,*, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         """
         Initializes the UserCollection with the provided session.
 
@@ -20,10 +21,10 @@ class UserCollection(BaseCollection):
     def _list_generator(
         self,
         *,
-        text: Optional[str] = None,
-        search_name: Optional[bool] = None,
-        search_email: Optional[bool] = None,
-        offset: Optional[int] = None,
+        text: str | None = None,
+        search_name: bool | None = None,
+        search_email: bool | None = None,
+        offset: int | None = None,
         limit: int = 50,
     ) -> Generator[User, None, None]:
         params = {"limit": limit, "status": "active"}
@@ -54,9 +55,9 @@ class UserCollection(BaseCollection):
     def list(
         self,
         *,
-        text: Optional[str] = None,
-        search_name: Optional[bool] = None,
-        search_email: Optional[bool] = None,
+        text: str | None = None,
+        search_name: bool | None = None,
+        search_email: bool | None = None,
     ) -> Iterator[User]:
         """Lists Users based on criteria
 
@@ -74,11 +75,9 @@ class UserCollection(BaseCollection):
         Generator
             Generator of matching Users or None
         """
-        return self._list_generator(
-            text=text, search_email=search_email, search_name=search_name
-        )
+        return self._list_generator(text=text, search_email=search_email, search_name=search_name)
 
-    def get_by_id(self, *,user_id:str) -> Union[User, None]:
+    def get_by_id(self, *, user_id: str) -> User | None:
         """
         Retrieves a User by its ID.
 
@@ -97,7 +96,7 @@ class UserCollection(BaseCollection):
         user = User(**response.json())
         return user
 
-    def create(self, *,user: User) -> User:
+    def create(self, *, user: User) -> User:
         """Create a new User
 
         Parameters
@@ -115,7 +114,7 @@ class UserCollection(BaseCollection):
         payload = {
             "name": user.name,
             "email": user.email,
-            "Roles": [{"id": r.tenant + "#" + r.id for r in user.roles}],
+            "Roles": [{"id": r.tenant + "#" + r.id} for r in user.roles],
             "Location": {"id": user.location.id},
             "userClass": "standard",
         }
@@ -125,7 +124,7 @@ class UserCollection(BaseCollection):
         user = User(**response.json())
         return user
 
-    def delete(self, *,user_id:str) -> bool:
+    def delete(self, *, user_id: str) -> bool:
         url = f"{self.base_url}/{user_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         return True

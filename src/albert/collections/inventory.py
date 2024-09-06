@@ -1,12 +1,14 @@
-from typing import List, Optional, Union, Generator, Iterator
-from albert.collections.tags import TagCollection
+import logging
+from collections.abc import Generator, Iterator
+
+from albert.albert_session import AlbertSession
+from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
-from albert.collections.base import BaseCollection, OrderBy
+from albert.collections.tags import TagCollection
 from albert.resources.base import BaseAlbertModel
-import logging
-from albert.resources.inventory import InventoryItem, InventoryCategory
-from albert.albert_session import AlbertSession
+from albert.resources.inventory import InventoryCategory, InventoryItem
+
 
 class InventoryCollection(BaseCollection):
     """
@@ -36,7 +38,7 @@ class InventoryCollection(BaseCollection):
         Lists inventory items with optional filters.
     """
 
-    def __init__(self, *, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
         self.base_url = "/api/v3/inventories"
 
@@ -55,14 +57,9 @@ class InventoryCollection(BaseCollection):
             True if the inventory item exists, False otherwise.
         """
         hit = self.get_match_or_none(inventory_item)
-        if hit:
-            return True
-        else:
-            return False
+        return bool(hit)
 
-    def get_match_or_none(
-        self, *, inventory_item: InventoryItem
-    ) -> Union[InventoryItem, None]:
+    def get_match_or_none(self, *, inventory_item: InventoryItem) -> InventoryItem | None:
         """
         Get a matching inventory item or return None if not found.
 
@@ -80,7 +77,7 @@ class InventoryCollection(BaseCollection):
         return next(hits, None)
 
     def create(
-        self,*, inventory_item: InventoryItem, avoid_duplicates: bool = True
+        self, *, inventory_item: InventoryItem, avoid_duplicates: bool = True
     ) -> InventoryItem:
         """
         Create a new inventory item.
@@ -112,9 +109,7 @@ class InventoryCollection(BaseCollection):
         inventory_item.tags = all_tags
         if inventory_item.company and inventory_item.company.id is None:
             company_collection = CompanyCollection(session=self.session)
-            inventory_item.company = company_collection.create(
-                company=inventory_item.company
-            )
+            inventory_item.company = company_collection.create(company=inventory_item.company)
         # Check to see if there is a match on name + Company already
         if avoid_duplicates:
             existing = self.get_match_or_none(inventory_item=inventory_item)
@@ -128,7 +123,7 @@ class InventoryCollection(BaseCollection):
         )
         return InventoryItem(**response.json())
 
-    def get_by_id(self,*, inventory_id: str) -> InventoryItem:
+    def get_by_id(self, *, inventory_id: str) -> InventoryItem:
         """
         Retrieve an inventory item by its ID.
 
@@ -148,7 +143,7 @@ class InventoryCollection(BaseCollection):
         response = self.session.get(url)
         return InventoryItem(**response.json())
 
-    def delete(self,*, inventory_id: str) -> bool:
+    def delete(self, *, inventory_id: str) -> bool:
         """
         Delete an inventory item by its ID.
 
@@ -162,22 +157,20 @@ class InventoryCollection(BaseCollection):
         bool
             True if the item was deleted, False otherwise.
         """
-        inventory_id = (
-            inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
-        )
+        inventory_id = inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
         url = f"{self.base_url}/{inventory_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         return True
 
     def _list_generator(
         self,
         *,
         limit: int = 50,
-        start_key: Optional[str] = None,
-        name: Optional[str] = None,
-        cas: Optional[List[Cas]] = None,
-        company: Optional[List[Company]] = None,
-        category: Optional[List[InventoryCategory]] = None,
+        start_key: str | None = None,
+        name: str | None = None,
+        cas: list[Cas] | None = None,
+        company: list[Company] | None = None,
+        category: list[InventoryCategory] | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
     ) -> Generator[InventoryItem, None, None]:
         """
@@ -240,10 +233,10 @@ class InventoryCollection(BaseCollection):
     def list(
         self,
         *,
-        name: Optional[str] = None,
-        cas: Optional[List[Cas]] = None,
-        category: Optional[List[InventoryCategory]] = None,
-        company: Optional[List[Company]] = None,
+        name: str | None = None,
+        cas: list[Cas] | None = None,
+        category: list[InventoryCategory] | None = None,
+        company: list[Company] | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
     ) -> Iterator[InventoryItem]:
         """
@@ -280,7 +273,7 @@ class InventoryCollection(BaseCollection):
             name=name, cas=cas, category=category, order_by=order_by, company=company
         )
 
-    def _generate_patch_payload(self,*, existing:InventoryItem, updated:InventoryItem) -> dict:
+    def _generate_patch_payload(self, *, existing: InventoryItem, updated: InventoryItem) -> dict:
         """
         Generate the PATCH payload for updating an inventory item.
 
@@ -344,7 +337,6 @@ class InventoryCollection(BaseCollection):
                     )
                 elif attribute == "cas":
                     for c in new_value:
-
                         payload["data"].append(
                             {
                                 "operation": "add",
@@ -379,7 +371,7 @@ class InventoryCollection(BaseCollection):
                 elif attribute == "cas":
                     old_cas_map = {x.id: x for x in old_value}
                     for c in new_value:
-                        if c.id in old_cas_map.keys():
+                        if c.id in old_cas_map:
                             this_old_cas = old_cas_map[c.id]
                             if this_old_cas.max == c.max and this_old_cas.min == c.min:
                                 continue
@@ -414,7 +406,7 @@ class InventoryCollection(BaseCollection):
                                 }
                             )
                             # Check amounts of related CAS
-                    for cas_id in old_cas_map.keys():
+                    for cas_id in old_cas_map:
                         if cas_id not in [x.id for x in new_value]:
                             payload["data"].append(
                                 {
@@ -451,7 +443,7 @@ class InventoryCollection(BaseCollection):
                             )
         return payload
 
-    def update(self,*, updated_object: BaseAlbertModel) -> BaseAlbertModel:
+    def update(self, *, updated_object: BaseAlbertModel) -> BaseAlbertModel:
         """
         Update an inventory item.
 
@@ -478,6 +470,6 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_url}/{updated_object.id}"
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
-            response = self.session.patch(url, json=change_payload)
+            self.session.patch(url, json=change_payload)
         updated_inv = self.get_by_id(inventory_id=updated_object.id)
         return updated_inv

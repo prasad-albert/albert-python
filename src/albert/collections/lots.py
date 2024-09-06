@@ -1,23 +1,20 @@
-from typing import List
+from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection
 from albert.resources.lots import Lot
-from albert.albert_session import AlbertSession
+
 
 class LotCollection(BaseCollection):
-
-    def __init__(self, *, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
         self.base_url = "/api/v3/lots"
 
-    def create(self,*, lots: List[Lot]) -> List[Lot]:
+    def create(self, *, lots: list[Lot]) -> list[Lot]:
         payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
         response = self.session.post(self.base_url, json=payload)
 
-        return [
-            self._rehydrate_lot(lot) for lot in response.json().get("CreatedLots", [])
-        ]
+        return [self._rehydrate_lot(lot) for lot in response.json().get("CreatedLots", [])]
 
-    def get_by_id(self,*, lot_id: str) -> Lot:
+    def get_by_id(self, *, lot_id: str) -> Lot:
         url = f"{self.base_url}/{lot_id}"
         response = self.session.get(url)
 
@@ -30,9 +27,9 @@ class LotCollection(BaseCollection):
     #
     #     return lot_id
 
-    def delete(self,*, lot_id: str) -> bool:
+    def delete(self, *, lot_id: str) -> bool:
         url = f"{self.base_url}/{lot_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
 
         return True
 
@@ -40,7 +37,7 @@ class LotCollection(BaseCollection):
 # TODO: Add generator logic
 # def list(
 #     self,
-    # *,
+# *,
 #     limit: int = 50,
 #     start_key: Optional[str] = None,
 #     inventory_id: Optional[str] = None,

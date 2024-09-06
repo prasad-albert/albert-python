@@ -1,9 +1,11 @@
-from albert.collections.users import User, UserCollection
+from collections.abc import Generator
+
 import pytest
+
 from albert.albert import Albert
-from typing import Generator
-from albert.collections.roles import Role
 from albert.collections.locations import Location
+from albert.collections.roles import Role
+from albert.collections.users import User
 
 
 @pytest.fixture(scope="module")
@@ -47,7 +49,7 @@ def test_advanced_users_list(client):
     assert found
 
 
-def test_user_get(client:Albert):
+def test_user_get(client: Albert):
     first_hit = next(client.users.list(text="Lenore"))
     user_from_get = client.users.get_by_id(user_id=first_hit.id)
     assert user_from_get.id == first_hit.id

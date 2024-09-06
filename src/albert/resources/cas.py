@@ -1,7 +1,8 @@
 from enum import Enum
-from albert.resources.base import BaseAlbertModel
+
 from pydantic import Field
-from typing import Optional
+
+from albert.resources.base import BaseAlbertModel
 
 
 class WGK(str, Enum):
@@ -60,14 +61,14 @@ class Cas(BaseAlbertModel):
     """
 
     number: str
-    description: Optional[str] = None
-    notes: Optional[str] = None
-    category: Optional[CasCategory] = None  # To better define in docstrings
-    smiles: Optional[str] = Field(None, alias="casSmiles")
-    inchi_key: Optional[str] = Field(None, alias="inchiKey")
-    iupac_name: Optional[str] = Field(None, alias="iUpacName")
-    name: Optional[str] = None
-    id: Optional[str] = Field(None, alias="albertId")
+    description: str | None = None
+    notes: str | None = None
+    category: CasCategory | None = None  # To better define in docstrings
+    smiles: str | None = Field(None, alias="casSmiles")
+    inchi_key: str | None = Field(None, alias="inchiKey")
+    iupac_name: str | None = Field(None, alias="iUpacName")
+    name: str | None = None
+    id: str | None = Field(None, alias="albertId")
 
     # hazards: Optional[List[Hazard]] = None
     # wgk: Optional[WGK] = None

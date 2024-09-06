@@ -1,46 +1,63 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "albert"
+version = "0.0.0" # Adjust version in src/albert/__init__.py
 description = "A Python SDK for interacting with the Albert API"
-dynamic = ["version"]
+authors = ["Albert Invent <support@albertinvent.com>"]
 readme = "README.md"
-requires-python = ">=3.10"
-license = { text = """
-Copyright (C) 2010-2024 Albert Invent Corp <support@albertinvent.com>
-
-This file is part of Albert-SDK
-
-Albert-SDK cannot be copied and/or distributed without the express
-permission of Albert Invent Corp
-""" }
-authors = [
-    { name = "Albert Invent", email = "support@albertinvent.com" }
-]
+license = "LICENSE"
+packages = [{ include = "albert", from = "src" }]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent"
+    "Operating System :: OS Independent",
 ]
-keywords = ["SDK", "API", "Albert"]
-dependencies = [
-    "pandas==2.2.2",
-    "pydantic==2.8.2"
+keywords = ["SDK", "API", "Albert", "Python"]
+
+[tool.poetry.urls]
+Homepage = "https://github.com/MoleculeEngineering/albert-sdk"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "2.32.3"
+pandas = "2.2.2"
+pydantic = "2.8.2"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "0.6.4"
+pytest = "8.3.2"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+
+[tool.poetry-dynamic-versioning.from-file]
+source = "src/albert/__init__.py"
+pattern = '__version__ = "(.+)"'
+
+[tool.ruff]
+target-version = "py310"
+
+# In addition to the standard set of exclusions, omit the following:
+extend-exclude = [".circleci", ".vscode"]
+
+line-length = 99
+indent-width = 4
+
+[tool.ruff.lint]
+select = [
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
 ]
 
-[project.urls]
-Homepage = "https://github.com/MoleculeEngineering/albert_api"
-
-[project.optional-dependencies]
-test = [
-    "black==24.4.2",
-    "pytest==8.3.2"
-]
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-
-[tool.hatch.version]
-path = "src/albert/__version__.py"
+[tool.ruff.lint.isort]
+known-first-party = ["albert", "tests"]

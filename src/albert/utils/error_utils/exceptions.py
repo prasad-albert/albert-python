@@ -1,5 +1,6 @@
-import requests
 import logging
+
+import requests
 
 
 def handle_api_error(response: requests.Response) -> None:
@@ -8,7 +9,9 @@ def handle_api_error(response: requests.Response) -> None:
         response.raise_for_status()
     except requests.HTTPError as e:
         # Log the initial error with status code and reason
-        error_message = f"API request failed with status code {response.status_code}: {response.reason}"
+        error_message = (
+            f"API request failed with status code {response.status_code}: {response.reason}"
+        )
 
         try:
             # Attempt to extract additional error details from the response JSON, if available

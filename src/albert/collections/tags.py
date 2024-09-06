@@ -1,8 +1,9 @@
-from typing import List, Optional, Union, Generator, Iterator
-from albert.collections.base import BaseCollection, OrderBy
 import logging
-from albert.resources.tags import Tag
+from collections.abc import Generator, Iterator
+
 from albert.albert_session import AlbertSession
+from albert.collections.base import BaseCollection, OrderBy
+from albert.resources.tags import Tag
 
 
 class TagCollection(BaseCollection):
@@ -39,7 +40,7 @@ class TagCollection(BaseCollection):
         Renames an existing tag entity.
     """
 
-    def __init__(self,*, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         """
         Initializes the TagCollection with the provided session.
 
@@ -52,7 +53,7 @@ class TagCollection(BaseCollection):
         self.tag_cache = {}
         self.base_url = "/api/v3/tags"
 
-    def _remove_from_cache_by_id(self,*, id:str):
+    def _remove_from_cache_by_id(self, *, id: str):
         name = None
         for k, v in self.tag_cache.items():
             if v.id == id:
@@ -66,9 +67,9 @@ class TagCollection(BaseCollection):
         *,
         limit: int = 50,
         order_by: OrderBy = OrderBy.DESCENDING,
-        name: Union[str, List[str]] = None,
-        exact_match:bool=True,
-        start_key: Optional[str] = None,
+        name: str | list[str] = None,
+        exact_match: bool = True,
+        start_key: str | None = None,
     ) -> Generator[Tag, None, None]:
         """
         Lists tag entities with optional filters.
@@ -116,8 +117,8 @@ class TagCollection(BaseCollection):
         self,
         *,
         order_by: OrderBy = OrderBy.DESCENDING,
-        name: Union[str, List[str]] = None,
-        exact_match:bool=True,
+        name: str | list[str] = None,
+        exact_match: bool = True,
     ) -> Iterator[Tag]:
         """
         Lists tag entities with optional filters.
@@ -136,9 +137,7 @@ class TagCollection(BaseCollection):
         Generator
             A generator of Tag objects.
         """
-        return self._list_generator(
-            order_by=order_by, name=name, exact_match=exact_match
-        )
+        return self._list_generator(order_by=order_by, name=name, exact_match=exact_match)
 
     def tag_exists(self, *, tag: str, exact_match: bool = True) -> bool:
         """
@@ -165,11 +164,9 @@ class TagCollection(BaseCollection):
         for t in tags:
             found_tag = Tag(**t)
             self.tag_cache[found_tag.tag] = found_tag
-        if len(tags) > 0:
-            return True
-        return False
+        return len(tags) > 0
 
-    def create(self, *, tag: Union[str, Tag]) -> Tag:
+    def create(self, *, tag: str | Tag) -> Tag:
         """
         Creates a new tag entity if the given tag does not exist.
 
@@ -187,9 +184,7 @@ class TagCollection(BaseCollection):
             tag = Tag(tag=tag)
         if self.tag_exists(tag=tag.tag):
             existing_tag = self.tag_cache[tag.tag]
-            logging.warning(
-                f"Tag {existing_tag.tag} already exists with id {existing_tag.id}"
-            )
+            logging.warning(f"Tag {existing_tag.tag} already exists with id {existing_tag.id}")
             return existing_tag
         payload = {"name": tag.tag}
         response = self.session.post(self.base_url, json=payload)
@@ -197,7 +192,7 @@ class TagCollection(BaseCollection):
         self.tag_cache[tag.tag] = tag
         return tag
 
-    def get_by_id(self, *, tag_id: str) -> Union[Tag, None]:
+    def get_by_id(self, *, tag_id: str) -> Tag | None:
         """
         Retrieves a tag by its ID of None if not found.
 
@@ -217,7 +212,7 @@ class TagCollection(BaseCollection):
         self.tag_cache[tag.tag] = tag
         return tag
 
-    def get_by_tag(self, *, tag: str, exact_match: bool = True) -> Union[Tag, None]:
+    def get_by_tag(self, *, tag: str, exact_match: bool = True) -> Tag | None:
         """
         Retrieves a tag by its name of None if not found.
 
@@ -253,11 +248,11 @@ class TagCollection(BaseCollection):
             True if the tag was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{tag_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         self._remove_from_cache_by_id(id=tag_id)
         return True
 
-    def rename(self, *, old_name: str, new_name: str) -> Optional[Tag]:
+    def rename(self, *, old_name: str, new_name: str) -> Tag | None:
         """
         Renames an existing tag entity.
 
@@ -292,7 +287,7 @@ class TagCollection(BaseCollection):
                 "id": tag_id,
             }
         ]
-        response = self.session.patch(self.base_url, json=payload)
+        self.session.patch(self.base_url, json=payload)
         self._remove_from_cache_by_id(id=tag_id)
         updated_tag = self.get_by_id(tag_id=tag_id)
         self.tag_cache[updated_tag.tag] = updated_tag

@@ -1,8 +1,9 @@
-from typing import Optional, Union, Generator, Iterator
+from collections.abc import Generator, Iterator
+
+from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.base import BaseAlbertModel
 from albert.resources.cas import Cas
-from albert.albert_session import AlbertSession
 
 
 class CasCollection(BaseCollection):
@@ -41,7 +42,7 @@ class CasCollection(BaseCollection):
 
     _updatable_attributes = {"notes", "description", "smiles"}
 
-    def __init__(self, *, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         """
         Initializes the CasCollection with the provided session.
 
@@ -67,9 +68,9 @@ class CasCollection(BaseCollection):
         self,
         *,
         limit: int = 50,
-        start_key: Optional[str] = None,
-        number: Optional[str] = None,
-        id: Optional[str] = None,
+        start_key: str | None = None,
+        number: str | None = None,
+        id: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
     ) -> Generator[Cas, None, None]:
         """
@@ -117,8 +118,8 @@ class CasCollection(BaseCollection):
     def list(
         self,
         *,
-        number: Optional[str] = None,
-        id: Optional[str] = None,
+        number: str | None = None,
+        id: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
     ) -> Iterator[Cas]:
         """
@@ -167,7 +168,7 @@ class CasCollection(BaseCollection):
             return False
         return len(cas_list) > 0
 
-    def create(self, *, cas: Union[str, Cas]) -> Cas:
+    def create(self, *, cas: str | Cas) -> Cas:
         """
         Creates a new CAS entity.
 
@@ -213,7 +214,7 @@ class CasCollection(BaseCollection):
         self.cas_cache[cas.number] = cas
         return cas
 
-    def get_by_number(self, *, number: str, exact_match: bool = True) -> Optional[Cas]:
+    def get_by_number(self, *, number: str, exact_match: bool = True) -> Cas | None:
         """
         Retrieves a CAS by its number.
 
@@ -253,7 +254,7 @@ class CasCollection(BaseCollection):
             True if the CAS was successfully deleted, False otherwise.
         """
         url = f"{self.base_url}/{cas_id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
 
         self._remove_from_cache_by_id(cas_id)
         return True
@@ -268,7 +269,7 @@ class CasCollection(BaseCollection):
         )
 
         url = f"{self.base_url}/{updated_object.id}"
-        response = self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=patch_payload)
 
         updated_cas = self.get_by_id(cas_id=updated_object.id)
         self._remove_from_cache_by_id(updated_object.id)

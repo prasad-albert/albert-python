@@ -1,12 +1,14 @@
-from typing import List, Optional, Dict, Any
 from enum import Enum
-from albert.collections.tags import Tag
+from typing import Any
+
+from pydantic import Field, PrivateAttr, model_validator
+
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
-from pydantic import Field, model_validator, PrivateAttr
-from albert.resources.tagged_base import BaseTaggedEntity
-from albert.resources.base import BaseAlbertModel
+from albert.collections.tags import Tag
 from albert.collections.un_numbers import UnNumber
+from albert.resources.base import BaseAlbertModel
+from albert.resources.tagged_base import BaseTaggedEntity
 
 
 class InventoryCategory(str, Enum):
@@ -55,9 +57,7 @@ class CasAmount(BaseAlbertModel):
     # Define a private attribute to store the Cas object
     _cas: Cas = PrivateAttr(None)
 
-    def __init__(
-        self, cas: Cas = None, min: float = None, max: float = None, **data: Any
-    ):
+    def __init__(self, cas: Cas = None, min: float = None, max: float = None, **data: Any):
         """
         CasAmount is a Pydantic model representing an amount of a given Cas.
 
@@ -109,30 +109,26 @@ class InventoryItem(BaseTaggedEntity):
         The company associated with the inventory item.
     """
 
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
     category: InventoryCategory
     unit_category: UnitCategory = Field(default=None, alias="unitCategory")
-    inventory_class: Optional[InventoryClass] = Field(default=None, alias="class")
-    id: Optional[str] = Field(None, alias="albertId")
-    company: Optional[Company] = Field(default=None, alias="Company")
-    tags: Optional[List[Tag]] = Field(default=[], alias="Tags")
-    formula_id: Optional[str] = Field(default=None, alias="formulaId")
-    project_id: Optional[str] = Field(default=None, alias="parentId")
+    inventory_class: InventoryClass | None = Field(default=None, alias="class")
+    id: str | None = Field(None, alias="albertId")
+    company: Company | None = Field(default=None, alias="Company")
+    tags: list[Tag] | None = Field(default=[], alias="Tags")
+    formula_id: str | None = Field(default=None, alias="formulaId")
+    project_id: str | None = Field(default=None, alias="parentId")
     # alias: Optional[str] = Field(default=None)
-    cas: Optional[List[CasAmount]] = Field(default=None, alias="Cas")
-    _task_config: Optional[List[Dict]] = PrivateAttr(
+    cas: list[CasAmount] | None = Field(default=None, alias="Cas")
+    _task_config: list[dict] | None = PrivateAttr(
         default=None
     )  # Read only: comes from task generation
-    _symbols: Optional[List[Dict]] = PrivateAttr(
-        default=None
-    )  # read only: comes from attachments
-    _un_number: Optional[UnNumber] = PrivateAttr(
-        default=None
-    )  # Read only: Comes from attachments
-    _acls: Optional[List[Dict]] = PrivateAttr(default=None)  # read only
-    _metadata: Optional[List[Dict]] = PrivateAttr(default=None)  # read only
-    _minimum: Optional[List[Dict[str, Any]]] = PrivateAttr(default=None)  # To do
+    _symbols: list[dict] | None = PrivateAttr(default=None)  # read only: comes from attachments
+    _un_number: UnNumber | None = PrivateAttr(default=None)  # Read only: Comes from attachments
+    _acls: list[dict] | None = PrivateAttr(default=None)  # read only
+    _metadata: list[dict] | None = PrivateAttr(default=None)  # read only
+    _minimum: list[dict[str, Any]] | None = PrivateAttr(default=None)  # To do
 
     def __init__(self, **data: Any):
         """
@@ -177,7 +173,7 @@ class InventoryItem(BaseTaggedEntity):
 
     @model_validator(mode="before")
     @classmethod
-    def set_unit_category(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def set_unit_category(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
         Set the unit category based on the inventory category.
 
@@ -212,7 +208,7 @@ class InventoryItem(BaseTaggedEntity):
 
     @model_validator(mode="before")
     @classmethod
-    def convert_company(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+    def convert_company(cls, data: dict[str, Any]) -> dict[str, Any]:
         """
         Convert the company field to a Company object if it is a string.
 
@@ -226,7 +222,7 @@ class InventoryItem(BaseTaggedEntity):
         Dict[str, Any]
             Updated field values with company converted.
         """
-        company = data.get("company", data.get("Company", None))
+        company = data.get("company", data.get("Company"))
         if company:
             if isinstance(company, Company):
                 data["company"] = company
@@ -239,7 +235,7 @@ class InventoryItem(BaseTaggedEntity):
 
     @model_validator(mode="before")
     @classmethod
-    def ensure_formula_fields(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+    def ensure_formula_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
         """
         Ensure required fields are present for formulas.
 
@@ -258,20 +254,17 @@ class InventoryItem(BaseTaggedEntity):
         AttributeError
             If a required project_id is missing for formulas.
         """
-        category_raw = data.get("category", None)
+        category_raw = data.get("category")
         category = (
             category_raw
             if category_raw is None or isinstance(category_raw, str)
             else category_raw.value
         )
         if category == "Formulas":
-            this_project = data.get("project_id", None)
-            if not this_project:
+            this_project = data.get("project_id")
+            if not this_project and not data.get("albertId"):
                 # Some on platform formulas somehow don't have a project_id so check if its already on platform
-                if not data.get("albertId", None):
-                    raise AttributeError(
-                        "A project_id must be supplied for all formulas."
-                    )
+                raise AttributeError("A project_id must be supplied for all formulas.")
         return data
 
     def _to_create_api(self):
@@ -284,9 +277,8 @@ class InventoryItem(BaseTaggedEntity):
             A dictionary representation of the model suitable for API requests.
         """
         dumped_model = self.model_dump(by_alias=True, exclude_none=True)
-        if "Company" in dumped_model:
-            if "albertId" in dumped_model["Company"]:
-                dumped_model["Company"] = {"id": dumped_model["Company"]["albertId"]}
+        if "Company" in dumped_model and "albertId" in dumped_model["Company"]:
+            dumped_model["Company"] = {"id": dumped_model["Company"]["albertId"]}
         if "Tags" in dumped_model:
             new_tags = []
             for t in dumped_model["Tags"]:

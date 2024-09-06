@@ -1,9 +1,9 @@
-from typing import Optional, List, Union
-from albert.collections.base import BaseCollection
-from typing import Generator, Iterator
 import logging
-from albert.resources.companies import Company
+from collections.abc import Generator, Iterator
+
 from albert.albert_session import AlbertSession
+from albert.collections.base import BaseCollection
+from albert.resources.companies import Company
 
 
 class CompanyCollection(BaseCollection):
@@ -40,7 +40,7 @@ class CompanyCollection(BaseCollection):
 
     _updatable_attributes = {"name"}
 
-    def __init__(self, *, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         """
         Initializes the CompanyCollection with the provided session.
 
@@ -53,7 +53,7 @@ class CompanyCollection(BaseCollection):
         self.base_url = "/api/v3/companies"
         self.company_cache = {}
 
-    def _remove_from_cache_by_id(self, *, id:str):
+    def _remove_from_cache_by_id(self, *, id: str):
         name = None
         for k, v in self.company_cache.items():
             if v.id == id:
@@ -66,9 +66,9 @@ class CompanyCollection(BaseCollection):
         self,
         *,
         limit: int = 50,
-        name: Union[str, List[str]] = None,
-        exact_match:bool=True,
-        start_key: Optional[str] = None,
+        name: str | list[str] = None,
+        exact_match: bool = True,
+        start_key: str | None = None,
     ) -> Generator[Company, None, None]:
         """
         Lists company entities with optional filters.
@@ -89,7 +89,7 @@ class CompanyCollection(BaseCollection):
         """
         params = {"limit": limit, "dupDetection": "false"}
         if name:
-            params["name"] = name if isinstance(name, List) else [name]
+            params["name"] = name if isinstance(name, list) else [name]
             params["exactMatch"] = str(exact_match).lower()
         if start_key:
             params["startKey"] = start_key
@@ -110,7 +110,7 @@ class CompanyCollection(BaseCollection):
             params["startKey"] = start_key
 
     def list(
-        self, *, name: Union[str, List[str]] = None, exact_match:bool=False
+        self, *, name: str | list[str] = None, exact_match: bool = False
     ) -> Iterator[Company]:
         """
         Lists company entities with optional filters.
@@ -131,7 +131,7 @@ class CompanyCollection(BaseCollection):
         """
         return self._list_generator(name=name, exact_match=exact_match)
 
-    def company_exists(self, *, name:str, exact_match:bool=True) -> bool:
+    def company_exists(self, *, name: str, exact_match: bool = True) -> bool:
         """
         Checks if a company exists by its name.
 
@@ -150,12 +150,9 @@ class CompanyCollection(BaseCollection):
         if name in self.company_cache:
             return True
         companies = self.get_by_name(name=name, exact_match=exact_match)
-        if companies:
-            return True
-        else:
-            return False
+        return bool(companies)
 
-    def get_by_id(self, *, id:str) -> Union[Company, None]:
+    def get_by_id(self, *, id: str) -> Company | None:
         """
         Retrieves a company by its ID.
 
@@ -176,9 +173,7 @@ class CompanyCollection(BaseCollection):
         self.company_cache[found_company.name] = found_company
         return found_company
 
-    def get_by_name(
-        self, *, name: str, exact_match: bool = True
-    ) -> Union[Company, None]:
+    def get_by_name(self, *, name: str, exact_match: bool = True) -> Company | None:
         """
         Retrieves a company by its name.
 
@@ -199,9 +194,7 @@ class CompanyCollection(BaseCollection):
         found = self.list(name=name, exact_match=exact_match)
         return next(found, None)
 
-    def create(
-        self, *, company: Union[str, Company], check_if_exists: bool = True
-    ) -> Company:
+    def create(self, *, company: str | Company, check_if_exists: bool = True) -> Company:
         """
         Creates a new company entity.
 
@@ -221,9 +214,7 @@ class CompanyCollection(BaseCollection):
             company = Company(name=company)
         if check_if_exists and self.company_exists(name=company.name):
             company = self.company_cache[company.name]
-            logging.warning(
-                f"Company {company.name} already exists with id {company.id}."
-            )
+            logging.warning(f"Company {company.name} already exists with id {company.id}.")
             return company
 
         payload = company.model_dump(by_alias=True, exclude_unset=True)
@@ -234,11 +225,11 @@ class CompanyCollection(BaseCollection):
 
     def delete(self, *, id: str) -> bool:
         url = f"{self.base_url}/{id}"
-        response = self.session.delete(url)
+        self.session.delete(url)
         self._remove_from_cache_by_id(id=id)
         return True
 
-    def rename(self, *, old_name: str, new_name: str) -> Optional[Company]:
+    def rename(self, *, old_name: str, new_name: str) -> Company | None:
         """
         Renames an existing company entity.
 
@@ -270,7 +261,7 @@ class CompanyCollection(BaseCollection):
                 }
             ]
         }
-        response = self.session.patch(endpoint, json=payload)
+        self.session.patch(endpoint, json=payload)
         updated_company = self.get_by_id(id=company_id)
         self._remove_from_cache_by_id(id=updated_company.id)
         self.company_cache[updated_company.name] = updated_company
@@ -285,7 +276,7 @@ class CompanyCollection(BaseCollection):
             existing=current_object, updated=updated_object
         )
         url = f"{self.base_url}/{updated_object.id}"
-        response = self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=patch_payload)
         updated_company = self.get_by_id(cas_id=updated_object.id)
         self._remove_from_cache_by_id(id=updated_object.id)
         self.company_cache[updated_company.id] = updated_company

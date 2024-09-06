@@ -1,8 +1,10 @@
-from albert.collections.units import Unit, UnitCollection, UnitCategory
+from collections.abc import Generator
+
+import pytest
+
 from albert.albert import Albert
 from albert.collections.base import OrderBy
-import pytest
-from typing import Generator
+from albert.collections.units import Unit, UnitCategory
 
 
 @pytest.fixture(scope="module")
@@ -26,7 +28,7 @@ def test_simple_units_list(client):
     _list_asserts(simple_list)
 
 
-def test_advanced_units_list(client:Albert):
+def test_advanced_units_list(client: Albert):
     adv_list = client.units.list(
         name="gram",
         category=UnitCategory.MASS,
@@ -40,7 +42,7 @@ def test_advanced_units_list(client:Albert):
     _list_asserts(adv_list)
 
 
-def test_get_unit_by(client:Albert):
+def test_get_unit_by(client: Albert):
     unit = client.units.get_by_name(name="gram")
     assert isinstance(unit, Unit)
 
@@ -49,10 +51,10 @@ def test_get_unit_by(client:Albert):
     assert by_id.name.lower() == "gram"
 
 
-def test_unit_exists(client:Albert):
+def test_unit_exists(client: Albert):
     assert client.units.unit_exists(name="gram")
-    assert not client.units.unit_exists(name=
-        "totally nonesense unit no one should be using!662378393278932y5r"
+    assert not client.units.unit_exists(
+        name="totally nonesense unit no one should be using!662378393278932y5r"
     )
 
 

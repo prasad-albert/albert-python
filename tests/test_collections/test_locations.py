@@ -1,6 +1,7 @@
-from albert.collections.locations import Location
 import pytest
+
 from albert.albert import Albert
+from albert.collections.locations import Location
 
 
 @pytest.fixture(scope="module")

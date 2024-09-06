@@ -1,8 +1,9 @@
-from albert.collections.companies import Company, CompanyCollection
-from albert.albert import Albert
-from albert.collections.base import OrderBy
+from collections.abc import Generator
+
 import pytest
-from typing import Generator
+
+from albert.albert import Albert
+from albert.collections.companies import Company
 
 
 @pytest.fixture(scope="module")
