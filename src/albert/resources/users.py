@@ -1,4 +1,3 @@
-
 from pydantic import Field
 
 from albert.collections.locations import Location

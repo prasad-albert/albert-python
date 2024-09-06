@@ -1,4 +1,3 @@
-
 from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection
 from albert.resources.lots import Lot

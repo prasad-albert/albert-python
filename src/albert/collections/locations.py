@@ -49,9 +49,7 @@ class LocationCollection(BaseCollection):
                 break
             params["startKey"] = start_key
 
-    def list(
-        self, *, name: str | list[str] = None, country: str = None
-    ) -> Iterator[Location]:
+    def list(self, *, name: str | list[str] = None, country: str = None) -> Iterator[Location]:
         return self._list_generator(name=name, country=country)
 
     def get_by_id(self, *, id: str) -> Location | None:
