@@ -38,3 +38,32 @@ when running command such as `poetry build`.
 ### Publishing
 
 TODO
+
+## Code Style
+
+This project uses [ruff](https://docs.astral.sh/ruff/) for both formatting and linting.
+Formatting and linting rules are enforced in the CI process.
+
+To check (or fix) your code formatting, you can run the commands
+
+```
+# Check
+ruff format . --check
+
+# Fix
+ruff format .
+```
+
+To check (or fix) your code linting, you can run the commands
+
+```
+# Check
+ruff check .
+
+# Fix
+ruff check . --fix
+```
+
+For VSCode users, there is also base workspace settings defined in `.vscode/settings.json` that enable
+automatic fomatting and import sorting on-save using the
+[Ruff for VSCode](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) extension.
