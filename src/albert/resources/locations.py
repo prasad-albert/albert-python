@@ -1,4 +1,4 @@
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel
 from pydantic import Field
 from typing import Optional
 

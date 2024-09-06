@@ -1,6 +1,6 @@
 from pydantic import Field, PrivateAttr
 from datetime import datetime
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel
 from enum import Enum
 import logging
 from typing import Optional, Any

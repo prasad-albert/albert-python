@@ -1,7 +1,7 @@
 from typing import Optional, List, Any
 from pydantic import Field, PrivateAttr
 
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel
 from enum import Enum
 
 
@@ -133,5 +133,5 @@ class Unit(BaseAlbertModel):
             self._verified = bool(data["verified"])
 
     @property
-    def verified(self):
+    def verified(self)->bool:
         return self._verified

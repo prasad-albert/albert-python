@@ -1,9 +1,10 @@
 from enum import Enum
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseSessionModel
 from typing import Union, Optional, List, Dict, Any
 from pydantic import Field, PrivateAttr, model_validator
 from albert.resources.inventory import InventoryItem
-from albert.albert_session import AlbertSession
+
 import pandas as pd
 from copy import copy
 
@@ -82,11 +83,10 @@ class Formulations(BaseAlbertModel):
     name: str
 
 
-class Design(BaseAlbertModel):
+class Design(BaseSessionModel):
     state: Optional[DesignState] = Field({})
     id: str = Field(alias="albertId")
     design_type: DesignType = Field(alias="designType")
-    session: AlbertSession
     _grid: pd.DataFrame = PrivateAttr(default=None)
     _rows: List["Row"] = PrivateAttr(default=None)
     _columns: List["Column"] = PrivateAttr(default=None)
@@ -185,7 +185,7 @@ class Design(BaseAlbertModel):
         return self._rows
 
 
-class Sheet(BaseAlbertModel):
+class Sheet(BaseSessionModel):
     id: str = Field(alias="albertId")
     name: str
     formulations: Optional[List[Formulations]] = Field(None)
@@ -194,7 +194,6 @@ class Sheet(BaseAlbertModel):
     product_design: Design
     result_design: Design
     designs: List[Design] = Field(alias="Designs")
-    session: AlbertSession
     project_id: str
     _grid: pd.DataFrame = PrivateAttr(default=None)
 
@@ -271,7 +270,7 @@ class Sheet(BaseAlbertModel):
         elif design == DesignType.RESULTS:
             return self.result_design
 
-    def rename(self, new_name):
+    def rename(self, new_name:str):
         endpoint = f"/api/v3/worksheet/sheet/{self.id}"
 
         payload = [{"attribute": "name", "operation": "update", "newValue": new_name}]
@@ -346,7 +345,7 @@ class Sheet(BaseAlbertModel):
     def add_blank_row(
         self,
         row_name: str,
-        design=DesignType.PRODUCTS,
+        design:Union[DesignType, str, None]=DesignType.PRODUCTS,
         position: dict = {"reference_id": "ROW1", "position": "above"},
     ):
 
@@ -624,12 +623,11 @@ class Sheet(BaseAlbertModel):
             )
 
 
-class Column(BaseAlbertModel):
+class Column(BaseSessionModel):
     column_id: str = Field(alias="colId")
     formulas: List[Formulations] = Field(default=None, alias="Formulas")
     name: str
     type: CellType
-    session: AlbertSession
     sheet: Sheet
     _cells: Union[List[Cell], None] = PrivateAttr(default=None)
 
@@ -677,10 +675,9 @@ class Column(BaseAlbertModel):
         return self.sheet.update_cells(new_cells)
 
 
-class Row(BaseAlbertModel):
+class Row(BaseSessionModel):
     row_id: str = Field(alias="rowId")
     type: CellType
-    session: AlbertSession
     design: Design
     sheet: Sheet
     name: str

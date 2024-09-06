@@ -1,10 +1,11 @@
 from albert.collections.base_collection import BaseCollection
-from typing import List
+from typing import List, Dict
 from albert.resources.roles import Role
+from albert.albert_session import AlbertSession
 
 
 class RoleCollection(BaseCollection):
-    def __init__(self,*, session):
+    def __init__(self,*, session:AlbertSession):
         """
         Initializes the RoleCollection with the provided session.
 
@@ -16,7 +17,9 @@ class RoleCollection(BaseCollection):
         super().__init__(session=session)
         self.base_url = "/api/v3/acl/roles"
 
-    def list(self, *, params={}) -> List[Role]:
+
+    #TODO: move from params to kwargs
+    def list(self, *, params:Dict={}) -> List[Role]:
         """Lists the available Roles
 
         Parameters

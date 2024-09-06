@@ -4,8 +4,8 @@ from albert.collections.tags import Tag
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from pydantic import Field, model_validator, PrivateAttr
-from albert.resources.base_tagged_resource import BaseTaggedEntity
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.tagged_base import BaseTaggedEntity
+from albert.resources.base import BaseAlbertModel
 from albert.collections.un_numbers import UnNumber
 
 
@@ -107,8 +107,6 @@ class InventoryItem(BaseTaggedEntity):
         The Albert ID of the inventory item.
     company : Optional[Company]
         The company associated with the inventory item.
-    session : Optional[AlbertSession]
-        The session instance for API interactions.
     """
 
     name: Optional[str] = None

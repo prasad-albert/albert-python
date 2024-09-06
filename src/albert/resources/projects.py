@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, List, Any, Dict
 from pydantic import model_validator, Field
-from albert.resources.base_tagged_resource import BaseTaggedEntity
+from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.tags import Tag
 from albert.resources.companies import Company
 

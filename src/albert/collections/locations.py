@@ -1,12 +1,13 @@
 from albert.collections.base_collection import BaseCollection
-from typing import Union, List
+from typing import Union, List, Generator, Iterator
 from albert.resources.locations import Location
+from albert.albert_session import AlbertSession
 
 
 class LocationCollection(BaseCollection):
     _updatable_attributes = {"latitude", "longitude", "address", "country", "name"}
 
-    def __init__(self, *, session):
+    def __init__(self, *, session:AlbertSession):
         """
         Initializes the LocationCollection with the provided session.
 
@@ -25,7 +26,7 @@ class LocationCollection(BaseCollection):
         name: Union[List[str], str] = None,
         country: str = None,
         start_key: str = None,
-    ):
+    )->Generator[Location, None, None]:
         params = {"limit": limit}
         if name:
             params["name"] = name if isinstance(name, list) else [name]
@@ -47,10 +48,10 @@ class LocationCollection(BaseCollection):
                 break
             params["startKey"] = start_key
 
-    def list(self, *, name: Union[str, List[str]] = None, country: str = None):
+    def list(self, *, name: Union[str, List[str]] = None, country: str = None)->Iterator[Location]:
         return self._list_generator(name=name, country=country)
 
-    def get_by_id(self, *, id) -> Union[Location, None]:
+    def get_by_id(self, *, id:str) -> Union[Location, None]:
         """
         Retrieves a location by its ID.
 

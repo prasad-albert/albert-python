@@ -1,7 +1,8 @@
-from typing import Optional, Union, Generator
+from typing import Optional, Union, Generator, Iterator
 from albert.collections.base_collection import BaseCollection, OrderBy
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel
 from albert.resources.cas import Cas
+from albert.albert_session import AlbertSession
 
 
 class CasCollection(BaseCollection):
@@ -40,7 +41,7 @@ class CasCollection(BaseCollection):
 
     _updatable_attributes = {"notes", "description", "smiles"}
 
-    def __init__(self, *, session):
+    def __init__(self, *, session:AlbertSession):
         """
         Initializes the CasCollection with the provided session.
 
@@ -70,7 +71,7 @@ class CasCollection(BaseCollection):
         number: Optional[str] = None,
         id: Optional[str] = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Generator:
+    ) -> Generator[Cas, None, None]:
         """
         Lists CAS entities with optional filters.
 
@@ -119,7 +120,7 @@ class CasCollection(BaseCollection):
         number: Optional[str] = None,
         id: Optional[str] = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Generator:
+    ) -> Iterator[Cas]:
         """
         Lists CAS entities with optional filters.
 

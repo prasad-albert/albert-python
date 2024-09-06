@@ -1,11 +1,11 @@
 from typing import List
 from albert.collections.base_collection import BaseCollection
 from albert.resources.lots import Lot
-
+from albert.albert_session import AlbertSession
 
 class LotCollection(BaseCollection):
 
-    def __init__(self, *, session):
+    def __init__(self, *, session:AlbertSession):
         super().__init__(session=session)
         self.base_url = "/api/v3/lots"
 
@@ -23,7 +23,7 @@ class LotCollection(BaseCollection):
 
         return Lot(**response.json())
 
-    # def update(self, lot_id: str, patch_data: Dict[str, Any]) -> bool:
+    # def update(self, *, lot_id: str, patch_data: Dict[str, Any]) -> bool:
     #     """TODO: Follow pattern for other Update methods. This will need a custom Patch creation method."""
     #     url = f"{self.base_url}/{lot_id}"
     #     response = self.session.patch(url, json=patch_data)

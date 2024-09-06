@@ -1,6 +1,6 @@
 from albert.albert_session import AlbertSession
 from enum import Enum
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel
 
 
 class OrderBy(str, Enum):
@@ -14,7 +14,7 @@ class BaseCollection:
 
     Parameters
     ----------
-    session : Albert
+    session : AlbertSession
         The Albert API Session instance.
 
     """

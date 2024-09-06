@@ -1,12 +1,12 @@
-from typing import List, Optional, Union, Generator
+from typing import List, Optional, Union, Generator, Iterator
 from albert.collections.tags import TagCollection
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.base_collection import BaseCollection, OrderBy
-from albert.resources.base_resource import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel
 import logging
 from albert.resources.inventory import InventoryItem, InventoryCategory
-
+from albert.albert_session import AlbertSession
 
 class InventoryCollection(BaseCollection):
     """
@@ -36,7 +36,7 @@ class InventoryCollection(BaseCollection):
         Lists inventory items with optional filters.
     """
 
-    def __init__(self, *, session):
+    def __init__(self, *, session:AlbertSession):
         super().__init__(session=session)
         self.base_url = "/api/v3/inventories"
 
@@ -179,7 +179,7 @@ class InventoryCollection(BaseCollection):
         company: Optional[List[Company]] = None,
         category: Optional[List[InventoryCategory]] = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Generator:
+    ) -> Generator[InventoryItem, None, None]:
         """
         Generator for listing inventory items with optional filters.
 
@@ -245,7 +245,7 @@ class InventoryCollection(BaseCollection):
         category: Optional[List[InventoryCategory]] = None,
         company: Optional[List[Company]] = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Optional[Generator[InventoryItem, None, None]]:
+    ) -> Iterator[InventoryItem]:
         """
         List inventory items with optional filters.
 
@@ -280,7 +280,7 @@ class InventoryCollection(BaseCollection):
             name=name, cas=cas, category=category, order_by=order_by, company=company
         )
 
-    def _generate_patch_payload(self,*, existing, updated) -> dict:
+    def _generate_patch_payload(self,*, existing:InventoryItem, updated:InventoryItem) -> dict:
         """
         Generate the PATCH payload for updating an inventory item.
 

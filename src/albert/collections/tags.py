@@ -1,7 +1,8 @@
-from typing import List, Optional, Union, Generator
+from typing import List, Optional, Union, Generator, Iterator
 from albert.collections.base_collection import BaseCollection, OrderBy
 import logging
 from albert.resources.tags import Tag
+from albert.albert_session import AlbertSession
 
 
 class TagCollection(BaseCollection):
@@ -38,7 +39,7 @@ class TagCollection(BaseCollection):
         Renames an existing tag entity.
     """
 
-    def __init__(self,*, session):
+    def __init__(self,*, session:AlbertSession):
         """
         Initializes the TagCollection with the provided session.
 
@@ -51,7 +52,7 @@ class TagCollection(BaseCollection):
         self.tag_cache = {}
         self.base_url = "/api/v3/tags"
 
-    def _remove_from_cache_by_id(self,*, id):
+    def _remove_from_cache_by_id(self,*, id:str):
         name = None
         for k, v in self.tag_cache.items():
             if v.id == id:
@@ -66,9 +67,9 @@ class TagCollection(BaseCollection):
         limit: int = 50,
         order_by: OrderBy = OrderBy.DESCENDING,
         name: Union[str, List[str]] = None,
-        exact_match=True,
+        exact_match:bool=True,
         start_key: Optional[str] = None,
-    ) -> Generator:
+    ) -> Generator[Tag, None, None]:
         """
         Lists tag entities with optional filters.
 
@@ -116,8 +117,8 @@ class TagCollection(BaseCollection):
         *,
         order_by: OrderBy = OrderBy.DESCENDING,
         name: Union[str, List[str]] = None,
-        exact_match=True,
-    ) -> Generator:
+        exact_match:bool=True,
+    ) -> Iterator[Tag]:
         """
         Lists tag entities with optional filters.
 

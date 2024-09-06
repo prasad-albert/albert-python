@@ -1,7 +1,7 @@
-from typing import Optional, List, Union, Generator
+from typing import Optional, List, Union, Generator, Iterator
 from albert.collections.base_collection import BaseCollection, OrderBy
 from albert.resources.units import Unit, UnitCategory
-
+from albert.albert_session import AlbertSession
 
 class UnitCollection(BaseCollection):
     """
@@ -37,7 +37,7 @@ class UnitCollection(BaseCollection):
 
     _updatable_attributes = {"symbol", "synonyms", "category"}
 
-    def __init__(self, *, session):
+    def __init__(self, *, session:AlbertSession):
         """
         Initializes the UnitCollection with the provided session.
 
@@ -50,7 +50,7 @@ class UnitCollection(BaseCollection):
         self.base_url = "/api/v3/units"
         self.unit_cache = {}
 
-    def _remove_from_cache_by_id(self, *, id):
+    def _remove_from_cache_by_id(self, *, id:str):
         name = None
         for k, v in self.unit_cache.items():
             if v.id == id:
@@ -155,7 +155,7 @@ class UnitCollection(BaseCollection):
         order_by: OrderBy = OrderBy.DESCENDING,
         exact_match: bool = False,
         verified: Optional[bool] = None,
-    ) -> Generator[Unit, None, None]:
+    ) -> Iterator[Unit]:
         """
         Lists unit entities with optional filters.
 

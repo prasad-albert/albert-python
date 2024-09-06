@@ -12,25 +12,8 @@ from albert.collections.users import UserCollection
 from albert.collections.locations import LocationCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.worksheets import WorksheetCollection
-import re
+from albert.__version__ import version
 
-def get_version_from_pyproject():
-    # Define the path to your __version__.py file
-    version_file_path = os.path.join(
-        os.path.dirname(__file__), "..", "__version__.py"
-    )
-
-    # Read the content of __version__.py
-    with open(version_file_path, "r") as f:
-        version_file_content = f.read()
-
-    # Use a regular expression to find the version string
-    version_match = re.search(r'^version\s*=\s*["\']([^"\']+)["\']', version_file_content, re.MULTILINE)
-
-    if version_match:
-        return version_match.group(1)
-    else:
-        raise ValueError("Version not found in __version__.py")
 
 
 class Albert:
@@ -70,7 +53,7 @@ class Albert:
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": f"Bearer {self.bearer_token}",
-                "User-Agent": f"albert-SDK V.{get_version_from_pyproject()}",
+                "User-Agent": f"albert-SDK V.{version}",
             }
         )
 

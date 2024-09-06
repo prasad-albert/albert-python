@@ -1,8 +1,9 @@
 from typing import Optional, List, Union
 from albert.collections.base_collection import BaseCollection
-from typing import Generator
+from typing import Generator, Iterator
 import logging
 from albert.resources.companies import Company
+from albert.albert_session import AlbertSession
 
 
 class CompanyCollection(BaseCollection):
@@ -39,7 +40,7 @@ class CompanyCollection(BaseCollection):
 
     _updatable_attributes = {"name"}
 
-    def __init__(self, *, session):
+    def __init__(self, *, session:AlbertSession):
         """
         Initializes the CompanyCollection with the provided session.
 
@@ -52,7 +53,7 @@ class CompanyCollection(BaseCollection):
         self.base_url = "/api/v3/companies"
         self.company_cache = {}
 
-    def _remove_from_cache_by_id(self, *, id):
+    def _remove_from_cache_by_id(self, *, id:str):
         name = None
         for k, v in self.company_cache.items():
             if v.id == id:
@@ -66,9 +67,9 @@ class CompanyCollection(BaseCollection):
         *,
         limit: int = 50,
         name: Union[str, List[str]] = None,
-        exact_match=True,
+        exact_match:bool=True,
         start_key: Optional[str] = None,
-    ) -> Generator:
+    ) -> Generator[Company, None, None]:
         """
         Lists company entities with optional filters.
 
@@ -109,8 +110,8 @@ class CompanyCollection(BaseCollection):
             params["startKey"] = start_key
 
     def list(
-        self, *, name: Union[str, List[str]] = None, exact_match=False
-    ) -> Generator[Company, None, None]:
+        self, *, name: Union[str, List[str]] = None, exact_match:bool=False
+    ) -> Iterator[Company]:
         """
         Lists company entities with optional filters.
 
@@ -125,12 +126,12 @@ class CompanyCollection(BaseCollection):
 
         Returns
         -------
-        Generator[Company]
+        Iterator[Company]
             A generator that yields Company.
         """
         return self._list_generator(name=name, exact_match=exact_match)
 
-    def company_exists(self, *, name, exact_match=True) -> bool:
+    def company_exists(self, *, name:str, exact_match:bool=True) -> bool:
         """
         Checks if a company exists by its name.
 
@@ -154,7 +155,7 @@ class CompanyCollection(BaseCollection):
         else:
             return False
 
-    def get_by_id(self, *, id) -> Union[Company, None]:
+    def get_by_id(self, *, id:str) -> Union[Company, None]:
         """
         Retrieves a company by its ID.
 
@@ -195,7 +196,7 @@ class CompanyCollection(BaseCollection):
         """
         if name in self.company_cache:
             return self.company_cache[name]
-        found = self.list(name=name, exact_match=True)
+        found = self.list(name=name, exact_match=exact_match)
         return next(found, None)
 
     def create(

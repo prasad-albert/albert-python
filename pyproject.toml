@@ -43,4 +43,4 @@ where = ["src"]
 
 
 [tool.hatch.version]
-path = "src/__version__.py"
+path = "src/albert/__version__.py"

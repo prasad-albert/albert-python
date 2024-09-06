@@ -1,8 +1,9 @@
-from typing import Optional, List, Union, Generator
+from typing import Optional, List, Union, Generator, Iterator
 from albert.collections.tags import TagCollection
 from albert.collections.base_collection import BaseCollection, OrderBy
 from albert.collections.companies import CompanyCollection
 from albert.resources.projects import Project
+from albert.albert_session import AlbertSession
 
 
 class ProjectCollection(BaseCollection):
@@ -33,7 +34,7 @@ class ProjectCollection(BaseCollection):
         Lists projects with optional filters.
     """
 
-    def __init__(self,*, session):
+    def __init__(self,*, session:AlbertSession):
         """
         Initialize a ProjectCollection object.
 
@@ -143,7 +144,7 @@ class ProjectCollection(BaseCollection):
         category: Optional[str] = None,
         order_by: OrderBy = OrderBy.DESCENDING,
         exact_match: bool = False,
-    ) -> Generator:
+    ) -> Generator[Project, None, None]:
         """
         Generator for listing projects with optional filters.
 
@@ -198,7 +199,7 @@ class ProjectCollection(BaseCollection):
         category: Optional[str] = None,
         order_by: OrderBy = OrderBy.DESCENDING,
         exact_match: bool = False,
-    ) -> Generator:
+    ) -> Iterator[Project]:
         """
         List projects with optional filters.
 

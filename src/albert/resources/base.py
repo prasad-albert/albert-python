@@ -1,7 +1,9 @@
 from pydantic import BaseModel, Field, PrivateAttr, ConfigDict, model_validator
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, List
 from datetime import datetime
 from enum import Enum
+from albert.albert_session import AlbertSession
+import logging
 
 
 class Status(str, Enum):
@@ -53,3 +55,8 @@ class BaseAlbertModel(BaseModel):
     @property
     def status(self) -> Optional[Status]:
         return self._status
+
+class BaseSessionModel(BaseAlbertModel):
+
+    session: AlbertSession
+

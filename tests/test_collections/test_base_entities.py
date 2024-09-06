@@ -1,3 +1,3 @@
-from albert.resources.base_resource import BaseAlbertModel
-from albert.resources.base_tagged_resource import BaseTaggedEntity
+from albert.resources.base import BaseAlbertModel
+from albert.resources.tagged_base import BaseTaggedEntity
 from albert.collections.base_collection import BaseCollection, OrderBy
