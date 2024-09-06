@@ -1,37 +1,36 @@
 import os
 from albert.albert_session import AlbertSession
-from albert.projects import ProjectCollection
-from albert.inventory import InventoryCollection
-from albert.lots import LotCollection
-from albert.entity.companies import CompanyCollection
-from albert.entity.tags import TagCollection
-from albert.entity.units import UnitCollection
-from albert.entity.cas import CasCollection
-from albert.entity.un_numbers import UnNumberCollection
-from albert.entity.users import UserCollection
-from albert.entity.locations import LocationCollection
-from albert.entity.roles import RoleCollection
-from albert.worksheets import WorksheetCollection
-import albert
-
-try:
-    import tomllib  # Python 3.11 and later
-except ModuleNotFoundError:
-    import tomli as tomllib  # Python 3.10 and earlier
-
+from albert.collections.projects import ProjectCollection
+from albert.collections.inventory import InventoryCollection
+from albert.collections.lots import LotCollection
+from albert.collections.companies import CompanyCollection
+from albert.collections.tags import TagCollection
+from albert.collections.units import UnitCollection
+from albert.collections.cas import CasCollection
+from albert.collections.un_numbers import UnNumberCollection
+from albert.collections.users import UserCollection
+from albert.collections.locations import LocationCollection
+from albert.collections.roles import RoleCollection
+from albert.collections.worksheets import WorksheetCollection
+import re
 
 def get_version_from_pyproject():
-    # Define the path to your pyproject.toml file
-    pyproject_path = os.path.join(
-        os.path.dirname(__file__), "..", "..", "pyproject.toml"
+    # Define the path to your __version__.py file
+    version_file_path = os.path.join(
+        os.path.dirname(__file__), "..", "__version__.py"
     )
 
-    with open(pyproject_path, "rb") as f:
-        pyproject_data = tomllib.load(f)
+    # Read the content of __version__.py
+    with open(version_file_path, "r") as f:
+        version_file_content = f.read()
 
-    # Access the version from the parsed TOML data
-    version = pyproject_data["project"]["version"]
-    return version
+    # Use a regular expression to find the version string
+    version_match = re.search(r'^version\s*=\s*["\']([^"\']+)["\']', version_file_content, re.MULTILINE)
+
+    if version_match:
+        return version_match.group(1)
+    else:
+        raise ValueError("Version not found in __version__.py")
 
 
 class Albert:

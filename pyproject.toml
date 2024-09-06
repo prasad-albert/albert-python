@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "albert"
-version = "0.1.0"
 description = "A Python SDK for interacting with the Albert API"
+dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = """
@@ -13,7 +13,7 @@ Copyright (C) 2010-2024 Albert Invent Corp <support@albertinvent.com>
 
 This file is part of Albert-SDK
 
-Albert-SDK can not be copied and/or distributed without the express
+Albert-SDK cannot be copied and/or distributed without the express
 permission of Albert Invent Corp
 """ }
 authors = [
@@ -23,14 +23,14 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
 ]
-keywords = ["SDK", "API", "Albert"]  # Add any relevant keywords
+keywords = ["SDK", "API", "Albert"]
+dependencies = [
+    "pandas==2.2.2",
+    "pydantic==2.8.2"
+]
 
 [project.urls]
 Homepage = "https://github.com/MoleculeEngineering/albert_api"
-
-[project.dependencies]
-pandas = "==2.2.2"
-pydantic = "==2.8.2"
 
 [project.optional-dependencies]
 test = [
@@ -40,3 +40,7 @@ test = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+
+[tool.hatch.version]
+path = "src/__version__.py"
