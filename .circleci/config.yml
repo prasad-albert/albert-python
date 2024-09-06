@@ -19,7 +19,7 @@ jobs:
           command: |
             poetry run ruff check .
       - run:
-          name: Check Linting
+          name: Run pytest
           command: |
             poetry run pytest
 
