@@ -50,7 +50,7 @@ class Cell(BaseAlbertModel):
     name: str
     calculation: str = ""
     design_id: str
-    format: dict = Field(default={}, alias="cellFormat")
+    format: dict = Field(default_factory=dict, alias="cellFormat")
 
     @property
     def raw_value(self):
@@ -113,7 +113,9 @@ class Design(BaseSessionModel):
                 c["design_id"] = self.id
                 c["type"] = row_type
                 this_cell = Cell(**c)
-                row[f"{c["colId"]}#{c["name"]}"] = this_cell
+                col_id = c["colId"]
+                name = c["name"]
+                row[f"{col_id}{name}"] = this_cell
             all_rows.append(row)
         return pd.DataFrame.from_records(all_rows, index=all_index)
 

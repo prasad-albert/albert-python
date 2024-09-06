@@ -25,9 +25,8 @@ class Lot(BaseAlbertModel):
     # location: Optional[Location] = {} #need to make Location Class
     # storageLocation: Optional[StorageLocation] = {} #need to make StorageLocation Class
     pack_size: float | None = Field(None, alias="packSize")
-    initial_quantity: float = Field(
-        ge=0, alias="initialQuantity"
-    )  # requires the field to be greater than or equal to 0
+    # requires the field to be greater than or equal to 0
+    initial_quantity: float = Field(ge=0, alias="initialQuantity")
     cost: float = Field(ge=0)  # requires the field to be greater than or equal to 0
     # owner: Optional[List[Owner]] # Need to make Owner Class (User should work)
     lot_number: str | None = Field(None, alias="lotNumber")
@@ -43,9 +42,8 @@ class Lot(BaseAlbertModel):
     _barcode_id: str = PrivateAttr(default=None)
     _metadata: Any | None = PrivateAttr(None)
 
-    _status: LotStatus | None = PrivateAttr(
-        default=None
-    )  # because quarantined is an allowed Lot status, we need to extend the normal status
+    # because quarantined is an allowed Lot status, we need to extend the normal status
+    _status: LotStatus | None = PrivateAttr(default=None)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
