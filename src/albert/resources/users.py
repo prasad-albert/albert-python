@@ -1,15 +1,16 @@
-from albert.resources.base import BaseAlbertModel
-from typing import Union, Optional, List
+
 from pydantic import Field
+
 from albert.collections.locations import Location
 from albert.collections.roles import Role
+from albert.resources.base import BaseAlbertModel
 
 
 class User(BaseAlbertModel):
     """Represents a User on the Albert Platform"""
 
-    id: Optional[str] = Field(None, alias="albertId")
+    id: str | None = Field(None, alias="albertId")
     name: str
-    location: Optional[Union[str, Location]] = Field(None)
+    location: str | Location | None = Field(None)
     email: str = Field(default=None, alias="email")
-    roles: List[Role] = Field(default=[])
+    roles: list[Role] = Field(default=[])

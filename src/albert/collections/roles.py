@@ -1,11 +1,11 @@
-from albert.collections.base import BaseCollection
-from typing import List, Dict
-from albert.resources.roles import Role
+
 from albert.albert_session import AlbertSession
+from albert.collections.base import BaseCollection
+from albert.resources.roles import Role
 
 
 class RoleCollection(BaseCollection):
-    def __init__(self,*, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         """
         Initializes the RoleCollection with the provided session.
 
@@ -17,9 +17,8 @@ class RoleCollection(BaseCollection):
         super().__init__(session=session)
         self.base_url = "/api/v3/acl/roles"
 
-
-    #TODO: move from params to kwargs
-    def list(self, *, params:Dict={}) -> List[Role]:
+    # TODO: move from params to kwargs
+    def list(self, *, params: dict = {}) -> list[Role]:
         """Lists the available Roles
 
         Parameters

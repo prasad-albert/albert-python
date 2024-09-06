@@ -1,9 +1,10 @@
-from typing import Optional, List, Union, Generator, Iterator
-from albert.collections.tags import TagCollection
+from collections.abc import Generator, Iterator
+
+from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.companies import CompanyCollection
+from albert.collections.tags import TagCollection
 from albert.resources.projects import Project
-from albert.albert_session import AlbertSession
 
 
 class ProjectCollection(BaseCollection):
@@ -34,7 +35,7 @@ class ProjectCollection(BaseCollection):
         Lists projects with optional filters.
     """
 
-    def __init__(self,*, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         """
         Initialize a ProjectCollection object.
 
@@ -46,7 +47,7 @@ class ProjectCollection(BaseCollection):
         super().__init__(session=session)
         self.base_url = "/api/v3/projects"
 
-    def create(self,*, project: Project) -> Optional[Project]:
+    def create(self, *, project: Project) -> Project | None:
         """
         Create a new project.
 
@@ -74,7 +75,7 @@ class ProjectCollection(BaseCollection):
 
         return Project(**response.json())
 
-    def get_by_id(self,*, project_id: str) -> Project:
+    def get_by_id(self, *, project_id: str) -> Project:
         """
         Retrieve a project by its ID.
 
@@ -93,7 +94,7 @@ class ProjectCollection(BaseCollection):
 
         return Project(**response.json())
 
-    def update(self, *,project_id: str, patch_data: dict) -> bool:
+    def update(self, *, project_id: str, patch_data: dict) -> bool:
         """
         Update a project by its ID.
 
@@ -115,7 +116,7 @@ class ProjectCollection(BaseCollection):
 
         return True
 
-    def delete(self,*, project_id: str) -> bool:
+    def delete(self, *, project_id: str) -> bool:
         """
         Delete a project by its ID.
 
@@ -139,9 +140,9 @@ class ProjectCollection(BaseCollection):
         self,
         *,
         limit: int = 50,
-        start_key: Union[str,] = None,
-        name: Optional[List[str]] = None,
-        category: Optional[str] = None,
+        start_key: str = None,
+        name: list[str] | None = None,
+        category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
         exact_match: bool = False,
     ) -> Generator[Project, None, None]:
@@ -195,8 +196,8 @@ class ProjectCollection(BaseCollection):
     def list(
         self,
         *,
-        name: Optional[List[str]] = None,
-        category: Optional[str] = None,
+        name: list[str] | None = None,
+        category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
         exact_match: bool = False,
     ) -> Iterator[Project]:

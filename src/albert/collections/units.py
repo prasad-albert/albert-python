@@ -1,7 +1,10 @@
-from typing import Optional, List, Union, Generator, Iterator
+import builtins
+from collections.abc import Generator, Iterator
+
+from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.units import Unit, UnitCategory
-from albert.albert_session import AlbertSession
+
 
 class UnitCollection(BaseCollection):
     """
@@ -37,7 +40,7 @@ class UnitCollection(BaseCollection):
 
     _updatable_attributes = {"symbol", "synonyms", "category"}
 
-    def __init__(self, *, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         """
         Initializes the UnitCollection with the provided session.
 
@@ -50,7 +53,7 @@ class UnitCollection(BaseCollection):
         self.base_url = "/api/v3/units"
         self.unit_cache = {}
 
-    def _remove_from_cache_by_id(self, *, id:str):
+    def _remove_from_cache_by_id(self, *, id: str):
         name = None
         for k, v in self.unit_cache.items():
             if v.id == id:
@@ -73,7 +76,7 @@ class UnitCollection(BaseCollection):
         Unit
             The created Unit object.
         """
-        if self.unit_exists(name =unit.name):
+        if self.unit_exists(name=unit.name):
             return self.unit_cache[unit.name]
         response = self.session.post(
             self.base_url, json=unit.model_dump(by_alias=True, exclude_unset=True)
@@ -102,7 +105,7 @@ class UnitCollection(BaseCollection):
         self.unit_cache[this_unit.name] = this_unit
         return this_unit
 
-    def update(self,*, updated_unit: Unit) -> Unit:
+    def update(self, *, updated_unit: Unit) -> Unit:
         """
         Updates a unit entity by its ID.
 
@@ -118,9 +121,7 @@ class UnitCollection(BaseCollection):
         """
         unit_id = updated_unit.id
         original_unit = self.get_by_id(unit_id=unit_id)
-        patch_data = self._generate_patch_payload(
-            existing=original_unit, updated=updated_unit
-        )
+        patch_data = self._generate_patch_payload(existing=original_unit, updated=updated_unit)
         url = f"{self.base_url}/{unit_id}"
         response = self.session.patch(url, json=patch_data)
         updated_unit = self.get_by_id(unit_id=unit_id)
@@ -150,11 +151,11 @@ class UnitCollection(BaseCollection):
     def list(
         self,
         *,
-        name: Optional[Union[str, List[str]]] = None,
-        category: Optional[UnitCategory] = None,
+        name: str | list[str] | None = None,
+        category: UnitCategory | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
         exact_match: bool = False,
-        verified: Optional[bool] = None,
+        verified: bool | None = None,
     ) -> Iterator[Unit]:
         """
         Lists unit entities with optional filters.
@@ -190,12 +191,12 @@ class UnitCollection(BaseCollection):
     def _list_generator(
         self,
         *,
-        name: Optional[Union[str, List[str]]] = None,
-        category: Optional[UnitCategory] = None,
+        name: str | builtins.list[str] | None = None,
+        category: UnitCategory | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
         exact_match: bool = False,
-        start_key: Optional[str] = None,
-        verified: Optional[bool] = None,
+        start_key: str | None = None,
+        verified: bool | None = None,
     ) -> Generator[Unit, None, None]:
         """
         Lists unit entities with optional filters.
@@ -246,7 +247,7 @@ class UnitCollection(BaseCollection):
                 break
             params["startKey"] = start_key
 
-    def get_by_name(self, *, name: str, exact_match: bool = False) -> Optional[Unit]:
+    def get_by_name(self, *, name: str, exact_match: bool = False) -> Unit | None:
         """
         Retrieves a unit by its name.
 
@@ -265,7 +266,7 @@ class UnitCollection(BaseCollection):
         found = self.list(name=name, exact_match=exact_match)
         return next(found, None)
 
-    def unit_exists(self,*, name: str, exact_match: bool = True) -> bool:
+    def unit_exists(self, *, name: str, exact_match: bool = True) -> bool:
         """
         Checks if a unit exists by its name.
 

@@ -1,8 +1,10 @@
+import logging
+from typing import Any
+
+from pydantic import Field, model_validator
+
 from albert.resources.base import BaseAlbertModel
 from albert.resources.tags import Tag
-from pydantic import model_validator, Field
-from typing import Optional, List, Union, Any, Dict
-import logging
 
 
 class BaseTaggedEntity(BaseAlbertModel):
@@ -20,13 +22,13 @@ class BaseTaggedEntity(BaseAlbertModel):
     convert_tags(values: Dict[str, Any]) -> Dict[str, Any]
         Converts tag strings to Tag objects.
     """
-    tags: Optional[List[Union[Tag, str]]] = Field(None)
+
+    tags: list[Tag | str] | None = Field(None)
 
     @model_validator(mode="before")
     @classmethod
-    def convert_tags(cls, data: Dict[str, Any]) -> Dict[str, Any]:
-
-        tags = data.get("tags", None)
+    def convert_tags(cls, data: dict[str, Any]) -> dict[str, Any]:
+        tags = data.get("tags")
         if tags:
             new_tags = []
             for t in tags:

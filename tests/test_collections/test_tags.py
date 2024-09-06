@@ -1,8 +1,10 @@
-from albert.resources.tags import Tag
+from collections.abc import Generator
+
+import pytest
+
 from albert.albert import Albert
 from albert.collections.base import OrderBy
-import pytest
-from typing import Generator
+from albert.resources.tags import Tag
 
 
 @pytest.fixture(scope="module")
@@ -50,21 +52,19 @@ def test_get_tag_by(client):
     assert by_id.tag.lower() == "lenore's new tag!"
 
 
-def test_tag_exists(client:Albert):
+def test_tag_exists(client: Albert):
     assert client.tags.tag_exists(tag="Lenore's New Tag!")
-    assert not client.tags.tag_exists(tag=
-        "Nonesense tag no one would ever make!893y58932y58923"
-    )
+    assert not client.tags.tag_exists(tag="Nonesense tag no one would ever make!893y58932y58923")
 
 
-def test_tag_crud(client:Albert):
+def test_tag_crud(client: Albert):
     new_tag = Tag(tag="SDK test tag!")
     registered_tag = client.tags.create(tag=new_tag)
     assert isinstance(registered_tag, Tag)
     assert registered_tag.tag == "SDK test tag!"
     assert registered_tag.id is not None
 
-    updated_tag = client.tags.rename(old_name=registered_tag.tag,new_name= "SDK test tag UPDATED!")
+    updated_tag = client.tags.rename(old_name=registered_tag.tag, new_name="SDK test tag UPDATED!")
     assert isinstance(updated_tag, Tag)
     assert registered_tag.id == updated_tag.id
     assert updated_tag.tag == "SDK test tag UPDATED!"

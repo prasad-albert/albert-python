@@ -1,8 +1,9 @@
-from typing import Optional, List, Any
+from enum import Enum
+from typing import Any
+
 from pydantic import Field, PrivateAttr
 
 from albert.resources.base import BaseAlbertModel
-from enum import Enum
 
 
 class UnitCategory(str, Enum):
@@ -100,12 +101,12 @@ class Unit(BaseAlbertModel):
         The status of the unit.
     """
 
-    id: Optional[str] = Field(None, alias="albertId")
+    id: str | None = Field(None, alias="albertId")
     name: str
-    symbol: Optional[str] = Field(None)
-    synonyms: Optional[List[str]] = Field(default=[], alias="Synonyms")
-    category: Optional[UnitCategory] = Field(None)
-    _verified: Optional[bool] = PrivateAttr(default=False)
+    symbol: str | None = Field(None)
+    synonyms: list[str] | None = Field(default=[], alias="Synonyms")
+    category: UnitCategory | None = Field(None)
+    _verified: bool | None = PrivateAttr(default=False)
 
     def __init__(self, **data: Any):
         """
@@ -133,5 +134,5 @@ class Unit(BaseAlbertModel):
             self._verified = bool(data["verified"])
 
     @property
-    def verified(self)->bool:
+    def verified(self) -> bool:
         return self._verified

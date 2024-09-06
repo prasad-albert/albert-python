@@ -1,5 +1,6 @@
-from albert.resources.base import BaseAlbertModel
 from pydantic import Field
+
+from albert.resources.base import BaseAlbertModel
 
 
 class UnNumber(BaseAlbertModel):

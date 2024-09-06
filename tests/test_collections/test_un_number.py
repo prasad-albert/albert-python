@@ -1,8 +1,9 @@
-from albert.collections.un_numbers import UnNumber, UnNumberCollection
-from albert.albert import Albert
-from albert.collections.base import OrderBy
+from collections.abc import Generator
+
 import pytest
-from typing import Generator
+
+from albert.albert import Albert
+from albert.collections.un_numbers import UnNumber
 
 
 @pytest.fixture(scope="module")
@@ -32,7 +33,7 @@ def test_advanced_un_number_list(client):
     _list_asserts(adv_list)
 
 
-def test_un_number_get_by(client:Albert):
+def test_un_number_get_by(client: Albert):
     found_un = client.un_numbers.get_by_name(name="UN9006")
     assert isinstance(found_un, UnNumber)
     found_by_id = client.un_numbers.get_by_id(un_number_id=found_un.id)

@@ -1,14 +1,14 @@
+from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection
 from albert.resources.worksheets import Worksheet
-from albert.albert_session import AlbertSession
 
 
 class WorksheetCollection(BaseCollection):
-    def __init__(self,*, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
         self.base_url = "/api/v3/worksheet"
 
-    def get_by_project_id(self, *, project_id:str):
+    def get_by_project_id(self, *, project_id: str):
         params = {"type": "project", "id": "PRO" + project_id}
         response = self.session.get(self.base_url, params=params)
 

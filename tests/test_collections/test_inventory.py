@@ -1,11 +1,14 @@
+from collections.abc import Generator
+from typing import Union
+
+import pytest
+
 from albert.albert import Albert
 from albert.collections.inventory import (
     InventoryCategory,
 )
+from albert.resources.inventory import CasAmount, InventoryCategory, InventoryItem
 from albert.resources.units import UnitCategory
-from albert.resources.inventory import InventoryItem, InventoryCategory, CasAmount
-import pytest
-from typing import Generator, Union
 
 
 @pytest.fixture(scope="module")
@@ -41,7 +44,7 @@ def test_advanced_inventory_list(client):
         assert "goggles" in x.name.lower()
 
 
-def test_get_by_id(client:Albert):
+def test_get_by_id(client: Albert):
     first_inv = next(client.inventory.list())
     inv_id = first_inv.id if first_inv.id.startswith("INV") else "INV" + first_inv.id
     get_by_id = client.inventory.get_by_id(inventory_id=inv_id)

@@ -2,13 +2,10 @@
 The Albert SDK provides a comprehensive and easy-to-use interface for interacting with the Albert API. The SDK is designed to simplify the process of working with various resources such as inventories, projects, companies, and tags by providing Resource Collections and Resource Models.
 
 ## Installation
-To install the Albert SDK, use pip:
 
-```bash
-git clone git@github.com:MoleculeEngineering/albert-sdk.git
-cd albert-sdk
-pip install ./
-```
+TODO: Add installation instructions from PyPI once published
+
+For developers, please see the [contributing guide](CONTRIBUTING.mD) for local installation instructions.
 
 ## Overview
 The SDK is built around two main concepts:

@@ -1,7 +1,8 @@
-from typing import Optional, Any
-from albert.resources.base import BaseAlbertModel
+from typing import Any
+
 from pydantic import Field, PrivateAttr
-from albert.resources.base import Status
+
+from albert.resources.base import BaseAlbertModel, Status
 
 
 class Company(BaseAlbertModel):
@@ -17,8 +18,8 @@ class Company(BaseAlbertModel):
     """
 
     name: str
-    id: Optional[str] = Field(None, alias="albertId")
-    _distance: Optional[Status] = PrivateAttr(Status.ACTIVE)
+    id: str | None = Field(None, alias="albertId")
+    _distance: Status | None = PrivateAttr(Status.ACTIVE)
 
     def __init__(self, **data: Any):
         """
@@ -36,5 +37,5 @@ class Company(BaseAlbertModel):
             self._distance = float(data["distance"])
 
     @property
-    def distance(self)-> float:
+    def distance(self) -> float:
         return self._distance

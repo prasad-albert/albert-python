@@ -1,7 +1,8 @@
-from albert.collections.base import BaseCollection
-from typing import Optional, Generator, Union, Iterator
-from albert.resources.un_numbers import UnNumber
+from collections.abc import Generator, Iterator
+
 from albert.albert_session import AlbertSession
+from albert.collections.base import BaseCollection
+from albert.resources.un_numbers import UnNumber
 
 
 class UnNumberCollection(BaseCollection):
@@ -13,7 +14,7 @@ class UnNumberCollection(BaseCollection):
     Creating UN Numbers is not supported via the SDK, as UN Numbers are highly controlled by Albert.
     """
 
-    def __init__(self,*, session:AlbertSession):
+    def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
         self.base_url = "/api/v3/unnumbers"
 
@@ -23,7 +24,7 @@ class UnNumberCollection(BaseCollection):
         """
         raise NotImplementedError()
 
-    def get_by_id(self, *, un_number_id: str) -> Union[UnNumber, None]:
+    def get_by_id(self, *, un_number_id: str) -> UnNumber | None:
         url = f"{self.base_url}/{un_number_id}"
         response = self.session.get(url)
         return UnNumber(**response.json())
@@ -32,8 +33,8 @@ class UnNumberCollection(BaseCollection):
         self,
         *,
         name: str = None,
-        start_key: Optional[str] = None,
-        exact_match: Optional[bool] = None,
+        start_key: str | None = None,
+        exact_match: bool | None = None,
     ) -> Generator[UnNumber, None, None]:
         params = {}
         if start_key:
@@ -58,7 +59,7 @@ class UnNumberCollection(BaseCollection):
         self,
         *,
         name: str = None,
-        exact_match: Optional[bool] = None,
+        exact_match: bool | None = None,
     ) -> Iterator[UnNumber]:
         return self._list_generator(name=name, exact_match=exact_match)
 

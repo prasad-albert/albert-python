@@ -1,9 +1,11 @@
 from enum import Enum
-from typing import Optional, List, Any, Dict
-from pydantic import model_validator, Field
+from typing import Any
+
+from pydantic import Field, model_validator
+
+from albert.resources.companies import Company
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.tags import Tag
-from albert.resources.companies import Company
 
 
 class ProjectCategory(str, Enum):
@@ -43,14 +45,14 @@ class Project(BaseTaggedEntity):
     name: str
     description: str
     category: ProjectCategory
-    project_class: Optional[ProjectClass] = None
-    tags: List[Tag] = []
-    id: Optional[str] = Field(None, alias="projectId")
-    company: Optional[Company] = None
+    project_class: ProjectClass | None = None
+    tags: list[Tag] = []
+    id: str | None = Field(None, alias="projectId")
+    company: Company | None = None
 
     @model_validator(mode="before")
     @classmethod
-    def set_default_class(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def set_default_class(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
         Set the default project class to PUBLIC if none is provided.
 

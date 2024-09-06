@@ -1,10 +1,12 @@
-from albert.resources.base import BaseAlbertModel
+from typing import Any
+
 from pydantic import Field
-from typing import Any, List, Optional
+
+from albert.resources.base import BaseAlbertModel
 
 
 class Role(BaseAlbertModel):
     id: str = Field(alias="albertId")
     name: str
-    policies: Optional[List[Any]] = Field(None)
+    policies: list[Any] | None = Field(None)
     tenant: str
