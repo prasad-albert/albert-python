@@ -57,7 +57,13 @@ class CasAmount(BaseAlbertModel):
     # Define a private attribute to store the Cas object
     _cas: Cas = PrivateAttr(None)
 
-    def __init__(self, cas: Cas = None, min: float = None, max: float = None, **data: Any):
+    def __init__(
+        self,
+        cas: Cas | None = None,
+        min: float | None = None,
+        max: float | None = None,
+        **data: Any,
+    ):
         """
         CasAmount is a Pydantic model representing an amount of a given Cas.
 
@@ -116,7 +122,7 @@ class InventoryItem(BaseTaggedEntity):
     inventory_class: InventoryClass | None = Field(default=None, alias="class")
     id: str | None = Field(None, alias="albertId")
     company: Company | None = Field(default=None, alias="Company")
-    tags: list[Tag] | None = Field(default=[], alias="Tags")
+    tags: list[Tag] | None = Field(default_factory=list, alias="Tags")
     formula_id: str | None = Field(default=None, alias="formulaId")
     project_id: str | None = Field(default=None, alias="parentId")
     # alias: Optional[str] = Field(default=None)

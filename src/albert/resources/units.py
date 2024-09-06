@@ -104,7 +104,7 @@ class Unit(BaseAlbertModel):
     id: str | None = Field(None, alias="albertId")
     name: str
     symbol: str | None = Field(None)
-    synonyms: list[str] | None = Field(default=[], alias="Synonyms")
+    synonyms: list[str] | None = Field(default_factory=list, alias="Synonyms")
     category: UnitCategory | None = Field(None)
     _verified: bool | None = PrivateAttr(default=False)
 

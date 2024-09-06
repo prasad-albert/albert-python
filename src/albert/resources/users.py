@@ -12,4 +12,4 @@ class User(BaseAlbertModel):
     name: str
     location: str | Location | None = Field(None)
     email: str = Field(default=None, alias="email")
-    roles: list[Role] = Field(default=[])
+    roles: list[Role] = Field(default_factory=list)

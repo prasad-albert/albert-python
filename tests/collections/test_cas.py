@@ -5,7 +5,7 @@ import pytest
 from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.cas import Cas
-from albert.utils.error_utils.exceptions import AlbertAPIError
+from albert.utils.exceptions import AlbertAPIError
 
 # Developer Note: We need more test here once we better uunderstand this collection's behavior.
 # The startKey / "lastKey" appear broken :(
