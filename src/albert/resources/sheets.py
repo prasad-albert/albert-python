@@ -1,6 +1,6 @@
-from copy import copy
+import copy
 from enum import Enum
-from typing import Any
+from typing import Any, Union
 
 import pandas as pd
 from pydantic import Field, PrivateAttr, model_validator
@@ -87,10 +87,10 @@ class Design(BaseSessionModel):
     state: DesignState | None = Field({})
     id: str = Field(alias="albertId")
     design_type: DesignType = Field(alias="designType")
-    _grid: pd.DataFrame = PrivateAttr(default=None)
-    _rows: list["Row"] = PrivateAttr(default=None)
-    _columns: list["Column"] = PrivateAttr(default=None)
-    _sheet: "Sheet" = PrivateAttr(default=None)
+    _grid: pd.DataFrame | None = PrivateAttr(default=None)
+    _rows: list["Row"] | None = PrivateAttr(default=None)
+    _columns: list["Column"] | None = PrivateAttr(default=None)
+    _sheet: Union["Sheet", None] = PrivateAttr(default=None)  # ruff: noqa
 
     def _grid_to_cell_df(self, grid_response):
         all_rows = []

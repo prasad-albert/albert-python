@@ -59,4 +59,11 @@ class BaseAlbertModel(BaseModel):
 
 
 class BaseSessionModel(BaseAlbertModel):
-    session: AlbertSession
+    session: AlbertSession | None = Field(
+        default=None,
+        description=(
+            "Albert session for accessing the Albert API. "
+            "The session is included as an optional field to allow for models of this type "
+            "to be created independently from calls to the API."
+        ),
+    )

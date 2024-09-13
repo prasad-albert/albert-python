@@ -1,6 +1,6 @@
 import requests
 
-from albert.utils.error_utils.exceptions import handle_api_error
+from albert.utils.exceptions import handle_api_error
 
 
 class AlbertSession(requests.Session):

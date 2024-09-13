@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field, NonNegativeFloat, PrivateAttr
 
 from albert.collections.inventory import InventoryCategory
 from albert.resources.base import BaseAlbertModel
@@ -26,21 +26,22 @@ class Lot(BaseAlbertModel):
     # storageLocation: Optional[StorageLocation] = {} #need to make StorageLocation Class
     pack_size: float | None = Field(None, alias="packSize")
     # requires the field to be greater than or equal to 0
-    initial_quantity: float = Field(ge=0, alias="initialQuantity")
-    cost: float = Field(ge=0)  # requires the field to be greater than or equal to 0
+    initial_quantity: NonNegativeFloat = Field(alias="initialQuantity")
+    cost: NonNegativeFloat  # requires the field to be greater than or equal to 0
     # owner: Optional[List[Owner]] # Need to make Owner Class (User should work)
     lot_number: str | None = Field(None, alias="lotNumber")
     inventory_on_hand: float = Field(ge=0, alias="inventoryOnHand")
     task_completion_date: datetime | None = Field(None, alias="taskCompletionDate")
     external_barcode_id: str | None = Field(None, alias="externalBarcodeId")
-    _has_notes: bool = PrivateAttr(default=None)
-    _notes: str = PrivateAttr(default=None)
-    _has_attachments: bool = PrivateAttr(default=None)
-    _parent_name: str = PrivateAttr(default=None)
-    _parent_unit: str = PrivateAttr(default=None)
-    _parent_category: InventoryCategory = PrivateAttr(default=None)
-    _barcode_id: str = PrivateAttr(default=None)
-    _metadata: Any | None = PrivateAttr(None)
+
+    _has_notes: bool | None = PrivateAttr(default=None)
+    _notes: str | None = PrivateAttr(default=None)
+    _has_attachments: bool | None = PrivateAttr(default=None)
+    _parent_name: str | None = PrivateAttr(default=None)
+    _parent_unit: str | None = PrivateAttr(default=None)
+    _parent_category: InventoryCategory | None = PrivateAttr(default=None)
+    _barcode_id: str | None = PrivateAttr(default=None)
+    _metadata: Any | None = PrivateAttr(default=None)
 
     # because quarantined is an allowed Lot status, we need to extend the normal status
     _status: LotStatus | None = PrivateAttr(default=None)

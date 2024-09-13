@@ -110,7 +110,10 @@ class CompanyCollection(BaseCollection):
             params["startKey"] = start_key
 
     def list(
-        self, *, name: str | list[str] = None, exact_match: bool = False
+        self,
+        *,
+        name: str | list[str] = None,
+        exact_match: bool = False,
     ) -> Iterator[Company]:
         """
         Lists company entities with optional filters.

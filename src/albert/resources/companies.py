@@ -19,7 +19,7 @@ class Company(BaseAlbertModel):
 
     name: str
     id: str | None = Field(None, alias="albertId")
-    _distance: Status | None = PrivateAttr(Status.ACTIVE)
+    _distance: Status | None = PrivateAttr(default=Status.ACTIVE)
 
     def __init__(self, **data: Any):
         """
