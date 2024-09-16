@@ -1,4 +1,6 @@
 import copy
+from collections import Counter
+from copy import deepcopy
 from enum import Enum
 from typing import Any, Union
 
@@ -66,7 +68,7 @@ class Cell(BaseAlbertModel):
 
 class Component(BaseAlbertModel):
     inventory_item: InventoryItem
-    amt_cell: float
+    amount: float
     _cell: Cell = None  # read only property set on registrstion
 
     @property
@@ -78,9 +80,9 @@ class DesignState(BaseAlbertModel):
     collapsed: bool | None = False
 
 
-class Formulations(BaseAlbertModel):
-    id: str = Field(alias="formulaId")
-    name: str
+# class Formulations(BaseAlbertModel):
+#     id: str = Field(alias="formulaId")
+#     name: str
 
 
 class Design(BaseSessionModel):
@@ -92,7 +94,7 @@ class Design(BaseSessionModel):
     _columns: list["Column"] | None = PrivateAttr(default=None)
     _sheet: Union["Sheet", None] = PrivateAttr(default=None)  # ruff: noqa
 
-    def _grid_to_cell_df(self, grid_response):
+    def _grid_to_cell_df(self, *, grid_response):
         all_rows = []
         all_index = []
 
@@ -115,7 +117,7 @@ class Design(BaseSessionModel):
                 this_cell = Cell(**c)
                 col_id = c["colId"]
                 name = c["name"]
-                row[f"{col_id}{name}"] = this_cell
+                row[f"{col_id}#{name}"] = this_cell
             all_rows.append(row)
         return pd.DataFrame.from_records(all_rows, index=all_index)
 
@@ -129,7 +131,7 @@ class Design(BaseSessionModel):
             self._grid = self._get_grid()
         return self._grid
 
-    def _get_columns(self, grid_response) -> list["Column"]:
+    def _get_columns(self, *, grid_response) -> list["Column"]:
         columns = []
         # rsp_json = response.json()
         first_row = grid_response["Items"][0]
@@ -145,7 +147,7 @@ class Design(BaseSessionModel):
             )
         return columns
 
-    def _get_rows(self, grid_response) -> list["Column"]:
+    def _get_rows(self, *, grid_response) -> list["Column"]:
         rows = []
         rows_dicts = grid_response["Items"]
 
@@ -158,8 +160,8 @@ class Design(BaseSessionModel):
                     session=self.session,
                     design=self,
                     sheet=self.sheet,
-                    manufacturer=getattr(v, "manufacturer", None),
-                    id=getattr(v, "id", None),
+                    manufacturer=v.get("manufacturer", None),
+                    inventory_id=v.get("id", None),
                 )
             )
         return rows
@@ -169,9 +171,9 @@ class Design(BaseSessionModel):
         response = self.session.get(endpoint)
 
         resp_json = response.json()
-        self._columns = self._get_columns(resp_json)
-        self._rows = self._get_rows(resp_json)
-        return self._grid_to_cell_df(resp_json)
+        self._columns = self._get_columns(grid_response=resp_json)
+        self._rows = self._get_rows(grid_response=resp_json)
+        return self._grid_to_cell_df(grid_response=resp_json)
 
     @property
     def columns(self) -> list["Column"]:
@@ -189,29 +191,35 @@ class Design(BaseSessionModel):
 class Sheet(BaseSessionModel):
     id: str = Field(alias="albertId")
     name: str
-    formulations: list[Formulations] | None = Field(None)
+    # formulations: list[Formulations] | None = Field(None)
     hidden: bool
-    app_design: Design
-    product_design: Design
-    result_design: Design
+    _app_design: Design = PrivateAttr(default=None)
+    _product_design: Design = PrivateAttr(default=None)
+    _result_design: Design = PrivateAttr(default=None)
     designs: list[Design] = Field(alias="Designs")
     project_id: str
     _grid: pd.DataFrame = PrivateAttr(default=None)
 
     @model_validator(mode="before")
     @classmethod
-    def set_design_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def set_session(cls, data: dict[str, Any]) -> dict[str, Any]:
         category_raw = data.get("Designs")
         if category_raw:
             for c in category_raw:
                 c["session"] = data["session"]
-                if c["designType"] == "apps":
-                    data["app_design"] = c
-                elif c["designType"] == "products":
-                    data["product_design"] = c
-                elif c["designType"] == "results":
-                    data["result_design"] = c
         return data
+
+    @property
+    def app_design(self):
+        return self._app_design
+
+    @property
+    def product_design(self):
+        return self._product_design
+
+    @property
+    def result_design(self):
+        return self._result_design
 
     @model_validator(mode="after")
     def set_sheet_fields(self) -> "Sheet":
@@ -220,9 +228,13 @@ class Sheet(BaseSessionModel):
             d._sheet = self
             sheet_set_designs.append(d)
         self.designs = sheet_set_designs
-        self.app_design._sheet = self
-        self.product_design._sheet = self
-        self.result_design._sheet = self
+        for d in self.designs:
+            if d.design_type == DesignType.APPS:
+                self._app_design = d
+            elif d.design_type == DesignType.PRODUCTS:
+                self._product_design = d
+            elif d.design_type == DesignType.RESULTS:
+                self._result_design = d
         return self
 
     @property
@@ -238,10 +250,13 @@ class Sheet(BaseSessionModel):
 
     @grid.setter
     def grid(self, value: pd.DataFrame | None):
-        self._grid = value
         if value is None:
+            # I am sure I could do this better.
+            self._grid = value
             for design in self.designs:
                 design._grid = None  # Assuming Design has a grid property
+                design._rows = None
+                design._columns = None
         else:
             raise NotImplementedError("grid is a read-only property")
 
@@ -258,7 +273,7 @@ class Sheet(BaseSessionModel):
             rows.extend(d.rows)
         return rows
 
-    def _get_design_id(self, design: DesignType):
+    def _get_design_id(self, *, design: DesignType):
         if design == DesignType.APPS:
             return self.app_design.id
         elif design == DesignType.PRODUCTS:
@@ -266,7 +281,7 @@ class Sheet(BaseSessionModel):
         elif design == DesignType.RESULTS:
             return self.result_design.id
 
-    def _get_design(self, design: DesignType):
+    def _get_design(self, *, design: DesignType):
         if design == DesignType.APPS:
             return self.app_design
         elif design == DesignType.PRODUCTS:
@@ -274,7 +289,7 @@ class Sheet(BaseSessionModel):
         elif design == DesignType.RESULTS:
             return self.result_design
 
-    def rename(self, new_name: str):
+    def rename(self, *, new_name: str):
         endpoint = f"/api/v3/worksheet/sheet/{self.id}"
 
         payload = [{"attribute": "name", "operation": "update", "newValue": new_name}]
@@ -284,7 +299,7 @@ class Sheet(BaseSessionModel):
         self.name = new_name
         return self
 
-    def _reformat_formulation_addition_payload(self, response_json: dict) -> dict:
+    def _reformat_formulation_addition_payload(self, *, response_json: dict) -> dict:
         new_dicts = []
         for item in response_json:
             this_dict = {
@@ -303,11 +318,83 @@ class Sheet(BaseSessionModel):
             new_dicts.append(this_dict)
         return new_dicts
 
+    def _clear_formulation_from_column(self, *, column):
+        cleared_cells = []
+        for cell in column.cells:
+            if cell.type == CellType.INVENTORY:
+                cell_copy = deepcopy(cell)
+                cell_copy.calculation = ""
+                cell_copy.value = ""
+                cleared_cells.append(cell_copy)
+        r = self.update_cells(cells=cleared_cells)
+        return r
+
+    def add_formulation(self, *, formulation_name: str, components: list[Component]) -> "Column":
+        existing_formulation_names = [x.name for x in self.columns]
+        if formulation_name not in existing_formulation_names:
+            col = self.add_formulation_columns(formulation_names=[formulation_name])
+        else:
+            # get the existing column and clear it out to put the new formulation in
+            col = self.get_column(column_name=formulation_name)
+            self._clear_formulation_from_column(column=col)
+
+        col_id = col.column_id
+        component_dict = {}
+        for c in components:
+            # sometimes, users want to have multiple rows for the SAME inventory item to represent adding in aliquots
+            if c.inventory_item.id not in component_dict:
+                component_dict[c.inventory_item.id] = {"count": 0, "amounts": []}
+            component_dict[c.inventory_item.id]["count"] += 1
+            component_dict[c.inventory_item.id]["amounts"].append(c.amount)
+        existing_inventory_rows = [x.inventory_id for x in self.rows if x.inventory_id is not None]
+        row_count = Counter(existing_inventory_rows)
+        # add any missing inventory rows
+        for inv_id, info in component_dict.items():
+            to_add_count = info["count"] - row_count[inv_id]
+            while to_add_count > 0:
+                self.add_inventory_row(inventory_id=inv_id)
+                to_add_count -= 1
+
+        all_cells = []
+        self.grid = None  # reset the grid for saftey
+
+        for component in components:
+            row_id = self._get_row_id_for_component(
+                inventory_item=component.inventory_item, existing_cells=all_cells
+            )
+            if row_id is None:
+                raise RuntimeError(f"no component with id {component.inventory_item.id}")
+            this_cell = Cell(
+                column_id=col_id,
+                row_id=row_id,
+                value=str(component.amount),
+                calculation="",
+                type=CellType.INVENTORY,
+                design_id=self.product_design.id,
+                name=formulation_name,
+            )
+            all_cells.append(this_cell)
+
+        self.update_cells(cells=all_cells)
+        return all_cells
+
+    def _get_row_id_for_component(self, *, inventory_item, existing_cells):
+        self.grid = None
+        matching_rows = [
+            x for x in self.product_design.rows if x.inventory_id == inventory_item.id
+        ]
+        used_row_ids = [x.row_id for x in existing_cells]
+        for r in matching_rows:
+            if r.row_id not in used_row_ids:
+                return r.row_id
+        return None
+
     def add_formulation_columns(
         self,
+        *,
         formulation_names: list[str],
         starting_position: dict | None = None,
-    ):
+    ) -> list["Column"]:
         if starting_position is None:
             starting_position = {"reference_id": "COL5", "position": "rightOf"}
         sheet_id = self.id
@@ -341,6 +428,7 @@ class Sheet(BaseSessionModel):
 
     def add_blank_row(
         self,
+        *,
         row_name: str,
         design: DesignType | str | None = DesignType.PRODUCTS,
         position: dict | None = None,
@@ -373,6 +461,7 @@ class Sheet(BaseSessionModel):
 
     def add_inventory_row(
         self,
+        *,
         inventory_id: str,
         position: dict | None = None,
     ):
@@ -394,6 +483,7 @@ class Sheet(BaseSessionModel):
         row_dict = response.json()
         return Row(
             rowId=row_dict["rowId"],
+            inventory_id=inventory_id,
             type=row_dict["type"],
             session=self.session,
             design=self.product_design,
@@ -403,7 +493,7 @@ class Sheet(BaseSessionModel):
             manufacturer=row_dict["manufacturer"],
         )
 
-    def _filter_cells(self, cells: list[Cell], response_dict: dict):
+    def _filter_cells(self, *, cells: list[Cell], response_dict: dict):
         updated = []
         failed = []
         for c in cells:
@@ -416,14 +506,12 @@ class Sheet(BaseSessionModel):
                 failed.append(c)
         return (updated, failed)
 
-    def _get_current_cell(self, cell: Cell) -> Cell:
+    def _get_current_cell(self, *, cell: Cell) -> Cell:
         filtered_columns = [
             col for col in self.grid.columns if col.startswith(cell.column_id + "#")
         ]
         filtered_rows = [
-            idx
-            for idx in self.grid.index
-            if idx.startswith(cell.design_id + "#" + cell.row_id + "#")
+            idx for idx in self.grid.index if idx.startswith(cell.design_id + "#" + cell.row_id)
         ]
 
         first_value = None
@@ -433,9 +521,8 @@ class Sheet(BaseSessionModel):
                 return first_value
         return first_value
 
-    def _get_cell_changes(self, cell: Cell) -> dict:
+    def _get_cell_changes(self, *, cell: Cell) -> dict:
         current_cell = self._get_current_cell(cell=cell)
-
         change_dict = {
             "Id": {"rowId": cell.row_id, "colId": cell.column_id},
             "data": [],
@@ -447,6 +534,14 @@ class Sheet(BaseSessionModel):
                         "operation": "delete",
                         "attribute": "calculation",
                         "oldValue": current_cell.calculation,
+                    }
+                )
+            elif current_cell.calculation is None or current_cell.calculation == "":
+                change_dict["data"].append(
+                    {
+                        "operation": "add",
+                        "attribute": "calculation",
+                        "newValue": cell.calculation,
                     }
                 )
             else:
@@ -476,22 +571,30 @@ class Sheet(BaseSessionModel):
                         "newValue": cell.format,
                     }
                 )
-        if cell.value != current_cell.value and (
+        if not self._compare_cell_values(cell=cell, existing_cell=current_cell) and (
             cell.calculation is None or cell.calculation == ""
         ):
             if cell.value is None or cell.value == "":
                 change_dict["data"].append(
                     {
                         "operation": "delete",
-                        "attribute": "value",
+                        "attribute": "cell",
                         "oldValue": current_cell.value,
+                    }
+                )
+            elif current_cell.value is None or current_cell.value == "":
+                change_dict["data"].append(
+                    {
+                        "operation": "add",
+                        "attribute": "cell",
+                        "newValue": cell.value,
                     }
                 )
             else:
                 change_dict["data"].append(
                     {
                         "operation": "update",
-                        "attribute": "value",
+                        "attribute": "cell",
                         "oldValue": current_cell.value,
                         "newValue": cell.value,
                     }
@@ -500,7 +603,25 @@ class Sheet(BaseSessionModel):
             return None
         return change_dict
 
-    def update_cells(self, cells: list[Cell]):
+    def _compare_cell_values(self, *, cell: Cell, existing_cell: Cell):
+        # Check if the strings are exactly equal
+        if cell.value == existing_cell.value:
+            return True
+
+        # Try to cast both strings to floats and compare
+        try:
+            float1 = float(cell.value)
+            float2 = float(existing_cell.value)
+            if float1 == float2:
+                return True
+        except ValueError:
+            # One or both strings could not be cast to a float
+            pass
+
+        # Return False if neither comparison returned True
+        return False
+
+    def update_cells(self, *, cells: list[Cell]):
         request_path_dict = {}
         updated = []
         failed = []
@@ -514,7 +635,7 @@ class Sheet(BaseSessionModel):
         for design_id, cell_list in request_path_dict.items():
             payload = []
             for cell in cell_list:
-                change_dict = self._get_cell_changes(cell)
+                change_dict = self._get_cell_changes(cell=cell)
                 if change_dict is not None:
                     payload.append(change_dict)
 
@@ -522,7 +643,6 @@ class Sheet(BaseSessionModel):
                 continue
 
             this_url = f"/api/v3/worksheet/{design_id}/values"
-
             response = self.session.patch(
                 this_url,
                 json=payload,
@@ -536,9 +656,11 @@ class Sheet(BaseSessionModel):
                 cell_results = self._filter_cells(cells=cell_list, response_dict=response.json())
                 updated.extend(cell_results[0])
                 failed.extend(cell_results[1])
+        # reset the in-memory grid after updates
+        self.grid = None
         return (updated, failed)
 
-    def add_blank_column(self, name: str, position: dict = None):
+    def add_blank_column(self, *, name: str, position: dict = None):
         if position is None:
             position = {"reference_id": "COL5", "position": "rightOf"}
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
@@ -558,7 +680,7 @@ class Sheet(BaseSessionModel):
         self.grid = None  # reset the known grid. We could probably make this nicer later.
         return Column(**data[0])
 
-    def delete_column(self, column_id: str):
+    def delete_column(self, *, column_id: str):
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [{"colId": column_id}]
         self.session.delete(endpoint, json=payload)
@@ -567,7 +689,7 @@ class Sheet(BaseSessionModel):
             self.grid = None
         return True
 
-    def delete_row(self, row_id: str, design_id: str):
+    def delete_row(self, *, row_id: str, design_id: str):
         endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
         payload = [{"rowId": row_id}]
         self.session.delete(endpoint, json=payload)
@@ -576,7 +698,7 @@ class Sheet(BaseSessionModel):
             self.grid = None
         return True
 
-    def _find_column(self, column_id: str = "", column_name: str = ""):
+    def _find_column(self, *, column_id: str = "", column_name: str = ""):
         if column_id == None:
             column_id = ""
         if column_name == None:
@@ -592,7 +714,7 @@ class Sheet(BaseSessionModel):
         else:
             return self.grid[matches[0]]
 
-    def get_column(self, column_id: None | str = None, column_name: str | None = None):
+    def get_column(self, *, column_id: None | str = None, column_name: str | None = None):
         if column_id is None and column_name is None:
             raise RuntimeError("Either a column name or id must be provided")
         else:
@@ -609,7 +731,7 @@ class Sheet(BaseSessionModel):
 
 class Column(BaseSessionModel):
     column_id: str = Field(alias="colId")
-    formulas: list[Formulations] = Field(default=None, alias="Formulas")
+    # formulas: list[Formulations] = Field(default=None, alias="Formulas")
     name: str
     type: CellType
     sheet: Sheet
@@ -653,7 +775,7 @@ class Column(BaseSessionModel):
             cell_copy = copy.deepcopy(c)
             cell_copy.format = {"bgColor": color.value}
             new_cells.append(cell_copy)
-        return self.sheet.update_cells(new_cells)
+        return self.sheet.update_cells(cells=new_cells)
 
 
 class Row(BaseSessionModel):
@@ -679,4 +801,4 @@ class Row(BaseSessionModel):
             cell_copy = copy.deepcopy(c)
             cell_copy.format = {"bgColor": color.value}
             new_cells.append(cell_copy)
-        return self.sheet.update_cells(new_cells)
+        return self.sheet.update_cells(cells=new_cells)
