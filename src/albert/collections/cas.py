@@ -184,7 +184,7 @@ class CasCollection(BaseCollection):
         """
         if isinstance(cas, str):
             cas = Cas(number=cas)
-        if self.cas_exists(cas.number):
+        if self.cas_exists(number=cas.number):
             existing_cas = self.cas_cache[cas.number]
             return existing_cas
         else:
