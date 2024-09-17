@@ -1,9 +1,9 @@
 import builtins
 from collections.abc import Generator, Iterator
 
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.units import Unit, UnitCategory
+from albert.session import AlbertSession
 
 
 class UnitCollection(BaseCollection):

@@ -1,7 +1,7 @@
 from enum import Enum
 
-from albert.albert_session import AlbertSession
 from albert.resources.base import BaseAlbertModel
+from albert.session import AlbertSession
 
 
 class OrderBy(str, Enum):

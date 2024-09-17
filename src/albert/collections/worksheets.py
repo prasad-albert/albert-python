@@ -1,6 +1,6 @@
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection
 from albert.resources.worksheets import Worksheet
+from albert.session import AlbertSession
 
 
 class WorksheetCollection(BaseCollection):

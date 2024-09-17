@@ -1,7 +1,5 @@
 import os
 
-import albert
-from albert.albert_session import AlbertSession
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.inventory import InventoryCollection
@@ -14,6 +12,7 @@ from albert.collections.un_numbers import UnNumberCollection
 from albert.collections.units import UnitCollection
 from albert.collections.users import UserCollection
 from albert.collections.worksheets import WorksheetCollection
+from albert.session import AlbertSession
 
 
 class Albert:
@@ -24,8 +23,12 @@ class Albert:
     ----------
     base_url : str, optional
         The base URL of the Albert API (default is "https://dev.albertinventdev.com").
-    bearer_token : str, optional
-        The bearer token for authentication (default is retrieved from environment variable "ALBERT_BEARER_TOKEN").
+    token : str, optional
+        The token for authentication (default is retrieved from environment variable "ALBERT_TOKEN").
+    client_id: str, optional
+        The client ID for programmatic authentication (default is retrieved from environment variable "ALBERT_CLIENT_ID").
+    client_secret: str, optional
+        The client secret key for programmatic authentication (default is retrieved from environment variable "ALBERT_CLIENT_SECRET").
 
     Attributes
     ----------
@@ -45,17 +48,15 @@ class Albert:
         self,
         *,
         base_url: str = "https://dev.albertinventdev.com",
-        bearer_token: str = os.getenv("ALBERT_BEARER_TOKEN"),
+        token: str | None = None,
+        client_id: str | None = None,
+        client_secret: str | None = None,
     ):
-        self.bearer_token = bearer_token
-        self.session = AlbertSession(base_url=base_url)
-        self.session.headers.update(
-            {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "Authorization": f"Bearer {self.bearer_token}",
-                "User-Agent": f"albert-SDK V.{albert.__version__}",
-            }
+        self.session = AlbertSession(
+            base_url=base_url,
+            token=token or os.getenv("ALBERT_TOKEN"),
+            client_id=client_id or os.getenv("ALBERT_CLIENT_ID"),
+            client_secret=client_secret or os.getenv("ALBERT_CLIENT_SECRET"),
         )
 
     @property

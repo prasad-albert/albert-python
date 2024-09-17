@@ -1,10 +1,10 @@
 from collections.abc import Generator, Iterator
 
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.companies import CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.projects import Project
+from albert.session import AlbertSession
 
 
 class ProjectCollection(BaseCollection):
