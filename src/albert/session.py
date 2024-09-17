@@ -10,10 +10,13 @@ from albert.utils.exceptions import handle_api_error
 EXPIRATION_BUFFER: timedelta = timedelta(minutes=1)
 
 
-def get_token_expiration(token: str, *, millis: bool = True) -> datetime:
+def get_token_expiration(token: str) -> datetime:
     claims = jwt.get_unverified_claims(token)
-    exp = claims["exp"] / 1000 if millis else claims["exp"]
-    return datetime.fromtimestamp(exp, tz=timezone.utc)
+    try:
+        return datetime.fromtimestamp(claims["exp"], tz=timezone.utc)
+    except ValueError:
+        # exp is in millis, not seconds, so datetime fails
+        return datetime.fromtimestamp(claims["exp"] / 1000, tz=timezone.utc)
 
 
 class AlbertSession(requests.Session):
@@ -46,11 +49,13 @@ class AlbertSession(requests.Session):
 
         self._client_id = client_id
         self._client_secret = client_secret
-        self._access_token: str = token
+        self._access_token = None
 
         if self.has_client_credentials:
             self._get_client_token()
-        elif self._access_token is None:
+        elif token is not None:
+            self._access_token = token
+        else:
             raise ValueError("Either client credentials or token must be specified.")
         self._set_auth_header()
 

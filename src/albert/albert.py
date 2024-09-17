@@ -47,13 +47,13 @@ class Albert:
     def __init__(
         self,
         *,
-        base_url: str = "https://app.albertinvent.com",
+        base_url: str | None = None,
         token: str | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
     ):
         self.session = AlbertSession(
-            base_url=base_url,
+            base_url=base_url or os.getenv("ALBERT_BASE_URL") or "https://app.albertinvent.com",
             token=token or os.getenv("ALBERT_TOKEN"),
             client_id=client_id or os.getenv("ALBERT_CLIENT_ID"),
             client_secret=client_secret or os.getenv("ALBERT_CLIENT_SECRET"),
