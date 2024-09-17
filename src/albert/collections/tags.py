@@ -155,7 +155,7 @@ class TagCollection(BaseCollection):
         bool
             True if the tag exists, False otherwise.
         """
-        if tag in self.tag_cache:
+        if tag.lower() in self.tag_cache:
             return True
         params = {"limit": "2", "name": [tag], "exactMatch": str(exact_match).lower()}
 
@@ -163,7 +163,7 @@ class TagCollection(BaseCollection):
         tags = response.json().get("Items", [])
         for t in tags:
             found_tag = Tag(**t)
-            self.tag_cache[found_tag.tag] = found_tag
+            self.tag_cache[found_tag.tag.lower()] = found_tag
         return len(tags) > 0
 
     def create(self, *, tag: str | Tag) -> Tag:
@@ -183,13 +183,13 @@ class TagCollection(BaseCollection):
         if isinstance(tag, str):
             tag = Tag(tag=tag)
         if self.tag_exists(tag=tag.tag):
-            existing_tag = self.tag_cache[tag.tag]
+            existing_tag = self.tag_cache[tag.tag.lower()]
             logging.warning(f"Tag {existing_tag.tag} already exists with id {existing_tag.id}")
             return existing_tag
         payload = {"name": tag.tag}
         response = self.session.post(self.base_url, json=payload)
         tag = Tag(**response.json())
-        self.tag_cache[tag.tag] = tag
+        self.tag_cache[tag.tag.lower()] = tag
         return tag
 
     def get_by_id(self, *, tag_id: str) -> Tag | None:

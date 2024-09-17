@@ -165,8 +165,8 @@ class InventoryCollection(BaseCollection):
     def _list_generator(
         self,
         *,
-        limit: int = 50,
-        start_key: str | None = None,
+        limit: int = 25,
+        offset: int | None = None,
         name: str | None = None,
         cas: list[Cas] | None = None,
         company: list[Company] | None = None,
@@ -202,11 +202,11 @@ class InventoryCollection(BaseCollection):
 
         params = {
             "limit": str(limit),
-            "orderBy": order_by.value,
+            # "orderBy": order_by.value,
             # "exactMatch": str(exact_match).lower(),
         }
-        if start_key:
-            params["startKey"] = start_key
+        if offset:
+            params["offset"] = offset
         if name:
             params["text"] = name
         if category:
@@ -217,8 +217,9 @@ class InventoryCollection(BaseCollection):
             params["manufacturer"] = [c.name for c in company if isinstance(c, Company)]
         while True:
             response = self.session.get(self.base_url + "/search", params=params)
-
             raw_inventory = response.json().get("Items", [])
+            start_offset = response.json().get("offset")
+            params["offset"] = int(start_offset) + int(limit)
             if not raw_inventory or raw_inventory == [] or len(raw_inventory) < limit:
                 break
             for item in raw_inventory:

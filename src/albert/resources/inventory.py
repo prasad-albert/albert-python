@@ -57,34 +57,37 @@ class CasAmount(BaseAlbertModel):
     # Define a private attribute to store the Cas object
     _cas: Cas = PrivateAttr(None)
 
-    def __init__(
-        self,
-        cas: Cas | None = None,
-        min: float | None = None,
-        max: float | None = None,
-        **data: Any,
-    ):
+    @model_validator(mode="before")
+    def ensure_floats_and_cas(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
-        CasAmount is a Pydantic model representing an amount of a given Cas.
-
-        Attributes
-        ----------
-        cas : Cas oject
-            The Cas Object albert.entity.cas.Cas
-        min : float
-            The minimum amount of the given cas in the formulation.
-        max : float
-            The maximum amount of the given cas in the formulation.
+        Ensure that min and max are floats and handle the CAS object initialization.
         """
 
-        if cas:
-            # Initialize with a Cas object
-            super().__init__(id=cas.id, min=min, max=max, **data)
-            self._cas = cas
-        else:
-            # Initialize with id, min, and max (for deserialization)
-            super().__init__(**data)
-            self._cas = None
+        # Ensure min and max are converted to floats if necessary
+        min_val = values.get("min")
+        max_val = values.get("max")
+
+        if isinstance(min_val, int):
+            values["min"] = float(min_val)
+        if isinstance(max_val, int):
+            values["max"] = float(max_val)
+
+        # If a Cas object is provided, update the id field
+        cas = values.get("cas")
+        if cas and isinstance(cas, Cas):
+            values["id"] = cas.id
+
+        return values
+
+    @model_validator(mode="after")
+    def set_cas_private_attr(cls, values: "CasAmount"):
+        """
+        Set the _cas attribute after model initialization.
+        """
+        if hasattr(values, "cas") and isinstance(values.cas, Cas):
+            values._cas = values.cas  # Set the private _cas attribute
+
+        return values
 
 
 class InventoryItem(BaseTaggedEntity):
@@ -125,7 +128,7 @@ class InventoryItem(BaseTaggedEntity):
     tags: list[Tag] | None = Field(default_factory=list, alias="Tags")
     formula_id: str | None = Field(default=None, alias="formulaId")
     project_id: str | None = Field(default=None, alias="parentId")
-    # alias: Optional[str] = Field(default=None)
+    alias: str | None = Field(default=None)
     cas: list[CasAmount] | None = Field(default=None, alias="Cas")
     _task_config: list[dict] | None = PrivateAttr(
         default=None
