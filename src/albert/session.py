@@ -79,8 +79,7 @@ class AlbertSession(requests.Session):
             data=payload,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        data = response.json()
-        self._access_token = data["access_token"]
+        self._access_token = response.json()["access_token"]
 
     def _requires_refresh(self) -> bool:
         token_expiration = get_token_expiration(self._access_token)
