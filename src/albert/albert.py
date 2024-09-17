@@ -47,7 +47,7 @@ class Albert:
     def __init__(
         self,
         *,
-        base_url: str = "https://dev.albertinventdev.com",
+        base_url: str = "https://app.albertinvent.com",
         token: str | None = None,
         client_id: str | None = None,
         client_secret: str | None = None,
