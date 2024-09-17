@@ -56,7 +56,7 @@ class InventoryCollection(BaseCollection):
         bool
             True if the inventory item exists, False otherwise.
         """
-        hit = self.get_match_or_none(inventory_item)
+        hit = self.get_match_or_none(inventory_item=inventory_item)
         return bool(hit)
 
     def get_match_or_none(self, *, inventory_item: InventoryItem) -> InventoryItem | None:
@@ -74,7 +74,12 @@ class InventoryCollection(BaseCollection):
             The matching inventory item or None if not found.
         """
         hits = self.list(name=inventory_item.name, company=[inventory_item.company])
-        return next(hits, None)
+        first_hit = next(hits, None)
+        return (
+            first_hit
+            and first_hit.name == inventory_item.name
+            and first_hit.company == inventory_item.company
+        )
 
     def create(
         self, *, inventory_item: InventoryItem, avoid_duplicates: bool = True
@@ -296,6 +301,7 @@ class InventoryCollection(BaseCollection):
             "description",
             "unit_category",
             "inventory_class",
+            "alias",
         }
 
         _updatable_attributes_special = {"company", "tags", "cas"}
