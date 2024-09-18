@@ -59,8 +59,6 @@ def test_user_get(client: Albert):
 def test_user_crud(client: Albert):
     existing_role = client.roles.list()[0]
     existing_loc = next(client.locations.list())
-    print("ROLE")
-    print(existing_role)
     test_user = User(
         name="Fake User SDK Testing",
         email="faux_person@albertinvent.com",
