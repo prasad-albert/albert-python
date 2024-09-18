@@ -3,6 +3,12 @@ import logging
 import requests
 
 
+class AlbertException(Exception):
+    def __init__(self, message, details=None):
+        super().__init__(message)
+        self.details = details
+
+
 def handle_api_error(response: requests.Response) -> None:
     try:
         # Raise an HTTPError if the HTTP request returned an unsuccessful status code
@@ -46,7 +52,7 @@ def handle_api_error(response: requests.Response) -> None:
 # Custom Exception classes for API errors
 
 
-class AlbertAPIError(Exception):
+class AlbertAPIError(AlbertException):
     """Base class for all API-related errors."""
 
     def __init__(self, message, details=None):

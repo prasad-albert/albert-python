@@ -9,6 +9,7 @@ from pydantic import Field, PrivateAttr, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseSessionModel
 from albert.resources.inventory import InventoryItem
+from albert.utils.exceptions import AlbertException
 
 
 class CellColor(str, Enum):
@@ -78,11 +79,6 @@ class Component(BaseAlbertModel):
 
 class DesignState(BaseAlbertModel):
     collapsed: bool | None = False
-
-
-# class Formulations(BaseAlbertModel):
-#     id: str = Field(alias="formulaId")
-#     name: str
 
 
 class Design(BaseSessionModel):
@@ -367,7 +363,7 @@ class Sheet(BaseSessionModel):
                 inventory_item=component.inventory_item, existing_cells=all_cells
             )
             if row_id is None:
-                raise RuntimeError(f"no component with id {component.inventory_item.id}")
+                raise AlbertException(f"no component with id {component.inventory_item.id}")
             this_cell = Cell(
                 column_id=col_id,
                 row_id=row_id,
@@ -712,7 +708,7 @@ class Sheet(BaseSessionModel):
         if len(matches) == 0:
             return None
         elif len(matches) > 1:
-            raise RuntimeError(
+            raise AlbertException(
                 f"Ambiguous match on column name {column_name}. Please try provided a column ID"
             )
         else:
@@ -720,7 +716,7 @@ class Sheet(BaseSessionModel):
 
     def get_column(self, *, column_id: None | str = None, column_name: str | None = None):
         if column_id is None and column_name is None:
-            raise RuntimeError("Either a column name or id must be provided")
+            raise AlbertException("Either a column name or id must be provided")
         else:
             matching_series = self._find_column(column_id=column_id, column_name=column_name)
             first_item = matching_series.iloc[0]
