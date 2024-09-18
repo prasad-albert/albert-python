@@ -111,10 +111,14 @@ class UserCollection(BaseCollection):
         """
 
         # May need to rehydrate location?
+        roles = [
+            {"id": r.tenant + "#" + r.id} if "#" not in r.id else {"id": r.id} for r in user.roles
+        ]
+
         payload = {
             "name": user.name,
             "email": user.email,
-            "Roles": [{"id": r.tenant + "#" + r.id} for r in user.roles],
+            "Roles": roles,
             "Location": {"id": user.location.id},
             "userClass": "standard",
         }

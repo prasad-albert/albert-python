@@ -3,8 +3,6 @@ from collections.abc import Generator
 import pytest
 
 from albert.albert import Albert
-from albert.collections.locations import Location
-from albert.collections.roles import Role
 from albert.collections.users import User
 
 
@@ -57,15 +55,8 @@ def test_user_get(client: Albert):
 
 
 def test_user_crud(client: Albert):
-    existing_role = Role(id="ROL95", tenant="TEN1", name="Myrole")
-    existing_loc = Location(
-        name="(D123) Duesseldorf, Germany",
-        id="LOC1375",
-        latitude=21.67752,
-        longitude=5.737409,
-        address="Quadpro 11, 40589 Düsseldorf, Germany",
-        country="DE",
-    )
+    existing_role = client.roles.list()[0]
+    existing_loc = next(client.locations.list())
     test_user = User(
         name="Fake User SDK Testing",
         email="faux_person@albertinvent.com",

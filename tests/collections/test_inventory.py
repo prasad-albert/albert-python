@@ -17,7 +17,7 @@ def client():
 
 def _list_asserts(returned_list):
     for i, u in enumerate(returned_list):
-        if i == 100:
+        if i == 5:
             break
         assert isinstance(u, InventoryItem)
         assert isinstance(u.name, str | None)

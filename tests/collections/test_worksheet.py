@@ -15,14 +15,14 @@ def client():
 # NOTE: Once we have the Project Module done, these should be made dynamically.
 @pytest.fixture(scope="module")
 def project(client: Albert):
-    return client.projects.get_by_id(project_id="EXP102748")
+    return client.projects.get_by_id(project_id="P015")
 
 
 # NOTE: Once we have the Project Module done, these should be made dynamically.
 @pytest.fixture(scope="module")
 def worksheet(client: Albert):
     collection = WorksheetCollection(session=client.session)
-    wksht = collection.get_by_project_id(project_id="EXP102748")
+    wksht = collection.get_by_project_id(project_id="P015")
     return wksht
 
 
