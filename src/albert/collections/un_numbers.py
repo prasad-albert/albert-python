@@ -1,8 +1,8 @@
 from collections.abc import Generator, Iterator
 
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection
 from albert.resources.un_numbers import UnNumber
+from albert.session import AlbertSession
 
 
 class UnNumberCollection(BaseCollection):
