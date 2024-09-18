@@ -3,8 +3,6 @@ from collections.abc import Generator
 import pytest
 
 from albert.albert import Albert
-from albert.collections.locations import Location
-from albert.collections.roles import Role
 from albert.collections.users import User
 
 
