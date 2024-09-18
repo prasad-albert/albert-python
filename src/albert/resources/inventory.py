@@ -136,7 +136,7 @@ class InventoryItem(BaseTaggedEntity):
     _symbols: list[dict] | None = PrivateAttr(default=None)  # read only: comes from attachments
     _un_number: UnNumber | None = PrivateAttr(default=None)  # Read only: Comes from attachments
     _acls: list[dict] | None = PrivateAttr(default=None)  # read only
-    _metadata: list[dict] | None = PrivateAttr(default=None)  # read only
+    metadata: dict | None = Field(default=None, alias="Metadata")  # read only
     _minimum: list[dict[str, Any]] | None = PrivateAttr(default=None)  # To do
 
     def __init__(self, **data: Any):
@@ -163,14 +163,14 @@ class InventoryItem(BaseTaggedEntity):
             The Albert ID of the inventory item.
         company : Optional[Company]
             The company associated with the inventory item.
+        metadata : dict | None
+            Any additional medatadata fields available to this InventoryItem.
         """
 
         super().__init__(**data)
         # handle aliases on private attributes
         if "ACL" in data:
             self._acls = data["ACL"]
-        if "Metadata" in data:
-            self._metadata = data["Metadata"]
         if "unNumber" in data:
             self._un_number = data["unNumber"]
         if "Symbols" in data:

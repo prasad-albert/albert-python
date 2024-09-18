@@ -8,6 +8,7 @@ from albert.collections.tags import TagCollection
 from albert.resources.base import BaseAlbertModel
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.session import AlbertSession
+from albert.utils.exceptions import ForbiddenError
 
 
 class InventoryCollection(BaseCollection):
@@ -234,7 +235,11 @@ class InventoryCollection(BaseCollection):
                     if item["albertId"].startswith("INV")
                     else "INV" + item["albertId"]
                 )
-                yield self.get_by_id(inventory_id=this_aid)
+                try:
+                    yield self.get_by_id(inventory_id=this_aid)
+                except ForbiddenError:
+                    # Sometimes InventoryItems are listed that the current user does not have full access to. Just skip those
+                    continue
 
     def list(
         self,
