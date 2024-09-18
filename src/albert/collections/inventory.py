@@ -8,6 +8,7 @@ from albert.collections.tags import TagCollection
 from albert.resources.base import BaseAlbertModel
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.session import AlbertSession
+from albert.utils.exceptions import ForbiddenError
 
 
 class InventoryCollection(BaseCollection):
@@ -56,7 +57,7 @@ class InventoryCollection(BaseCollection):
         bool
             True if the inventory item exists, False otherwise.
         """
-        hit = self.get_match_or_none(inventory_item)
+        hit = self.get_match_or_none(inventory_item=inventory_item)
         return bool(hit)
 
     def get_match_or_none(self, *, inventory_item: InventoryItem) -> InventoryItem | None:
@@ -74,7 +75,15 @@ class InventoryCollection(BaseCollection):
             The matching inventory item or None if not found.
         """
         hits = self.list(name=inventory_item.name, company=[inventory_item.company])
-        return next(hits, None)
+        first_hit = next(hits, None)
+        if (
+            first_hit
+            and first_hit.name == inventory_item.name
+            and first_hit.company == inventory_item.company
+        ):
+            return first_hit
+        else:
+            return None
 
     def create(
         self, *, inventory_item: InventoryItem, avoid_duplicates: bool = True
@@ -166,7 +175,7 @@ class InventoryCollection(BaseCollection):
         self,
         *,
         limit: int = 25,
-        start_key: str | None = None,
+        offset: int | None = None,
         name: str | None = None,
         cas: list[Cas] | None = None,
         company: list[Company] | None = None,
@@ -203,10 +212,9 @@ class InventoryCollection(BaseCollection):
         params = {
             "limit": str(limit),
             "orderBy": order_by.value,
-            # "exactMatch": str(exact_match).lower(),
         }
-        if start_key:
-            params["startKey"] = start_key
+        if offset:
+            params["offset"] = offset
         if name:
             params["text"] = name
         if category:
@@ -218,6 +226,8 @@ class InventoryCollection(BaseCollection):
         while True:
             response = self.session.get(self.base_url + "/search", params=params)
             raw_inventory = response.json().get("Items", [])
+            start_offset = response.json().get("offset")
+            params["offset"] = int(start_offset) + int(limit)
             if not raw_inventory or raw_inventory == [] or len(raw_inventory) < limit:
                 break
             for item in raw_inventory:
@@ -227,7 +237,11 @@ class InventoryCollection(BaseCollection):
                     if item["albertId"].startswith("INV")
                     else "INV" + item["albertId"]
                 )
-                yield self.get_by_id(inventory_id=this_aid)
+                try:
+                    yield self.get_by_id(inventory_id=this_aid)
+                except ForbiddenError:
+                    # Sometimes InventoryItems are listed that the current user does not have full access to. Just skip those
+                    continue
 
     def list(
         self,
@@ -294,6 +308,7 @@ class InventoryCollection(BaseCollection):
             "description",
             "unit_category",
             "inventory_class",
+            "alias",
         }
 
         _updatable_attributes_special = {"company", "tags", "cas"}
