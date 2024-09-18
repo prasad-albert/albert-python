@@ -36,6 +36,8 @@ def test_advanced_company_list(client: Albert):
 
 
 def test_company_get_by(client: Albert):
+    if not client.companies.company_exists(name="Lenore Corp"):
+        client.companies.create(company=Company(name="Lenore Corp"))
     company = client.companies.get_by_name(name="Lenore Corp")
     assert isinstance(company, Company)
     assert company.name == "Lenore Corp"

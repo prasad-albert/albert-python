@@ -42,24 +42,27 @@ def test_advanced_tags_list(client):
 
 
 def test_get_tag_by(client):
-    tag = client.tags.get_by_tag(tag="Lenore's New Tag!", exact_match=False)
+    tag_test_str = "Lenore's New Tag!"
+    if not client.tags.tag_exists(tag=tag_test_str, exact_match=True):
+        client.tags.create(tag=Tag(tag=tag_test_str))
+    tag = client.tags.get_by_tag(tag=tag_test_str, exact_match=False)
 
     assert isinstance(tag, Tag)
-    assert tag.tag.lower() == "lenore's new tag!"
+    assert tag.tag.lower() == tag_test_str.lower()
 
     by_id = client.tags.get_by_id(tag_id=tag.id)
     assert isinstance(by_id, Tag)
-    assert by_id.tag.lower() == "lenore's new tag!"
+    assert by_id.tag.lower() == tag_test_str.lower()
 
 
 def test_tag_exists(client: Albert):
-    assert client.tags.tag_exists(tag="Lenore's New Tag!")
     assert not client.tags.tag_exists(tag="Nonesense tag no one would ever make!893y58932y58923")
 
 
 def test_tag_crud(client: Albert):
     new_tag = Tag(tag="SDK test tag!")
     registered_tag = client.tags.create(tag=new_tag)
+    assert client.tags.tag_exists(tag=new_tag.tag)
     assert isinstance(registered_tag, Tag)
     assert registered_tag.tag == "SDK test tag!"
     assert registered_tag.id is not None
