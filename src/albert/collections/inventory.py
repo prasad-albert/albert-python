@@ -1,13 +1,13 @@
 import logging
 from collections.abc import Generator, Iterator
 
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.base import BaseAlbertModel
 from albert.resources.inventory import InventoryCategory, InventoryItem
+from albert.session import AlbertSession
 
 
 class InventoryCollection(BaseCollection):
@@ -165,7 +165,7 @@ class InventoryCollection(BaseCollection):
     def _list_generator(
         self,
         *,
-        limit: int = 50,
+        limit: int = 25,
         start_key: str | None = None,
         name: str | None = None,
         cas: list[Cas] | None = None,
@@ -217,7 +217,6 @@ class InventoryCollection(BaseCollection):
             params["manufacturer"] = [c.name for c in company if isinstance(c, Company)]
         while True:
             response = self.session.get(self.base_url + "/search", params=params)
-
             raw_inventory = response.json().get("Items", [])
             if not raw_inventory or raw_inventory == [] or len(raw_inventory) < limit:
                 break

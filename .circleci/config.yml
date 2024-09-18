@@ -11,11 +11,15 @@ jobs:
       - python/install-packages:
           pkg-manager: poetry
       - run:
-          name: Check Formatting
+          name: Set environment
+          command: |
+            echo 'export ALBERT_BASE_URL="https://app.albertinvent.com"' >> "$BASH_ENV"
+      - run:
+          name: Check formatting
           command: |
             poetry run ruff format . --check
       - run:
-          name: Check Linting
+          name: Check lints
           command: |
             poetry run ruff check .
       - run:
@@ -28,4 +32,5 @@ workflows:
     jobs:
       - tests:
           name: Tests
+          context: ds-dev
 

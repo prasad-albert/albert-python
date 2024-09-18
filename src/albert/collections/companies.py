@@ -1,9 +1,9 @@
 import logging
 from collections.abc import Generator, Iterator
 
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection
 from albert.resources.companies import Company
+from albert.session import AlbertSession
 
 
 class CompanyCollection(BaseCollection):

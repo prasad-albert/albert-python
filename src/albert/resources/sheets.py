@@ -49,7 +49,7 @@ class Cell(BaseAlbertModel):
     row_id: str = Field(alias="rowId")
     value: str | dict = ""
     type: CellType
-    name: str
+    name: str | None = Field(default=None)
     calculation: str = ""
     design_id: str
     format: dict = Field(default_factory=dict, alias="cellFormat")
@@ -97,7 +97,8 @@ class Design(BaseSessionModel):
     def _grid_to_cell_df(self, *, grid_response):
         all_rows = []
         all_index = []
-
+        if not grid_response["Items"] or len(grid_response["Items"]) == 0:
+            return pd.DataFrame()
         for item in grid_response["Items"]:
             row = {}
             this_row_id = item["rowId"]
@@ -116,8 +117,8 @@ class Design(BaseSessionModel):
                 c["type"] = row_type
                 this_cell = Cell(**c)
                 col_id = c["colId"]
-                name = c["name"]
-                row[f"{col_id}#{name}"] = this_cell
+                name = c.get("name", None)
+                row[f"{col_id}{name}"] = this_cell
             all_rows.append(row)
         return pd.DataFrame.from_records(all_rows, index=all_index)
 
@@ -134,12 +135,14 @@ class Design(BaseSessionModel):
     def _get_columns(self, *, grid_response) -> list["Column"]:
         columns = []
         # rsp_json = response.json()
+        if not grid_response["Items"] or len(grid_response["Items"]) == 0:
+            return []
         first_row = grid_response["Items"][0]
         for v in first_row["Values"]:
             columns.append(
                 Column(
                     colId=v["colId"],
-                    name=v["name"],
+                    name=v.get("name", None),
                     type=v["type"],
                     session=self.session,
                     sheet=self.sheet,
@@ -150,11 +153,12 @@ class Design(BaseSessionModel):
     def _get_rows(self, *, grid_response) -> list["Column"]:
         rows = []
         rows_dicts = grid_response["Items"]
-
+        if not grid_response["Items"] or len(grid_response["Items"]) == 0:
+            return []
         for v in rows_dicts:
             rows.append(
                 Row(
-                    name=v["name"],
+                    name=v.get("name", None),
                     rowId=v["rowId"],
                     type=v["type"],
                     session=self.session,
@@ -731,8 +735,7 @@ class Sheet(BaseSessionModel):
 
 class Column(BaseSessionModel):
     column_id: str = Field(alias="colId")
-    # formulas: list[Formulations] = Field(default=None, alias="Formulas")
-    name: str
+    name: str | None = Field(default=None)
     type: CellType
     sheet: Sheet
     _cells: list[Cell] | None = PrivateAttr(default=None)
@@ -783,7 +786,7 @@ class Row(BaseSessionModel):
     type: CellType
     design: Design
     sheet: Sheet
-    name: str
+    name: str | None = Field(default=None)
     inventory_id: str | None = Field(default=None, alias="id")
     manufacturer: str | None = Field(default=None)
 
