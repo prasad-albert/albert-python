@@ -1,9 +1,9 @@
 from collections.abc import Generator, Iterator
 
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.base import BaseAlbertModel
 from albert.resources.cas import Cas
+from albert.session import AlbertSession
 
 
 class CasCollection(BaseCollection):

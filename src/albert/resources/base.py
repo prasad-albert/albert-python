@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
 
-from albert.albert_session import AlbertSession
+from albert.session import AlbertSession
 
 
 class Status(str, Enum):

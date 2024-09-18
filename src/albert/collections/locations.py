@@ -1,8 +1,8 @@
 from collections.abc import Generator, Iterator
 
-from albert.albert_session import AlbertSession
 from albert.collections.base import BaseCollection
 from albert.resources.locations import Location
+from albert.session import AlbertSession
 
 
 class LocationCollection(BaseCollection):
