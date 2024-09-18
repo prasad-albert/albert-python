@@ -208,8 +208,7 @@ class InventoryCollection(BaseCollection):
 
         params = {
             "limit": str(limit),
-            # "orderBy": order_by.value,
-            # "exactMatch": str(exact_match).lower(),
+            "orderBy": order_by.value,
         }
         if offset:
             params["offset"] = offset
