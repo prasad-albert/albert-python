@@ -76,11 +76,14 @@ class InventoryCollection(BaseCollection):
         """
         hits = self.list(name=inventory_item.name, company=[inventory_item.company])
         first_hit = next(hits, None)
-        return (
+        if (
             first_hit
             and first_hit.name == inventory_item.name
             and first_hit.company == inventory_item.company
-        )
+        ):
+            return first_hit
+        else:
+            return None
 
     def create(
         self, *, inventory_item: InventoryItem, avoid_duplicates: bool = True
