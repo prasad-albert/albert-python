@@ -7,8 +7,6 @@ from jose import jwt
 import albert
 from albert.utils.exceptions import handle_api_error
 
-EXPIRATION_BUFFER: timedelta = timedelta(minutes=1)
-
 
 def get_token_refresh_time(token: str, *, buffer: timedelta | None) -> datetime:
     claims = jwt.get_unverified_claims(token)
