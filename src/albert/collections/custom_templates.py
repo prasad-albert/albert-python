@@ -12,7 +12,7 @@ class CustomTemplatesCollection(BaseCollection):
 
     def __init__(self, *, session: AlbertSession):
         """
-        Initializes the UnitCollection with the provided session.
+        Initializes the CustomTemplatesCollection with the provided session.
 
         Parameters
         ----------
@@ -29,29 +29,6 @@ class CustomTemplatesCollection(BaseCollection):
         start_key: str | None = None,
         limit: int = 50,
     ) -> Generator[CustomTemplate, None, None]:
-        """
-        Lists unit entities with optional filters.
-
-        Parameters
-        ----------
-        limit : int, optional
-            The maximum number of units to return, by default 50.
-        name : Optional[str], optional
-            The name of the unit to filter by, by default None.
-        category : Optional[UnitCategory], optional
-            The category of the unit to filter by, by default None.
-        order_by : OrderBy, optional
-            The order by which to sort the results, by default OrderBy.DESCENDING.
-        exact_match : bool, optional
-            Whether to match the name exactly, by default False.
-        start_key : Optional[str], optional
-            The starting point for the next set of results, by default None.
-
-        Returns
-        -------
-        Generator
-            A generator of Unit objects.
-        """
         params = {
             "limit": limit,
         }
