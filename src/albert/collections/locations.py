@@ -7,6 +7,7 @@ from albert.session import AlbertSession
 
 class LocationCollection(BaseCollection):
     _updatable_attributes = {"latitude", "longitude", "address", "country", "name"}
+    _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -18,7 +19,7 @@ class LocationCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/locations"
+        self.base_path = f"/api/{LocationCollection._api_version}/locations"
 
     def _list_generator(
         self,
@@ -37,7 +38,7 @@ class LocationCollection(BaseCollection):
             params["country"] = country
 
         while True:
-            response = self.session.get(self.base_url, params=params)
+            response = self.session.get(self.base_path, params=params)
             loc_data = response.json().get("Items", [])
             if not loc_data or loc_data == []:
                 break
@@ -66,7 +67,7 @@ class LocationCollection(BaseCollection):
         Union[Location, None]
             The Location object if found, None otherwise.
         """
-        url = f"{self.base_url}/{id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         loc = response.json()
         found_company = Location(**loc)
@@ -80,6 +81,6 @@ class LocationCollection(BaseCollection):
         patch_payload = self._generate_patch_payload(
             existing=current_object, updated=updated_object
         )
-        url = f"{self.base_url}/{updated_object.id}"
+        url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
         return self.get_by_id(id=updated_object.id)

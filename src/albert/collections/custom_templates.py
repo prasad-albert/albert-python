@@ -9,6 +9,7 @@ from albert.utils.exceptions import ForbiddenError
 
 class CustomTemplatesCollection(BaseCollection):
     # _updatable_attributes = {"symbol", "synonyms", "category"}
+    _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -20,7 +21,7 @@ class CustomTemplatesCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/customtemplates"
+        self.base_path = f"/api/{CustomTemplatesCollection._api_version}/customtemplates"
 
     def _list_generator(
         self,
@@ -38,7 +39,7 @@ class CustomTemplatesCollection(BaseCollection):
             params["startKey"] = start_key
 
         while True:
-            response = self.session.get(self.base_url + "/search", params=params)
+            response = self.session.get(self.base_path + "/search", params=params)
             templates = response.json().get("Items", [])
             if not templates or templates == []:
                 break
@@ -87,7 +88,7 @@ class CustomTemplatesCollection(BaseCollection):
         CustomTemplate
             The CutomTemplate with the provided ID (or None if not found)
         """
-        url = f"{self.base_url}/{id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         template = CustomTemplate(**response.json())
         return template

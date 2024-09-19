@@ -4,6 +4,8 @@ from albert.session import AlbertSession
 
 
 class RoleCollection(BaseCollection):
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         """
         Initializes the RoleCollection with the provided session.
@@ -14,7 +16,7 @@ class RoleCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/acl/roles"
+        self.base_path = f"/api/{RoleCollection._api_version}/acl/roles"
 
     # TODO: move from params to kwargs
     def list(self, *, params: dict | None = None) -> list[Role]:
@@ -32,6 +34,6 @@ class RoleCollection(BaseCollection):
         """
         if params is None:
             params = {}
-        response = self.session.get(self.base_url, params=params)
+        response = self.session.get(self.base_path, params=params)
         role_data = response.json().get("Items", [])
         return [Role(**r) for r in role_data]

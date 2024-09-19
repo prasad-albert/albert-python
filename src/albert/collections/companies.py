@@ -17,7 +17,7 @@ class CompanyCollection(BaseCollection):
 
     Attributes
     ----------
-    base_url : str
+    base_path : str
         The base URL for company API requests.
     company_cache : dict
         A cache of company objects.
@@ -39,6 +39,7 @@ class CompanyCollection(BaseCollection):
     """
 
     _updatable_attributes = {"name"}
+    _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -50,7 +51,7 @@ class CompanyCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/companies"
+        self.base_path = f"/api/{CompanyCollection._api_version}/companies"
         self.company_cache = {}
 
     def _remove_from_cache_by_id(self, *, id: str):
@@ -94,7 +95,7 @@ class CompanyCollection(BaseCollection):
         if start_key:
             params["startKey"] = start_key
         while True:
-            response = self.session.get(self.base_url, params=params)
+            response = self.session.get(self.base_path, params=params)
 
             company_data = response.json().get("Items", [])
             if not company_data or company_data == []:
@@ -169,7 +170,7 @@ class CompanyCollection(BaseCollection):
         Union[Company, None]
             The Company object if found, None otherwise.
         """
-        url = f"{self.base_url}/{id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         company = response.json()
         found_company = Company(**company)
@@ -221,13 +222,13 @@ class CompanyCollection(BaseCollection):
             return company
 
         payload = company.model_dump(by_alias=True, exclude_unset=True)
-        response = self.session.post(self.base_url, json=payload)
+        response = self.session.post(self.base_path, json=payload)
         this_company = Company(**response.json())
         self.company_cache[this_company.name] = this_company
         return this_company
 
     def delete(self, *, id: str) -> bool:
-        url = f"{self.base_url}/{id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
         self._remove_from_cache_by_id(id=id)
         return True
@@ -253,7 +254,7 @@ class CompanyCollection(BaseCollection):
             logging.error(f'Company "{old_name}" not found.')
             return None
         company_id = company.id
-        endpoint = f"{self.base_url}/{company_id}"
+        endpoint = f"{self.base_path}/{company_id}"
         payload = {
             "data": [
                 {
@@ -278,7 +279,7 @@ class CompanyCollection(BaseCollection):
         patch_payload = self._generate_patch_payload(
             existing=current_object, updated=updated_object
         )
-        url = f"{self.base_url}/{updated_object.id}"
+        url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
         updated_company = self.get_by_id(cas_id=updated_object.id)
         self._remove_from_cache_by_id(id=updated_object.id)
