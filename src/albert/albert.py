@@ -2,6 +2,7 @@ import os
 
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
+from albert.collections.custom_templates import CustomTemplatesCollection
 from albert.collections.inventory import InventoryCollection
 from albert.collections.locations import LocationCollection
 from albert.collections.lots import LotCollection
@@ -106,3 +107,7 @@ class Albert:
     @property
     def worksheets(self) -> WorksheetCollection:
         return WorksheetCollection(session=self.session)
+
+    @property
+    def templates(self) -> CustomTemplatesCollection:
+        return CustomTemplatesCollection(session=self.session)

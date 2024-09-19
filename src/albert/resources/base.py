@@ -67,3 +67,8 @@ class BaseSessionModel(BaseAlbertModel):
             "to be created independently from calls to the API."
         ),
     )
+
+
+class BaseEntityLink(BaseAlbertModel):
+    id: str
+    name: str | None = Field(default=None)

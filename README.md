@@ -23,7 +23,7 @@ Resource Collections act as managers for Resource Models. They provide methods f
 ## Usage
 ### Initialization
 To use the SDK, you need to initialize the Albert client with your base URL and bearer token.
-By default, the client Albert class will use the environment varribale `ALBERT_BEARER_TOKEN` and base_url `https://dev.albertinventdev.com`
+By default, the client Albert class will use the environment varribale `ALBERT_TOKEN` and base_url `https://dev.albertinventdev.com`
 
 ```python
 from albert.albert import Albert
@@ -31,7 +31,7 @@ from albert.albert import Albert
 # Initialize the client
 client = Albert(
     base_url="https://dev.albertinventdev.com", # default value
-    bearer_token = os.getenv("ALBERT_BEARER_TOKEN") # default value
+    token = os.getenv("ALBERT_TOKEN") # default value
     )
 ```
 
