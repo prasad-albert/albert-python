@@ -18,7 +18,8 @@ def _list_asserts(returned_list):
         if hasattr(u, "data"):
             for d in u.data:
                 assert isinstance(d, CustomTemplateData)
-    # assert found #None of test yet to check :(
+    # assert found
+    # TODO: No custom templates loaded to test yet  :(
 
 
 @pytest.fixture(scope="module")
