@@ -60,11 +60,34 @@ class CustomTemplatesCollection(BaseCollection):
         *,
         name: str | builtins.list[str] | None = None,
     ) -> Iterator[CustomTemplate]:
+        """lists Custom Templates
+
+        Parameters
+        ----------
+        name : str | builtins.list[str] | None, optional
+            Name to search on, by default None
+
+        Yields
+        ------
+        Iterator[CustomTemplate]
+            An Iterator with CustomTemplate Objects
+        """
         return self._list_generator(name=name)
 
-    def get_by_id(self, *, id):
+    def get_by_id(self, *, id) -> CustomTemplate:
+        """Get a Custom Template by ID
+
+        Parameters
+        ----------
+        id : str
+            id of the custom template
+
+        Returns
+        -------
+        CustomTemplate
+            The CutomTemplate with the provided ID (or None if not found)
+        """
         url = f"{self.base_url}/{id}"
         response = self.session.get(url)
-        print(response.json())
         template = CustomTemplate(**response.json())
         return template
