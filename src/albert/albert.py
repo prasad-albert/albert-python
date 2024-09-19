@@ -6,6 +6,7 @@ from albert.collections.custom_templates import CustomTemplatesCollection
 from albert.collections.inventory import InventoryCollection
 from albert.collections.locations import LocationCollection
 from albert.collections.lots import LotCollection
+from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.projects import ProjectCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.tags import TagCollection
@@ -111,3 +112,7 @@ class Albert:
     @property
     def templates(self) -> CustomTemplatesCollection:
         return CustomTemplatesCollection(session=self.session)
+
+    @property
+    def parameter_groups(self) -> ParameterGroupCollection:
+        return ParameterGroupCollection(session=self.session)

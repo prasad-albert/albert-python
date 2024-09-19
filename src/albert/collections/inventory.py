@@ -309,7 +309,7 @@ class InventoryCollection(BaseCollection):
             "name",
             "description",
             "unit_category",
-            "inventory_class",
+            "security_class",
             "alias",
         }
 

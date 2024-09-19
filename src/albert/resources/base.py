@@ -12,6 +12,14 @@ class Status(str, Enum):
     INACTIVE = "inactive"
 
 
+class SecurityClass(str, Enum):
+    SHARED = "shared"
+    RESTRICTED = "restricted"
+    CONFIDENTIAL = "confidential"
+    PRIVATE = "private"
+    PUBLIC = "public"
+
+
 class AuditFields(BaseModel):
     by: str = Field(None)
     by_name: str | None = Field(None, alias="byName")

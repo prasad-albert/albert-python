@@ -3,6 +3,7 @@ from typing import Any
 
 from pydantic import Field, model_validator
 
+from albert.resources.base import SecurityClass
 from albert.resources.companies import Company
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.tags import Tag
@@ -12,12 +13,6 @@ class ProjectCategory(str, Enum):
     DEVELOPMENT = "Development"
     RESEARCH = "Research"
     PRODUCTION = "Production"
-
-
-class ProjectClass(str, Enum):
-    PUBLIC = "public"
-    PRIVATE = "private"
-    CONFIDENTIAL = "confidential"
 
 
 class Project(BaseTaggedEntity):
@@ -32,7 +27,7 @@ class Project(BaseTaggedEntity):
         The description of the project.
     category : ProjectCategory
         The category of the project.
-    project_class : Optional[ProjectClass]
+    project_class : Optional[SecurityClass]
         The classification of the project.
     tags : List[Tag]
         The tags associated with the project.
@@ -45,27 +40,27 @@ class Project(BaseTaggedEntity):
     name: str
     description: str
     category: ProjectCategory
-    project_class: ProjectClass | None = None
+    security_class: SecurityClass = Field(default=SecurityClass.PUBLIC, alias="class")
     tags: list[Tag] = []
     id: str | None = Field(None, alias="projectId")
     company: Company | None = None
 
-    @model_validator(mode="before")
-    @classmethod
-    def set_default_class(cls, values: dict[str, Any]) -> dict[str, Any]:
-        """
-        Set the default project class to PUBLIC if none is provided.
+    # @model_validator(mode="before")
+    # @classmethod
+    # def set_default_class(cls, values: dict[str, Any]) -> dict[str, Any]:
+    #     """
+    #     Set the default project class to PUBLIC if none is provided.
 
-        Parameters
-        ----------
-        values : Dict[str, Any]
-            A dictionary of field values.
+    #     Parameters
+    #     ----------
+    #     values : Dict[str, Any]
+    #         A dictionary of field values.
 
-        Returns
-        -------
-        Dict[str, Any]
-            Updated field values with a default project class if not provided.
-        """
-        if "project_class" not in values or values["project_class"] is None:
-            values["project_class"] = ProjectClass.PUBLIC
-        return values
+    #     Returns
+    #     -------
+    #     Dict[str, Any]
+    #         Updated field values with a default project class if not provided.
+    #     """
+    #     if "cla" not in values or values["project_class"] is None:
+    #         values["project_class"] = SecurityClass.PUBLIC
+    #     return values
