@@ -30,7 +30,7 @@ class TemplateCategory(str, Enum):
 
 
 class GeneralData(BaseTaggedEntity):
-    category: Literal[TemplateCategory.GENERAL]
+    category: Literal[TemplateCategory.GENERAL] = TemplateCategory.GENERAL
 
 
 class Priority(str, Enum):
@@ -81,7 +81,7 @@ class Block(BaseTaggedEntity):
 
 
 class QCBatchData(BaseTaggedEntity):
-    category: Literal[TemplateCategory.QC_BATCH]
+    category: Literal[TemplateCategory.QC_BATCH] = TemplateCategory.QC_BATCH
     project: BaseEntityLink | None = Field(alias="Project", default=None)
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     workflow: list[BaseEntityLink] = Field(default=None, alias="Workflow")
@@ -92,7 +92,7 @@ class QCBatchData(BaseTaggedEntity):
 
 
 class BatchData(BaseTaggedEntity):
-    category: Literal[TemplateCategory.BATCH]
+    category: Literal[TemplateCategory.BATCH] = TemplateCategory.BATCH
     assigned_to: BaseEntityLink | None = Field(alias="AssignedTo", default=None)
     project: BaseEntityLink | None = Field(alias="Project", default=None)
     name: str | None = Field(default=None)
@@ -104,7 +104,7 @@ class BatchData(BaseTaggedEntity):
 
 
 class PropertyData(BaseTaggedEntity):
-    category: Literal[TemplateCategory.PROPERTY]
+    category: Literal[TemplateCategory.PROPERTY] = TemplateCategory.PROPERTY
     name: str | None = Field(default=None)
     blocks: list[Block] = Field(default=[], alias="Blocks")  # Needs to be it's own class
     priority: Priority  # enum?!
@@ -116,14 +116,14 @@ class PropertyData(BaseTaggedEntity):
 
 
 class SheetData(BaseTaggedEntity):
-    category: Literal[TemplateCategory.SHEET]
+    category: Literal[TemplateCategory.SHEET] = TemplateCategory.SHEET
     designs: list[DesignLink] = Field(default=None, alias="Designs")
     formula_info: list = Field(default=[], alias="FormulaInfo")
     task_rows: list[BaseEntityLink] = Field(default=[], alias="TaskRows")
 
 
 class NotebookData(BaseTaggedEntity):
-    category: Literal[TemplateCategory.NOTEBOOK]
+    category: Literal[TemplateCategory.NOTEBOOK] = TemplateCategory.NOTEBOOK
 
 
 CustomTemplateData = Annotated[
@@ -139,18 +139,18 @@ class ACLType(str, Enum):
 
 
 class TeamACL(BaseAlbertModel):
-    type: Literal[ACLType.TEAM]
+    type: Literal[ACLType.TEAM] = ACLType.TEAM
     id: str
     fgc: str
 
 
 class OwnerACL(BaseAlbertModel):
-    type: Literal[ACLType.OWNER]
+    type: Literal[ACLType.OWNER] = ACLType.OWNER
     id: str
 
 
 class MemberACL(BaseAlbertModel):
-    type: Literal[ACLType.MEMBER]
+    type: Literal[ACLType.MEMBER] = ACLType.MEMBER
     id: str
     fgc: str
 
