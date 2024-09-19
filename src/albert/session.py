@@ -10,13 +10,15 @@ from albert.utils.exceptions import handle_api_error
 EXPIRATION_BUFFER: timedelta = timedelta(minutes=1)
 
 
-def get_token_expiration(token: str) -> datetime:
+def get_token_refresh_time(token: str, *, buffer: timedelta | None) -> datetime:
     claims = jwt.get_unverified_claims(token)
     try:
-        return datetime.fromtimestamp(claims["exp"], tz=timezone.utc)
+        exp_time = datetime.fromtimestamp(claims["exp"], tz=timezone.utc)
     except ValueError:
         # exp is in millis, not seconds, so datetime fails
-        return datetime.fromtimestamp(claims["exp"] / 1000, tz=timezone.utc)
+        exp_time = datetime.fromtimestamp(claims["exp"] / 1000, tz=timezone.utc)
+    buffer = buffer or timedelta(seconds=0)
+    return exp_time - buffer
 
 
 class AlbertSession(requests.Session):
@@ -50,23 +52,27 @@ class AlbertSession(requests.Session):
         self._client_id = client_id
         self._client_secret = client_secret
         self._access_token = None
+        self._access_token_refresh_time = None
 
         if self.has_client_credentials:
-            self._get_client_token()
+            self._refresh_token()
         elif token is not None:
-            self._access_token = token
+            self._set_access_token(token)
         else:
             raise ValueError("Either client credentials or token must be specified.")
-        self._set_auth_header()
 
     @property
     def has_client_credentials(self) -> bool:
         return self._client_id is not None and self._client_secret is not None
 
-    def _set_auth_header(self) -> None:
+    def _set_access_token(self, token: str) -> None:
+        self._access_token = token
+        self._access_token_refresh_time = get_token_refresh_time(
+            self._access_token, buffer=timedelta(minutes=1)
+        )
         self.headers["Authorization"] = f"Bearer {self._access_token}"
 
-    def _get_client_token(self) -> None:
+    def _get_client_token(self) -> str:
         path = "/api/v3/login/oauth/token"
         payload = {
             "grant_type": "client_credentials",
@@ -79,12 +85,15 @@ class AlbertSession(requests.Session):
             data=payload,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        self._access_token = response.json()["access_token"]
+        return response.json()["access_token"]
 
     def _requires_refresh(self) -> bool:
-        token_expiration = get_token_expiration(self._access_token)
-        deadline = token_expiration - EXPIRATION_BUFFER
-        return datetime.now(timezone.utc) > deadline
+        return datetime.now(timezone.utc) > self._access_token_refresh_time
+
+    def _refresh_token(self) -> None:
+        # TODO: Implement using refresh token once it is working
+        token = self._get_client_token()
+        self._set_access_token(token)
 
     def _request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
         full_url = urljoin(self.base_url, path) if not path.startswith("http") else path
@@ -94,7 +103,5 @@ class AlbertSession(requests.Session):
 
     def request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
         if self._requires_refresh() and self.has_client_credentials:
-            # TODO: Implement using refresh token once it is working
-            self._get_client_token()
-            self._set_auth_header()
+            self._refresh_token()
         return self._request(method, path, *args, **kwargs)
