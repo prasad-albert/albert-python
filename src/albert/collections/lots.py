@@ -4,31 +4,33 @@ from albert.session import AlbertSession
 
 
 class LotCollection(BaseCollection):
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
-        self.base_url = "/api/v3/lots"
+        self.base_path = f"/api/{LotCollection._api_version}/lots"
 
     def create(self, *, lots: list[Lot]) -> list[Lot]:
         payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
-        response = self.session.post(self.base_url, json=payload)
+        response = self.session.post(self.base_path, json=payload)
 
         return [self._rehydrate_lot(lot) for lot in response.json().get("CreatedLots", [])]
 
     def get_by_id(self, *, lot_id: str) -> Lot:
-        url = f"{self.base_url}/{lot_id}"
+        url = f"{self.base_path}/{lot_id}"
         response = self.session.get(url)
 
         return Lot(**response.json())
 
     # def update(self, *, lot_id: str, patch_data: Dict[str, Any]) -> bool:
     #     """TODO: Follow pattern for other Update methods. This will need a custom Patch creation method."""
-    #     url = f"{self.base_url}/{lot_id}"
+    #     url = f"{self.base_path}/{lot_id}"
     #     response = self.session.patch(url, json=patch_data)
     #
     #     return lot_id
 
     def delete(self, *, lot_id: str) -> bool:
-        url = f"{self.base_url}/{lot_id}"
+        url = f"{self.base_path}/{lot_id}"
         self.session.delete(url)
 
         return True
@@ -63,7 +65,7 @@ class LotCollection(BaseCollection):
 #         params["locationName"] = locationName
 
 #     response = self.session.get(
-#         self.base_url, params=params
+#         self.base_path, params=params
 #     )
 #
 #

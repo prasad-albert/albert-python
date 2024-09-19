@@ -17,7 +17,7 @@ class TagCollection(BaseCollection):
 
     Attributes
     ----------
-    base_url : str
+    base_path : str
         The base URL for tag API requests.
     tag_cache : dict
         A cache of tag objects.
@@ -40,6 +40,8 @@ class TagCollection(BaseCollection):
         Renames an existing tag entity.
     """
 
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         """
         Initializes the TagCollection with the provided session.
@@ -51,7 +53,7 @@ class TagCollection(BaseCollection):
         """
         super().__init__(session=session)
         self.tag_cache = {}
-        self.base_url = "/api/v3/tags"
+        self.base_path = f"/api/{TagCollection._api_version}/tags"
 
     def _remove_from_cache_by_id(self, *, id: str):
         name = None
@@ -100,7 +102,7 @@ class TagCollection(BaseCollection):
             params["startKey"] = start_key
 
         while True:
-            response = self.session.get(self.base_url, params=params)
+            response = self.session.get(self.base_path, params=params)
             tags_data = response.json().get("Items", [])
             if not tags_data or tags_data == []:
                 break
@@ -159,7 +161,7 @@ class TagCollection(BaseCollection):
             return True
         params = {"limit": "2", "name": [tag], "exactMatch": str(exact_match).lower()}
 
-        response = self.session.get(self.base_url, params=params)
+        response = self.session.get(self.base_path, params=params)
         tags = response.json().get("Items", [])
         for t in tags:
             found_tag = Tag(**t)
@@ -187,7 +189,7 @@ class TagCollection(BaseCollection):
             logging.warning(f"Tag {existing_tag.tag} already exists with id {existing_tag.id}")
             return existing_tag
         payload = {"name": tag.tag}
-        response = self.session.post(self.base_url, json=payload)
+        response = self.session.post(self.base_path, json=payload)
         tag = Tag(**response.json())
         self.tag_cache[tag.tag.lower()] = tag
         return tag
@@ -206,7 +208,7 @@ class TagCollection(BaseCollection):
         Tag
             The Tag object if found, None otherwise.
         """
-        url = f"{self.base_url}/{tag_id}"
+        url = f"{self.base_path}/{tag_id}"
         response = self.session.get(url)
         tag = Tag(**response.json())
         self.tag_cache[tag.tag] = tag
@@ -247,7 +249,7 @@ class TagCollection(BaseCollection):
         bool
             True if the tag was successfully deleted, False otherwise.
         """
-        url = f"{self.base_url}/{tag_id}"
+        url = f"{self.base_path}/{tag_id}"
         self.session.delete(url)
         self._remove_from_cache_by_id(id=tag_id)
         return True
@@ -287,7 +289,7 @@ class TagCollection(BaseCollection):
                 "id": tag_id,
             }
         ]
-        self.session.patch(self.base_url, json=payload)
+        self.session.patch(self.base_path, json=payload)
         self._remove_from_cache_by_id(id=tag_id)
         updated_tag = self.get_by_id(tag_id=tag_id)
         self.tag_cache[updated_tag.tag] = updated_tag

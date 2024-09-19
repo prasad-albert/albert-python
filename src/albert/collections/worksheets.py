@@ -4,13 +4,15 @@ from albert.session import AlbertSession
 
 
 class WorksheetCollection(BaseCollection):
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
-        self.base_url = "/api/v3/worksheet"
+        self.base_path = f"/api/{WorksheetCollection._api_version}/worksheet"
 
     def get_by_project_id(self, *, project_id: str):
         params = {"type": "project", "id": "PRO" + project_id}
-        response = self.session.get(self.base_url, params=params)
+        response = self.session.get(self.base_path, params=params)
 
         response_json = response.json()
 

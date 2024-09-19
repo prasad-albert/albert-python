@@ -17,7 +17,7 @@ class UnitCollection(BaseCollection):
 
     Attributes
     ----------
-    base_url : str
+    base_path : str
         The base URL for unit API requests.
 
     Methods
@@ -39,6 +39,7 @@ class UnitCollection(BaseCollection):
     """
 
     _updatable_attributes = {"symbol", "synonyms", "category"}
+    _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -50,7 +51,7 @@ class UnitCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/units"
+        self.base_path = f"/api/{UnitCollection._api_version}/units"
         self.unit_cache = {}
 
     def _remove_from_cache_by_id(self, *, id: str):
@@ -79,7 +80,7 @@ class UnitCollection(BaseCollection):
         if self.unit_exists(name=unit.name):
             return self.unit_cache[unit.name]
         response = self.session.post(
-            self.base_url, json=unit.model_dump(by_alias=True, exclude_unset=True)
+            self.base_path, json=unit.model_dump(by_alias=True, exclude_unset=True)
         )
         this_unit = Unit(**response.json())
         self.unit_cache[this_unit.name] = this_unit
@@ -99,7 +100,7 @@ class UnitCollection(BaseCollection):
         Unit
             The Unit object if found, None otherwise.
         """
-        url = f"{self.base_url}/{unit_id}"
+        url = f"{self.base_path}/{unit_id}"
         response = self.session.get(url)
         this_unit = Unit(**response.json())
         self.unit_cache[this_unit.name] = this_unit
@@ -122,7 +123,7 @@ class UnitCollection(BaseCollection):
         unit_id = updated_unit.id
         original_unit = self.get_by_id(unit_id=unit_id)
         patch_data = self._generate_patch_payload(existing=original_unit, updated=updated_unit)
-        url = f"{self.base_url}/{unit_id}"
+        url = f"{self.base_path}/{unit_id}"
         self.session.patch(url, json=patch_data)
         updated_unit = self.get_by_id(unit_id=unit_id)
         self._remove_from_cache_by_id(id=unit_id)
@@ -143,7 +144,7 @@ class UnitCollection(BaseCollection):
         bool
             True if the unit was successfully deleted, False otherwise.
         """
-        url = f"{self.base_url}/{unit_id}"
+        url = f"{self.base_path}/{unit_id}"
         self.session.delete(url)
         self._remove_from_cache_by_id(id=unit_id)
         return True
@@ -234,7 +235,7 @@ class UnitCollection(BaseCollection):
         if not verified is None:
             params["verified"] = str(verified).lower()
         while True:
-            response = self.session.get(self.base_url, params=params)
+            response = self.session.get(self.base_path, params=params)
             units = response.json().get("Items", [])
             if not units or units == []:
                 break

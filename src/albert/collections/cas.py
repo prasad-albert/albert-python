@@ -17,8 +17,8 @@ class CasCollection(BaseCollection):
 
     Attributes
     ----------
-    base_url : str
-        The base URL for CAS API self.session.
+    base_path : str
+        The base path for CAS API.
     cas_cache : dict
         A cache of CAS objects.
 
@@ -41,6 +41,7 @@ class CasCollection(BaseCollection):
     """
 
     _updatable_attributes = {"notes", "description", "smiles"}
+    _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -52,7 +53,7 @@ class CasCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/cas"
+        self.base_path = f"/api/{CasCollection._api_version}/cas"
         self.cas_cache = {}
 
     def _remove_from_cache_by_id(self, *, id):
@@ -102,7 +103,7 @@ class CasCollection(BaseCollection):
         if id:
             params["albertId"] = id
         while True:
-            response = self.session.get(self.base_url, params=params)
+            response = self.session.get(self.base_path, params=params)
             cas_data = response.json().get("Items", [])
             if not cas_data or cas_data == []:
                 break
@@ -189,7 +190,7 @@ class CasCollection(BaseCollection):
             return existing_cas
         else:
             payload = cas.model_dump(by_alias=True, exclude_unset=True)
-            response = self.session.post(self.base_url, json=payload)
+            response = self.session.post(self.base_path, json=payload)
             cas = Cas(**response.json())
             self.cas_cache[cas.number] = cas
             return cas
@@ -208,7 +209,7 @@ class CasCollection(BaseCollection):
         Cas
             The Cas object if found, None otherwise.
         """
-        url = f"{self.base_url}/{cas_id}"
+        url = f"{self.base_path}/{cas_id}"
         response = self.session.get(url)
         cas = Cas(**response.json())
         self.cas_cache[cas.number] = cas
@@ -253,7 +254,7 @@ class CasCollection(BaseCollection):
         bool
             True if the CAS was successfully deleted, False otherwise.
         """
-        url = f"{self.base_url}/{cas_id}"
+        url = f"{self.base_path}/{cas_id}"
         self.session.delete(url)
 
         self._remove_from_cache_by_id(cas_id)
@@ -268,7 +269,7 @@ class CasCollection(BaseCollection):
             existing=current_object, updated=updated_object
         )
 
-        url = f"{self.base_url}/{updated_object.id}"
+        url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
 
         updated_cas = self.get_by_id(cas_id=updated_object.id)

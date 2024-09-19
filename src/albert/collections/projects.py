@@ -18,7 +18,7 @@ class ProjectCollection(BaseCollection):
 
     Attributes
     ----------
-    base_url : str
+    base_path : str
         The base URL for project API requests.
 
     Methods
@@ -35,6 +35,8 @@ class ProjectCollection(BaseCollection):
         Lists projects with optional filters.
     """
 
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         """
         Initialize a ProjectCollection object.
@@ -45,7 +47,7 @@ class ProjectCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/projects"
+        self.base_path = f"/api/{ProjectCollection._api_version}/projects"
 
     def create(self, *, project: Project) -> Project | None:
         """
@@ -71,7 +73,7 @@ class ProjectCollection(BaseCollection):
         if project.company and project.company.id is None:
             company_collection = CompanyCollection(session=self.session)
             project.company = company_collection.create(project.company)
-        response = self.session.post(self.base_url, json=project.to_dict())
+        response = self.session.post(self.base_path, json=project.to_dict())
 
         return Project(**response.json())
 
@@ -89,7 +91,7 @@ class ProjectCollection(BaseCollection):
         Project
             The project object if found
         """
-        url = f"{self.base_url}/{project_id}"
+        url = f"{self.base_path}/{project_id}"
         response = self.session.get(url)
 
         return Project(**response.json())
@@ -110,7 +112,7 @@ class ProjectCollection(BaseCollection):
         bool
             True if the update was successful, False otherwise.
         """
-        url = f"{self.base_url}/{project_id}"
+        url = f"{self.base_path}/{project_id}"
 
         self.session.patch(url, json=patch_data)
 
@@ -130,7 +132,7 @@ class ProjectCollection(BaseCollection):
         bool
             True if the deletion was successful
         """
-        url = f"{self.base_url}/{project_id}"
+        url = f"{self.base_path}/{project_id}"
 
         self.session.delete(url)
 
@@ -181,7 +183,7 @@ class ProjectCollection(BaseCollection):
         if category:
             params["category"] = category
         while True:
-            response = self.session.get(self.base_url, params=params)
+            response = self.session.get(self.base_path, params=params)
 
             raw_projects = response.json().get("Items", [])
             if not raw_projects or raw_projects == []:

@@ -22,7 +22,7 @@ class InventoryCollection(BaseCollection):
 
     Attributes
     ----------
-    base_url : str
+    base_path : str
         The base URL for inventory API requests.
 
     Methods
@@ -39,9 +39,11 @@ class InventoryCollection(BaseCollection):
         Lists inventory items with optional filters.
     """
 
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
-        self.base_url = "/api/v3/inventories"
+        self.base_path = f"/api/{InventoryCollection._api_version}/inventories"
 
     def inventory_exists(self, *, inventory_item: InventoryItem) -> bool:
         """
@@ -127,7 +129,7 @@ class InventoryCollection(BaseCollection):
                 return existing
 
         response = self.session.post(
-            self.base_url,
+            self.base_path,
             json=inventory_item._to_create_api(),  # This endpoint has some custom payload configurations so I don't use the normal model_dump() method
         )
         return InventoryItem(**response.json())
@@ -148,7 +150,7 @@ class InventoryCollection(BaseCollection):
         """
         if not inventory_id.startswith("INV"):
             inventory_id = "INV" + inventory_id
-        url = f"{self.base_url}/{inventory_id}"
+        url = f"{self.base_path}/{inventory_id}"
         response = self.session.get(url)
         return InventoryItem(**response.json())
 
@@ -167,7 +169,7 @@ class InventoryCollection(BaseCollection):
             True if the item was deleted, False otherwise.
         """
         inventory_id = inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
-        url = f"{self.base_url}/{inventory_id}"
+        url = f"{self.base_path}/{inventory_id}"
         self.session.delete(url)
         return True
 
@@ -224,7 +226,7 @@ class InventoryCollection(BaseCollection):
         if company:
             params["manufacturer"] = [c.name for c in company if isinstance(c, Company)]
         while True:
-            response = self.session.get(self.base_url + "/search", params=params)
+            response = self.session.get(self.base_path + "/search", params=params)
             raw_inventory = response.json().get("Items", [])
             start_offset = response.json().get("offset")
             params["offset"] = int(start_offset) + int(limit)
@@ -481,7 +483,7 @@ class InventoryCollection(BaseCollection):
 
         # Complex patching is not working, so I'm going to do this in a loop :(
         # https://teams.microsoft.com/l/message/19:de4a48c366664ce1bafcdbea02298810@thread.tacv2/1724856117312?tenantId=98aab90e-764b-48f1-afaa-02e3c7300653&groupId=35a36a3d-fc25-4899-a1dd-ad9c7d77b5b3&parentMessageId=1724856117312&teamName=Product%20%2B%20Engineering&channelName=General%20-%20API&createdTime=1724856117312
-        url = f"{self.base_url}/{updated_object.id}"
+        url = f"{self.base_path}/{updated_object.id}"
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
             self.session.patch(url, json=change_payload)

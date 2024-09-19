@@ -6,6 +6,8 @@ from albert.session import AlbertSession
 
 
 class UserCollection(BaseCollection):
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         """
         Initializes the UserCollection with the provided session.
@@ -16,7 +18,7 @@ class UserCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.base_url = "/api/v3/users"
+        self.base_path = f"/api/{UserCollection._api_version}/users"
 
     def _list_generator(
         self,
@@ -41,7 +43,7 @@ class UserCollection(BaseCollection):
                 params["offset"] = offset
         while True:
             # status=active&limit=50&text=Lenore&searchFields=name
-            response = self.session.get(self.base_url + "/search", params=params)
+            response = self.session.get(self.base_path + "/search", params=params)
             user_data = response.json().get("Items", [])
             if not user_data or user_data == []:
                 break
@@ -91,7 +93,7 @@ class UserCollection(BaseCollection):
         User
             The User object if found, None otherwise.
         """
-        url = f"{self.base_url}/{user_id}"
+        url = f"{self.base_path}/{user_id}"
         response = self.session.get(url)
         user = User(**response.json())
         return user
@@ -124,11 +126,11 @@ class UserCollection(BaseCollection):
         }
 
         # build and run query
-        response = self.session.post(self.base_url, json=payload)
+        response = self.session.post(self.base_path, json=payload)
         user = User(**response.json())
         return user
 
     def delete(self, *, user_id: str) -> bool:
-        url = f"{self.base_url}/{user_id}"
+        url = f"{self.base_path}/{user_id}"
         self.session.delete(url)
         return True

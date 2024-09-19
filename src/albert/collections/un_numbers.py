@@ -14,9 +14,11 @@ class UnNumberCollection(BaseCollection):
     Creating UN Numbers is not supported via the SDK, as UN Numbers are highly controlled by Albert.
     """
 
+    _api_version = "v3"
+
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
-        self.base_url = "/api/v3/unnumbers"
+        self.base_path = f"/api/{UnNumberCollection._api_version}/unnumbers"
 
     def create(self) -> None:
         """
@@ -25,7 +27,7 @@ class UnNumberCollection(BaseCollection):
         raise NotImplementedError()
 
     def get_by_id(self, *, un_number_id: str) -> UnNumber | None:
-        url = f"{self.base_url}/{un_number_id}"
+        url = f"{self.base_path}/{un_number_id}"
         response = self.session.get(url)
         return UnNumber(**response.json())
 
@@ -44,7 +46,7 @@ class UnNumberCollection(BaseCollection):
             if exact_match:
                 params["exactMatch"] = str(exact_match).lower()
         while True:
-            response = self.session.get(self.base_url, params=params)
+            response = self.session.get(self.base_path, params=params)
             un_numbers = response.json().get("Items", [])
             if not un_numbers or un_numbers == []:
                 break
