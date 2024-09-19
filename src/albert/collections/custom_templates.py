@@ -1,9 +1,10 @@
 import builtins
 from collections.abc import Generator, Iterator
 
-from albert.collections.base import BaseCollection, OrderBy
+from albert.collections.base import BaseCollection
 from albert.resources.custom_templates import CustomTemplate
 from albert.session import AlbertSession
+from albert.utils.exceptions import ForbiddenError
 
 
 class CustomTemplatesCollection(BaseCollection):
@@ -65,13 +66,12 @@ class CustomTemplatesCollection(BaseCollection):
             if not templates or templates == []:
                 break
             for t in templates:
-                # print(t["albertId"])
                 try:
-                    # print(t)
                     # Like InventoryItems I need to add a get here.
+                    # May want to swap to lazy-load later for speed
                     yield self.get_by_id(id=t["albertId"])
-                    # yield CustomTemplate(**t)
-                except:
+                except ForbiddenError:
+                    print("no access!!")
                     continue
             start_key = response.json().get("lastKey")
             if not start_key:
@@ -88,7 +88,6 @@ class CustomTemplatesCollection(BaseCollection):
     def get_by_id(self, *, id):
         url = f"{self.base_url}/{id}"
         response = self.session.get(url)
-        # print(response.json())
-        # print("----")
+        print(response.json())
         template = CustomTemplate(**response.json())
         return template

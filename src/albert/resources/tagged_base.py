@@ -29,6 +29,8 @@ class BaseTaggedEntity(BaseAlbertModel):
     @classmethod
     def convert_tags(cls, data: dict[str, Any]) -> dict[str, Any]:
         tags = data.get("tags")
+        if not tags:
+            tags = data.get("Tags")
         if tags:
             new_tags = []
             for t in tags:
@@ -36,6 +38,8 @@ class BaseTaggedEntity(BaseAlbertModel):
                     new_tags.append(t)
                 elif isinstance(t, str):
                     new_tags.append(Tag.from_string(t))
+                elif isinstance(t, dict):
+                    new_tags.append(Tag(**t))
                 else:
                     # We do not expect this else to be hit because tags should only be Tag or str
                     logging.warning(f"Unexpected value for Tag. {t} of type {type(t)}")
