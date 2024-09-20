@@ -1,7 +1,6 @@
 from enum import Enum
-from typing import Any
 
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from albert.resources.base import SecurityClass
 from albert.resources.companies import Company

@@ -59,7 +59,7 @@ def test_user_crud(client: Albert):
     existing_loc = next(client.locations.list())
     test_user = User(
         name="Fake User SDK Testing",
-        email="faux_person@albertinvent.com",
+        email="testcase_faux_person@albertinvent.com",
         roles=[existing_role],
         location=existing_loc,
     )
