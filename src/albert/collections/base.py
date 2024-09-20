@@ -41,7 +41,7 @@ class BaseCollection:
             if old_value is None and new_value is not None:
                 # Add new attribute
                 payload["data"].append(
-                    {"operation": "add", "attribute": alias, "newValue": new_value}
+                    {"operation": "add", "attribute": alias, "newValue": str(new_value)}
                 )
             elif old_value is not None and new_value != old_value:
                 # Update existing attribute
@@ -49,8 +49,8 @@ class BaseCollection:
                     {
                         "operation": "update",
                         "attribute": alias,
-                        "oldValue": old_value,
-                        "newValue": new_value,
+                        "oldValue": str(old_value),
+                        "newValue": str(new_value),
                     }
                 )
 

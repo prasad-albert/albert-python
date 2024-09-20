@@ -75,7 +75,7 @@ class LocationCollection(BaseCollection):
 
     def update(self, *, updated_object: Location) -> Location:
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(updated_object.id)
+        current_object = self.get_by_id(id=updated_object.id)
 
         # Generate the PATCH payload
         patch_payload = self._generate_patch_payload(
@@ -84,3 +84,51 @@ class LocationCollection(BaseCollection):
         url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
         return self.get_by_id(id=updated_object.id)
+
+    def location_exists(self, *, location: Location):
+        hit = next(self.list(name=location.name, country=location.country), None)
+        if hit and hit.name.lower() == location.name.lower() and hit.country == location.country:
+            return hit
+        else:
+            return None
+
+    def create(self, *, location: Location) -> Location:
+        """
+        Creates a new Location entity.
+
+        Parameters
+        ----------
+        location : Location
+            The Location object to create.
+
+        Returns
+        -------
+        Location
+            The created Location object.
+        """
+        exists = self.location_exists(location=location)
+        if exists:
+            return exists
+
+        payload = location.model_dump(by_alias=True, exclude_unset=True)
+        response = self.session.post(self.base_path, json=payload)
+
+        return Location(**response.json())
+
+    def delete(self, *, location_id: str) -> bool:
+        """
+        Deletes a Location entity.
+
+        Parameters
+        ----------
+        location_id : Str
+            The id of the Location object to delete.
+
+        Returns
+        -------
+        bool
+            True if deleted.
+        """
+        url = f"{self.base_path}/{location_id}"
+        self.session.delete(url)
+        return True
