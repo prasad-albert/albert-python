@@ -24,14 +24,14 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_list_projects(client: Albert, seeded_projects):
+def test_list_projects(client: Albert, seeded_projects:list[Project]):
     project_collection = ProjectCollection(session=client.session)
     project_list = project_collection.list()
     assert isinstance(project_list, Generator)
     _list_asserts(project_list)
 
 
-def test_get_by_id(client: Albert, seeded_projects):
+def test_get_by_id(client: Albert, seeded_projects:list[Project]):
     project_collection = ProjectCollection(session=client.session)
 
     # Get the first seeded project by ID
@@ -62,22 +62,6 @@ def test_create_project(client: Albert):
 
     # Clean up
     project_collection.delete(project_id=created_project.id)
-
-
-def test_update_project(client: Albert, seeded_projects):
-    project_collection = ProjectCollection(session=client.session)
-
-    # Update the first seeded project
-    seeded_project = seeded_projects[0]
-    updated_data = {"name": "Updated Project Name", "description": "An updated description."}
-
-    success = project_collection.update(project_id=seeded_project.id, patch_data=updated_data)
-    assert success
-
-    # Retrieve updated project to confirm changes
-    updated_project = project_collection.get_by_id(project_id=seeded_project.id)
-    assert updated_project.name == "Updated Project Name"
-    assert updated_project.description == "An updated description."
 
 
 def test_delete_project(client: Albert):

@@ -24,22 +24,23 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_simple_company_list(client: Albert, seeded_companies):
+def test_simple_company_list(client: Albert, seeded_companies:list[Company]):
     simple_list = client.companies.list()
     assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
 
-def test_advanced_company_list(client: Albert, seeded_companies):
-    adv_list = client.companies.list(name="Umbrella Corp", exact_match=True)
+def test_advanced_company_list(client: Albert, seeded_companies:list[Company]):
+    name = seeded_companies[1].name
+    adv_list = client.companies.list(name=name, exact_match=True)
     assert isinstance(adv_list, Generator)
     adv_list = list(adv_list)
     for c in adv_list:
-        assert "umbrella corp" in c.name.lower()
+        assert name in c.name.lower()
     _list_asserts(adv_list)
 
 
-def test_company_get_by(client: Albert, seeded_companies):
+def test_company_get_by(client: Albert, seeded_companies:list[Company]):
     test_name = seeded_companies[0].name
     company = client.companies.get_by_name(name=test_name)
     assert isinstance(company, Company)
