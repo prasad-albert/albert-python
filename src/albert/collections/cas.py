@@ -257,7 +257,7 @@ class CasCollection(BaseCollection):
         url = f"{self.base_path}/{cas_id}"
         self.session.delete(url)
 
-        self._remove_from_cache_by_id(cas_id)
+        self._remove_from_cache_by_id(id=cas_id)
         return True
 
     def update(self, *, updated_object: BaseAlbertModel) -> BaseAlbertModel:

@@ -6,6 +6,8 @@ from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.tags import Tag
 
+from ..seeding.tags import seeded_tags
+
 
 @pytest.fixture(scope="module")
 def client():
@@ -13,39 +15,45 @@ def client():
 
 
 def _list_asserts(returned_list):
+    found = False
     for i, u in enumerate(returned_list):
+        found = True
         # just check the first 100
         if i == 100:
             break
+
         assert isinstance(u, Tag)
         assert isinstance(u.tag, str)
         assert isinstance(u.id, str)
         assert u.id.startswith("TAG")
+    assert found
 
 
-def test_simple_tags_list(client):
+def test_simple_tags_list(client: Albert, seeded_tags):
     simple_list = client.tags.list()
     assert isinstance(simple_list, Generator)
+    simple_list = list(simple_list)
     _list_asserts(simple_list)
 
 
-def test_advanced_tags_list(client):
+def test_advanced_tags_list(client: Albert, seeded_tags):
     adv_list = client.tags.list(
-        name="Lenore",
-        exact_match=False,
+        name="inventory-tag-1",
+        exact_match=True,
         order_by=OrderBy.ASCENDING,
     )
     assert isinstance(adv_list, Generator)
+    adv_list = list(adv_list)
+
     for t in adv_list:
-        assert "lenore" in t.tag.lower()
+        assert "inventory-tag-1" in t.tag.lower()
     _list_asserts(adv_list)
 
 
-def test_get_tag_by(client):
-    tag_test_str = "Lenore's New Tag!"
-    if not client.tags.tag_exists(tag=tag_test_str, exact_match=True):
-        client.tags.create(tag=Tag(tag=tag_test_str))
-    tag = client.tags.get_by_tag(tag=tag_test_str, exact_match=False)
+def test_get_tag_by(client: Albert, seeded_tags):
+    tag_test_str = "inventory-tag-2"
+
+    tag = client.tags.get_by_tag(tag=tag_test_str, exact_match=True)
 
     assert isinstance(tag, Tag)
     assert tag.tag.lower() == tag_test_str.lower()
@@ -55,7 +63,8 @@ def test_get_tag_by(client):
     assert by_id.tag.lower() == tag_test_str.lower()
 
 
-def test_tag_exists(client: Albert):
+def test_tag_exists(client: Albert, seeded_tags):
+    assert client.tags.tag_exists(tag="company-tag-2")
     assert not client.tags.tag_exists(tag="Nonesense tag no one would ever make!893y58932y58923")
 
 
