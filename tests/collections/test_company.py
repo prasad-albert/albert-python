@@ -36,7 +36,7 @@ def test_advanced_company_list(client: Albert, seeded_companies:list[Company]):
     assert isinstance(adv_list, Generator)
     adv_list = list(adv_list)
     for c in adv_list:
-        assert name in c.name.lower()
+        assert name.lower() in c.name.lower()
     _list_asserts(adv_list)
 
 
