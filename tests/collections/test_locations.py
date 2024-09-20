@@ -4,9 +4,7 @@ import pytest
 
 from albert.albert import Albert
 from albert.collections.locations import Location
-
-from ..seeding.locations import seeded_locations
-
+from tests.seeding.locations import seeded_locations
 
 @pytest.fixture(scope="module")
 def client():

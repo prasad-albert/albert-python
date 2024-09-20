@@ -229,7 +229,7 @@ class UnitCollection(BaseCollection):
         if name:
             params["name"] = name if isinstance(name, list) else [name]
         if category:
-            params["category"] = category.value
+            params["category"] = category if isinstance(category,str) else category.value
         if start_key:
             params["startKey"] = start_key
         if not verified is None:

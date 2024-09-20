@@ -4,9 +4,7 @@ import pytest
 
 from albert.albert import Albert
 from albert.collections.companies import Company
-
-from ..seeding.companies import seeded_companies
-
+from tests.seeding.companies import seeded_companies
 
 @pytest.fixture(scope="module")
 def client():

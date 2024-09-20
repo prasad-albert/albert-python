@@ -136,7 +136,7 @@ class InventoryItem(BaseTaggedEntity):
     _symbols: list[dict] | None = PrivateAttr(default=None)  # read only: comes from attachments
     _un_number: UnNumber | None = PrivateAttr(default=None)  # Read only: Comes from attachments
     _acls: list[dict] | None = PrivateAttr(default=None)  # read only
-    metadata: dict | None = Field(default=None, alias="Metadata")  # read only
+    metadata: dict | None = Field(default=None, alias="Metadata")
     _minimum: list[dict[str, Any]] | None = PrivateAttr(default=None)  # To do
 
     def __init__(self, **data: Any):

@@ -5,8 +5,7 @@ import pytest
 from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.tags import Tag
-
-from ..seeding.tags import seeded_tags
+from tests.seeding.tags import seeded_tags
 
 
 @pytest.fixture(scope="module")

@@ -28,10 +28,12 @@ class LocationCollection(BaseCollection):
         name: list[str] | str = None,
         country: str = None,
         start_key: str = None,
+        exact_match:bool = False
     ) -> Generator[Location, None, None]:
         params = {"limit": limit}
         if name:
             params["name"] = name if isinstance(name, list) else [name]
+            # params["exactMatch"] = str(exact_match).lower()
         if start_key:
             params["startKey"] = start_key
         if country:
@@ -39,6 +41,7 @@ class LocationCollection(BaseCollection):
 
         while True:
             response = self.session.get(self.base_path, params=params)
+            print(response.request.url)
             loc_data = response.json().get("Items", [])
             if not loc_data or loc_data == []:
                 break
@@ -50,8 +53,8 @@ class LocationCollection(BaseCollection):
                 break
             params["startKey"] = start_key
 
-    def list(self, *, name: str | list[str] = None, country: str = None) -> Iterator[Location]:
-        return self._list_generator(name=name, country=country)
+    def list(self, *, name: str | list[str] = None, country: str = None, exact_match:bool = False) -> Iterator[Location]:
+        return self._list_generator(name=name, country=country, exact_match=exact_match)
 
     def get_by_id(self, *, id: str) -> Location | None:
         """
@@ -86,11 +89,12 @@ class LocationCollection(BaseCollection):
         return self.get_by_id(id=updated_object.id)
 
     def location_exists(self, *, location: Location):
-        hit = next(self.list(name=location.name, country=location.country), None)
-        if hit and hit.name.lower() == location.name.lower() and hit.country == location.country:
-            return hit
-        else:
-            return None
+        hits =self.list(name=location.name, country=location.country, exact_match=True)
+        if hits:
+           for hit in hits:
+            if hit and hit.name.lower() == location.name.lower() and hit.country == location.country:
+                return hit
+        return None
 
     def create(self, *, location: Location) -> Location:
         """

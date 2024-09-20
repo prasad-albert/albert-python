@@ -6,9 +6,7 @@ from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.cas import Cas
 from albert.utils.exceptions import AlbertAPIError
-
-from ..seeding.cas import seeded_cas
-
+from tests.seeding.cas import seeded_cas
 
 @pytest.fixture(scope="module")
 def client():

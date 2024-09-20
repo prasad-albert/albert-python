@@ -73,7 +73,9 @@ class ProjectCollection(BaseCollection):
         if project.company and project.company.id is None:
             company_collection = CompanyCollection(session=self.session)
             project.company = company_collection.create(project.company)
-        response = self.session.post(self.base_path, json=project.to_dict())
+        response = self.session.post(
+            self.base_path, json=project.model_dump(by_alias=True, exclude_unset=True)
+        )
 
         return Project(**response.json())
 
