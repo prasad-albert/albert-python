@@ -9,12 +9,14 @@ from albert.resources.locations import Location
 from albert.resources.projects import Project
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
-from tests.seeding.cas import generate_cas_seeds
-from tests.seeding.companies import generate_company_seeds
-from tests.seeding.locations import generate_location_seeds
-from tests.seeding.projects import generate_project_seeds
-from tests.seeding.tags import generate_tag_seeds
-from tests.seeding.units import generate_unit_seeds
+from tests.seeding import (
+    generate_cas_seeds,
+    generate_company_seeds,
+    generate_location_seeds,
+    generate_project_seeds,
+    generate_tag_seeds,
+    generate_unit_seeds,
+)
 
 
 @pytest.fixture(scope="session")
