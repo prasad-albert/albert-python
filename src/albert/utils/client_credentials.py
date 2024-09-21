@@ -5,7 +5,7 @@ from pydantic import BaseModel, SecretStr
 
 
 class ClientCredentials(BaseModel):
-    """Client authentication information for the Albert API."""
+    """Client authentication credentials for the Albert API."""
 
     id: str
     secret: SecretStr

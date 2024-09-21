@@ -26,11 +26,10 @@ class Albert:
     base_url : str, optional
         The base URL of the Albert API (default is "https://dev.albertinventdev.com").
     token : str, optional
-        The token for authentication (default is retrieved from environment variable "ALBERT_TOKEN").
-    client_id: str, optional
-        The client ID for programmatic authentication (default is retrieved from environment variable "ALBERT_CLIENT_ID").
-    client_secret: str, optional
-        The client secret key for programmatic authentication (default is retrieved from environment variable "ALBERT_CLIENT_SECRET").
+        The token for authentication (default is read from environment variable "ALBERT_TOKEN").
+    client_credentials: ClientCredentials, optional
+        The client credentials for programmatic authentication
+        (default is read from the environment varaibles "ALBERT_CLIENT_ID" and "ALBERT_CLIENT_SECRET").
 
     Attributes
     ----------
