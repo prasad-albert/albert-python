@@ -1,15 +1,8 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.collections.units import Unit, UnitCategory
-from tests.seeding.units import seeded_units
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
@@ -25,13 +18,13 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_simple_units_list(client:Albert, seeded_units):
+def test_simple_units_list(client: Albert):
     simple_list = client.units.list()
     assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
 
-def test_advanced_units_list(client: Albert, seeded_units:list[Unit]):
+def test_advanced_units_list(client: Albert, seeded_units: list[Unit]):
     test_unit = seeded_units[1]
     adv_list = client.units.list(
         name=test_unit.name,
@@ -47,7 +40,7 @@ def test_advanced_units_list(client: Albert, seeded_units:list[Unit]):
     _list_asserts(adv_list)
 
 
-def test_get_unit_by(client: Albert, seeded_units:list[Unit]):
+def test_get_unit_by(client: Albert, seeded_units: list[Unit]):
     test_unit = seeded_units[0]
     unit = client.units.get_by_name(name=test_unit.name)
     assert isinstance(unit, Unit)
@@ -57,7 +50,7 @@ def test_get_unit_by(client: Albert, seeded_units:list[Unit]):
     assert by_id.name.lower() == test_unit.name.lower()
 
 
-def test_unit_exists(client: Albert, seeded_units:list[Unit]):
+def test_unit_exists(client: Albert, seeded_units: list[Unit]):
     test_unit = seeded_units[2]
     assert client.units.unit_exists(name=test_unit.name)
     assert not client.units.unit_exists(

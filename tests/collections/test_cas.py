@@ -6,11 +6,6 @@ from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.cas import Cas
 from albert.utils.exceptions import AlbertAPIError
-from tests.seeding.cas import seeded_cas
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
@@ -27,7 +22,7 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_simple_cas_list(client, seeded_cas:list[Cas]):
+def test_simple_cas_list(client: Albert):
     simple_list = client.cas_numbers.list()
     assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
@@ -38,7 +33,7 @@ def test_cas_not_found(client: Albert):
         client.cas_numbers.get_by_id(cas_id="foo bar")
 
 
-def test_advanced_cas_list(client: Albert, seeded_cas:list[Cas]):
+def test_advanced_cas_list(client: Albert, seeded_cas: list[Cas]):
     number = seeded_cas[0].number
     adv_list = client.cas_numbers.list(number=number, order_by=OrderBy.DESCENDING)
     assert isinstance(adv_list, Generator)

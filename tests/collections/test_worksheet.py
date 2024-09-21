@@ -7,11 +7,6 @@ from albert.resources.sheets import Column, Sheet
 from albert.resources.worksheets import Worksheet
 
 
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
-
-
 # NOTE: Once we have the Project Module done, these should be made dynamically.
 @pytest.fixture(scope="module")
 def project(client: Albert):
@@ -27,13 +22,13 @@ def worksheet(client: Albert):
 
 
 @pytest.fixture(scope="module")
-def sheet(worksheet) -> Sheet:
+def sheet(worksheet: Worksheet) -> Sheet:
     for s in worksheet.sheets:
         if s.name == "test":
             return s
 
 
-def test_get_worksheet(worksheet):
+def test_get_worksheet(worksheet: Worksheet):
     assert isinstance(worksheet, Worksheet)
     has_sheet = False
     for s in worksheet.sheets:
@@ -42,7 +37,7 @@ def test_get_worksheet(worksheet):
     assert has_sheet
 
 
-def test_get_test_sheet(sheet):
+def test_get_test_sheet(sheet: Sheet):
     assert isinstance(sheet, Sheet)
     sheet.rename(new_name="test renamed")
     assert sheet.name == "test renamed"
@@ -51,7 +46,7 @@ def test_get_test_sheet(sheet):
     assert isinstance(sheet.grid, pd.DataFrame)
 
 
-def test_crud_empty_column(sheet):
+def test_crud_empty_column(sheet: Sheet):
     new_col = sheet.add_blank_column(name="my cool new column")
     assert isinstance(new_col, Column)
     assert new_col.column_id.startswith("COL")

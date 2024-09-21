@@ -1,14 +1,7 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
 from albert.collections.users import User
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
@@ -24,13 +17,13 @@ def _list_asserts(returned_list):
     assert found  # make sure at least one was returned
 
 
-def test_simple_users_list(client):
+def test_simple_users_list(client: Albert):
     simple_user_list = client.users.list()
     assert isinstance(simple_user_list, Generator)
     _list_asserts(simple_user_list)
 
 
-def test_advanced_users_list(client):
+def test_advanced_users_list(client: Albert):
     adv_list = client.users.list(text="Lenore", search_email=False, search_name=True)
     assert isinstance(adv_list, Generator)
     _list_asserts(adv_list)

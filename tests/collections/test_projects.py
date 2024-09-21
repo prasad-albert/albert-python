@@ -1,15 +1,8 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
 from albert.collections.projects import ProjectCollection
 from albert.resources.projects import Project
-from tests.seeding.projects import seeded_projects
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
@@ -24,14 +17,14 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_list_projects(client: Albert, seeded_projects:list[Project]):
+def test_list_projects(client: Albert):
     project_collection = ProjectCollection(session=client.session)
     project_list = project_collection.list()
     assert isinstance(project_list, Generator)
     _list_asserts(project_list)
 
 
-def test_get_by_id(client: Albert, seeded_projects:list[Project]):
+def test_get_by_id(client: Albert, seeded_projects: list[Project]):
     project_collection = ProjectCollection(session=client.session)
 
     # Get the first seeded project by ID

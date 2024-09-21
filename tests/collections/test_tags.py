@@ -1,16 +1,8 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.tags import Tag
-from tests.seeding.tags import seeded_tags
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
@@ -28,14 +20,14 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_simple_tags_list(client: Albert, seeded_tags:list[Tag]):
+def test_simple_tags_list(client: Albert):
     simple_list = client.tags.list()
     assert isinstance(simple_list, Generator)
     simple_list = list(simple_list)
     _list_asserts(simple_list)
 
 
-def test_advanced_tags_list(client: Albert, seeded_tags:list[Tag]):
+def test_advanced_tags_list(client: Albert, seeded_tags: list[Tag]):
     name = seeded_tags[0].tag
     adv_list = client.tags.list(
         name=name,
@@ -50,7 +42,7 @@ def test_advanced_tags_list(client: Albert, seeded_tags:list[Tag]):
     _list_asserts(adv_list)
 
 
-def test_get_tag_by(client: Albert, seeded_tags:list[Tag]):
+def test_get_tag_by(client: Albert, seeded_tags: list[Tag]):
     tag_test_str = seeded_tags[2].tag
 
     tag = client.tags.get_by_tag(tag=tag_test_str, exact_match=True)
@@ -63,7 +55,7 @@ def test_get_tag_by(client: Albert, seeded_tags:list[Tag]):
     assert by_id.tag.lower() == tag_test_str.lower()
 
 
-def test_tag_exists(client: Albert, seeded_tags:list[Tag]):
+def test_tag_exists(client: Albert, seeded_tags: list[Tag]):
     assert client.tags.tag_exists(tag=seeded_tags[1].tag)
     assert not client.tags.tag_exists(tag="Nonesense tag no one would ever make!893y58932y58923")
 

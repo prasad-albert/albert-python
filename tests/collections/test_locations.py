@@ -1,18 +1,10 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
 from albert.collections.locations import Location
-from tests.seeding.locations import seeded_locations
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
-    found = False
     for i, c in enumerate(returned_list):
         if i == 30:
             break
@@ -21,13 +13,13 @@ def _list_asserts(returned_list):
         assert c.id.startswith("LOC")
 
 
-def test_simple_list(client: Albert, seeded_locations):
+def test_simple_list(client: Albert):
     simple_loc_list = client.locations.list()
     assert isinstance(simple_loc_list, Generator)
     _list_asserts(simple_loc_list)
 
 
-def test_get_by_id(client: Albert, seeded_locations):
+def test_get_by_id(client: Albert, seeded_locations: list[Location]):
     # Assuming we want to get the first seeded location by ID
     seeded_location = seeded_locations[0]
     fetched_location = client.locations.get_by_id(id=seeded_location.id)
@@ -56,7 +48,7 @@ def test_create_location(client: Albert):
     client.locations.delete(location_id=created_location.id)
 
 
-def test_update_location(client: Albert, seeded_locations):
+def test_update_location(client: Albert, seeded_locations: list[Location]):
     # Update the first seeded location
     seeded_location = seeded_locations[0]
     updated_location = Location(

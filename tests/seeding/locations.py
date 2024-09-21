@@ -1,12 +1,4 @@
-import pytest
-
-from albert import Albert
-from albert.resources.locations import Location  # Ensure correct import of Location model
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
+from albert.resources.locations import Location
 
 
 def generate_location_seeds() -> list[Location]:
@@ -51,31 +43,3 @@ def generate_location_seeds() -> list[Location]:
             country="GB",
         ),
     ]
-
-
-@pytest.fixture(scope="function")
-def seeded_locations(client: Albert):
-    """
-    Fixture to seed Locations before the test and delete them after.
-
-    Parameters
-    ----------
-    client : Albert
-        The Albert SDK client instance.
-
-    Returns
-    -------
-    List[Location]
-        The list of seeded Location objects.
-    """
-    # Seed the Locations
-    seeded = []
-    for location in generate_location_seeds():
-        created_location = client.locations.create(location=location)
-        seeded.append(created_location)
-
-    yield seeded  # Provide the seeded Locations to the test
-
-    # Teardown - delete the seeded Locations after the test
-    for location in seeded:
-        client.locations.delete(location_id=location.id)

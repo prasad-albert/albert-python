@@ -1,12 +1,4 @@
-import pytest
-
-from albert import Albert
-from albert.resources.cas import Cas, CasCategory  # Ensure you're importing the correct Cas model
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
+from albert.resources.cas import Cas, CasCategory
 
 
 def generate_cas_seeds() -> list[Cas]:
@@ -52,32 +44,3 @@ def generate_cas_seeds() -> list[Cas]:
         # CAS with unknown classification
         Cas(number="1234-56-7", description="Unknown substance", category=CasCategory.UNKNOWN),
     ]
-
-
-# Example usage within a pytest fixture
-@pytest.fixture(scope="function")
-def seeded_cas(client: Albert):
-    """
-    Fixture to seed CAS before the test and delete them after.
-
-    Parameters
-    ----------
-    client : Albert
-        The Albert SDK client instance.
-
-    Returns
-    -------
-    List[Cas]
-        The list of seeded Cas objects.
-    """
-    # Seed the CAS
-    seeded = []
-    for cas in generate_cas_seeds():
-        created_cas = client.cas_numbers.create(cas=cas)
-        seeded.append(created_cas)
-
-    yield seeded  # Provide the seeded CAS to the test
-
-    # Teardown - delete the seeded CAS after the test
-    for cas in seeded:
-        client.cas_numbers.delete(cas_id=cas.id)

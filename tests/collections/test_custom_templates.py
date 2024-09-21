@@ -1,13 +1,9 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
 from albert.resources.custom_templates import CustomTemplate, CustomTemplateData
 
 
-# from albert.resources.inventory import CasAmount, InventoryItem
-# from albert.resources.units import UnitCategory
 def _list_asserts(returned_list):
     # found = False
     for i, u in enumerate(returned_list):
@@ -20,11 +16,6 @@ def _list_asserts(returned_list):
                 assert isinstance(d, CustomTemplateData)
     # assert found
     # TODO: No custom templates loaded to test yet  :(
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def test_basics(client: Albert):
