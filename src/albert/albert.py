@@ -14,6 +14,7 @@ from albert.collections.units import UnitCollection
 from albert.collections.users import UserCollection
 from albert.collections.worksheets import WorksheetCollection
 from albert.session import AlbertSession
+from albert.utils.client_credentials import ClientCredentials
 
 
 class Albert:
@@ -50,14 +51,12 @@ class Albert:
         *,
         base_url: str | None = None,
         token: str | None = None,
-        client_id: str | None = None,
-        client_secret: str | None = None,
+        client_credentials: ClientCredentials | None = None,
     ):
         self.session = AlbertSession(
             base_url=base_url or os.getenv("ALBERT_BASE_URL") or "https://app.albertinvent.com",
             token=token or os.getenv("ALBERT_TOKEN"),
-            client_id=client_id or os.getenv("ALBERT_CLIENT_ID"),
-            client_secret=client_secret or os.getenv("ALBERT_CLIENT_SECRET"),
+            client_credentials=client_credentials or ClientCredentials.from_env(),
         )
 
     @property
