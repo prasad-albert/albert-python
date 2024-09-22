@@ -315,29 +315,6 @@ class InventoryCollection(BaseCollection):
 
         _updatable_attributes_special = {"company", "tags", "cas"}
         payload = self._generate_patch_payload(existing=existing, updated=updated)
-        # for attribute in _updatable_attributes_individual:
-        #     old_value = getattr(existing, attribute)
-        #     new_value = getattr(updated, attribute)
-
-        #     # Get the serialization alias name for the attribute, if it exists
-        #     alias = existing.model_fields[attribute].alias or attribute
-
-        #     if old_value is None and new_value is not None:
-        #         # Add new attribute
-        #         payload["data"].append(
-        #             {"operation": "add", "attribute": alias, "newValue": new_value}
-        #         )
-        #     elif old_value is not None and new_value != old_value:
-        #         # Update existing attribute
-        #         payload["data"].append(
-        #             {
-        #                 "operation": "update",
-        #                 "attribute": alias,
-        #                 "oldValue": old_value,
-        #                 "newValue": new_value,
-        #             }
-        #         )
-
         for attribute in _updatable_attributes_special:
             old_value = getattr(existing, attribute)
             new_value = getattr(updated, attribute)

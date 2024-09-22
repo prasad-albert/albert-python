@@ -10,8 +10,6 @@ from albert.session import AlbertSession
 class Status(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
-    # ACTIVE_TEMP = "Status.ACTIVE"
-    # INACTIVE_TEMP = "Status.INACTIVE"
 
 
 class AuditFields(BaseModel):
@@ -41,23 +39,6 @@ class BaseAlbertModel(BaseModel):
             self._created = AuditFields(**data["Created"])
         if "Updated" in data:
             self._updated = AuditFields(**data["Updated"])
-        # if "status" in data:
-        #     self._status = Status(data["status"])
-
-    # @model_validator(mode="before")
-    # @classmethod
-    # def initialize_private_attrs(cls, data: dict[str, Any]) -> dict[str, Any]:
-    #     """
-    #     Initialize private attributes from the incoming data dictionary before the model is fully constructed.
-    #     """
-    #     if "Created" in data:
-    #         data["_created"] = AuditFields(**data["Created"])
-    #     if "Updated" in data:
-    #         data["_updated"] = AuditFields(**data["Updated"])
-    #     if "status" in data:
-    #         data["_status"] = Status(data["status"])
-
-    #     return data
 
     @property
     def created(self) -> AuditFields | None:
@@ -66,14 +47,6 @@ class BaseAlbertModel(BaseModel):
     @property
     def updated(self) -> AuditFields | None:
         return self._updated
-
-    # @property
-    # def status(self) -> Status | None:
-    #     return self._status
-
-    # @status.setter
-    # def status(self, value) -> Status | None:
-    #     self._status = value
 
 
 class BaseSessionModel(BaseAlbertModel):
