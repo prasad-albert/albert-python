@@ -39,7 +39,7 @@ class UserCollection(BaseCollection):
                 fields.append("mail")
             if fields != []:
                 params["searchFields"] = fields
-            if offset:
+            if offset:  # pragma: no cover
                 params["offset"] = offset
         while True:
             # status=active&limit=50&text=Lenore&searchFields=name

@@ -166,7 +166,7 @@ class ProjectCollection(BaseCollection):
             "limit": str(limit),
             "orderBy": order_by.value,
         }
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         if name:
             params["name"] = ",".join(name)

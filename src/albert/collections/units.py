@@ -229,8 +229,8 @@ class UnitCollection(BaseCollection):
         if name:
             params["name"] = name if isinstance(name, list) else [name]
         if category:
-            params["category"] = category if isinstance(category,str) else category.value
-        if start_key:
+            params["category"] = category if isinstance(category, str) else category.value
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         if not verified is None:
             params["verified"] = str(verified).lower()

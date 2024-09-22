@@ -34,19 +34,19 @@ def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
         ),
         # Project with shared classification and advanced metadata
         Project(
-            description="A research project focused on new materials.",
+            description="A public research project focused on new materials.",
             locations=[BaseEntityLink(id=seeded_locations[1].id)],
-            project_class=ProjectClass.PRIVATE,
+            project_class=ProjectClass.PUBLIC,
             grid=GridDefault.WKS,
         ),
         # Project with production category and custom ACLs
         Project(
-            description="A production project with custom ACLs.",
+            description="A private production project",
             locations=[
                 BaseEntityLink(id=seeded_locations[0].id),
-                BaseEntityLink(id=seeded_locations[2].id),
+                BaseEntityLink(id=seeded_locations[1].id),
             ],
-            project_class=ProjectClass.CONFIDENTIAL,
+            project_class=ProjectClass.PRIVATE,
         ),
     ]
 

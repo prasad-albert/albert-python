@@ -62,7 +62,7 @@ def test_unit_crud(client: Albert):
     new_unit = Unit(
         name="SDK Test Unit",
         symbol="x",
-        synonums=["kfnehiuow", "hbfuiewhbuewf89fy89b"],
+        synonyms=["kfnehiuow", "hbfuiewhbuewf89fy89b"],
         category=UnitCategory.MASS,
     )
     created_unit = client.units.create(unit=new_unit)

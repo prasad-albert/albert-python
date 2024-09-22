@@ -4,6 +4,7 @@ import pytest
 
 from albert.albert import Albert
 from albert.collections.companies import Company
+from albert.utils.exceptions import NotFoundError
 
 
 def _list_asserts(returned_list):
@@ -34,6 +35,9 @@ def test_advanced_company_list(client: Albert, seeded_companies: list[Company]):
         assert name.lower() in c.name.lower()
     _list_asserts(adv_list)
 
+    list_small_batch = client.companies._list_generator(limit=2)
+    _list_asserts(list_small_batch)
+
 
 def test_company_get_by(client: Albert, seeded_companies: list[Company]):
     test_name = seeded_companies[0].name
@@ -46,21 +50,44 @@ def test_company_get_by(client: Albert, seeded_companies: list[Company]):
     assert company_by_id.name == test_name
 
 
-def test_company_crud(client: Albert):
+def test_basic_create(client: Albert):
+    simple_company = client.companies.create(company="Simple test company name!")
+    assert isinstance(simple_company, Company)
+    assert simple_company.id is not None
+    assert client.companies.delete(id=simple_company.id)
+
+
+def test_company_crud(company_collection, client: Albert):
     new_company = Company(name="SDK Testing Corp.")
-    registered_company = client.companies.create(company=new_company)
+
+    c1 = company_collection.get_by_name(name="SDK Testing Corp. UPDATED")
+    if c1:
+        print("del c1")
+        company_collection.delete(id=c1.id)
+    c2 = company_collection.get_by_name(name="A second cool name")
+    if c2:
+        print("delc2")
+        company_collection.delete(id=c2.id)
+
+    registered_company = company_collection.create(company=new_company)
     assert isinstance(registered_company, Company)
     assert registered_company.id is not None
     assert registered_company.name == "SDK Testing Corp."
 
-    renamed_company = client.companies.rename(
+    renamed_company = company_collection.rename(
         old_name="SDK Testing Corp.", new_name="SDK Testing Corp. UPDATED"
     )
 
     assert isinstance(renamed_company, Company)
     assert renamed_company.name == "SDK Testing Corp. UPDATED"
     assert renamed_company.id == registered_company.id
+    # make sure cache was updated
+    assert company_collection.company_exists(name=renamed_company.name)
 
-    deleted = client.companies.delete(id=renamed_company.id)
+    renamed_company.name = "A second cool name"
+    renamed_company = company_collection.update(updated_object=renamed_company)
+    deleted = company_collection.delete(id=renamed_company.id)
     assert deleted
-    assert not client.companies.company_exists(name="SDK Testing Corp. UPDATED")
+    assert not company_collection.company_exists(name="SDK Testing Corp. UPDATED")
+    with pytest.raises(NotFoundError):
+        company_collection.rename(old_name="SDK Testing Corp. UPDATED", new_name="nope")

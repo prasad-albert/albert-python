@@ -53,7 +53,6 @@ def test_inventory_crud(client: Albert):
             break
     new_inv = InventoryItem(
         name="SDK Testing Inventory Item",
-        description="testing SDK CRUD",
         category=InventoryCategory.RAW_MATERIALS,
         tags=["testing"],
         company="Lenore Corp.",
@@ -64,5 +63,11 @@ def test_inventory_crud(client: Albert):
     this_id = created.id
     assert this_id is not None
     assert created.unit_category.lower() == UnitCategory.MASS.value.lower()
+    d = "testing SDK CRUD"
+    created.description = d
+
+    updated = client.inventory.update(updated_object=created)
+    assert updated.description == d
+
     deleted = client.inventory.delete(inventory_id=this_id)
     assert deleted

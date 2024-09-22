@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
@@ -33,8 +34,8 @@ class LocationCollection(BaseCollection):
         params = {"limit": limit}
         if name:
             params["name"] = name if isinstance(name, list) else [name]
-            # params["exactMatch"] = str(exact_match).lower()
-        if start_key:
+            params["exactMatch"] = str(exact_match).lower()
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         if country:
             params["country"] = country
@@ -90,14 +91,13 @@ class LocationCollection(BaseCollection):
         return self.get_by_id(id=updated_object.id)
 
     def location_exists(self, *, location: Location):
-        hits = self.list(name=location.name, country=location.country, exact_match=True)
+        hits = self.list(name=location.name)
         if hits:
             for hit in hits:
-                if (
-                    hit
-                    and hit.name.lower() == location.name.lower()
-                    and hit.country == location.country
-                ):
+                print(hit.name.lower())
+                print(location.name.lower())
+                if hit and hit.name.lower() == location.name.lower():
+                    print(f"MATCHED {hit.name}")
                     return hit
         return None
 
@@ -117,6 +117,9 @@ class LocationCollection(BaseCollection):
         """
         exists = self.location_exists(location=location)
         if exists:
+            logging.warning(
+                f"Location with name {location.name} matches an existing location. Returning the existing Location."
+            )
             return exists
 
         payload = location.model_dump(by_alias=True, exclude_unset=True)

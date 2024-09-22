@@ -1,7 +1,10 @@
+import logging
 from collections.abc import Generator
 
+import pytest
+
 from albert.albert import Albert
-from albert.collections.locations import Location
+from albert.collections.locations import Location, LocationCollection
 
 
 def _list_asserts(returned_list):
@@ -19,6 +22,13 @@ def test_simple_list(client: Albert):
     _list_asserts(simple_loc_list)
 
 
+def test_adv_list(location_collection: LocationCollection):
+    adv_list = location_collection.list(country="US")
+    _list_asserts(adv_list)
+    short_list = location_collection._list_generator(limit=2)
+    _list_asserts(short_list)
+
+
 def test_get_by_id(client: Albert, seeded_locations: list[Location]):
     # Assuming we want to get the first seeded location by ID
     seeded_location = seeded_locations[0]
@@ -29,23 +39,27 @@ def test_get_by_id(client: Albert, seeded_locations: list[Location]):
     assert fetched_location.name == seeded_location.name
 
 
-def test_create_location(client: Albert):
+def test_create_location(
+    caplog, location_collection: LocationCollection, seeded_locations: list[Location]
+):
     # Create a new location and check if it's created properly
+
     new_location = Location(
-        name="New Test Location",
-        latitude=40.7,
-        longitude=-74.0,
-        address="123 New Test St, New York, NY",
+        name=seeded_locations[0].name,
+        latitude=seeded_locations[0].latitude,
+        longitude=-seeded_locations[0].longitude,
+        address=seeded_locations[0].address,
     )
 
-    created_location = client.locations.create(location=new_location)
-    assert isinstance(created_location, Location)
-    assert created_location.name == "New Test Location"
-    assert created_location.latitude == 40.7
-    assert created_location.longitude == -74.0
+    created_location = location_collection.create(location=new_location)
 
-    # Clean up
-    client.locations.delete(location_id=created_location.id)
+    # assert it returns the existing
+    re_created = location_collection.create(location=created_location)
+    assert (
+        f"Location with name {created_location.name} matches an existing location. Returning the existing Location."
+        in caplog.text
+    )
+    assert re_created.id == seeded_locations[0].id
 
 
 def test_update_location(client: Albert, seeded_locations: list[Location]):
@@ -70,7 +84,7 @@ def test_update_location(client: Albert, seeded_locations: list[Location]):
 
 def test_location_exists(client: Albert, seeded_locations):
     # Check if the first seeded location exists
-    seeded_location = seeded_locations[2]
+    seeded_location = seeded_locations[1]
     exists = client.locations.location_exists(location=seeded_location)
 
     assert exists is not None
@@ -78,22 +92,12 @@ def test_location_exists(client: Albert, seeded_locations):
     assert exists.name == seeded_location.name
 
 
-def test_delete_location(client: Albert):
+def test_delete_location(client: Albert, seeded_locations: list[Location]):
     # Create a new location to delete
-    new_location = Location(
-        name="Location to Delete",
-        latitude=41.8,
-        longitude=-87.6,
-        address="456 Delete St, Chicago, IL",
-    )
 
-    created_location = client.locations.create(location=new_location)
-    assert isinstance(created_location, Location)
-
-    # Now delete it
-    deleted = client.locations.delete(location_id=created_location.id)
+    deleted = client.locations.delete(location_id=seeded_locations[2].id)
     assert deleted is True
 
     # Ensure it no longer exists
-    does_exist = client.locations.location_exists(location=created_location)
+    does_exist = client.locations.location_exists(location=seeded_locations[2])
     assert does_exist is None

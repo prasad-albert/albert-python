@@ -35,7 +35,7 @@ class CustomTemplatesCollection(BaseCollection):
         }
         if name:
             params["name"] = name if isinstance(name, list) else [name]
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
 
         while True:

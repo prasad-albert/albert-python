@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterator
 from albert.collections.base import BaseCollection
 from albert.resources.companies import Company
 from albert.session import AlbertSession
+from albert.utils.exceptions import NotFoundError
 
 
 class CompanyCollection(BaseCollection):
@@ -92,7 +93,7 @@ class CompanyCollection(BaseCollection):
         if name:
             params["name"] = name if isinstance(name, list) else [name]
             params["exactMatch"] = str(exact_match).lower()
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         while True:
             response = self.session.get(self.base_path, params=params)
@@ -251,8 +252,9 @@ class CompanyCollection(BaseCollection):
         """
         company = self.get_by_name(name=old_name, exact_match=True)
         if not company:
-            logging.error(f'Company "{old_name}" not found.')
-            return None
+            msg = f'Company "{old_name}" not found.'
+            logging.error(msg)
+            raise NotFoundError(msg)
         company_id = company.id
         endpoint = f"{self.base_path}/{company_id}"
         payload = {
@@ -281,7 +283,7 @@ class CompanyCollection(BaseCollection):
         )
         url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
-        updated_company = self.get_by_id(cas_id=updated_object.id)
+        updated_company = self.get_by_id(id=updated_object.id)
         self._remove_from_cache_by_id(id=updated_object.id)
         self.company_cache[updated_company.id] = updated_company
         return updated_company

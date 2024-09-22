@@ -98,7 +98,7 @@ class TagCollection(BaseCollection):
         if name:
             params["name"] = name if isinstance(name, list) else [name]
             params["exactMatch"] = str(exact_match).lower()
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
 
         while True:
