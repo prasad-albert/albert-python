@@ -39,6 +39,10 @@ def test_advanced_users_list(client: Albert):
             break
     assert found
 
+    adv_list = client.users.list(text="Lenore", search_email=True, search_name=True)
+    assert isinstance(adv_list, Generator)
+    _list_asserts(adv_list)
+
 
 def test_user_get(client: Albert):
     first_hit = next(client.users.list(text="Lenore"))

@@ -1,4 +1,5 @@
 import builtins
+import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
@@ -78,6 +79,9 @@ class UnitCollection(BaseCollection):
             The created Unit object.
         """
         if self.unit_exists(name=unit.name):
+            logging.warning(
+                f"Unit with the name {unit.name} already exists. Returning the existing unit."
+            )
             return self.unit_cache[unit.name]
         response = self.session.post(
             self.base_path, json=unit.model_dump(by_alias=True, exclude_unset=True)
@@ -198,6 +202,7 @@ class UnitCollection(BaseCollection):
         exact_match: bool = False,
         start_key: str | None = None,
         verified: bool | None = None,
+        limit: int = 100,
     ) -> Generator[Unit, None, None]:
         """
         Lists unit entities with optional filters.
@@ -225,6 +230,7 @@ class UnitCollection(BaseCollection):
         params = {
             "orderBy": order_by.value,
             "exactMatch": str(exact_match).lower(),
+            "limit": limit,
         }
         if name:
             params["name"] = name if isinstance(name, list) else [name]
