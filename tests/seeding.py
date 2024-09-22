@@ -174,10 +174,10 @@ def generate_tag_seeds() -> list[Tag]:
 
     return [
         # INVENTORY tags
-        Tag(tag="inventory-tag-1"),  # No id provided, will be set server-side
-        Tag(tag="inventory-tag-2"),  # No id provided
+        Tag(tag="inventory-tag-1"),
+        Tag(tag="inventory-tag-2"),
         # COMPANY tags
-        Tag(tag="company-tag-1"),  # No id provided
+        Tag(tag="company-tag-1"),
         Tag(tag="company-tag-2"),  # No id provided
     ]
 
