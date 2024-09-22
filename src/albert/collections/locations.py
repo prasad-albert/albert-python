@@ -42,7 +42,6 @@ class LocationCollection(BaseCollection):
 
         while True:
             response = self.session.get(self.base_path, params=params)
-            print(response.request.url)
             loc_data = response.json().get("Items", [])
             if not loc_data or loc_data == []:
                 break
@@ -94,10 +93,7 @@ class LocationCollection(BaseCollection):
         hits = self.list(name=location.name)
         if hits:
             for hit in hits:
-                print(hit.name.lower())
-                print(location.name.lower())
                 if hit and hit.name.lower() == location.name.lower():
-                    print(f"MATCHED {hit.name}")
                     return hit
         return None
 

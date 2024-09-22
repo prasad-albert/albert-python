@@ -3,10 +3,10 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, NonNegativeFloat, PrivateAttr
+from pydantic import Field, NonNegativeFloat, PrivateAttr, field_serializer
 
 from albert.collections.inventory import InventoryCategory
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel, BaseEntityLink
 
 
 class LotStatus(str, Enum):
@@ -15,23 +15,45 @@ class LotStatus(str, Enum):
     QUARANTINED = "quarantined"
 
 
+class LotMetadata(BaseAlbertModel):
+    asset_tag: str | None = Field(default=None, alias="assetTag")
+    serial_number: str | None = Field(default=None, alias="serialNumber")
+    quality_number: str | None = Field(default=None, alias="qualityNumber")
+    distributor: str | None = Field(default=None)
+    _raw_cost: str | None = PrivateAttr(default=None)
+    _cogs: str | None = PrivateAttr(default=None)
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if "rawCost" in data:
+            self._raw_cost = data["rawCost"]
+        if "cogs" in data:
+            self._raw_cost = data["cogs"]
+
+    @property
+    def cogs(self):
+        return self._cogs
+
+    @property
+    def raw_cost(self):
+        return self._raw_cost
+
+
 class Lot(BaseAlbertModel):
     id: str | None = Field(None, alias="albertId")
     inventory_id: str = Field(alias="parentId")
     task_id: str | None = Field(default=None, alias="taskId")
-
-    expiration_date: datetime | None = Field(None, alias="expirationDate")
+    notes: str | None = Field(default=None)
+    expiration_date: str | None = Field(None, alias="expirationDate")
     manufacturer_lot_number: str | None = Field(None, alias="manufacturerLotNumber")
-    # location: Optional[Location] = {} #need to make Location Class
-    # storageLocation: Optional[StorageLocation] = {} #need to make StorageLocation Class
-    pack_size: float | None = Field(None, alias="packSize")
-    # requires the field to be greater than or equal to 0
+    location: BaseEntityLink = None  # need to make Location Class
+    storage_location: BaseEntityLink = Field(alias="storageLocation")
+    pack_size: str | None = Field(None, alias="packSize")
     initial_quantity: NonNegativeFloat = Field(alias="initialQuantity")
-    cost: NonNegativeFloat  # requires the field to be greater than or equal to 0
-    # owner: Optional[List[Owner]] # Need to make Owner Class (User should work)
+    cost: NonNegativeFloat | None = Field(default=None)
+    inventory_on_hand: NonNegativeFloat = Field(alias="inventoryOnHand")
+    owner: list[BaseEntityLink] | None = Field(default=None)
     lot_number: str | None = Field(None, alias="lotNumber")
-    inventory_on_hand: float = Field(ge=0, alias="inventoryOnHand")
-    task_completion_date: datetime | None = Field(None, alias="taskCompletionDate")
     external_barcode_id: str | None = Field(None, alias="externalBarcodeId")
 
     _has_notes: bool | None = PrivateAttr(default=None)
@@ -41,7 +63,7 @@ class Lot(BaseAlbertModel):
     _parent_unit: str | None = PrivateAttr(default=None)
     _parent_category: InventoryCategory | None = PrivateAttr(default=None)
     _barcode_id: str | None = PrivateAttr(default=None)
-    _metadata: Any | None = PrivateAttr(default=None)
+    metadata: LotMetadata | None = Field(default=None, alias="Metadata")
 
     # because quarantined is an allowed Lot status, we need to extend the normal status
     _status: LotStatus | None = PrivateAttr(default=None)
@@ -75,12 +97,22 @@ class Lot(BaseAlbertModel):
         if "status" in data:
             self._status = LotStatus(data["status"])
 
-        if "Metadata" in data:
-            self._metadata = data["Metadata"]
         if "notes" in data:
             self._notes = data["notes"]
         if "barcodeId" in data:
             self._barcode_id = data["barcodeId"]
+
+    @field_serializer("initial_quantity", return_type=str)
+    def serialize_initial_quantity(self, initial_quantity: NonNegativeFloat):
+        return str(initial_quantity)
+
+    @field_serializer("cost", return_type=str)
+    def serialize_cost(self, cost: NonNegativeFloat):
+        return str(cost)
+
+    @field_serializer("inventory_on_hand", return_type=str)
+    def serialize_inventory_on_hand(self, inventory_on_hand: NonNegativeFloat):
+        return str(inventory_on_hand)
 
     @property
     def has_notes(self) -> bool:
@@ -89,14 +121,6 @@ class Lot(BaseAlbertModel):
     @property
     def has_attachments(self) -> bool:
         return self._has_attachments
-
-    @property
-    def metadata(self) -> str:
-        return self._metadata
-
-    @property
-    def notes(self) -> str:
-        return self._notes
 
     @property
     def barcode_id(self) -> str:

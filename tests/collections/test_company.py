@@ -62,11 +62,9 @@ def test_company_crud(company_collection, client: Albert):
 
     c1 = company_collection.get_by_name(name="SDK Testing Corp. UPDATED")
     if c1:
-        print("del c1")
         company_collection.delete(id=c1.id)
     c2 = company_collection.get_by_name(name="A second cool name")
     if c2:
-        print("delc2")
         company_collection.delete(id=c2.id)
 
     registered_company = company_collection.create(company=new_company)

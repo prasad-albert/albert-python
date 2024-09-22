@@ -5,7 +5,7 @@ import pytest
 from albert.albert import Albert
 from albert.collections.projects import ProjectCollection
 from albert.resources.base import BaseEntityLink
-from albert.resources.projects import Project
+from albert.resources.projects import Project, State
 from albert.utils.exceptions import NotFoundError
 
 
@@ -16,6 +16,7 @@ def _list_asserts(returned_list, limit=50):
             break
         assert isinstance(project, Project)
         assert isinstance(project.description, str)
+        assert isinstance(project.state, str)
         assert project.id is not None
         found = True
     assert found

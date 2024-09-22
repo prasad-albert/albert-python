@@ -1,5 +1,7 @@
+import time
 from collections.abc import Iterator
 from contextlib import suppress
+from time import sleep
 
 import pytest
 
@@ -9,14 +11,19 @@ from albert.collections.companies import CompanyCollection
 from albert.collections.inventory import InventoryCategory
 from albert.collections.locations import LocationCollection
 from albert.collections.projects import ProjectCollection
+from albert.collections.roles import RoleCollection
 from albert.collections.tags import TagCollection
 from albert.collections.units import UnitCollection
+from albert.collections.users import UserCollection
+from albert.resources.base import Status
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.locations import Location
 from albert.resources.projects import Project
+from albert.resources.roles import Role
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
+from albert.resources.users import User
 from albert.utils.exceptions import NotFoundError
 from tests.seeding import (
     generate_cas_seeds,
@@ -25,6 +32,7 @@ from tests.seeding import (
     generate_project_seeds,
     generate_tag_seeds,
     generate_unit_seeds,
+    generate_user_seeds,
 )
 
 
@@ -64,8 +72,18 @@ def tag_collection(client: Albert) -> TagCollection:
 
 
 @pytest.fixture(scope="session")
+def role_collection(client: Albert) -> RoleCollection:
+    return client.roles
+
+
+@pytest.fixture(scope="session")
 def unit_collection(client: Albert) -> UnitCollection:
     return client.units
+
+
+@pytest.fixture(scope="session")
+def user_collection(client: Albert) -> UserCollection:
+    return client.users
 
 
 @pytest.fixture(scope="session")
@@ -78,12 +96,8 @@ def seeded_projects(
 
     for project in generate_project_seeds(seeded_locations=seeded_locations):
         existing = project_collection.list()
-        print("***")
-        print(project.description)
         for m in existing:
-            print(m.description)
             if m.description.lower() == project.description.lower():
-                print("DELETING EXISTING")
                 project_collection.delete(project_id=m.id)
         created_project = project_collection.create(project=project)
         seeded.append(created_project)
@@ -103,7 +117,7 @@ def seeded_cas(cas_collection: CasCollection) -> Iterator[list[Cas]]:
     for cas in generate_cas_seeds():
         created_cas = cas_collection.create(cas=cas)
         seeded.append(created_cas)
-
+    sleep(1.5)  # avoid race condition while it populated through DBs
     yield seeded  # Provide the seeded CAS to the test
 
     # Teardown - delete the seeded CAS after the test
@@ -168,10 +182,48 @@ def seeded_units(unit_collection: UnitCollection) -> Iterator[list[Unit]]:
     for unit in generate_unit_seeds():
         created_unit = unit_collection.create(unit=unit)
         seeded.append(created_unit)
-
+    sleep(1.5)  # avoid race condition while it populated through DBs
     yield seeded  # Provide the seeded units to the test
 
     # Teardown - delete the seeded units after the test
     for unit in seeded:
         with suppress(NotFoundError):
             unit_collection.delete(unit_id=unit.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_roles(role_collection: RoleCollection) -> Iterator[list[Role]]:
+    # Roles are not deleted or created. We just use the existing roles.
+    existing = []
+    for role in role_collection.list():
+        existing.append(role)
+
+    yield existing  # Provide the seeded units to the test
+
+
+@pytest.fixture(scope="session")
+def seeded_users(
+    user_collection: UserCollection, seeded_roles, seeded_locations
+) -> Iterator[list[User]]:
+    seeded = []
+    # Here, seeded_roles and seeded_locations will already be lists from the respective fixtures
+
+    for user in generate_user_seeds(seeded_roles=seeded_roles, seeded_locations=seeded_locations):
+        matches = user_collection.list(text=user.name)
+        found = False
+        for m in matches:
+            if m.name == user.name:
+                created_user = m
+                created_user.status = Status.ACTIVE.value
+                user_collection.update(updated_object=created_user)
+                found = True
+        if not found:
+            created_user = user_collection.create(user=user)
+        seeded.append(created_user)
+    sleep(1.5)  # avoid race condition while it populated through DBs
+    yield seeded  # Provide the seeded users to the test
+
+    # Teardown - archive/set inactive
+    for user in seeded:
+        user.status = Status.INACTIVE.value
+        user_collection.update(updated_object=user)

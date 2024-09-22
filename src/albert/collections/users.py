@@ -1,12 +1,14 @@
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
+from albert.resources.base import Status
 from albert.resources.users import User
 from albert.session import AlbertSession
 
 
 class UserCollection(BaseCollection):
     _api_version = "v3"
+    _updatable_attributes = {"name", "status", "email"}
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -24,25 +26,18 @@ class UserCollection(BaseCollection):
         self,
         *,
         text: str | None = None,
-        search_name: bool | None = None,
-        search_email: bool | None = None,
         offset: int | None = None,
         limit: int = 50,
+        status=None,
     ) -> Generator[User, None, None]:
-        params = {"limit": limit, "status": "active"}
+        params = {"limit": limit}
+        if status:
+            params["status"] = status
         if text:
-            fields = []
-            params["text"] = text
-            if search_name:
-                fields.append("name")
-            if search_email:
-                fields.append("mail")
-            if fields != []:
-                params["searchFields"] = fields
-            if offset:  # pragma: no cover
-                params["offset"] = offset
+            params["text"] = text.lower()
+        if offset:  # pragma: no cover
+            params["offset"] = offset
         while True:
-            # status=active&limit=50&text=Lenore&searchFields=name
             response = self.session.get(self.base_path + "/search", params=params)
             user_data = response.json().get("Items", [])
             if not user_data or user_data == []:
@@ -52,32 +47,22 @@ class UserCollection(BaseCollection):
             offset = response.json().get("offset")
             if not offset or len(user_data) < limit:
                 break
-            params["offset"] = offset
+            params["offset"] = int(offset) + int(limit)
 
-    def list(
-        self,
-        *,
-        text: str | None = None,
-        search_name: bool | None = None,
-        search_email: bool | None = None,
-    ) -> Iterator[User]:
+    def list(self, *, text: str | None = None, status: Status = None) -> Iterator[User]:
         """Lists Users based on criteria
 
         Parameters
         ----------
         text : Optional[str], optional
             text to search against, by default None
-        search_name : Optional[bool], optional
-            Name to search against, by default None
-        search_email : Optional[bool], optional
-            email to search against, by default None
 
         Returns
         -------
         Generator
             Generator of matching Users or None
         """
-        return self._list_generator(text=text, search_email=search_email, search_name=search_name)
+        return self._list_generator(text=text, status=status)
 
     def get_by_id(self, *, user_id: str) -> User | None:
         """
@@ -98,7 +83,7 @@ class UserCollection(BaseCollection):
         user = User(**response.json())
         return user
 
-    def create(self, *, user: User) -> User:
+    def create(self, *, user: User) -> User:  # pragma: no cover
         """Create a new User
 
         Parameters
@@ -130,7 +115,17 @@ class UserCollection(BaseCollection):
         user = User(**response.json())
         return user
 
-    def delete(self, *, user_id: str) -> bool:
-        url = f"{self.base_path}/{user_id}"
-        self.session.delete(url)
-        return True
+    def update(self, *, updated_object: User) -> User:
+        # Fetch the current object state from the server or database
+        current_object = self.get_by_id(user_id=updated_object.id)
+
+        # Generate the PATCH payload
+        patch_payload = self._generate_patch_payload(
+            existing=current_object, updated=updated_object
+        )
+
+        url = f"{self.base_path}/{updated_object.id}"
+        self.session.patch(url, json=patch_payload)
+
+        updated_user = self.get_by_id(user_id=updated_object.id)
+        return updated_user
