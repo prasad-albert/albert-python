@@ -24,7 +24,22 @@ def client() -> Albert:
     return Albert()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
+def seeded_projects(client: Albert, seeded_locations) -> Iterator[list[Project]]:
+    # Seed the projects using seeded locations
+    seeded = []
+    for project in generate_project_seeds(seeded_locations=seeded_locations):
+        created_project = client.projects.create(project=project)
+        seeded.append(created_project)
+
+    yield seeded  # Provide the seeded projects to the test
+
+    # Teardown - delete the seeded projects after the test
+    for project in seeded:
+        client.projects.delete(project_id=project.id)
+
+
+@pytest.fixture(scope="session")
 def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
     # Seed the CAS
     seeded = []
@@ -39,7 +54,7 @@ def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
         client.cas_numbers.delete(cas_id=cas.id)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def seeded_companies(client: Albert) -> Iterator[list[Company]]:
     # Seed the companies
     seeded = []
@@ -54,7 +69,7 @@ def seeded_companies(client: Albert) -> Iterator[list[Company]]:
         client.companies.delete(id=company.id)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def seeded_locations(client: Albert) -> Iterator[list[Location]]:
     # Seed the Locations
     seeded = []
@@ -70,7 +85,7 @@ def seeded_locations(client: Albert) -> Iterator[list[Location]]:
 
 
 # Example usage within a pytest fixture
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
     # Seed the tags
     seeded = []
@@ -85,7 +100,7 @@ def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
         client.tags.delete(tag_id=tag.id)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def seeded_units(client: Albert) -> Iterator[list[Unit]]:
     # Seed the units
     seeded = []
@@ -98,22 +113,3 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
     # Teardown - delete the seeded units after the test
     for unit in seeded:
         client.units.delete(unit_id=unit.id)
-
-
-@pytest.fixture(scope="function")
-def seeded_projects(
-    client: Albert,
-    seeded_tags: list[Tag],
-    seeded_companies: list[Company],
-) -> Iterator[list[Project]]:
-    # Seed the projects using seeded tags and companies
-    seeded = []
-    for project in generate_project_seeds(seeded_tags, seeded_companies):
-        created_project = client.projects.create(project=project)
-        seeded.append(created_project)
-
-    yield seeded  # Provide the seeded projects to the test
-
-    # Teardown - delete the seeded projects after the test
-    for project in seeded:
-        client.projects.delete(project_id=project.id)

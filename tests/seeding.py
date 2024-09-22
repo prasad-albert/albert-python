@@ -1,9 +1,54 @@
+from albert.resources.base import BaseEntityLink
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
 from albert.resources.locations import Location
-from albert.resources.projects import Project, ProjectCategory, ProjectClass
+from albert.resources.projects import GridDefault, Metadata, Project, ProjectClass
 from albert.resources.tags import Tag
 from albert.resources.units import Unit, UnitCategory
+
+
+def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
+    """
+    Generates a list of Project seed objects for testing without IDs.
+
+    Parameters
+    ----------
+    seeded_locations : List[Location]
+        List of seeded Location objects.
+
+    Returns
+    -------
+    List[Project]
+        A list of Project objects with different permutations.
+    """
+
+    return [
+        # Project with basic metadata and public classification
+        Project(
+            description="A basic development project.",
+            locations=[BaseEntityLink(id=seeded_locations[0].id)],
+            project_class=ProjectClass.PRIVATE,
+            metadata=Metadata(
+                adpNumber="adp123",
+            ),
+        ),
+        # Project with shared classification and advanced metadata
+        Project(
+            description="A research project focused on new materials.",
+            locations=[BaseEntityLink(id=seeded_locations[1].id)],
+            project_class=ProjectClass.PRIVATE,
+            grid=GridDefault.WKS,
+        ),
+        # Project with production category and custom ACLs
+        Project(
+            description="A production project with custom ACLs.",
+            locations=[
+                BaseEntityLink(id=seeded_locations[0].id),
+                BaseEntityLink(id=seeded_locations[2].id),
+            ],
+            project_class=ProjectClass.CONFIDENTIAL,
+        ),
+    ]
 
 
 def generate_cas_seeds() -> list[Cas]:
@@ -175,62 +220,5 @@ def generate_unit_seeds() -> list[Unit]:
             synonyms=["Litre"],
             category=UnitCategory.VOLUME,
             verified=True,
-        ),
-    ]
-
-
-def generate_project_seeds(
-    seeded_tags: list[Tag], seeded_companies: list[Company]
-) -> list[Project]:
-    """
-    Generates a list of Project seed objects for testing without IDs,
-    using seeded tags and companies.
-
-    Parameters
-    ----------
-    seeded_tags : List[Tag]
-        List of seeded Tag objects.
-    seeded_companies : List[Company]
-        List of seeded Company objects.
-
-    Returns
-    -------
-    List[Project]
-        A list of Project objects with different permutations.
-    """
-
-    return [
-        # Basic project with default class (PUBLIC) using seeded tag and company
-        Project(
-            name="Project Alpha",
-            description="A development project.",
-            category=ProjectCategory.DEVELOPMENT,
-            tags=[seeded_tags[0]],
-            company=seeded_companies[0],
-        ),
-        # Project with a specific class (CONFIDENTIAL) using multiple seeded tags and company
-        Project(
-            name="Project Beta",
-            description="A confidential research project.",
-            category=ProjectCategory.RESEARCH,
-            project_class=ProjectClass.CONFIDENTIAL,
-            tags=[seeded_tags[1], seeded_tags[2]],
-            company=seeded_companies[1],
-        ),
-        # Another project with production category and default class (PUBLIC)
-        Project(
-            name="Project Gamma",
-            description="A production project.",
-            category=ProjectCategory.PRODUCTION,
-            tags=[seeded_tags[3]],
-            company=seeded_companies[2],
-        ),
-        # Project with no tags and explicit class (PRIVATE)
-        Project(
-            name="Project Delta",
-            description="A private research project.",
-            category=ProjectCategory.RESEARCH,
-            project_class=ProjectClass.PRIVATE,
-            company=seeded_companies[3],
         ),
     ]

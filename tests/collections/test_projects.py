@@ -1,8 +1,12 @@
 from collections.abc import Generator
 
+import pytest
+
 from albert.albert import Albert
 from albert.collections.projects import ProjectCollection
+from albert.resources.base import BaseEntityLink
 from albert.resources.projects import Project
+from albert.utils.exceptions import NotFoundError
 
 
 def _list_asserts(returned_list):
@@ -11,7 +15,7 @@ def _list_asserts(returned_list):
         if i == 50:  # Limit to checking first 50 projects
             break
         assert isinstance(project, Project)
-        assert isinstance(project.name, str)
+        assert isinstance(project.description, str)
         assert project.id is not None
         found = True
     assert found
@@ -33,40 +37,35 @@ def test_get_by_id(client: Albert, seeded_projects: list[Project]):
 
     assert isinstance(fetched_project, Project)
     assert fetched_project.id == seeded_project.id
-    assert fetched_project.name == seeded_project.name
+    assert fetched_project.description == seeded_project.description
 
 
-def test_create_project(client: Albert):
+def test_create_project(client: Albert, seeded_locations):
     project_collection = ProjectCollection(session=client.session)
 
     # Create a new project
     new_project = Project(
-        name="New Project",
-        description="A new development project.",
-        category="Development",
-        tags=[],
-        company=None,
+        description="A basic development project.",
+        locations=[BaseEntityLink(id=seeded_locations[0].id)],
     )
 
     created_project = project_collection.create(project=new_project)
     assert isinstance(created_project, Project)
-    assert created_project.name == "New Project"
-    assert created_project.description == "A new development project."
+    assert isinstance(created_project.id, str)
+    assert created_project.description == "A basic development project."
 
     # Clean up
     project_collection.delete(project_id=created_project.id)
 
 
-def test_delete_project(client: Albert):
+def test_delete_project(client: Albert, seeded_locations):
     project_collection = ProjectCollection(session=client.session)
 
     # Create a new project to delete
     new_project = Project(
-        name="Project to Delete",
-        description="A project to be deleted.",
-        category="Development",
-        tags=[],
-        company=None,
+        description="Project to Delete",
+        # acls=[],
+        locations=[BaseEntityLink(id=seeded_locations[1].id)],
     )
 
     created_project = project_collection.create(project=new_project)
@@ -77,5 +76,5 @@ def test_delete_project(client: Albert):
     assert success
 
     # Try to fetch the project, should return None or not found
-    deleted_project = project_collection.get_by_id(project_id=created_project.id)
-    assert deleted_project is None
+    with pytest.raises(NotFoundError):
+        project_collection.get_by_id(project_id=created_project.id)

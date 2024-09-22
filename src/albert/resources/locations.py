@@ -6,7 +6,7 @@ from albert.resources.base import BaseAlbertModel
 class Location(BaseAlbertModel):
     name: str
     id: str | None = Field(None, alias="albertId")
-    latitude: float
-    longitude: float
+    latitude: float = Field()
+    longitude: float = Field()
     address: str
     country: str | None = Field(None, max_length=2, min_length=2)

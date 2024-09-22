@@ -28,7 +28,7 @@ class LocationCollection(BaseCollection):
         name: list[str] | str = None,
         country: str = None,
         start_key: str = None,
-        exact_match:bool = False
+        exact_match: bool = False,
     ) -> Generator[Location, None, None]:
         params = {"limit": limit}
         if name:
@@ -53,7 +53,9 @@ class LocationCollection(BaseCollection):
                 break
             params["startKey"] = start_key
 
-    def list(self, *, name: str | list[str] = None, country: str = None, exact_match:bool = False) -> Iterator[Location]:
+    def list(
+        self, *, name: str | list[str] = None, country: str = None, exact_match: bool = False
+    ) -> Iterator[Location]:
         return self._list_generator(name=name, country=country, exact_match=exact_match)
 
     def get_by_id(self, *, id: str) -> Location | None:
@@ -79,7 +81,6 @@ class LocationCollection(BaseCollection):
     def update(self, *, updated_object: Location) -> Location:
         # Fetch the current object state from the server or database
         current_object = self.get_by_id(id=updated_object.id)
-
         # Generate the PATCH payload
         patch_payload = self._generate_patch_payload(
             existing=current_object, updated=updated_object
@@ -89,11 +90,15 @@ class LocationCollection(BaseCollection):
         return self.get_by_id(id=updated_object.id)
 
     def location_exists(self, *, location: Location):
-        hits =self.list(name=location.name, country=location.country, exact_match=True)
+        hits = self.list(name=location.name, country=location.country, exact_match=True)
         if hits:
-           for hit in hits:
-            if hit and hit.name.lower() == location.name.lower() and hit.country == location.country:
-                return hit
+            for hit in hits:
+                if (
+                    hit
+                    and hit.name.lower() == location.name.lower()
+                    and hit.country == location.country
+                ):
+                    return hit
         return None
 
     def create(self, *, location: Location) -> Location:

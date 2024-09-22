@@ -70,7 +70,7 @@ def test_update_location(client: Albert, seeded_locations: list[Location]):
 
 def test_location_exists(client: Albert, seeded_locations):
     # Check if the first seeded location exists
-    seeded_location = seeded_locations[0]
+    seeded_location = seeded_locations[2]
     exists = client.locations.location_exists(location=seeded_location)
 
     assert exists is not None

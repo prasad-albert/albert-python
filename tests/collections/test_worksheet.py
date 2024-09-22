@@ -8,20 +8,20 @@ from albert.resources.worksheets import Worksheet
 
 
 # NOTE: Once we have the Project Module done, these should be made dynamically.
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def project(client: Albert):
     return client.projects.get_by_id(project_id="P015")
 
 
 # NOTE: Once we have the Project Module done, these should be made dynamically.
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def worksheet(client: Albert):
     collection = WorksheetCollection(session=client.session)
     wksht = collection.get_by_project_id(project_id="P015")
     return wksht
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def sheet(worksheet: Worksheet) -> Sheet:
     for s in worksheet.sheets:
         if s.name == "test":

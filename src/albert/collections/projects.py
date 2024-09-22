@@ -63,16 +63,6 @@ class ProjectCollection(BaseCollection):
         Optional[Project]
             The created project object if successful, None otherwise.
         """
-        all_tags = []
-        tag_collection = TagCollection(session=self.session)
-        for t in project.tags:
-            if t.id is None:
-                t = tag_collection.create(t)
-            all_tags.append(t)
-        project.tags = all_tags
-        if project.company and project.company.id is None:
-            company_collection = CompanyCollection(session=self.session)
-            project.company = company_collection.create(project.company)
         response = self.session.post(
             self.base_path, json=project.model_dump(by_alias=True, exclude_unset=True)
         )
@@ -148,7 +138,6 @@ class ProjectCollection(BaseCollection):
         name: list[str] | None = None,
         category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-        exact_match: bool = False,
     ) -> Generator[Project, None, None]:
         """
         Generator for listing projects with optional filters.
@@ -176,7 +165,6 @@ class ProjectCollection(BaseCollection):
         params = {
             "limit": str(limit),
             "orderBy": order_by.value,
-            "exactMatch": str(exact_match).lower(),
         }
         if start_key:
             params["startKey"] = start_key
@@ -203,7 +191,6 @@ class ProjectCollection(BaseCollection):
         name: list[str] | None = None,
         category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-        exact_match: bool = False,
     ) -> Iterator[Project]:
         """
         List projects with optional filters.
@@ -224,6 +211,4 @@ class ProjectCollection(BaseCollection):
         Generator
             A generator yielding projects that match the filters.
         """
-        return self._list_generator(
-            name=name, category=category, order_by=order_by, exact_match=exact_match
-        )
+        return self._list_generator(name=name, category=category, order_by=order_by)

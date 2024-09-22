@@ -6,11 +6,6 @@ from albert.albert import Albert
 from albert.collections.companies import Company
 
 
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
-
-
 def _list_asserts(returned_list):
     found = False
     for i, c in enumerate(returned_list):

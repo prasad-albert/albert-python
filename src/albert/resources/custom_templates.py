@@ -3,6 +3,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
+from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink
 from albert.resources.inventory import InventoryCategory
 from albert.resources.sheets import DesignType
@@ -138,28 +139,23 @@ class ACLType(str, Enum):
     OWNER = "owner"
 
 
-class TeamACL(BaseAlbertModel):
+class TeamACL(ACL):
     type: Literal[ACLType.TEAM] = ACLType.TEAM
-    id: str
-    fgc: str
 
 
-class OwnerACL(BaseAlbertModel):
+class OwnerACL(ACL):
     type: Literal[ACLType.OWNER] = ACLType.OWNER
-    id: str
 
 
-class MemberACL(BaseAlbertModel):
+class MemberACL(ACL):
     type: Literal[ACLType.MEMBER] = ACLType.MEMBER
-    id: str
-    fgc: str
 
 
 ACLEntry = Annotated[TeamACL | OwnerACL | MemberACL, Field(discriminator="type")]
 
 
 # NOTE: Unsure if this will be re-used elsewhere and may need to be moved somewhere more general.
-class ACL(BaseAlbertModel):
+class TemplateACL(BaseAlbertModel):
     fgclist: list[ACLEntry] = Field(default=None)
     acl_class: str = Field(alias="class")
 
@@ -171,7 +167,7 @@ class CustomTemplate(BaseTaggedEntity):
     metadata: dict | None = Field(default=None, alias="Metadata")
     data: None | CustomTemplateData = Field(default=None, alias="Data")
     team: list[TeamACL] | None = Field(default=[])
-    acl: ACL | None = Field(default=[], alias="ACL")
+    acl: TemplateACL | None = Field(default=[], alias="ACL")
 
     @model_validator(mode="before")
     @classmethod
