@@ -5,7 +5,7 @@ import pytest
 from albert.albert import Albert
 from albert.collections.projects import ProjectCollection
 from albert.resources.base import BaseEntityLink
-from albert.resources.projects import Project, State
+from albert.resources.projects import Project
 from albert.utils.exceptions import NotFoundError
 
 

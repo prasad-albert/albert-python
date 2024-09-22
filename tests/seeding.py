@@ -2,7 +2,8 @@ from albert.resources.base import BaseEntityLink
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
 from albert.resources.locations import Location
-from albert.resources.lots import Lot, LotMetadata, LotStatus
+
+# from albert.resources.lots import Lot, LotMetadata, LotStatus
 from albert.resources.projects import GridDefault, Metadata, Project, ProjectClass
 from albert.resources.roles import Role
 from albert.resources.tags import Tag

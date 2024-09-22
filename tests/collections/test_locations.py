@@ -1,7 +1,4 @@
-import logging
 from collections.abc import Generator
-
-import pytest
 
 from albert.albert import Albert
 from albert.collections.locations import Location, LocationCollection
