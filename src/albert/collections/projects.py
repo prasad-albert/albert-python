@@ -1,8 +1,6 @@
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.collections.companies import CompanyCollection
-from albert.collections.tags import TagCollection
 from albert.resources.projects import Project
 from albert.session import AlbertSession
 
@@ -36,6 +34,7 @@ class ProjectCollection(BaseCollection):
     """
 
     _api_version = "v3"
+    _updatable_attributes = {"description", "grid"}
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -88,27 +87,19 @@ class ProjectCollection(BaseCollection):
 
         return Project(**response.json())
 
-    def update(self, *, project_id: str, patch_data: dict) -> bool:
+    def update(self, *, updated_project: Project) -> Project:
         """
-        Update a project by its ID.
-
-        Parameters
-        ----------
-        project_id : str
-            The ID of the project to update.
-        patch_data : dict
-            The patch data to update the project with.
-
-        Returns
-        -------
-        bool
-            True if the update was successful, False otherwise.
+        TO DO: This needs some more custom patch logic
         """
-        url = f"{self.base_path}/{project_id}"
+        existing_project = self.get_by_id(project_id=updated_project.id)
+        patch_data = self._generate_patch_payload(
+            existing=existing_project, updated=updated_project
+        )
+        url = f"{self.base_path}/{updated_project.id}"
 
         self.session.patch(url, json=patch_data)
 
-        return True
+        return updated_project
 
     def delete(self, *, project_id: str) -> bool:
         """
@@ -135,8 +126,6 @@ class ProjectCollection(BaseCollection):
         *,
         limit: int = 50,
         start_key: str = None,
-        name: list[str] | None = None,
-        category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
     ) -> Generator[Project, None, None]:
         """
@@ -150,8 +139,6 @@ class ProjectCollection(BaseCollection):
             The start key for pagination.
         name : Optional[List[str]], optional
             The name filter for the projects.
-        category : Optional[str], optional
-            The category filter for the projects.
         order_by : OrderBy, optional
             The order in which to retrieve items (default is OrderBy.DESCENDING).
         exact_match : bool, optional
@@ -168,15 +155,11 @@ class ProjectCollection(BaseCollection):
         }
         if start_key:  # pragma: no cover
             params["startKey"] = start_key
-        if name:
-            params["name"] = ",".join(name)
-        if category:
-            params["category"] = category
         while True:
             response = self.session.get(self.base_path, params=params)
 
             raw_projects = response.json().get("Items", [])
-            if not raw_projects or raw_projects == []:
+            if not raw_projects or raw_projects == []:  # pragma: no cover
                 break
             for x in raw_projects:
                 yield Project(**x)
@@ -188,8 +171,6 @@ class ProjectCollection(BaseCollection):
     def list(
         self,
         *,
-        name: list[str] | None = None,
-        category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
     ) -> Iterator[Project]:
         """
@@ -197,18 +178,11 @@ class ProjectCollection(BaseCollection):
 
         Parameters
         ----------
-        name : Optional[List[str]], optional
-            The name filter for the projects.
-        category : Optional[str], optional
-            The category filter for the projects.
         order_by : OrderBy, optional
             The order in which to retrieve items (default is OrderBy.DESCENDING).
-        exact_match : bool, optional
-            Whether to match names exactly (default is False).
-
         Returns
         -------
         Generator
             A generator yielding projects that match the filters.
         """
-        return self._list_generator(name=name, category=category, order_by=order_by)
+        return self._list_generator(order_by=order_by)

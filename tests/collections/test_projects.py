@@ -9,10 +9,10 @@ from albert.resources.projects import Project
 from albert.utils.exceptions import NotFoundError
 
 
-def _list_asserts(returned_list):
+def _list_asserts(returned_list, limit=50):
     found = False
     for i, project in enumerate(returned_list):
-        if i == 50:  # Limit to checking first 50 projects
+        if i == limit:  # Limit to checking first 50 projects
             break
         assert isinstance(project, Project)
         assert isinstance(project.description, str)
@@ -21,11 +21,13 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_list_projects(client: Albert):
-    project_collection = ProjectCollection(session=client.session)
+def test_list_projects(project_collection):
     project_list = project_collection.list()
     assert isinstance(project_list, Generator)
     _list_asserts(project_list)
+
+    short_lists = project_collection._list_generator(limit=5)
+    _list_asserts(short_lists, limit=7)
 
 
 def test_get_by_id(client: Albert, seeded_projects: list[Project]):
@@ -56,6 +58,12 @@ def test_create_project(client: Albert, seeded_locations):
 
     # Clean up
     project_collection.delete(project_id=created_project.id)
+
+
+def test_update_project(seeded_projects, project_collection):
+    seeded_projects[1].grid = "PD"
+    updated = project_collection.update(updated_project=seeded_projects[1])
+    assert updated.id == seeded_projects[1].id
 
 
 def test_delete_project(client: Albert, seeded_locations):
