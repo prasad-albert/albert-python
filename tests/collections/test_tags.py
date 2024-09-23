@@ -30,9 +30,9 @@ def test_simple_tags_list(client: Albert):
     _list_asserts(simple_list)
 
 
-def test_advanced_tags_list(tag_collection, seeded_tags: list[Tag]):
+def test_advanced_tags_list(client: Albert, seeded_tags: list[Tag]):
     name = seeded_tags[0].tag
-    adv_list = tag_collection.list(
+    adv_list = client.tags.list(
         name=name,
         exact_match=True,
         order_by=OrderBy.ASCENDING,
@@ -44,33 +44,33 @@ def test_advanced_tags_list(tag_collection, seeded_tags: list[Tag]):
         assert "inventory-tag-1" in t.tag.lower()
     _list_asserts(adv_list)
 
-    adv_list_no_match = tag_collection.list(
+    adv_list_no_match = client.tags.list(
         name="chaos tags 126485% HELLO WORLD!!!!",
         exact_match=True,
         order_by=OrderBy.ASCENDING,
     )
     assert next(adv_list_no_match, None) == None
 
-    tag_short_list = tag_collection._list_generator(limit=3)
+    tag_short_list = client.tags._list_generator(limit=3)
     _list_asserts(tag_short_list, limit=5)
 
 
-def test_get_tag_by(tag_collection, seeded_tags: list[Tag]):
+def test_get_tag_by(client: Albert, seeded_tags: list[Tag]):
     tag_test_str = seeded_tags[2].tag
 
-    tag = tag_collection.get_by_tag(tag=tag_test_str, exact_match=True)
+    tag = client.tags.get_by_tag(tag=tag_test_str, exact_match=True)
 
     assert isinstance(tag, Tag)
     assert tag.tag.lower() == tag_test_str.lower()
 
-    by_id = tag_collection.get_by_id(tag_id=tag.id)
+    by_id = client.tags.get_by_id(tag_id=tag.id)
     assert isinstance(by_id, Tag)
     assert by_id.tag.lower() == tag_test_str.lower()
 
 
-def test_tag_exists(tag_collection, seeded_tags: list[Tag]):
-    assert tag_collection.tag_exists(tag=seeded_tags[1].tag)
-    assert not tag_collection.tag_exists(
+def test_tag_exists(client: Albert, seeded_tags: list[Tag]):
+    assert client.tags.tag_exists(tag=seeded_tags[1].tag)
+    assert not client.tags.tag_exists(
         tag="Nonesense tag no one would ever make!893y58932y58923", exact_match=True
     )
 

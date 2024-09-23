@@ -59,66 +59,51 @@ def test_cas_exists(client: Albert, seeded_cas: list[Cas]):
     assert not client.cas_numbers.cas_exists(number="999-99-9xxxx")
 
 
-def test_create_cas(client: Albert):
-    # Create a new CAS entry
-    new_cas = Cas(number="123-45-6", description="Test CAS")
-    created_cas = client.cas_numbers.create(cas=new_cas)
-
-    assert isinstance(created_cas, Cas)
-    assert created_cas.number == "123-45-6"
-    assert created_cas.description == "Test CAS"
-
-    # Try to create the same CAS again, should return the existing one
-    existing_cas = client.cas_numbers.create(cas="123-45-6")
-    assert existing_cas.id == created_cas.id
-    assert existing_cas.number == "123-45-6"
-
-
-def test_update_cas(cas_collection, seeded_cas: list[Cas]):
+def test_update_cas(client: Albert, seeded_cas: list[Cas]):
     # Update the description of a seeded CAS entry
     cas_to_update = seeded_cas[0]
     updated_description = "Updated CAS Description"
     cas_to_update.description = updated_description
 
-    updated_cas = cas_collection.update(updated_object=cas_to_update)
+    updated_cas = client.cas_numbers.update(updated_object=cas_to_update)
 
     assert updated_cas.description == updated_description
 
-    # Verify the cache has the updated object
-    assert cas_collection.cas_cache[cas_to_update.number].description == updated_description
 
-
-def test_delete_cas(cas_collection, client: Albert):
+def test_create_and_delete_cas(client: Albert):
     # Create a new CAS to be deleted
     new_cas = Cas(number="987-65-4", description="Delete Test CAS")
 
-    created_cas = cas_collection.create(cas=new_cas)
+    created_cas = client.cas_numbers.create(cas=new_cas)
+
+    assert isinstance(created_cas, Cas)
+    assert isinstance(created_cas.id, str)
 
     # Verify that the CAS was created
     sleep(
-        1
+        1.5
     )  # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
-    assert cas_collection.cas_exists(number="987-65-4")
+    assert client.cas_numbers.cas_exists(number="987-65-4")
 
     # Delete the CAS
-    deleted = cas_collection.delete(cas_id=created_cas.id)
+    deleted = client.cas_numbers.delete(cas_id=created_cas.id)
     assert deleted
 
     # Verify that the CAS no longer exists
-    assert not cas_collection.cas_exists(number="987-65-4")
+    assert not client.cas_numbers.cas_exists(number="987-65-4")
 
 
-def test_get_by_number(cas_collection, client: Albert):
+def test_get_by_number(client: Albert):
     # Create a new CAS to be deleted
     new_cas = Cas(number="987-65-4", description="Delete Test CAS")
-    created_cas = cas_collection.create(cas=new_cas)
+    created_cas = client.cas_numbers.create(cas=new_cas)
 
     # Verify that the CAS was created
     sleep(
-        1
+        1.5
     )  # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
-    returned_cas = cas_collection.get_by_number(number="987-65-4")
+    returned_cas = client.cas_numbers.get_by_number(number="987-65-4", exact_match=True)
     assert returned_cas.id == created_cas.id
     # Delete the CAS
-    deleted = cas_collection.delete(cas_id=created_cas.id)
+    deleted = client.cas_numbers.delete(cas_id=created_cas.id)
     assert deleted

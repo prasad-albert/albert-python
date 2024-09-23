@@ -19,8 +19,6 @@ class CasCollection(BaseCollection):
     ----------
     base_path : str
         The base path for CAS API.
-    cas_cache : dict
-        A cache of CAS objects.
 
     Methods
     -------
@@ -54,16 +52,6 @@ class CasCollection(BaseCollection):
         """
         super().__init__(session=session)
         self.base_path = f"/api/{CasCollection._api_version}/cas"
-        self.cas_cache = {}
-
-    def _remove_from_cache_by_id(self, *, id):
-        name = None
-        for k, v in self.cas_cache.items():
-            if v.id == id:
-                name = k
-                break
-        if name:
-            del self.cas_cache[name]
 
     def _list_generator(
         self,
@@ -109,7 +97,6 @@ class CasCollection(BaseCollection):
                 break
             for x in cas_data:
                 this_cas = Cas(**x)
-                self.cas_cache[this_cas.number] = this_cas
                 yield this_cas
             start_key = response.json().get("lastKey")
             if not start_key:  # start key is tested here but not on init
@@ -162,12 +149,8 @@ class CasCollection(BaseCollection):
         bool
             True if the CAS exists, False otherwise.
         """
-        if number in self.cas_cache:
-            return True
         cas_list = self.get_by_number(number=number, exact_match=exact_match)
-        if cas_list is None:
-            return False
-        return len(cas_list) > 0
+        return cas_list is not None
 
     def create(self, *, cas: str | Cas) -> Cas:
         """
@@ -185,14 +168,13 @@ class CasCollection(BaseCollection):
         """
         if isinstance(cas, str):
             cas = Cas(number=cas)
-        if self.cas_exists(number=cas.number):
-            existing_cas = self.cas_cache[cas.number]
-            return existing_cas
+        hit = self.get_by_number(number=cas.number, exact_match=True)
+        if hit:
+            return hit
         else:
             payload = cas.model_dump(by_alias=True, exclude_unset=True)
             response = self.session.post(self.base_path, json=payload)
             cas = Cas(**response.json())
-            self.cas_cache[cas.number] = cas
             return cas
 
     def get_by_id(self, *, cas_id: str) -> Cas:
@@ -212,7 +194,6 @@ class CasCollection(BaseCollection):
         url = f"{self.base_path}/{cas_id}"
         response = self.session.get(url)
         cas = Cas(**response.json())
-        self.cas_cache[cas.number] = cas
         return cas
 
     def get_by_number(self, *, number: str, exact_match: bool = True) -> Cas | None:
@@ -231,13 +212,11 @@ class CasCollection(BaseCollection):
         Optional[Cas]
             The Cas object if found, None otherwise.
         """
-        if number in self.cas_cache:
-            return self.cas_cache[number]
         found = self.list(number=number)
         if exact_match:
             for f in found:
                 if f.number == number:
-                    return [f]
+                    return f
         return next(found, None)
 
     def delete(self, *, cas_id: str) -> bool:
@@ -256,7 +235,6 @@ class CasCollection(BaseCollection):
         """
         url = f"{self.base_path}/{cas_id}"
         self.session.delete(url)
-        self._remove_from_cache_by_id(id=cas_id)
         return True
 
     def update(self, *, updated_object: BaseAlbertModel) -> BaseAlbertModel:
@@ -271,6 +249,5 @@ class CasCollection(BaseCollection):
         url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
 
-        # this get also updates the cache
         updated_cas = self.get_by_id(cas_id=updated_object.id)
         return updated_cas
