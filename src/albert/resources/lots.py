@@ -7,6 +7,7 @@ from pydantic import Field, NonNegativeFloat, PrivateAttr, field_serializer
 from albert.collections.inventory import InventoryCategory
 from albert.resources.base import BaseAlbertModel, BaseEntityLink
 from albert.resources.locations import Location
+from albert.resources.serialization import serialize_to_entity_link, serialize_to_entity_link_list
 from albert.resources.users import User
 
 
@@ -54,7 +55,7 @@ class Lot(BaseAlbertModel):
     initial_quantity: NonNegativeFloat = Field(alias="initialQuantity")
     cost: NonNegativeFloat | None = Field(default=None)
     inventory_on_hand: NonNegativeFloat = Field(alias="inventoryOnHand")
-    owner: list[BaseEntityLink] | list[User] | None = Field(default=None)
+    owner: list[User | BaseEntityLink] | None = Field(default=None)
     lot_number: str | None = Field(None, alias="lotNumber")
     external_barcode_id: str | None = Field(None, alias="externalBarcodeId")
 
@@ -116,16 +117,8 @@ class Lot(BaseAlbertModel):
     def serialize_inventory_on_hand(self, inventory_on_hand: NonNegativeFloat):
         return str(inventory_on_hand)
 
-    @field_serializer("location", return_type=BaseEntityLink)
-    def set_location_to_link(self, location: Location | BaseEntityLink):
-        if isinstance(location, Location):
-            return location.to_entity_link()
-        else:
-            return location
-
-    @field_serializer("owner", return_type=list[BaseEntityLink])
-    def set_owners_to_link(self, owner: list[User] | list[BaseEntityLink]):
-        return [x.to_entity_link() if isinstance(x, User) else x for x in owner]
+    location_serializer = field_serializer("location")(serialize_to_entity_link)
+    owner_serializer = field_serializer("owner")(serialize_to_entity_link_list)
 
     @property
     def has_notes(self) -> bool:

@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel, EntityLinkConvertible
 
 
-class Location(BaseAlbertModel):
+class Location(BaseAlbertModel, EntityLinkConvertible):
     name: str
     id: str | None = Field(None, alias="albertId")
     latitude: float = Field()

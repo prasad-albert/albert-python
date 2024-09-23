@@ -5,6 +5,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 from albert.session import AlbertSession
+from albert.utils.exceptions import AlbertException
 
 
 class Status(str, Enum):
@@ -59,18 +60,16 @@ class BaseSessionModel(BaseAlbertModel):
         ),
     )
 
-    def to_entity_link(self):
-        if hasattr(self, "id"):
-            this_link = BaseEntityLink(id=self.id)
-            if hasattr(self, "name"):
-                this_link.name = self.name
-            return this_link
-        else:
-            ValueError(
-                "`id` is required to create an entity link. Ensure the linked object is registered."
-            )
-
 
 class BaseEntityLink(BaseAlbertModel):
     id: str
     name: str | None = Field(default=None)
+
+
+class EntityLinkConvertible:
+    def to_entity_link(self) -> BaseEntityLink:
+        if hasattr(self, "id"):
+            return BaseEntityLink(id=self.id, name=getattr(self, "name", None))
+        return AlbertException(
+            "`id` is required to create an entity link. Ensure the linked object is registered."
+        )

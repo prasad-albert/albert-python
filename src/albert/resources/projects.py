@@ -4,8 +4,9 @@ from typing import Any
 from pydantic import BaseModel, Field, PrivateAttr, field_serializer, model_validator
 
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, BaseEntityLink
+from albert.resources.base import BaseAlbertModel, BaseEntityLink, EntityLinkConvertible
 from albert.resources.locations import Location
+from albert.resources.serialization import serialize_to_entity_link_list
 
 
 class ProjectClass(str, Enum):
@@ -44,10 +45,10 @@ class Metadata(BaseModel):
     adpType: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
 
 
-class Project(BaseAlbertModel):
+class Project(BaseAlbertModel, EntityLinkConvertible):
     description: str = Field(min_length=1, max_length=2000)
-    locations: list[BaseEntityLink] | list[Location] | None = Field(
-        min_length=1, max_length=20, alias="Locations"
+    locations: list[Location | BaseEntityLink] | None = Field(
+        default=None, min_length=1, max_length=20, alias="Locations"
     )
     project_class: ProjectClass | None = Field(default=None, alias="class")
     prefix: str | None = Field(default=None)
@@ -63,6 +64,8 @@ class Project(BaseAlbertModel):
     grid: GridDefault | None = None
     metadata: Metadata | None = Field(alias="Metadata", default=None)
     _state: State | None = PrivateAttr(default=None)
+
+    locations_serializer = field_serializer("locations")(serialize_to_entity_link_list)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -92,7 +95,3 @@ class Project(BaseAlbertModel):
         if "project_class" not in values or values["project_class"] is None:
             values["project_class"] = ProjectClass.PRIVATE
         return values
-
-    @field_serializer("locations", return_type=BaseEntityLink)
-    def serialize_locations_as_links(self, locations: list[BaseEntityLink] | list[Location]):
-        return [x if isinstance(x, BaseEntityLink) else x.to_entity_link() for x in locations]

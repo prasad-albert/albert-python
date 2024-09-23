@@ -8,6 +8,7 @@ from albert.resources.base import BaseAlbertModel, BaseEntityLink
 from albert.resources.inventory import InventoryCategory
 from albert.resources.locations import Location
 from albert.resources.projects import Project
+from albert.resources.serialization import serialize_to_entity_link
 from albert.resources.sheets import DesignType, Sheet
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.users import User
@@ -15,7 +16,7 @@ from albert.resources.users import User
 
 class DataTemplateInventory(BaseEntityLink):
     batch_size: float | None = Field(default=None, alias="batchSize")
-    sheet: list[BaseEntityLink] | list[Sheet] | None = Field(default=None)
+    sheet: list[Sheet | BaseEntityLink] | None = Field(default=None)
     category: InventoryCategory | None = Field(default=None)
 
 
@@ -97,19 +98,8 @@ class QCBatchData(BaseTaggedEntity):
     priority: Priority  # enum?!
     name: str | None = Field(default=None)
 
-    @field_serializer("project", return_type=BaseEntityLink)
-    def set_project_to_link(self, project: Project | BaseEntityLink):
-        if isinstance(project, Project):
-            return project.to_entity_link()
-        else:
-            return project
-
-    @field_serializer("location", return_type=BaseEntityLink)
-    def set_location_to_link(self, location: Location | BaseEntityLink):
-        if isinstance(location, Location):
-            return location.to_entity_link()
-        else:
-            return location
+    project_serializer = field_serializer("project")(serialize_to_entity_link)
+    location_serializer = field_serializer("location")(serialize_to_entity_link)
 
 
 class BatchData(BaseTaggedEntity):
@@ -124,26 +114,9 @@ class BatchData(BaseTaggedEntity):
     priority: Priority  # enum?!
     workflow: list[BaseEntityLink] = Field(default=None, alias="Workflow")
 
-    @field_serializer("assigned_to", return_type=BaseEntityLink)
-    def set_assigned_to_to_link(self, assigned_to: User | BaseEntityLink):
-        if isinstance(assigned_to, User):
-            return assigned_to.to_entity_link()
-        else:
-            return assigned_to
-
-    @field_serializer("location", return_type=BaseEntityLink)
-    def set_location_to_link(self, location: Location | BaseEntityLink):
-        if isinstance(location, Location):
-            return location.to_entity_link()
-        else:
-            return location
-
-    @field_serializer("project", return_type=BaseEntityLink)
-    def set_project_to_link(self, project: Project | BaseEntityLink):
-        if isinstance(project, Location):
-            return project.to_entity_link()
-        else:
-            return project
+    assigned_to_serializer = field_serializer("assigned_to")(serialize_to_entity_link)
+    location_serializer = field_serializer("location")(serialize_to_entity_link)
+    project_serializer = field_serializer("project")(serialize_to_entity_link)
 
 
 class PropertyData(BaseTaggedEntity):
@@ -157,26 +130,9 @@ class PropertyData(BaseTaggedEntity):
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     due_date: str | None = Field(alias="dueDate", default=None)
 
-    @field_serializer("assigned_to", return_type=BaseEntityLink)
-    def set_assigned_to_to_link(self, assigned_to: User | BaseEntityLink):
-        if isinstance(assigned_to, User):
-            return assigned_to.to_entity_link()
-        else:
-            return assigned_to
-
-    @field_serializer("location", return_type=BaseEntityLink)
-    def set_location_to_link(self, location: Location | BaseEntityLink):
-        if isinstance(location, Location):
-            return location.to_entity_link()
-        else:
-            return location
-
-    @field_serializer("project", return_type=BaseEntityLink)
-    def set_project_to_link(self, project: Project | BaseEntityLink):
-        if isinstance(project, Location):
-            return project.to_entity_link()
-        else:
-            return project
+    assigned_to_serializer = field_serializer("assigned_to")(serialize_to_entity_link)
+    location_serializer = field_serializer("location")(serialize_to_entity_link)
+    project_serializer = field_serializer("project")(serialize_to_entity_link)
 
 
 class SheetData(BaseTaggedEntity):
