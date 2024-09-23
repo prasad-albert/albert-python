@@ -59,6 +59,17 @@ class BaseSessionModel(BaseAlbertModel):
         ),
     )
 
+    def to_entity_link(self):
+        if hasattr(self, "id"):
+            this_link = BaseEntityLink(id=self.id)
+            if hasattr(self, "name"):
+                this_link.name = self.name
+            return this_link
+        else:
+            ValueError(
+                "`id` is required to create an entity link. Ensure the linked object is registered."
+            )
+
 
 class BaseEntityLink(BaseAlbertModel):
     id: str

@@ -6,6 +6,8 @@ from pydantic import Field, NonNegativeFloat, PrivateAttr, field_serializer
 
 from albert.collections.inventory import InventoryCategory
 from albert.resources.base import BaseAlbertModel, BaseEntityLink
+from albert.resources.locations import Location
+from albert.resources.users import User
 
 
 class LotStatus(str, Enum):
@@ -39,19 +41,20 @@ class LotMetadata(BaseAlbertModel):
 
 
 class Lot(BaseAlbertModel):
+    # To Do: Once Storage Locations are down allow them here instead of just the link
     id: str | None = Field(None, alias="albertId")
     inventory_id: str = Field(alias="parentId")
     task_id: str | None = Field(default=None, alias="taskId")
     notes: str | None = Field(default=None)
     expiration_date: str | None = Field(None, alias="expirationDate")
     manufacturer_lot_number: str | None = Field(None, alias="manufacturerLotNumber")
-    location: BaseEntityLink = None  # need to make Location Class
+    location: BaseEntityLink | Location = None  # need to make Location Class
     storage_location: BaseEntityLink = Field(alias="storageLocation")
     pack_size: str | None = Field(None, alias="packSize")
     initial_quantity: NonNegativeFloat = Field(alias="initialQuantity")
     cost: NonNegativeFloat | None = Field(default=None)
     inventory_on_hand: NonNegativeFloat = Field(alias="inventoryOnHand")
-    owner: list[BaseEntityLink] | None = Field(default=None)
+    owner: list[BaseEntityLink] | list[User] | None = Field(default=None)
     lot_number: str | None = Field(None, alias="lotNumber")
     external_barcode_id: str | None = Field(None, alias="externalBarcodeId")
 
@@ -112,6 +115,17 @@ class Lot(BaseAlbertModel):
     @field_serializer("inventory_on_hand", return_type=str)
     def serialize_inventory_on_hand(self, inventory_on_hand: NonNegativeFloat):
         return str(inventory_on_hand)
+
+    @field_serializer("location", return_type=BaseEntityLink)
+    def set_location_to_link(self, location: Location | BaseEntityLink):
+        if isinstance(location, Location):
+            return location.to_entity_link()
+        else:
+            return location
+
+    @field_serializer("owner", return_type=list[BaseEntityLink])
+    def set_owners_to_link(self, owner: list[User] | list[BaseEntityLink]):
+        return [x.to_entity_link() if isinstance(x, User) else x for x in owner]
 
     @property
     def has_notes(self) -> bool:

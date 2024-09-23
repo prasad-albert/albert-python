@@ -43,7 +43,8 @@ class UserCollection(BaseCollection):
             if not user_data or user_data == []:
                 break
             for u in user_data:
-                yield User(**u)
+                # do a full get
+                yield self.get_by_id(user_id=u["albertId"])
             offset = response.json().get("offset")
             if not offset or len(user_data) < limit:
                 break

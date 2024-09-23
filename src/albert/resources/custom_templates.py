@@ -1,18 +1,21 @@
 from enum import Enum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_serializer, model_validator
 
 from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink
 from albert.resources.inventory import InventoryCategory
-from albert.resources.sheets import DesignType
+from albert.resources.locations import Location
+from albert.resources.projects import Project
+from albert.resources.sheets import DesignType, Sheet
 from albert.resources.tagged_base import BaseTaggedEntity
+from albert.resources.users import User
 
 
 class DataTemplateInventory(BaseEntityLink):
     batch_size: float | None = Field(default=None, alias="batchSize")
-    sheet: list[BaseEntityLink] | None = Field(default=None)
+    sheet: list[BaseEntityLink] | list[Sheet] | None = Field(default=None)
     category: InventoryCategory | None = Field(default=None)
 
 
@@ -76,32 +79,71 @@ class Workflow(BaseAlbertModel):
     )  # Some workflows may have SamConfig
 
 
-class Block(BaseTaggedEntity):
+class Block(
+    BaseTaggedEntity
+):  # To Do once DTs are done allow a list of DTs with the correct field_serializer
     workflow: list[Workflow] = Field(default=None, alias="Workflow")
     datatemplate: list[BaseEntityLink] | None = Field(default=None, alias="Datatemplate")
 
 
 class QCBatchData(BaseTaggedEntity):
+    # To Do once Workflows are done, add the option to have a list of Workflow objects (with the right field_serializer)
     category: Literal[TemplateCategory.QC_BATCH] = TemplateCategory.QC_BATCH
-    project: BaseEntityLink | None = Field(alias="Project", default=None)
+    project: BaseEntityLink | Project | None = Field(alias="Project", default=None)
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     workflow: list[BaseEntityLink] = Field(default=None, alias="Workflow")
-    location: BaseEntityLink | None = Field(alias="Location", default=None)
+    location: BaseEntityLink | Location | None = Field(alias="Location", default=None)
     batch_size_unit: str = Field(alias="batchSizeUnit", default=None)
     priority: Priority  # enum?!
     name: str | None = Field(default=None)
+
+    @field_serializer("project", return_type=BaseEntityLink)
+    def set_project_to_link(self, project: Project | BaseEntityLink):
+        if isinstance(project, Project):
+            return project.to_entity_link()
+        else:
+            return project
+
+    @field_serializer("location", return_type=BaseEntityLink)
+    def set_location_to_link(self, location: Location | BaseEntityLink):
+        if isinstance(location, Location):
+            return location.to_entity_link()
+        else:
+            return location
 
 
 class BatchData(BaseTaggedEntity):
+    # To Do once Workflows are done, add the option to have a list of Workflow objects (with the right field_serializer)
     category: Literal[TemplateCategory.BATCH] = TemplateCategory.BATCH
-    assigned_to: BaseEntityLink | None = Field(alias="AssignedTo", default=None)
-    project: BaseEntityLink | None = Field(alias="Project", default=None)
+    assigned_to: BaseEntityLink | User | None = Field(alias="AssignedTo", default=None)
+    project: BaseEntityLink | Project | None = Field(alias="Project", default=None)
     name: str | None = Field(default=None)
-    location: BaseEntityLink | None = Field(alias="Location", default=None)
+    location: BaseEntityLink | Location | None = Field(alias="Location", default=None)
     batch_size_unit: str = Field(alias="batchSizeUnit", default=None)
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     priority: Priority  # enum?!
     workflow: list[BaseEntityLink] = Field(default=None, alias="Workflow")
+
+    @field_serializer("assigned_to", return_type=BaseEntityLink)
+    def set_assigned_to_to_link(self, assigned_to: User | BaseEntityLink):
+        if isinstance(assigned_to, User):
+            return assigned_to.to_entity_link()
+        else:
+            return assigned_to
+
+    @field_serializer("location", return_type=BaseEntityLink)
+    def set_location_to_link(self, location: Location | BaseEntityLink):
+        if isinstance(location, Location):
+            return location.to_entity_link()
+        else:
+            return location
+
+    @field_serializer("project", return_type=BaseEntityLink)
+    def set_project_to_link(self, project: Project | BaseEntityLink):
+        if isinstance(project, Location):
+            return project.to_entity_link()
+        else:
+            return project
 
 
 class PropertyData(BaseTaggedEntity):
@@ -109,11 +151,32 @@ class PropertyData(BaseTaggedEntity):
     name: str | None = Field(default=None)
     blocks: list[Block] = Field(default=[], alias="Blocks")  # Needs to be it's own class
     priority: Priority  # enum?!
-    location: BaseEntityLink | None = Field(alias="Location", default=None)
-    assigned_to: BaseEntityLink | None = Field(alias="AssignedTo", default=None)
-    project: BaseEntityLink | None = Field(alias="Project", default=None)
+    location: BaseEntityLink | Location | None = Field(alias="Location", default=None)
+    assigned_to: BaseEntityLink | User | None = Field(alias="AssignedTo", default=None)
+    project: BaseEntityLink | Project | None = Field(alias="Project", default=None)
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     due_date: str | None = Field(alias="dueDate", default=None)
+
+    @field_serializer("assigned_to", return_type=BaseEntityLink)
+    def set_assigned_to_to_link(self, assigned_to: User | BaseEntityLink):
+        if isinstance(assigned_to, User):
+            return assigned_to.to_entity_link()
+        else:
+            return assigned_to
+
+    @field_serializer("location", return_type=BaseEntityLink)
+    def set_location_to_link(self, location: Location | BaseEntityLink):
+        if isinstance(location, Location):
+            return location.to_entity_link()
+        else:
+            return location
+
+    @field_serializer("project", return_type=BaseEntityLink)
+    def set_project_to_link(self, project: Project | BaseEntityLink):
+        if isinstance(project, Location):
+            return project.to_entity_link()
+        else:
+            return project
 
 
 class SheetData(BaseTaggedEntity):
@@ -154,7 +217,6 @@ class MemberACL(ACL):
 ACLEntry = Annotated[TeamACL | OwnerACL | MemberACL, Field(discriminator="type")]
 
 
-# NOTE: Unsure if this will be re-used elsewhere and may need to be moved somewhere more general.
 class TemplateACL(BaseAlbertModel):
     fgclist: list[ACLEntry] = Field(default=None)
     acl_class: str = Field(alias="class")
