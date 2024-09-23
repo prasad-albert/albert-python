@@ -8,7 +8,7 @@ from albert.resources.base import BaseAlbertModel, BaseEntityLink
 
 
 class UserClass(str, Enum):
-    GUEST = ("guest",)
+    GUEST = "guest"
     STANDARD = "standard"
     TRUSTED = "trusted"
     PRIVILEGED = "privileged"
