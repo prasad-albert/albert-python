@@ -7,6 +7,7 @@ from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.tags import Tag
 from albert.collections.un_numbers import UnNumber
+from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel
 from albert.resources.tagged_base import BaseTaggedEntity
 
@@ -135,8 +136,8 @@ class InventoryItem(BaseTaggedEntity):
     )  # Read only: comes from task generation
     _symbols: list[dict] | None = PrivateAttr(default=None)  # read only: comes from attachments
     _un_number: UnNumber | None = PrivateAttr(default=None)  # Read only: Comes from attachments
-    _acls: list[dict] | None = PrivateAttr(default=None)  # read only
-    metadata: dict | None = Field(default=None, alias="Metadata")  # read only
+    _acls: list[ACL] | None = PrivateAttr(default=None)  # read only
+    metadata: dict | None = Field(default=None, alias="Metadata")
     _minimum: list[dict[str, Any]] | None = PrivateAttr(default=None)  # To do
 
     def __init__(self, **data: Any):

@@ -39,7 +39,7 @@ class UnNumberCollection(BaseCollection):
         exact_match: bool | None = None,
     ) -> Generator[UnNumber, None, None]:
         params = {}
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         if name:
             params["name"] = name

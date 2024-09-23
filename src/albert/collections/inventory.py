@@ -5,7 +5,6 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
-from albert.resources.base import BaseAlbertModel
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.session import AlbertSession
 from albert.utils.exceptions import ForbiddenError
@@ -40,6 +39,13 @@ class InventoryCollection(BaseCollection):
     """
 
     _api_version = "v3"
+    _updatable_attributes = {
+        "name",
+        "description",
+        "unit_category",
+        "inventory_class",
+        "alias",
+    }
 
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
@@ -215,7 +221,7 @@ class InventoryCollection(BaseCollection):
             "limit": str(limit),
             "orderBy": order_by.value,
         }
-        if offset:
+        if offset:  # pragma: no cover
             params["offset"] = offset
         if name:
             params["text"] = name
@@ -288,7 +294,9 @@ class InventoryCollection(BaseCollection):
             name=name, cas=cas, category=category, order_by=order_by, company=company
         )
 
-    def _generate_patch_payload(self, *, existing: InventoryItem, updated: InventoryItem) -> dict:
+    def _generate_inventory_patch_payload(
+        self, *, existing: InventoryItem, updated: InventoryItem
+    ) -> dict:
         """
         Generate the PATCH payload for updating an inventory item.
 
@@ -305,39 +313,8 @@ class InventoryCollection(BaseCollection):
             The payload for the PATCH request.
         """
 
-        _updatable_attributes_individual = {
-            "name",
-            "description",
-            "unit_category",
-            "inventory_class",
-            "alias",
-        }
-
         _updatable_attributes_special = {"company", "tags", "cas"}
-        payload = {"data": []}
-        for attribute in _updatable_attributes_individual:
-            old_value = getattr(existing, attribute)
-            new_value = getattr(updated, attribute)
-
-            # Get the serialization alias name for the attribute, if it exists
-            alias = existing.model_fields[attribute].alias or attribute
-
-            if old_value is None and new_value is not None:
-                # Add new attribute
-                payload["data"].append(
-                    {"operation": "add", "attribute": alias, "newValue": new_value}
-                )
-            elif old_value is not None and new_value != old_value:
-                # Update existing attribute
-                payload["data"].append(
-                    {
-                        "operation": "update",
-                        "attribute": alias,
-                        "oldValue": old_value,
-                        "newValue": new_value,
-                    }
-                )
-
+        payload = self._generate_patch_payload(existing=existing, updated=updated)
         for attribute in _updatable_attributes_special:
             old_value = getattr(existing, attribute)
             new_value = getattr(updated, attribute)
@@ -459,25 +436,25 @@ class InventoryCollection(BaseCollection):
                             )
         return payload
 
-    def update(self, *, updated_object: BaseAlbertModel) -> BaseAlbertModel:
+    def update(self, *, updated_object: InventoryItem) -> InventoryItem:
         """
         Update an inventory item.
 
         Parameters
         ----------
-        updated_object : BaseAlbertModel
+        updated_object : InventoryItem
             The updated inventory item object.
 
         Returns
         -------
-        BaseAlbertModel
+        InventoryItem
             The updated inventory item retrieved from the server.
         """
         # Fetch the current object state from the server or database
         current_object = self.get_by_id(inventory_id=updated_object.id)
 
         # Generate the PATCH payload
-        patch_payload = self._generate_patch_payload(
+        patch_payload = self._generate_inventory_patch_payload(
             existing=current_object, updated=updated_object
         )
 

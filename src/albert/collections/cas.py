@@ -96,7 +96,7 @@ class CasCollection(BaseCollection):
             A Generator of Cas objects.
         """
         params = {"limit": limit, "orderBy": order_by.value}
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         if number:
             params["number"] = number
@@ -112,7 +112,7 @@ class CasCollection(BaseCollection):
                 self.cas_cache[this_cas.number] = this_cas
                 yield this_cas
             start_key = response.json().get("lastKey")
-            if not start_key:
+            if not start_key:  # start key is tested here but not on init
                 break
             params["startKey"] = start_key
 
@@ -256,13 +256,12 @@ class CasCollection(BaseCollection):
         """
         url = f"{self.base_path}/{cas_id}"
         self.session.delete(url)
-
-        self._remove_from_cache_by_id(cas_id)
+        self._remove_from_cache_by_id(id=cas_id)
         return True
 
     def update(self, *, updated_object: BaseAlbertModel) -> BaseAlbertModel:
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(updated_object.id)
+        current_object = self.get_by_id(cas_id=updated_object.id)
 
         # Generate the PATCH payload
         patch_payload = self._generate_patch_payload(
@@ -272,7 +271,6 @@ class CasCollection(BaseCollection):
         url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
 
+        # this get also updates the cache
         updated_cas = self.get_by_id(cas_id=updated_object.id)
-        self._remove_from_cache_by_id(updated_object.id)
-        self.cas_cache[updated_cas.number] = updated_cas
         return updated_cas

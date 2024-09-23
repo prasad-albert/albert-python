@@ -1,60 +1,86 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_serializer, model_validator
 
-from albert.resources.companies import Company
-from albert.resources.tagged_base import BaseTaggedEntity
-from albert.resources.tags import Tag
-
-
-class ProjectCategory(str, Enum):
-    DEVELOPMENT = "Development"
-    RESEARCH = "Research"
-    PRODUCTION = "Production"
+from albert.resources.acls import ACL
+from albert.resources.base import BaseAlbertModel, BaseEntityLink, EntityLinkConvertible
+from albert.resources.locations import Location
+from albert.resources.serialization import serialize_to_entity_link_list
 
 
 class ProjectClass(str, Enum):
+    SHARED = "shared"
     PUBLIC = "public"
-    PRIVATE = "private"
     CONFIDENTIAL = "confidential"
+    PRIVATE = "private"
 
 
-class Project(BaseTaggedEntity):
-    """
-    Project is a Pydantic model representing a project entity.
+class State(str, Enum):
+    NOT_STARTED = "Not Started"
+    ACTIVE = "Active"
+    CLOSED_SUCCESS = "Closed - Success"
+    CLOSED_ARCHIVED = "Closed - Archived"
 
-    Attributes
-    ----------
-    name : str
-        The name of the project.
-    description : str
-        The description of the project.
-    category : ProjectCategory
-        The category of the project.
-    project_class : Optional[ProjectClass]
-        The classification of the project.
-    tags : List[Tag]
-        The tags associated with the project.
-    id : Optional[str]
-        The Albert ID of the project.
-    company : Optional[Company]
-        The company associated with the project.
-    """
 
-    name: str
-    description: str
-    category: ProjectCategory
-    project_class: ProjectClass | None = None
-    tags: list[Tag] = []
-    id: str | None = Field(None, alias="projectId")
-    company: Company | None = None
+class TaskConfig(BaseModel):
+    datatemplateId: str | None = None
+    workflowId: str | None = None
+    defaultTaskName: str | None = None
+    target: str | None = None
+    hidden: bool | None = False
+
+
+class GridDefault(str, Enum):
+    PD = "PD"
+    WKS = "WKS"
+
+
+class Metadata(BaseModel):
+    adpNumber: str | None = Field(default=None, min_length=1, max_length=255)
+    segment: str | None = Field(default=None, min_length=1, max_length=255)
+    applications: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
+    technologies: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
+    sub_categories: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
+    adpType: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
+
+
+class Project(BaseAlbertModel, EntityLinkConvertible):
+    description: str = Field(min_length=1, max_length=2000)
+    locations: list[Location | BaseEntityLink] | None = Field(
+        default=None, min_length=1, max_length=20, alias="Locations"
+    )
+    project_class: ProjectClass | None = Field(default=None, alias="class")
+    prefix: str | None = Field(default=None)
+    application_engineering_inventory_ids: list[str] | None = Field(
+        default=None,
+        alias="appEngg",
+        description="Inventory Ids to be added as application engineering",
+    )
+    id: str | None = Field(None, alias="albertId")
+    acl: list[ACL] | None = Field(default_factory=list, alias="ACL")
+    old_api_params: dict | None = None
+    task_config: list[TaskConfig] | None = Field(default_factory=list)
+    grid: GridDefault | None = None
+    metadata: Metadata | None = Field(alias="Metadata", default=None)
+    _state: State | None = PrivateAttr(default=None)
+
+    locations_serializer = field_serializer("locations")(serialize_to_entity_link_list)
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if "state" in data:
+            self._state = data["state"]
+
+    @property
+    def state(self):
+        return self._state
 
     @model_validator(mode="before")
     @classmethod
     def set_default_class(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
-        Set the default project class to PUBLIC if none is provided.
+        Set the default project class to PRIVATE if none is provided.
 
         Parameters
         ----------
@@ -67,5 +93,5 @@ class Project(BaseTaggedEntity):
             Updated field values with a default project class if not provided.
         """
         if "project_class" not in values or values["project_class"] is None:
-            values["project_class"] = ProjectClass.PUBLIC
+            values["project_class"] = ProjectClass.PRIVATE
         return values

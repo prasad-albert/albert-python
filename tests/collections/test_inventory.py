@@ -1,18 +1,9 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
-from albert.collections.inventory import (
-    InventoryCategory,
-)
+from albert.collections.inventory import InventoryCategory
 from albert.resources.inventory import CasAmount, InventoryItem
 from albert.resources.units import UnitCategory
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
@@ -24,13 +15,13 @@ def _list_asserts(returned_list):
         assert isinstance(u.id, str)
 
 
-def test_simple_inventory_list(client):
+def test_simple_inventory_list(client: Albert):
     inventory = client.inventory.list()
     assert isinstance(inventory, Generator)
     _list_asserts(inventory)
 
 
-def test_advanced_inventory_list(client):
+def test_advanced_inventory_list(client: Albert):
     inventory = client.inventory.list(
         name="goggles",
         category=[InventoryCategory.EQUIPMENT, InventoryCategory.CONSUMABLES],
@@ -62,7 +53,6 @@ def test_inventory_crud(client: Albert):
             break
     new_inv = InventoryItem(
         name="SDK Testing Inventory Item",
-        description="testing SDK CRUD",
         category=InventoryCategory.RAW_MATERIALS,
         tags=["testing"],
         company="Lenore Corp.",
@@ -73,5 +63,11 @@ def test_inventory_crud(client: Albert):
     this_id = created.id
     assert this_id is not None
     assert created.unit_category.lower() == UnitCategory.MASS.value.lower()
+    d = "testing SDK CRUD"
+    created.description = d
+
+    updated = client.inventory.update(updated_object=created)
+    assert updated.description == d
+
     deleted = client.inventory.delete(inventory_id=this_id)
     assert deleted

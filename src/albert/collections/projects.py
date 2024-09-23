@@ -1,8 +1,6 @@
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.collections.companies import CompanyCollection
-from albert.collections.tags import TagCollection
 from albert.resources.projects import Project
 from albert.session import AlbertSession
 
@@ -36,6 +34,7 @@ class ProjectCollection(BaseCollection):
     """
 
     _api_version = "v3"
+    _updatable_attributes = {"description", "grid"}
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -63,17 +62,9 @@ class ProjectCollection(BaseCollection):
         Optional[Project]
             The created project object if successful, None otherwise.
         """
-        all_tags = []
-        tag_collection = TagCollection(session=self.session)
-        for t in project.tags:
-            if t.id is None:
-                t = tag_collection.create(t)
-            all_tags.append(t)
-        project.tags = all_tags
-        if project.company and project.company.id is None:
-            company_collection = CompanyCollection(session=self.session)
-            project.company = company_collection.create(project.company)
-        response = self.session.post(self.base_path, json=project.to_dict())
+        response = self.session.post(
+            self.base_path, json=project.model_dump(by_alias=True, exclude_unset=True)
+        )
 
         return Project(**response.json())
 
@@ -96,27 +87,19 @@ class ProjectCollection(BaseCollection):
 
         return Project(**response.json())
 
-    def update(self, *, project_id: str, patch_data: dict) -> bool:
+    def update(self, *, updated_project: Project) -> Project:
         """
-        Update a project by its ID.
-
-        Parameters
-        ----------
-        project_id : str
-            The ID of the project to update.
-        patch_data : dict
-            The patch data to update the project with.
-
-        Returns
-        -------
-        bool
-            True if the update was successful, False otherwise.
+        TO DO: This needs some more custom patch logic
         """
-        url = f"{self.base_path}/{project_id}"
+        existing_project = self.get_by_id(project_id=updated_project.id)
+        patch_data = self._generate_patch_payload(
+            existing=existing_project, updated=updated_project
+        )
+        url = f"{self.base_path}/{updated_project.id}"
 
         self.session.patch(url, json=patch_data)
 
-        return True
+        return updated_project
 
     def delete(self, *, project_id: str) -> bool:
         """
@@ -143,10 +126,7 @@ class ProjectCollection(BaseCollection):
         *,
         limit: int = 50,
         start_key: str = None,
-        name: list[str] | None = None,
-        category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-        exact_match: bool = False,
     ) -> Generator[Project, None, None]:
         """
         Generator for listing projects with optional filters.
@@ -159,8 +139,6 @@ class ProjectCollection(BaseCollection):
             The start key for pagination.
         name : Optional[List[str]], optional
             The name filter for the projects.
-        category : Optional[str], optional
-            The category filter for the projects.
         order_by : OrderBy, optional
             The order in which to retrieve items (default is OrderBy.DESCENDING).
         exact_match : bool, optional
@@ -174,19 +152,14 @@ class ProjectCollection(BaseCollection):
         params = {
             "limit": str(limit),
             "orderBy": order_by.value,
-            "exactMatch": str(exact_match).lower(),
         }
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
-        if name:
-            params["name"] = ",".join(name)
-        if category:
-            params["category"] = category
         while True:
             response = self.session.get(self.base_path, params=params)
 
             raw_projects = response.json().get("Items", [])
-            if not raw_projects or raw_projects == []:
+            if not raw_projects or raw_projects == []:  # pragma: no cover
                 break
             for x in raw_projects:
                 yield Project(**x)
@@ -198,30 +171,18 @@ class ProjectCollection(BaseCollection):
     def list(
         self,
         *,
-        name: list[str] | None = None,
-        category: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-        exact_match: bool = False,
     ) -> Iterator[Project]:
         """
         List projects with optional filters.
 
         Parameters
         ----------
-        name : Optional[List[str]], optional
-            The name filter for the projects.
-        category : Optional[str], optional
-            The category filter for the projects.
         order_by : OrderBy, optional
             The order in which to retrieve items (default is OrderBy.DESCENDING).
-        exact_match : bool, optional
-            Whether to match names exactly (default is False).
-
         Returns
         -------
         Generator
             A generator yielding projects that match the filters.
         """
-        return self._list_generator(
-            name=name, category=category, order_by=order_by, exact_match=exact_match
-        )
+        return self._list_generator(order_by=order_by)

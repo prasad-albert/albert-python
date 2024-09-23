@@ -1,12 +1,12 @@
 from pydantic import Field
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel, EntityLinkConvertible
 
 
-class Location(BaseAlbertModel):
+class Location(BaseAlbertModel, EntityLinkConvertible):
     name: str
     id: str | None = Field(None, alias="albertId")
-    latitude: float | None = Field(None)
-    longitude: float | None = Field(None)
-    address: str | None = Field(None)
-    country: str | None = Field(None)
+    latitude: float = Field()
+    longitude: float = Field()
+    address: str
+    country: str | None = Field(None, max_length=2, min_length=2)

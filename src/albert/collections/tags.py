@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterator
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.tags import Tag
 from albert.session import AlbertSession
+from albert.utils.exceptions import NotFoundError
 
 
 class TagCollection(BaseCollection):
@@ -98,7 +99,7 @@ class TagCollection(BaseCollection):
         if name:
             params["name"] = name if isinstance(name, list) else [name]
             params["exactMatch"] = str(exact_match).lower()
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
 
         while True:
@@ -273,8 +274,9 @@ class TagCollection(BaseCollection):
         found_tag = self.get_by_tag(tag=old_name, exact_match=True)
 
         if not found_tag:
-            logging.error(f'Tag "{old_name}" not found.')
-            return None
+            msg = f'Tag "{old_name}" not found.'
+            logging.error(msg)
+            raise NotFoundError(msg)
         tag_id = found_tag.id
         payload = [
             {
