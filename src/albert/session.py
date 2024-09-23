@@ -5,6 +5,7 @@ import requests
 from jose import jwt
 
 import albert
+from albert.utils.client_credentials import ClientCredentials
 from albert.utils.exceptions import handle_api_error
 
 
@@ -34,8 +35,7 @@ class AlbertSession(requests.Session):
         *,
         base_url: str,
         token: str | None = None,
-        client_id: str | None = None,
-        client_secret: str | None = None,
+        client_credentials: ClientCredentials | None = None,
     ):
         super().__init__()
         self.base_url = base_url
@@ -47,21 +47,16 @@ class AlbertSession(requests.Session):
             }
         )
 
-        self._client_id = client_id
-        self._client_secret = client_secret
+        self._client_credentials = client_credentials
         self._access_token = None
         self._access_token_refresh_time = None
 
-        if self.has_client_credentials:
+        if self._client_credentials is not None:
             self._refresh_token()
         elif token is not None:
             self._set_access_token(token)
         else:
             raise ValueError("Either client credentials or token must be specified.")
-
-    @property
-    def has_client_credentials(self) -> bool:
-        return self._client_id is not None and self._client_secret is not None
 
     def _set_access_token(self, token: str) -> None:
         self._access_token = token
@@ -74,8 +69,8 @@ class AlbertSession(requests.Session):
         path = "/api/v3/login/oauth/token"
         payload = {
             "grant_type": "client_credentials",
-            "client_id": self._client_id,
-            "client_secret": self._client_secret,
+            "client_id": self._client_credentials.id,
+            "client_secret": self._client_credentials.secret.get_secret_value(),
         }
         response = self._request(
             "POST",
@@ -100,6 +95,6 @@ class AlbertSession(requests.Session):
         return response
 
     def request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
-        if self._requires_refresh() and self.has_client_credentials:
+        if self._requires_refresh() and self._client_credentials is not None:
             self._refresh_token()
         return self._request(method, path, *args, **kwargs)

@@ -35,7 +35,7 @@ class CustomTemplatesCollection(BaseCollection):
         }
         if name:
             params["name"] = name if isinstance(name, list) else [name]
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
 
         while True:
@@ -49,7 +49,6 @@ class CustomTemplatesCollection(BaseCollection):
                     # May want to swap to lazy-load later for speed
                     yield self.get_by_id(id=t["albertId"])
                 except ForbiddenError:
-                    print("no access!!")
                     continue
             start_key = response.json().get("lastKey")
             if not start_key:

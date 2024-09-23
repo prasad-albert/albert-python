@@ -1,14 +1,7 @@
 from collections.abc import Generator
 
-import pytest
-
 from albert.albert import Albert
 from albert.collections.un_numbers import UnNumber
-
-
-@pytest.fixture(scope="module")
-def client():
-    return Albert()
 
 
 def _list_asserts(returned_list):
@@ -21,13 +14,13 @@ def _list_asserts(returned_list):
         assert u.id.startswith("UNN")
 
 
-def test_simple_un_number_list(client):
+def test_simple_un_number_list(client: Albert):
     simple_list = client.un_numbers.list()
     _list_asserts(simple_list)
     assert isinstance(simple_list, Generator)
 
 
-def test_advanced_un_number_list(client):
+def test_advanced_un_number_list(client: Albert):
     adv_list = client.un_numbers.list(name="56", exact_match=False)
     assert isinstance(adv_list, Generator)
     _list_asserts(adv_list)

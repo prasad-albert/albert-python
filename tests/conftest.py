@@ -1,0 +1,170 @@
+from collections.abc import Iterator
+from contextlib import suppress
+from time import sleep
+
+import pytest
+
+from albert import Albert
+from albert.resources.base import Status
+from albert.resources.cas import Cas
+from albert.resources.companies import Company
+from albert.resources.locations import Location
+from albert.resources.projects import Project
+from albert.resources.roles import Role
+from albert.resources.tags import Tag
+from albert.resources.units import Unit
+from albert.resources.users import User
+from albert.utils.exceptions import NotFoundError
+from tests.seeding import (
+    generate_cas_seeds,
+    generate_company_seeds,
+    generate_location_seeds,
+    generate_project_seeds,
+    generate_tag_seeds,
+    generate_unit_seeds,
+    generate_user_seeds,
+)
+
+
+@pytest.fixture(scope="session")
+def client() -> Albert:
+    return Albert()
+
+
+@pytest.fixture(scope="session")
+def seeded_projects(client: Albert, seeded_locations) -> Iterator[list[Project]]:
+    # Seed the projects using seeded locations
+
+    seeded = []
+
+    for project in generate_project_seeds(seeded_locations=seeded_locations):
+        existing = client.projects.list()
+        for m in existing:
+            if m.description.lower() == project.description.lower():
+                client.projects.delete(project_id=m.id)
+        created_project = client.projects.create(project=project)
+        seeded.append(created_project)
+
+    yield seeded  # Provide the seeded projects to the test
+
+    # Teardown - delete the seeded projects after the test
+    for project in seeded:
+        with suppress(NotFoundError):
+            client.projects.delete(project_id=project.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
+    # Seed the CAS
+    seeded = []
+    for cas in generate_cas_seeds():
+        created_cas = client.cas_numbers.create(cas=cas)
+        seeded.append(created_cas)
+    sleep(1.5)  # avoid race condition while it populated through DBs
+    yield seeded  # Provide the seeded CAS to the test
+
+    # Teardown - delete the seeded CAS after the test
+    for cas in seeded:
+        with suppress(NotFoundError):
+            client.cas_numbers.delete(cas_id=cas.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_companies(client: Albert) -> Iterator[list[Company]]:
+    # Seed the companies
+    seeded = []
+    for company in generate_company_seeds():
+        created_company = client.companies.create(company=company)
+        seeded.append(created_company)
+
+    yield seeded  # Provide the seeded companies to the test
+
+    # Teardown - delete the seeded companies after the test
+    for company in seeded:
+        with suppress(NotFoundError):
+            client.companies.delete(id=company.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_locations(client: Albert) -> Iterator[list[Location]]:
+    # Seed the Locations
+    seeded = []
+    for location in generate_location_seeds():
+        created_location = client.locations.create(location=location)
+        seeded.append(created_location)
+
+    yield seeded  # Provide the seeded Locations to the test
+
+    # Teardown - delete the seeded Locations after the test
+    for location in seeded:
+        with suppress(NotFoundError):
+            client.locations.delete(location_id=location.id)
+
+
+# Example usage within a pytest fixture
+@pytest.fixture(scope="session")
+def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
+    # Seed the tags
+    seeded = []
+    for tag in generate_tag_seeds():
+        created_tag = client.tags.create(tag=tag)
+        seeded.append(created_tag)
+
+    yield seeded  # Provide the seeded tags to the test
+
+    # Teardown - delete the seeded tags after the test
+    for tag in seeded:
+        with suppress(NotFoundError):
+            client.tags.delete(tag_id=tag.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_units(client: Albert) -> Iterator[list[Unit]]:
+    # Seed the units
+    seeded = []
+    for unit in generate_unit_seeds():
+        created_unit = client.units.create(unit=unit)
+        seeded.append(created_unit)
+    sleep(1.5)  # avoid race condition while it populated through DBs
+    yield seeded  # Provide the seeded units to the test
+
+    # Teardown - delete the seeded units after the test
+    for unit in seeded:
+        with suppress(NotFoundError):
+            client.units.delete(unit_id=unit.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_roles(client: Albert) -> Iterator[list[Role]]:
+    # Roles are not deleted or created. We just use the existing roles.
+    existing = []
+    for role in client.roles.list():
+        existing.append(role)
+
+    yield existing  # Provide the seeded units to the test
+
+
+@pytest.fixture(scope="session")
+def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[list[User]]:
+    seeded = []
+    # Here, seeded_roles and seeded_locations will already be lists from the respective fixtures
+
+    for user in generate_user_seeds(seeded_roles=seeded_roles, seeded_locations=seeded_locations):
+        matches = client.users.list(text=user.name)
+        found = False
+        for m in matches:
+            if m.name == user.name:
+                created_user = m
+                created_user.status = Status.ACTIVE.value
+                client.users.update(updated_object=created_user)
+                found = True
+        if not found:
+            created_user = client.users.create(user=user)
+        seeded.append(created_user)
+    sleep(1.5)  # avoid race condition while it populated through DBs
+    yield seeded  # Provide the seeded users to the test
+
+    # Teardown - archive/set inactive
+    for user in seeded:
+        user.status = Status.INACTIVE.value
+        client.users.update(updated_object=user)

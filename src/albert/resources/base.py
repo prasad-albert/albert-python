@@ -2,9 +2,10 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 from albert.session import AlbertSession
+from albert.utils.exceptions import AlbertException
 
 
 class Status(str, Enum):
@@ -29,7 +30,7 @@ class AuditFields(BaseModel):
 class BaseAlbertModel(BaseModel):
     _created: AuditFields | None = PrivateAttr(default=None)
     _updated: AuditFields | None = PrivateAttr(default=None)
-    _status: Status | None = PrivateAttr(default=None)
+    status: Status | None = Field(default=None)
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -38,20 +39,15 @@ class BaseAlbertModel(BaseModel):
         arbitrary_types_allowed=True,
     )
 
-    @model_validator(mode="before")
-    @classmethod
-    def initialize_private_attrs(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def __init__(self, **data: Any):
         """
-        Initialize private attributes from the incoming data dictionary before the model is fully constructed.
+        Initialize a Base resource instance.
         """
+        super().__init__(**data)
         if "Created" in data:
-            data["_created"] = AuditFields(**data["Created"])
+            self._created = AuditFields(**data["Created"])
         if "Updated" in data:
-            data["_updated"] = AuditFields(**data["Updated"])
-        if "status" in data:
-            data["_status"] = Status(data["status"])
-
-        return data
+            self._updated = AuditFields(**data["Updated"])
 
     @property
     def created(self) -> AuditFields | None:
@@ -60,10 +56,6 @@ class BaseAlbertModel(BaseModel):
     @property
     def updated(self) -> AuditFields | None:
         return self._updated
-
-    @property
-    def status(self) -> Status | None:
-        return self._status
 
 
 class BaseSessionModel(BaseAlbertModel):
@@ -80,3 +72,12 @@ class BaseSessionModel(BaseAlbertModel):
 class BaseEntityLink(BaseAlbertModel):
     id: str
     name: str | None = Field(default=None)
+
+
+class EntityLinkConvertible:
+    def to_entity_link(self) -> BaseEntityLink:
+        if hasattr(self, "id"):
+            return BaseEntityLink(id=self.id, name=getattr(self, "name", None))
+        return AlbertException(
+            "`id` is required to create an entity link. Ensure the linked object is registered."
+        )

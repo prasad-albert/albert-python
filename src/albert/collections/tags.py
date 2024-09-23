@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterator
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.tags import Tag
 from albert.session import AlbertSession
+from albert.utils.exceptions import NotFoundError
 
 
 class TagCollection(BaseCollection):
@@ -19,8 +20,6 @@ class TagCollection(BaseCollection):
     ----------
     base_path : str
         The base URL for tag API requests.
-    tag_cache : dict
-        A cache of tag objects.
 
     Methods
     -------
@@ -52,17 +51,7 @@ class TagCollection(BaseCollection):
             The Albert session instance.
         """
         super().__init__(session=session)
-        self.tag_cache = {}
         self.base_path = f"/api/{TagCollection._api_version}/tags"
-
-    def _remove_from_cache_by_id(self, *, id: str):
-        name = None
-        for k, v in self.tag_cache.items():
-            if v.id == id:
-                name = k
-                break
-        if name:
-            del self.tag_cache[name]
 
     def _list_generator(
         self,
@@ -98,7 +87,7 @@ class TagCollection(BaseCollection):
         if name:
             params["name"] = name if isinstance(name, list) else [name]
             params["exactMatch"] = str(exact_match).lower()
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
 
         while True:
@@ -108,7 +97,6 @@ class TagCollection(BaseCollection):
                 break
             for t in tags_data:
                 this_tag = Tag(**t)
-                self.tag_cache[this_tag.tag] = this_tag
                 yield this_tag
             start_key = response.json().get("lastKey")
             if not start_key:
@@ -157,16 +145,8 @@ class TagCollection(BaseCollection):
         bool
             True if the tag exists, False otherwise.
         """
-        if tag.lower() in self.tag_cache:
-            return True
-        params = {"limit": "2", "name": [tag], "exactMatch": str(exact_match).lower()}
 
-        response = self.session.get(self.base_path, params=params)
-        tags = response.json().get("Items", [])
-        for t in tags:
-            found_tag = Tag(**t)
-            self.tag_cache[found_tag.tag.lower()] = found_tag
-        return len(tags) > 0
+        return self.get_by_tag(tag=tag, exact_match=exact_match) is not None
 
     def create(self, *, tag: str | Tag) -> Tag:
         """
@@ -184,14 +164,13 @@ class TagCollection(BaseCollection):
         """
         if isinstance(tag, str):
             tag = Tag(tag=tag)
-        if self.tag_exists(tag=tag.tag):
-            existing_tag = self.tag_cache[tag.tag.lower()]
-            logging.warning(f"Tag {existing_tag.tag} already exists with id {existing_tag.id}")
-            return existing_tag
+        hit = self.get_by_tag(tag=tag.tag, exact_match=True)
+        if hit is not None:
+            logging.warning(f"Tag {hit.tag} already exists with id {hit.id}")
+            return hit
         payload = {"name": tag.tag}
         response = self.session.post(self.base_path, json=payload)
         tag = Tag(**response.json())
-        self.tag_cache[tag.tag.lower()] = tag
         return tag
 
     def get_by_id(self, *, tag_id: str) -> Tag | None:
@@ -211,7 +190,6 @@ class TagCollection(BaseCollection):
         url = f"{self.base_path}/{tag_id}"
         response = self.session.get(url)
         tag = Tag(**response.json())
-        self.tag_cache[tag.tag] = tag
         return tag
 
     def get_by_tag(self, *, tag: str, exact_match: bool = True) -> Tag | None:
@@ -230,8 +208,6 @@ class TagCollection(BaseCollection):
         Tag
             The Tag object if found, None otherwise.
         """
-        if tag in self.tag_cache:
-            return self.tag_cache[tag]
         found = self.list(name=tag, exact_match=exact_match)
         return next(found, None)
 
@@ -251,7 +227,6 @@ class TagCollection(BaseCollection):
         """
         url = f"{self.base_path}/{tag_id}"
         self.session.delete(url)
-        self._remove_from_cache_by_id(id=tag_id)
         return True
 
     def rename(self, *, old_name: str, new_name: str) -> Tag | None:
@@ -273,8 +248,9 @@ class TagCollection(BaseCollection):
         found_tag = self.get_by_tag(tag=old_name, exact_match=True)
 
         if not found_tag:
-            logging.error(f'Tag "{old_name}" not found.')
-            return None
+            msg = f'Tag "{old_name}" not found.'
+            logging.error(msg)
+            raise NotFoundError(msg)
         tag_id = found_tag.id
         payload = [
             {
@@ -290,7 +266,5 @@ class TagCollection(BaseCollection):
             }
         ]
         self.session.patch(self.base_path, json=payload)
-        self._remove_from_cache_by_id(id=tag_id)
         updated_tag = self.get_by_id(tag_id=tag_id)
-        self.tag_cache[updated_tag.tag] = updated_tag
         return updated_tag

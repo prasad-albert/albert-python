@@ -1,4 +1,5 @@
 import builtins
+import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
@@ -52,16 +53,6 @@ class UnitCollection(BaseCollection):
         """
         super().__init__(session=session)
         self.base_path = f"/api/{UnitCollection._api_version}/units"
-        self.unit_cache = {}
-
-    def _remove_from_cache_by_id(self, *, id: str):
-        name = None
-        for k, v in self.unit_cache.items():
-            if v.id == id:
-                name = k
-                break
-        if name:
-            del self.unit_cache[name]
 
     def create(self, *, unit: Unit) -> Unit:
         """
@@ -77,13 +68,16 @@ class UnitCollection(BaseCollection):
         Unit
             The created Unit object.
         """
-        if self.unit_exists(name=unit.name):
-            return self.unit_cache[unit.name]
+        hit = self.get_by_name(name=unit.name, exact_match=True)
+        if hit is not None:
+            logging.warning(
+                f"Unit with the name {hit.name} already exists. Returning the existing unit."
+            )
+            return hit
         response = self.session.post(
             self.base_path, json=unit.model_dump(by_alias=True, exclude_unset=True)
         )
         this_unit = Unit(**response.json())
-        self.unit_cache[this_unit.name] = this_unit
         return this_unit
 
     def get_by_id(self, *, unit_id: str) -> Unit:
@@ -103,7 +97,6 @@ class UnitCollection(BaseCollection):
         url = f"{self.base_path}/{unit_id}"
         response = self.session.get(url)
         this_unit = Unit(**response.json())
-        self.unit_cache[this_unit.name] = this_unit
         return this_unit
 
     def update(self, *, updated_unit: Unit) -> Unit:
@@ -126,8 +119,6 @@ class UnitCollection(BaseCollection):
         url = f"{self.base_path}/{unit_id}"
         self.session.patch(url, json=patch_data)
         updated_unit = self.get_by_id(unit_id=unit_id)
-        self._remove_from_cache_by_id(id=unit_id)
-        self.unit_cache[updated_unit.name] = updated_unit
         return updated_unit
 
     def delete(self, *, unit_id: str) -> bool:
@@ -146,7 +137,6 @@ class UnitCollection(BaseCollection):
         """
         url = f"{self.base_path}/{unit_id}"
         self.session.delete(url)
-        self._remove_from_cache_by_id(id=unit_id)
         return True
 
     def list(
@@ -198,6 +188,7 @@ class UnitCollection(BaseCollection):
         exact_match: bool = False,
         start_key: str | None = None,
         verified: bool | None = None,
+        limit: int = 100,
     ) -> Generator[Unit, None, None]:
         """
         Lists unit entities with optional filters.
@@ -225,12 +216,13 @@ class UnitCollection(BaseCollection):
         params = {
             "orderBy": order_by.value,
             "exactMatch": str(exact_match).lower(),
+            "limit": limit,
         }
         if name:
             params["name"] = name if isinstance(name, list) else [name]
         if category:
-            params["category"] = category.value
-        if start_key:
+            params["category"] = category if isinstance(category, str) else category.value
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         if not verified is None:
             params["verified"] = str(verified).lower()
@@ -241,7 +233,6 @@ class UnitCollection(BaseCollection):
                 break
             for u in units:
                 this_unit = Unit(**u)
-                self.unit_cache[this_unit.name] = this_unit
                 yield this_unit
             start_key = response.json().get("lastKey")
             if not start_key:
@@ -283,4 +274,4 @@ class UnitCollection(BaseCollection):
         bool
             True if the unit exists, False otherwise.
         """
-        return bool(self.get_by_name(name=name, exact_match=exact_match))
+        return self.get_by_name(name=name, exact_match=exact_match) is not None

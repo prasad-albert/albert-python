@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterator
 from albert.collections.base import BaseCollection
 from albert.resources.companies import Company
 from albert.session import AlbertSession
+from albert.utils.exceptions import NotFoundError
 
 
 class CompanyCollection(BaseCollection):
@@ -19,8 +20,6 @@ class CompanyCollection(BaseCollection):
     ----------
     base_path : str
         The base URL for company API requests.
-    company_cache : dict
-        A cache of company objects.
 
     Methods
     -------
@@ -52,16 +51,6 @@ class CompanyCollection(BaseCollection):
         """
         super().__init__(session=session)
         self.base_path = f"/api/{CompanyCollection._api_version}/companies"
-        self.company_cache = {}
-
-    def _remove_from_cache_by_id(self, *, id: str):
-        name = None
-        for k, v in self.company_cache.items():
-            if v.id == id:
-                name = k
-                break
-        if name:
-            del self.company_cache[name]
 
     def _list_generator(
         self,
@@ -92,7 +81,7 @@ class CompanyCollection(BaseCollection):
         if name:
             params["name"] = name if isinstance(name, list) else [name]
             params["exactMatch"] = str(exact_match).lower()
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startKey"] = start_key
         while True:
             response = self.session.get(self.base_path, params=params)
@@ -103,7 +92,6 @@ class CompanyCollection(BaseCollection):
 
             for company in company_data:
                 this_company = Company(**company)
-                self.company_cache[this_company.name] = this_company
                 yield this_company
             start_key = response.json().get("lastKey")
             if not start_key or len(company_data) < limit:
@@ -151,8 +139,6 @@ class CompanyCollection(BaseCollection):
         bool
             True if the company exists, False otherwise.
         """
-        if name in self.company_cache:
-            return True
         companies = self.get_by_name(name=name, exact_match=exact_match)
         return bool(companies)
 
@@ -174,7 +160,6 @@ class CompanyCollection(BaseCollection):
         response = self.session.get(url)
         company = response.json()
         found_company = Company(**company)
-        self.company_cache[found_company.name] = found_company
         return found_company
 
     def get_by_name(self, *, name: str, exact_match: bool = True) -> Company | None:
@@ -193,8 +178,6 @@ class CompanyCollection(BaseCollection):
         Company
             The Company object if found, None otherwise.
         """
-        if name in self.company_cache:
-            return self.company_cache[name]
         found = self.list(name=name, exact_match=exact_match)
         return next(found, None)
 
@@ -216,21 +199,19 @@ class CompanyCollection(BaseCollection):
         """
         if isinstance(company, str):
             company = Company(name=company)
-        if check_if_exists and self.company_exists(name=company.name):
-            company = self.company_cache[company.name]
+        hit = self.get_by_name(name=company.name, exact_match=True)
+        if check_if_exists and hit:
             logging.warning(f"Company {company.name} already exists with id {company.id}.")
-            return company
+            return hit
 
         payload = company.model_dump(by_alias=True, exclude_unset=True)
         response = self.session.post(self.base_path, json=payload)
         this_company = Company(**response.json())
-        self.company_cache[this_company.name] = this_company
         return this_company
 
     def delete(self, *, id: str) -> bool:
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
-        self._remove_from_cache_by_id(id=id)
         return True
 
     def rename(self, *, old_name: str, new_name: str) -> Company | None:
@@ -251,8 +232,9 @@ class CompanyCollection(BaseCollection):
         """
         company = self.get_by_name(name=old_name, exact_match=True)
         if not company:
-            logging.error(f'Company "{old_name}" not found.')
-            return None
+            msg = f'Company "{old_name}" not found.'
+            logging.error(msg)
+            raise NotFoundError(msg)
         company_id = company.id
         endpoint = f"{self.base_path}/{company_id}"
         payload = {
@@ -267,8 +249,6 @@ class CompanyCollection(BaseCollection):
         }
         self.session.patch(endpoint, json=payload)
         updated_company = self.get_by_id(id=company_id)
-        self._remove_from_cache_by_id(id=updated_company.id)
-        self.company_cache[updated_company.name] = updated_company
         return updated_company
 
     def update(self, *, updated_object: Company) -> Company:
@@ -281,7 +261,5 @@ class CompanyCollection(BaseCollection):
         )
         url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload)
-        updated_company = self.get_by_id(cas_id=updated_object.id)
-        self._remove_from_cache_by_id(id=updated_object.id)
-        self.company_cache[updated_company.id] = updated_company
+        updated_company = self.get_by_id(id=updated_object.id)
         return updated_company
