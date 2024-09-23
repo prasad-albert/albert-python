@@ -9,6 +9,7 @@ from albert.resources.base import Status
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.locations import Location
+from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
 from albert.resources.roles import Role
 from albert.resources.tags import Tag
@@ -19,6 +20,8 @@ from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,
     generate_location_seeds,
+    generate_parameter_group_seeds,
+    generate_parameter_seeds,
     generate_project_seeds,
     generate_tag_seeds,
     generate_unit_seeds,
@@ -29,6 +32,30 @@ from tests.seeding import (
 @pytest.fixture(scope="session")
 def client() -> Albert:
     return Albert()
+
+
+@pytest.fixture(scope="session")
+def seeded_parameters(client: Albert) -> Iterator[list[Parameter]]:
+    seeded = []
+    for parameter in generate_parameter_seeds():
+        created_parameter = client.parameters.create(parameter=parameter)
+        seeded.append(created_parameter)
+    yield seeded
+    for parameter in seeded:
+        with suppress(NotFoundError):
+            client.parameters.delete(parameter_id=parameter.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_parameter_groups(client: Albert, seeded_parameters) -> Iterator[list[Parameter]]:
+    seeded = []
+    for parameter_group in generate_parameter_group_seeds(seeded_parameters=seeded_parameters):
+        created_parameter_group = client.parameter_groups.create(parameter_group=parameter_group)
+        seeded.append(created_parameter_group)
+    yield seeded
+    for parameter_group in seeded:
+        with suppress(NotFoundError):
+            client.parameter_groups.delete(parameter_group_id=parameter_group.id)
 
 
 @pytest.fixture(scope="session")
