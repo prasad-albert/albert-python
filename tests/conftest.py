@@ -1,6 +1,6 @@
+import time
 from collections.abc import Iterator
 from contextlib import suppress
-from time import sleep
 
 import pytest
 
@@ -14,7 +14,7 @@ from albert.resources.roles import Role
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.users import User
-from albert.utils.exceptions import NotFoundError
+from albert.utils.exceptions import BadRequestError, NotFoundError
 from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,
@@ -48,8 +48,8 @@ def seeded_projects(client: Albert, seeded_locations) -> Iterator[list[Project]]
     yield seeded  # Provide the seeded projects to the test
 
     # Teardown - delete the seeded projects after the test
-    for project in seeded:
-        with suppress(NotFoundError):
+    with suppress(NotFoundError):
+        for project in seeded:
             client.projects.delete(project_id=project.id)
 
 
@@ -60,12 +60,12 @@ def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
     for cas in generate_cas_seeds():
         created_cas = client.cas_numbers.create(cas=cas)
         seeded.append(created_cas)
-    sleep(1.5)  # avoid race condition while it populated through DBs
+    time.sleep(1.5)  # avoid race condition while it populated through DBs
     yield seeded  # Provide the seeded CAS to the test
 
     # Teardown - delete the seeded CAS after the test
-    for cas in seeded:
-        with suppress(NotFoundError):
+    with suppress(BadRequestError | NotFoundError):
+        for cas in seeded:
             client.cas_numbers.delete(cas_id=cas.id)
 
 
@@ -80,8 +80,8 @@ def seeded_companies(client: Albert) -> Iterator[list[Company]]:
     yield seeded  # Provide the seeded companies to the test
 
     # Teardown - delete the seeded companies after the test
-    for company in seeded:
-        with suppress(NotFoundError):
+    with suppress(NotFoundError):
+        for company in seeded:
             client.companies.delete(id=company.id)
 
 
@@ -96,8 +96,8 @@ def seeded_locations(client: Albert) -> Iterator[list[Location]]:
     yield seeded  # Provide the seeded Locations to the test
 
     # Teardown - delete the seeded Locations after the test
-    for location in seeded:
-        with suppress(NotFoundError):
+    with suppress(NotFoundError):
+        for location in seeded:
             client.locations.delete(location_id=location.id)
 
 
@@ -113,8 +113,8 @@ def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
     yield seeded  # Provide the seeded tags to the test
 
     # Teardown - delete the seeded tags after the test
-    for tag in seeded:
-        with suppress(NotFoundError):
+    with suppress(NotFoundError):
+        for tag in seeded:
             client.tags.delete(tag_id=tag.id)
 
 
@@ -125,12 +125,12 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
     for unit in generate_unit_seeds():
         created_unit = client.units.create(unit=unit)
         seeded.append(created_unit)
-    sleep(1.5)  # avoid race condition while it populated through DBs
+    time.sleep(1.5)  # avoid race condition while it populated through DBs
     yield seeded  # Provide the seeded units to the test
 
     # Teardown - delete the seeded units after the test
-    for unit in seeded:
-        with suppress(NotFoundError):
+    with suppress(NotFoundError):
+        for unit in seeded:
             client.units.delete(unit_id=unit.id)
 
 
@@ -161,7 +161,7 @@ def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[lis
         if not found:
             created_user = client.users.create(user=user)
         seeded.append(created_user)
-    sleep(1.5)  # avoid race condition while it populated through DBs
+    time.sleep(1.5)  # avoid race condition while it populates through DBs
     yield seeded  # Provide the seeded users to the test
 
     # Teardown - archive/set inactive
