@@ -1,12 +1,12 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, PrivateAttr, field_serializer, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, EntityLinkConvertible
 from albert.resources.locations import Location
-from albert.resources.serialization import serialize_to_entity_link_list
+from albert.resources.serialization import SerializeAsEntityLink
 
 
 class ProjectClass(str, Enum):
@@ -47,7 +47,7 @@ class Metadata(BaseModel):
 
 class Project(BaseAlbertModel, EntityLinkConvertible):
     description: str = Field(min_length=1, max_length=2000)
-    locations: list[Location | BaseEntityLink] | None = Field(
+    locations: list[SerializeAsEntityLink[Location]] | None = Field(
         default=None, min_length=1, max_length=20, alias="Locations"
     )
     project_class: ProjectClass | None = Field(default=None, alias="class")
@@ -64,8 +64,6 @@ class Project(BaseAlbertModel, EntityLinkConvertible):
     grid: GridDefault | None = None
     metadata: Metadata | None = Field(alias="Metadata", default=None)
     _state: State | None = PrivateAttr(default=None)
-
-    locations_serializer = field_serializer("locations")(serialize_to_entity_link_list)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
