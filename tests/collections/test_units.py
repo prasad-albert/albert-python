@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 from albert.albert import Albert
 from albert.collections.base import OrderBy
-from albert.collections.units import Unit, UnitCategory
+from albert.resources.units import Unit, UnitCategory
 
 
 def _list_asserts(returned_list):
@@ -18,15 +18,15 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_simple_units_list(unit_collection):
-    simple_list = unit_collection.list()
+def test_simple_units_list(client: Albert):
+    simple_list = client.units.list()
     assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
 
-def test_advanced_units_list(unit_collection, seeded_units: list[Unit]):
+def test_advanced_units_list(client: Albert, seeded_units: list[Unit]):
     test_unit = seeded_units[1]
-    adv_list = unit_collection.list(
+    adv_list = client.units.list(
         name=test_unit.name,
         category=test_unit.category,
         order_by=OrderBy.ASCENDING,
@@ -39,24 +39,24 @@ def test_advanced_units_list(unit_collection, seeded_units: list[Unit]):
         assert test_unit.name.lower() in u.name.lower()
     _list_asserts(adv_list)
 
-    adv_short_list = unit_collection._list_generator(limit=2)
+    adv_short_list = client.units._list_generator(limit=2)
     _list_asserts(adv_short_list)
 
 
-def test_get_unit_by(unit_collection, seeded_units: list[Unit]):
+def test_get_unit_by(client: Albert, seeded_units: list[Unit]):
     test_unit = seeded_units[0]
-    unit = unit_collection.get_by_name(name=test_unit.name)
+    unit = client.units.get_by_name(name=test_unit.name)
     assert isinstance(unit, Unit)
 
-    by_id = unit_collection.get_by_id(unit_id=unit.id)
+    by_id = client.units.get_by_id(unit_id=unit.id)
     assert isinstance(by_id, Unit)
     assert by_id.name.lower() == test_unit.name.lower()
 
 
-def test_unit_exists(unit_collection, seeded_units: list[Unit]):
+def test_unit_exists(client: Albert, seeded_units: list[Unit]):
     test_unit = seeded_units[2]
-    assert unit_collection.unit_exists(name=test_unit.name)
-    assert not unit_collection.unit_exists(
+    assert client.units.unit_exists(name=test_unit.name)
+    assert not client.units.unit_exists(
         name="totally nonesense unit no one should be using!662378393278932y5r"
     )
 
@@ -84,13 +84,13 @@ def test_unit_crud(client: Albert):
     assert not client.units.unit_exists(name=updated_unit.name)
 
 
-def test_create_unit(caplog, seeded_units: list[Unit], unit_collection):
+def test_create_unit(caplog, seeded_units: list[Unit], client: Albert):
     dupe_unit = Unit(
         name=seeded_units[0].name,
         symbol=seeded_units[0].symbol,
     )
 
-    registered = unit_collection.create(unit=dupe_unit)
+    registered = client.units.create(unit=dupe_unit)
     assert registered.id == seeded_units[0].id
     assert (
         f"Unit with the name {seeded_units[0].name} already exists. Returning the existing unit."

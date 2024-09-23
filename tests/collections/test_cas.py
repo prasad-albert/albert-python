@@ -59,13 +59,13 @@ def test_cas_exists(client: Albert, seeded_cas: list[Cas]):
     assert not client.cas_numbers.cas_exists(number="999-99-9xxxx")
 
 
-def test_update_cas(cas_collection, seeded_cas: list[Cas]):
+def test_update_cas(client: Albert, seeded_cas: list[Cas]):
     # Update the description of a seeded CAS entry
     cas_to_update = seeded_cas[0]
     updated_description = "Updated CAS Description"
     cas_to_update.description = updated_description
 
-    updated_cas = cas_collection.update(updated_object=cas_to_update)
+    updated_cas = client.cas_numbers.update(updated_object=cas_to_update)
 
     assert updated_cas.description == updated_description
 
@@ -81,7 +81,7 @@ def test_create_and_delete_cas(client: Albert):
 
     # Verify that the CAS was created
     sleep(
-        1
+        1.5
     )  # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
     assert client.cas_numbers.cas_exists(number="987-65-4")
 
@@ -100,7 +100,7 @@ def test_get_by_number(client: Albert):
 
     # Verify that the CAS was created
     sleep(
-        1
+        1.5
     )  # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
     returned_cas = client.cas_numbers.get_by_number(number="987-65-4", exact_match=True)
     assert returned_cas.id == created_cas.id

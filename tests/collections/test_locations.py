@@ -1,7 +1,7 @@
 from collections.abc import Generator
 
 from albert.albert import Albert
-from albert.collections.locations import Location, LocationCollection
+from albert.resources.locations import Location
 
 
 def _list_asserts(returned_list):
@@ -19,10 +19,10 @@ def test_simple_list(client: Albert):
     _list_asserts(simple_loc_list)
 
 
-def test_adv_list(location_collection: LocationCollection):
-    adv_list = location_collection.list(country="US")
+def test_adv_list(client: Albert):
+    adv_list = client.locations.list(country="US")
     _list_asserts(adv_list)
-    short_list = location_collection._list_generator(limit=2)
+    short_list = client.locations._list_generator(limit=2)
     _list_asserts(short_list)
 
 
@@ -36,9 +36,7 @@ def test_get_by_id(client: Albert, seeded_locations: list[Location]):
     assert fetched_location.name == seeded_location.name
 
 
-def test_create_location(
-    caplog, location_collection: LocationCollection, seeded_locations: list[Location]
-):
+def test_create_location(caplog, client: Albert, seeded_locations: list[Location]):
     # Create a new location and check if it's created properly
 
     new_location = Location(
@@ -48,10 +46,10 @@ def test_create_location(
         address=seeded_locations[0].address,
     )
 
-    created_location = location_collection.create(location=new_location)
+    created_location = client.locations.create(location=new_location)
 
     # assert it returns the existing
-    re_created = location_collection.create(location=created_location)
+    re_created = client.locations.create(location=created_location)
     assert (
         f"Location with name {created_location.name} matches an existing location. Returning the existing Location."
         in caplog.text
