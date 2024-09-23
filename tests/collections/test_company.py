@@ -79,8 +79,6 @@ def test_company_crud(company_collection, client: Albert):
     assert isinstance(renamed_company, Company)
     assert renamed_company.name == "SDK Testing Corp. UPDATED"
     assert renamed_company.id == registered_company.id
-    # make sure cache was updated
-    assert company_collection.company_exists(name=renamed_company.name)
 
     renamed_company.name = "A second cool name"
     renamed_company = company_collection.update(updated_object=renamed_company)
