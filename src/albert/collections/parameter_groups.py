@@ -15,7 +15,7 @@ class ParameterGroupCollection(BaseCollection):
 
     def get_by_id(self, *, id: str) -> ParameterGroup:
         path = f"{self.base_path}/{id}"
-        response = self.session.get(url)
+        response = self.session.get(path)
         return ParameterGroup(**response.json())
 
     def _list_generator(
@@ -60,8 +60,8 @@ class ParameterGroupCollection(BaseCollection):
         )
 
     def delete(self, *, id: str) -> bool:
-        url = f"{self.base_path}/{id}"
-        self.session.delete(url)
+        path = f"{self.base_path}/{id}"
+        self.session.delete(path)
         return True
 
     def create(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
