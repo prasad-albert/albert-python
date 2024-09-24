@@ -57,3 +57,14 @@ class ParameterGroupCollection(BaseCollection):
             types=types,
             order_by=order_by,
         )
+
+    def delete(self, *, id: str) -> bool:
+        url = f"{self.base_path}/{id}"
+        self.session.delete(url)
+        return True
+
+    def create(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
+        response = self.session.post(
+            self.base_path, json=parameter_group.model_dump(by_alias=True, exclude_none=True)
+        )
+        return ParameterGroup(**response.json())
