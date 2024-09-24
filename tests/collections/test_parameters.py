@@ -26,6 +26,24 @@ def test_advanced_list(client: Albert, seeded_parameters: list[Parameter]):
     _list_asserts(list_response)
 
 
+def test_get(client: Albert, seeded_parameters: list[Parameter]):
+    p = client.parameters.get_by_id(id=seeded_parameters[0].id)
+    assert p.id == seeded_parameters[0].id
+    assert p.name == seeded_parameters[0].name
+
+
+def test_returns_dupe(caplog, client: Albert, seeded_parameters: list[Parameter]):
+    p = seeded_parameters[0]
+    p.id = None
+    returned = client.parameters.create(parameter=p)
+    assert (
+        f"Parameter with name {p.name} already exists. Returning existing parameter."
+        in caplog.text
+    )
+    assert returned.id == seeded_parameters[0].id
+    assert returned.name == seeded_parameters[0].name
+
+
 # def test_update(client: Albert, seeded_parameters: list[Parameter]):
 #     p = seeded_parameters[0]
 #     p.name = "Updated"

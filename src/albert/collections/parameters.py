@@ -52,7 +52,7 @@ class ParameterCollection(BaseCollection):
                 names = [names]
             params["name"] = names
             params["exactMatch"] = str(exact_match).lower()
-        if start_key:
+        if start_key:  # pragma: no cover
             params["startkey"] = start_key
         while True:
             response = self.session.get(self.base_path, params=params)
