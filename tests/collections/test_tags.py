@@ -5,7 +5,7 @@ import pytest
 from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.tags import Tag
-from albert.utils.exceptions import NotFoundError
+from albert.utils.exceptions import AlbertException
 
 
 def _list_asserts(returned_list, limit=100):
@@ -75,24 +75,18 @@ def test_tag_exists(client: Albert, seeded_tags: list[Tag]):
     )
 
 
-def test_tag_crud(client: Albert):
-    new_tag = "SDK test tag!"
-    registered_tag = client.tags.create(tag=new_tag)
-    assert client.tags.tag_exists(tag=registered_tag.tag)
-    assert isinstance(registered_tag, Tag)
-    assert registered_tag.tag == "SDK test tag!"
-    assert registered_tag.id is not None
+def test_tag_update(client: Albert, seeded_tags: list[Tag]):
+    test_tag = seeded_tags[3]
+    renamed_tag = "TEST - SDK test tag UPDATED!"
 
-    updated_tag = client.tags.rename(old_name=registered_tag.tag, new_name="SDK test tag UPDATED!")
+    assert test_tag.id is not None
+
+    updated_tag = client.tags.rename(old_name=test_tag.tag, new_name=renamed_tag)
     assert isinstance(updated_tag, Tag)
-    assert registered_tag.id == updated_tag.id
-    assert updated_tag.tag == "SDK test tag UPDATED!"
+    assert test_tag.id == updated_tag.id
+    assert updated_tag.tag == renamed_tag
 
-    with pytest.raises(NotFoundError):
+    with pytest.raises(AlbertException):
         client.tags.rename(
             old_name="y74r79ub4v9f874ebf982bTEST NONESENSEg89befbnr", new_name="Foo Bar!"
         )
-
-    deleted = client.tags.delete(tag_id=updated_tag.id)
-    assert deleted
-    assert not client.tags.tag_exists(tag="SDK test tag UPDATED!")

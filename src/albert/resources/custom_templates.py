@@ -1,14 +1,14 @@
 from enum import Enum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, field_serializer, model_validator
+from pydantic import Field, model_validator
 
 from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink
 from albert.resources.inventory import InventoryCategory
 from albert.resources.locations import Location
 from albert.resources.projects import Project
-from albert.resources.serialization import serialize_to_entity_link
+from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.sheets import DesignType, Sheet
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.users import User
@@ -90,33 +90,26 @@ class Block(
 class QCBatchData(BaseTaggedEntity):
     # To Do once Workflows are done, add the option to have a list of Workflow objects (with the right field_serializer)
     category: Literal[TemplateCategory.QC_BATCH] = TemplateCategory.QC_BATCH
-    project: BaseEntityLink | Project | None = Field(alias="Project", default=None)
+    project: SerializeAsEntityLink[Project] | None = Field(alias="Project", default=None)
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     workflow: list[BaseEntityLink] = Field(default=None, alias="Workflow")
-    location: BaseEntityLink | Location | None = Field(alias="Location", default=None)
+    location: SerializeAsEntityLink[Location] | None = Field(alias="Location", default=None)
     batch_size_unit: str = Field(alias="batchSizeUnit", default=None)
     priority: Priority  # enum?!
     name: str | None = Field(default=None)
-
-    project_serializer = field_serializer("project")(serialize_to_entity_link)
-    location_serializer = field_serializer("location")(serialize_to_entity_link)
 
 
 class BatchData(BaseTaggedEntity):
     # To Do once Workflows are done, add the option to have a list of Workflow objects (with the right field_serializer)
-    category: Literal[TemplateCategory.BATCH] = TemplateCategory.BATCH
-    assigned_to: BaseEntityLink | User | None = Field(alias="AssignedTo", default=None)
-    project: BaseEntityLink | Project | None = Field(alias="Project", default=None)
     name: str | None = Field(default=None)
-    location: BaseEntityLink | Location | None = Field(alias="Location", default=None)
+    category: Literal[TemplateCategory.BATCH] = TemplateCategory.BATCH
+    assigned_to: SerializeAsEntityLink[User] | None = Field(alias="AssignedTo", default=None)
+    project: SerializeAsEntityLink[Project] | None = Field(alias="Project", default=None)
+    location: SerializeAsEntityLink[Location] | None = Field(alias="Location", default=None)
     batch_size_unit: str = Field(alias="batchSizeUnit", default=None)
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     priority: Priority  # enum?!
     workflow: list[BaseEntityLink] = Field(default=None, alias="Workflow")
-
-    assigned_to_serializer = field_serializer("assigned_to")(serialize_to_entity_link)
-    location_serializer = field_serializer("location")(serialize_to_entity_link)
-    project_serializer = field_serializer("project")(serialize_to_entity_link)
 
 
 class PropertyData(BaseTaggedEntity):
@@ -124,15 +117,11 @@ class PropertyData(BaseTaggedEntity):
     name: str | None = Field(default=None)
     blocks: list[Block] = Field(default=[], alias="Blocks")  # Needs to be it's own class
     priority: Priority  # enum?!
-    location: BaseEntityLink | Location | None = Field(alias="Location", default=None)
-    assigned_to: BaseEntityLink | User | None = Field(alias="AssignedTo", default=None)
-    project: BaseEntityLink | Project | None = Field(alias="Project", default=None)
+    location: SerializeAsEntityLink[Location] | None = Field(alias="Location", default=None)
+    assigned_to: SerializeAsEntityLink[User] | None = Field(alias="AssignedTo", default=None)
+    project: SerializeAsEntityLink[Project] | None = Field(alias="Project", default=None)
     inventories: list[DataTemplateInventory] | None = Field(default=None, alias="Inventories")
     due_date: str | None = Field(alias="dueDate", default=None)
-
-    assigned_to_serializer = field_serializer("assigned_to")(serialize_to_entity_link)
-    location_serializer = field_serializer("location")(serialize_to_entity_link)
-    project_serializer = field_serializer("project")(serialize_to_entity_link)
 
 
 class SheetData(BaseTaggedEntity):

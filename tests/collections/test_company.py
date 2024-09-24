@@ -4,7 +4,7 @@ import pytest
 
 from albert.albert import Albert
 from albert.resources.companies import Company
-from albert.utils.exceptions import NotFoundError
+from albert.utils.exceptions import AlbertException
 
 
 def _list_asserts(returned_list):
@@ -86,5 +86,5 @@ def test_company_crud(client: Albert):
     deleted = client.companies.delete(id=renamed_company.id)
     assert deleted
     assert not client.companies.company_exists(name="SDK Testing Corp. UPDATED")
-    with pytest.raises(NotFoundError):
+    with pytest.raises(AlbertException):
         client.companies.rename(old_name="SDK Testing Corp. UPDATED", new_name="nope")

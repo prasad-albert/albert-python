@@ -69,7 +69,11 @@ class BaseEntityLink(BaseAlbertModel):
 class EntityLinkConvertible:
     def to_entity_link(self) -> BaseEntityLink:
         if hasattr(self, "id"):
-            return BaseEntityLink(id=self.id, name=getattr(self, "name", None))
+            return BaseEntityLink(
+                id=self.id,
+                name=getattr(self, "name", None),
+                status=getattr(self, "status", None),
+            )
         return AlbertException(
             "`id` is required to create an entity link. Ensure the linked object is registered."
         )
