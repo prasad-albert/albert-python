@@ -184,12 +184,10 @@ def generate_tag_seeds() -> list[Tag]:
     """
 
     return [
-        # INVENTORY tags
-        Tag(tag="inventory-tag-1"),
-        Tag(tag="inventory-tag-2"),
-        # COMPANY tags
-        Tag(tag="company-tag-1"),
-        Tag(tag="company-tag-2"),  # No id provided
+        Tag(tag="TEST-TAG-inventory-tag-1"),
+        Tag(tag="TEST-TAG-inventory-tag-2"),
+        Tag(tag="TEST-TAG-company-tag-1"),
+        Tag(tag="TEST-TAG-company-tag-2"),
     ]
 
 
