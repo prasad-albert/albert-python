@@ -8,6 +8,7 @@ from albert.resources.parameters import Parameter, ParameterCategory
 # from albert.resources.lots import Lot, LotMetadata, LotStatus
 from albert.resources.projects import GridDefault, Metadata, Project, ProjectClass
 from albert.resources.roles import Role
+from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
 from albert.resources.units import Unit, UnitCategory
 from albert.resources.users import User, UserClass, UserMetadata
@@ -100,14 +101,14 @@ def generate_location_seeds() -> list[Location]:
     return [
         # Basic location with required fields (name, latitude, longitude, address)
         Location(
-            name="Warehouse A",
+            name="TEST - Warehouse A",
             latitude=40.7,
             longitude=-74.0,
             address="123 Warehouse St, New York, NY",
         ),
         # Location with full fields including optional country
         Location(
-            name="Headquarters",
+            name="TEST - Headquarters",
             latitude=37.8,
             longitude=-122.4,
             address="123 Market St, San Francisco, CA",
@@ -115,17 +116,62 @@ def generate_location_seeds() -> list[Location]:
         ),
         # Location with required fields but without the country
         Location(
-            name="Remote Office",
+            name="TEST - Remote Office",
             latitude=48.9,
             longitude=2.4,
             address="10 Office Lane, Paris",
         ),
         # Another location with all fields
         Location(
-            name="Test Site",
+            name="TEST - Test Site",
             latitude=51.5,
             longitude=-0.1,
             address="Test Facility, London",
+            country="GB",
+        ),
+    ]
+
+
+def generate_storage_location_seeds(seeded_locations: list[Location]) -> list[StorageLocation]:
+    """
+    Generates a list of StorageLocation seed objects for testing without IDs.
+
+    Parameters
+    ----------
+    seeded_locations : List[Location]
+        List of seeded Location objects.
+
+    Returns
+    -------
+    List[StorageLocation]
+        A list of StorageLocation objects with different permutations.
+    """
+
+    return [
+        # Basic storage location with required fields
+        StorageLocation(
+            name="TEST - Warehouse A",
+            location=BaseEntityLink(id=seeded_locations[0].id),
+            address="123 Warehouse St, New York, NY",
+        ),
+        # Storage location with full fields including optional country
+        StorageLocation(
+            name="TEST - Storage Room 1",
+            location=BaseEntityLink(id=seeded_locations[1].id),
+            address="123 Storage St, San Francisco, CA",
+            country="US",
+        ),
+        # Storage location with required fields but without the country
+        StorageLocation(
+            name="TEST - Storage Room 2",
+            location=BaseEntityLink(id=seeded_locations[0].id),
+            address="10 Storage Lane, Paris",
+        ),
+        # Another storage location with all fields
+        StorageLocation(
+            name="TEST - Storage Room 3",
+            location=BaseEntityLink(id=seeded_locations[1].id),
+            address="Test Storage Facility, London",
             country="GB",
         ),
     ]

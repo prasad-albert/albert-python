@@ -90,3 +90,14 @@ def test_tag_update(client: Albert, seeded_tags: list[Tag]):
         client.tags.rename(
             old_name="y74r79ub4v9f874ebf982bTEST NONESENSEg89befbnr", new_name="Foo Bar!"
         )
+
+
+def test_returns_existing(caplog, client: Albert, seeded_tags: list[Tag]):
+    created_tag = client.tags.create(
+        tag=seeded_tags[0].tag
+    )  # passing the string directly to test that logic
+
+    # assert it returns the existing
+    re_created = client.tags.create(tag=created_tag)
+    assert f"Tag {re_created.tag} already exists with id {re_created.id}" in caplog.text
+    assert re_created.id == seeded_tags[0].id

@@ -23,6 +23,7 @@ from tests.seeding import (
     generate_parameter_group_seeds,
     generate_parameter_seeds,
     generate_project_seeds,
+    generate_storage_location_seeds,
     generate_tag_seeds,
     generate_unit_seeds,
     generate_user_seeds,
@@ -104,7 +105,21 @@ def seeded_locations(client: Albert) -> Iterator[list[Location]]:
             client.locations.delete(location_id=location.id)
 
 
-# Example usage within a pytest fixture
+@pytest.fixture(scope="session")
+def seeded_storage_locations(
+    client: Albert, seeded_locations: list[Location]
+) -> Iterator[list[Location]]:
+    seeded = []
+    for storage_location in generate_storage_location_seeds(seeded_locations=seeded_locations):
+        created_location = client.storage_locations.create(storage_location=storage_location)
+        seeded.append(created_location)
+    yield seeded
+
+    with suppress(NotFoundError):
+        for storage_location in seeded:
+            client.storage_locations.delete(id=storage_location.id)
+
+
 @pytest.fixture(scope="session")
 def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
     # Seed the tags
