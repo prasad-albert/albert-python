@@ -1,7 +1,9 @@
-from albert.resources.base import BaseEntityLink
+from albert.resources.base import BaseEntityLink, SecurityClass
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
 from albert.resources.locations import Location
+from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
+from albert.resources.parameters import Parameter, ParameterCategory
 
 # from albert.resources.lots import Lot, LotMetadata, LotStatus
 from albert.resources.projects import GridDefault, Metadata, Project, ProjectClass
@@ -276,6 +278,105 @@ def generate_user_seeds(seeded_locations: list[Location], seeded_roles: list[Rol
             roles=[seeded_roles[0]],
             user_class=UserClass.STANDARD,
             metadata=UserMetadata(sbu="SBU2"),
+        ),
+    ]
+
+
+def generate_parameter_seeds() -> list[Parameter]:
+    """
+    Generates a list of Parameter seed objects for testing without IDs.
+
+    Returns
+    -------
+    List[Parameter]
+        A list of Parameter objects with different permutations.
+    """
+
+    return [
+        Parameter(name="Temperature", category=ParameterCategory.NORMAL),
+        Parameter(
+            name="Pressure",
+            category=ParameterCategory.SPECIAL,
+        ),
+        Parameter(
+            name="Volume",
+        ),
+        Parameter(
+            name="Mass",
+            category=ParameterCategory.NORMAL,
+        ),
+        Parameter(
+            name="Length",
+            category=ParameterCategory.NORMAL,
+        ),
+    ]
+
+
+def generate_parameter_group_seeds(
+    seeded_parameters: list[Parameter], seeded_tags: list[Tag], seeded_units: list[Unit]
+) -> list[ParameterGroup]:
+    """
+    Generates a list of ParameterGroup seed objects for testing without IDs.
+
+    Parameters
+    ----------
+    seeded_parameters : List[Parameter]
+        List of seeded Parameter objects.
+
+    Returns
+    -------
+    List[ParameterGroup]
+        A list of ParameterGroup objects with different permutations.
+    """
+
+    return [
+        # Basic ParameterGroup with required fields
+        ParameterGroup(
+            name="General Parameters",
+            type=PGType.PROPERTY,
+            parameters=[
+                ParameterValue(
+                    id=seeded_parameters[0].id,
+                    value="25.0",
+                    unit=seeded_units[1],
+                )
+            ],
+        ),
+        # ParameterGroup with all fields filled out
+        ParameterGroup(
+            name="Batch Parameters",
+            description="Parameters for batch processing",
+            type=PGType.BATCH,
+            security_class=SecurityClass.RESTRICTED,
+            parameters=[
+                ParameterValue(
+                    id=seeded_parameters[1].id,
+                    value="100.0",
+                    unit=seeded_units[0],
+                ),
+                ParameterValue(
+                    id=seeded_parameters[2].id,
+                    value="500.0",
+                    unit=seeded_units[2],
+                ),
+            ],
+        ),
+        # ParameterGroup with no tags or metadata
+        ParameterGroup(
+            name="Property Parameters",
+            type=PGType.PROPERTY,
+            parameters=[
+                ParameterValue(
+                    id=seeded_parameters[3].id,
+                    value="75.0",
+                    unit=seeded_units[0],
+                ),
+                ParameterValue(
+                    id=seeded_parameters[4].id,
+                    value="2.5",
+                    unit=seeded_units[3],
+                ),
+            ],
         ),
     ]
 

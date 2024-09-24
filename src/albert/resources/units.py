@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import Field, PrivateAttr
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel, EntityLinkConvertible
 
 
 class UnitCategory(str, Enum):
@@ -79,7 +79,7 @@ class UnitCategory(str, Enum):
     RESISTANCE = "Resistance"
 
 
-class Unit(BaseAlbertModel):
+class Unit(BaseAlbertModel, EntityLinkConvertible):
     """
     Unit is a Pydantic model representing a unit entity.
 

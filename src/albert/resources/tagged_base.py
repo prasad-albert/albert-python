@@ -4,6 +4,7 @@ from typing import Any
 from pydantic import Field, model_validator
 
 from albert.resources.base import BaseAlbertModel
+from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tags import Tag
 
 
@@ -23,7 +24,7 @@ class BaseTaggedEntity(BaseAlbertModel):
         Converts tag strings to Tag objects.
     """
 
-    tags: list[Tag | str] | None = Field(None)
+    tags: list[SerializeAsEntityLink[Tag]] | None = Field(None)
 
     @model_validator(mode="before")
     @classmethod

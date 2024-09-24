@@ -8,7 +8,7 @@ from albert.collections.companies import Company
 from albert.collections.tags import Tag
 from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseAlbertModel, SecurityClass
 from albert.resources.tagged_base import BaseTaggedEntity
 
 
@@ -25,14 +25,6 @@ class UnitCategory(str, Enum):
     LENGTH = "length"
     PRESSURE = "pressure"
     UNITS = "units"
-
-
-class InventoryClass(str, Enum):
-    SHARED = "shared"
-    RESTRICTED = "restricted"
-    CONFIDENTIAL = "confidential"
-    PRIVATE = "private"
-    PUBLIC = "public"
 
 
 class CasAmount(BaseAlbertModel):
@@ -111,7 +103,7 @@ class InventoryItem(BaseTaggedEntity):
         The tags associated with the inventory item.
     cas : Optional[str]
         The CAS number of the inventory item.
-    inventory_class : Optional[InventoryClass]
+    security_class : Optional[SecurityClass]
         The class of the inventory item.
     id : Optional[str]
         The Albert ID of the inventory item.
@@ -123,7 +115,7 @@ class InventoryItem(BaseTaggedEntity):
     description: str | None = None
     category: InventoryCategory
     unit_category: UnitCategory = Field(default=None, alias="unitCategory")
-    inventory_class: InventoryClass | None = Field(default=None, alias="class")
+    security_class: SecurityClass | None = Field(default=None, alias="class")
     id: str | None = Field(None, alias="albertId")
     company: Company | None = Field(default=None, alias="Company")
     tags: list[Tag] | None = Field(default_factory=list, alias="Tags")
@@ -158,7 +150,7 @@ class InventoryItem(BaseTaggedEntity):
             The tags associated with the inventory item.
         cas : Optional[str]
             The CAS number of the inventory item.
-        inventory_class : Optional[InventoryClass]
+        security_class : Optional[InventoryClass]
             The class of the inventory item.
         id : Optional[str]
             The Albert ID of the inventory item.

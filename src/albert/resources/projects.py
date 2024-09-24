@@ -78,17 +78,17 @@ class Project(BaseAlbertModel, EntityLinkConvertible):
     @classmethod
     def set_default_class(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
-        Set the default project class to PRIVATE if none is provided.
+            Set the default project class to PRIVATE if none is provided.
 
-        Parameters
-        ----------
-        values : Dict[str, Any]
-            A dictionary of field values.
+        #     Parameters
+        #     ----------
+        #     values : Dict[str, Any]
+        #         A dictionary of field values.
 
-        Returns
-        -------
-        Dict[str, Any]
-            Updated field values with a default project class if not provided.
+            Returns
+            -------
+            Dict[str, Any]
+                Updated field values with a default project class if not provided.
         """
         if "project_class" not in values or values["project_class"] is None:
             values["project_class"] = ProjectClass.PRIVATE
