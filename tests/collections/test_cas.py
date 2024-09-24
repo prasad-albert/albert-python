@@ -1,5 +1,5 @@
+import time
 from collections.abc import Generator
-from time import sleep
 
 import pytest
 
@@ -80,9 +80,8 @@ def test_create_and_delete_cas(client: Albert):
     assert isinstance(created_cas.id, str)
 
     # Verify that the CAS was created
-    sleep(
-        1.5
-    )  # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
+    # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
+    time.sleep(1.5)
     assert client.cas_numbers.cas_exists(number="987-65-4")
 
     # Delete the CAS
@@ -99,9 +98,8 @@ def test_get_by_number(client: Albert):
     created_cas = client.cas_numbers.create(cas=new_cas)
 
     # Verify that the CAS was created
-    sleep(
-        1.5
-    )  # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
+    # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
+    time.sleep(1.5)
     returned_cas = client.cas_numbers.get_by_number(number="987-65-4", exact_match=True)
     assert returned_cas.id == created_cas.id
     # Delete the CAS

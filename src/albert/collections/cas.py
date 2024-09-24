@@ -1,7 +1,6 @@
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.resources.base import BaseAlbertModel
 from albert.resources.cas import Cas
 from albert.session import AlbertSession
 
@@ -237,7 +236,7 @@ class CasCollection(BaseCollection):
         self.session.delete(url)
         return True
 
-    def update(self, *, updated_object: BaseAlbertModel) -> BaseAlbertModel:
+    def update(self, *, updated_object: Cas) -> Cas:
         # Fetch the current object state from the server or database
         current_object = self.get_by_id(cas_id=updated_object.id)
 
