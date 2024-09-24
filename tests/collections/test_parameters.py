@@ -45,8 +45,8 @@ def test_returns_dupe(caplog, client: Albert, seeded_parameters: list[Parameter]
     assert returned.name == seeded_parameters[0].name
 
 
-# def test_update(client: Albert, seeded_parameters: list[Parameter]):
-#     p = seeded_parameters[0]
-#     p.name = "Updated"
-#     updated = client.parameters.update(updated_parameter=p)
-#     assert updated.name == "Updated"
+def test_update(client: Albert, seeded_parameters: list[Parameter]):
+    p = seeded_parameters[0]
+    p.name = "Updated"
+    updated = client.parameters.update(updated_parameter=p)
+    assert updated.name == "Updated"

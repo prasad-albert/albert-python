@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Generator
 
-from albert.collections.base import BaseCollection, OrderBy
+from albert.collections.base import BaseCollection
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.session import AlbertSession
