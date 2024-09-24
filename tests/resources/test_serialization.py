@@ -26,3 +26,9 @@ def test_serialize_as_entity_link():
     assert isinstance(container.entity, BaseEntityLink)
     for entity in container.entity_list:
         assert isinstance(entity, BaseEntityLink)
+
+    # Test with optional values
+    container = FakeContainer(entity=None, entity_list=[])
+    container = FakeContainer(**container.model_dump(mode="json"))
+    assert container.entity is None
+    assert not container.entity_list
