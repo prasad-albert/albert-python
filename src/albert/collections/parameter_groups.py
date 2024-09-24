@@ -14,7 +14,7 @@ class ParameterGroupCollection(BaseCollection):
         self.base_path = f"/api/{ParameterGroupCollection._api_version}/parametergroups"
 
     def get_by_id(self, *, id: str) -> ParameterGroup:
-        url = f"{self.base_path}/{id}"
+        path = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return ParameterGroup(**response.json())
 
