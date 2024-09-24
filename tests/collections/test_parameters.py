@@ -1,3 +1,4 @@
+import copy
 from collections.abc import Generator
 
 from albert.albert import Albert
@@ -33,7 +34,7 @@ def test_get(client: Albert, seeded_parameters: list[Parameter]):
 
 
 def test_returns_dupe(caplog, client: Albert, seeded_parameters: list[Parameter]):
-    p = seeded_parameters[0]
+    p = copy.deepcopy(seeded_parameters[0])
     p.id = None
     returned = client.parameters.create(parameter=p)
     assert (
