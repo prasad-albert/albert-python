@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
@@ -29,10 +30,10 @@ class ParameterGroupCollection(BaseCollection):
         params = {"limit": limit, "order": order_by.value}
         if text:
             params["text"] = text
-        if offset:
+        if offset:  # pragma: no cover
             params["offset"] = offset
         if types:
-            params["type"] = [t.value for t in types] if isinstance(types, list) else types.value
+            params["types"] = types if isinstance(types, list) else [types]
         while True:
             response = self.session.get(self.base_path + "/search", params=params)
             pg_data = response.json().get("Items", [])
@@ -41,9 +42,9 @@ class ParameterGroupCollection(BaseCollection):
             for pg in pg_data:
                 yield self.get_by_id(id=pg["albertId"])
             offset = response.json().get("offset")
-            if not offset:
+            if not offset:  # pragma: no cover
                 break
-            params["offset"] = offset
+            params["offset"] = int(offset) + int(limit)
 
     def list(
         self,
@@ -64,6 +65,13 @@ class ParameterGroupCollection(BaseCollection):
         return True
 
     def create(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
+        matches = self.list(text=parameter_group.name)
+        for m in matches:
+            if m.name == parameter_group.name:
+                logging.warning(
+                    f"Parameter Group {parameter_group.name} already exists. Returning the exiting parameter group."
+                )
+                return m
         response = self.session.post(
             self.base_path, json=parameter_group.model_dump(by_alias=True, exclude_none=True)
         )

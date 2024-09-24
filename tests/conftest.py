@@ -35,34 +35,6 @@ def client() -> Albert:
 
 
 @pytest.fixture(scope="session")
-def seeded_parameters(client: Albert) -> Iterator[list[Parameter]]:
-    seeded = []
-    for parameter in generate_parameter_seeds():
-        created_parameter = client.parameters.create(parameter=parameter)
-        seeded.append(created_parameter)
-    yield seeded
-    for parameter in seeded:
-        with suppress(NotFoundError):
-            client.parameters.delete(id=parameter.id)
-
-
-@pytest.fixture(scope="session")
-def seeded_parameter_groups(
-    client: Albert, seeded_parameters, seeded_tags, seeded_units
-) -> Iterator[list[Parameter]]:
-    seeded = []
-    for parameter_group in generate_parameter_group_seeds(
-        seeded_parameters=seeded_parameters, seeded_tags=seeded_tags, seeded_units=seeded_units
-    ):
-        created_parameter_group = client.parameter_groups.create(parameter_group=parameter_group)
-        seeded.append(created_parameter_group)
-    yield seeded
-    for parameter_group in seeded:
-        with suppress(NotFoundError):
-            client.parameter_groups.delete(id=parameter_group.id)
-
-
-@pytest.fixture(scope="session")
 def seeded_projects(client: Albert, seeded_locations) -> Iterator[list[Project]]:
     # Seed the projects using seeded locations
 
@@ -199,3 +171,31 @@ def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[lis
     for user in seeded:
         user.status = Status.INACTIVE.value
         client.users.update(updated_object=user)
+
+
+@pytest.fixture(scope="session")
+def seeded_parameters(client: Albert) -> Iterator[list[Parameter]]:
+    seeded = []
+    for parameter in generate_parameter_seeds():
+        created_parameter = client.parameters.create(parameter=parameter)
+        seeded.append(created_parameter)
+    yield seeded
+    for parameter in seeded:
+        with suppress(NotFoundError):
+            client.parameters.delete(id=parameter.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_parameter_groups(
+    client: Albert, seeded_parameters, seeded_tags, seeded_units
+) -> Iterator[list[Parameter]]:
+    seeded = []
+    for parameter_group in generate_parameter_group_seeds(
+        seeded_parameters=seeded_parameters, seeded_tags=seeded_tags, seeded_units=seeded_units
+    ):
+        created_parameter_group = client.parameter_groups.create(parameter_group=parameter_group)
+        seeded.append(created_parameter_group)
+    yield seeded
+    for parameter_group in seeded:
+        with suppress(NotFoundError):
+            client.parameter_groups.delete(id=parameter_group.id)

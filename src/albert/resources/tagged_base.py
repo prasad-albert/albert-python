@@ -1,10 +1,10 @@
 import logging
 from typing import Any
 
-from pydantic import Field, field_serializer, model_validator
+from pydantic import Field, model_validator
 
-from albert.resources.base import BaseAlbertModel, BaseEntityLink
-from albert.resources.serialization import serialize_to_entity_link_list
+from albert.resources.base import BaseAlbertModel
+from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tags import Tag
 
 
@@ -24,7 +24,7 @@ class BaseTaggedEntity(BaseAlbertModel):
         Converts tag strings to Tag objects.
     """
 
-    tags: list[Tag | BaseEntityLink] | None = Field(None)
+    tags: list[SerializeAsEntityLink[Tag]] | None = Field(None)
 
     @model_validator(mode="before")
     @classmethod
@@ -47,5 +47,3 @@ class BaseTaggedEntity(BaseAlbertModel):
                     pass
             data["tags"] = new_tags
         return data
-
-    tag_serializer = field_serializer("tags")(serialize_to_entity_link_list)

@@ -1,3 +1,4 @@
+import copy
 from collections.abc import Generator
 
 from albert.albert import Albert
@@ -21,6 +22,20 @@ def test_basics(client: Albert, seeded_parameter_groups: list[ParameterGroup]):
 
 
 def test_advanced_list(client: Albert, seeded_parameter_groups: list[ParameterGroup]):
-    list_response = client.parameter_groups.list(names=[seeded_parameter_groups[0].name])
+    list_response = client.parameter_groups.list(
+        text=[seeded_parameter_groups[0].name], types=[seeded_parameter_groups[0].type]
+    )
     assert isinstance(list_response, Generator)
     _list_asserts(list_response)
+
+
+def test_returns_existing(caplog, client: Albert, seeded_parameter_groups: list[ParameterGroup]):
+    pg = copy.deepcopy(seeded_parameter_groups[0])
+    pg.id = None
+    returned_pg = client.parameter_groups.create(parameter_group=pg)
+    assert (
+        f"Parameter Group {pg.name} already exists. Returning the exiting parameter group."
+        in caplog.text
+    )
+    assert returned_pg.id == seeded_parameter_groups[0].id
+    assert returned_pg.name == seeded_parameter_groups[0].name

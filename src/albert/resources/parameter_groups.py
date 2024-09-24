@@ -1,12 +1,11 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, PrivateAttr, field_serializer
+from pydantic import Field, PrivateAttr
 
 from albert.resources.base import AuditFields, BaseAlbertModel, BaseEntityLink, SecurityClass
 from albert.resources.parameters import Parameter
-from albert.resources.serialization import serialize_to_entity_link, serialize_to_entity_link_list
-from albert.resources.tagged_base import BaseTaggedEntity
+from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
 from albert.resources.users import User
 from albert.utils.exceptions import AlbertException
@@ -24,15 +23,13 @@ class PGMetadata(BaseAlbertModel):
 
 class ParameterValue(BaseAlbertModel):
     parameter: Parameter = Field(default=None, exclude=True)
-    id: str | None = Field(alias="albertId", default=None)
+    id: str | None = Field(default=None)
     _name = PrivateAttr(default=None)
     short_name: str | None = Field(alias="shortName", default=None)
     value: str | None = Field(default=None)
-    unit: BaseEntityLink | Unit | None = Field(alias="Unit")
+    unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit")
     _sequence: int | None = PrivateAttr(default=None)
     added: AuditFields | None = Field(alias="Added", default=None)
-
-    unit_serializer = field_serializer("unit")(serialize_to_entity_link)
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -65,14 +62,14 @@ class ParameterValue(BaseAlbertModel):
         return self._sequence
 
 
-class ParameterGroup(BaseTaggedEntity):
+class ParameterGroup(BaseAlbertModel):
     id: str | None = Field(None, alias="albertId")
     name: str
     description: str | None = Field(default=None)
     type: PGType
     security_class: SecurityClass = Field(default=SecurityClass.RESTRICTED, alias="class")
     _verified: bool = PrivateAttr(default=False)
-    acl: list[User | BaseEntityLink] | None = Field(default=None, alias="ACL")
+    acl: list[SerializeAsEntityLink[User]] | None = Field(default=None, alias="ACL")
     metadata: PGMetadata | None = Field(alias="Metadata", default=None)
     _documents: list[BaseEntityLink] = PrivateAttr(default_factory=list)
     parameters: list[ParameterValue] = Field(alias="Parameters")
@@ -91,5 +88,3 @@ class ParameterGroup(BaseTaggedEntity):
     @property
     def documents(self) -> list[BaseEntityLink]:
         return self._documents
-
-    acl_serializer = field_serializer("acl")(serialize_to_entity_link_list)
