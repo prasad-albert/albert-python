@@ -60,6 +60,7 @@ def handle_api_error(response: requests.Response) -> None:
 
         # Raise specific exceptions based on status code
         if response.status_code == 400:
+            print(response.request.body)
             albert_error = BadRequestError(message)
         elif response.status_code == 401:
             albert_error = UnauthorizedError(message)

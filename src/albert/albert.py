@@ -10,6 +10,7 @@ from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
 from albert.collections.projects import ProjectCollection
 from albert.collections.roles import RoleCollection
+from albert.collections.storage_locations import StorageLocationsCollection
 from albert.collections.tags import TagCollection
 from albert.collections.un_numbers import UnNumberCollection
 from albert.collections.units import UnitCollection
@@ -119,3 +120,7 @@ class Albert:
     @property
     def parameters(self) -> ParameterCollection:
         return ParameterCollection(session=self.session)
+
+    @property
+    def storage_locations(self) -> StorageLocationsCollection:
+        return StorageLocationsCollection(session=self.session)
