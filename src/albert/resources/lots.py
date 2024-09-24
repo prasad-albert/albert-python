@@ -5,9 +5,10 @@ from typing import Any
 from pydantic import Field, NonNegativeFloat, PrivateAttr, field_serializer
 
 from albert.collections.inventory import InventoryCategory
-from albert.resources.base import BaseAlbertModel, BaseEntityLink
+from albert.resources.base import BaseAlbertModel
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
+from albert.resources.storage_locations import StorageLocation
 from albert.resources.users import User
 
 
@@ -42,7 +43,6 @@ class LotMetadata(BaseAlbertModel):
 
 
 class Lot(BaseAlbertModel):
-    # TODO: Once Storage Locations are down allow them here instead of just the link
     id: str | None = Field(None, alias="albertId")
     inventory_id: str = Field(alias="parentId")
     task_id: str | None = Field(default=None, alias="taskId")
@@ -50,7 +50,7 @@ class Lot(BaseAlbertModel):
     expiration_date: str | None = Field(None, alias="expirationDate")
     manufacturer_lot_number: str | None = Field(None, alias="manufacturerLotNumber")
     location: SerializeAsEntityLink[Location] | None = Field(default=None)
-    storage_location: BaseEntityLink = Field(alias="storageLocation")
+    storage_location: SerializeAsEntityLink[StorageLocation] = Field(alias="storageLocation")
     pack_size: str | None = Field(None, alias="packSize")
     initial_quantity: NonNegativeFloat = Field(alias="initialQuantity")
     cost: NonNegativeFloat | None = Field(default=None)
@@ -76,21 +76,19 @@ class Lot(BaseAlbertModel):
         if "hasAttachments" in data:
             if data["hasAttachments"] == "1":
                 self._has_attachments = True
-            elif data["hasAttachments"] == "2":
+            elif data["hasAttachments"] == "0":
                 self._has_attachments = False
             else:
                 logging.error(
                     f"Unknown response for hasAttachments given: {data['hasAttachments']}"
                 )
-                pass
         if "hasNotes" in data:
             if data["hasNotes"] == "1":
                 self._has_notes = True
-            elif data["hasNotes"] == "2":
+            elif data["hasNotes"] == "0":
                 self._has_notes = False
             else:
                 logging.error(f"Unknown response for hasNotes given: {data['hasNotes']}")
-                pass
         if "parentName" in data:
             self._parent_name = data["parentName"]
         if "parentUnit" in data:
