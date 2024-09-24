@@ -195,6 +195,8 @@ def seeded_parameter_groups(
     ):
         created_parameter_group = client.parameter_groups.create(parameter_group=parameter_group)
         seeded.append(created_parameter_group)
+        time.sleep(1.5)  # avoid race condition while it populates through DBs
+
     yield seeded
     for parameter_group in seeded:
         with suppress(NotFoundError):
