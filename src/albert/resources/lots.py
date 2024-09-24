@@ -7,7 +7,7 @@ from pydantic import Field, NonNegativeFloat, PrivateAttr, field_serializer
 from albert.collections.inventory import InventoryCategory
 from albert.resources.base import BaseAlbertModel, BaseEntityLink
 from albert.resources.locations import Location
-from albert.resources.serialization import serialize_to_entity_link, serialize_to_entity_link_list
+from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.users import User
 
 
@@ -42,20 +42,20 @@ class LotMetadata(BaseAlbertModel):
 
 
 class Lot(BaseAlbertModel):
-    # To Do: Once Storage Locations are down allow them here instead of just the link
+    # TODO: Once Storage Locations are down allow them here instead of just the link
     id: str | None = Field(None, alias="albertId")
     inventory_id: str = Field(alias="parentId")
     task_id: str | None = Field(default=None, alias="taskId")
     notes: str | None = Field(default=None)
     expiration_date: str | None = Field(None, alias="expirationDate")
     manufacturer_lot_number: str | None = Field(None, alias="manufacturerLotNumber")
-    location: BaseEntityLink | Location = None  # need to make Location Class
+    location: SerializeAsEntityLink[Location] | None = Field(default=None)
     storage_location: BaseEntityLink = Field(alias="storageLocation")
     pack_size: str | None = Field(None, alias="packSize")
     initial_quantity: NonNegativeFloat = Field(alias="initialQuantity")
     cost: NonNegativeFloat | None = Field(default=None)
     inventory_on_hand: NonNegativeFloat = Field(alias="inventoryOnHand")
-    owner: list[User | BaseEntityLink] | None = Field(default=None)
+    owner: list[SerializeAsEntityLink[User]] | None = Field(default=None)
     lot_number: str | None = Field(None, alias="lotNumber")
     external_barcode_id: str | None = Field(None, alias="externalBarcodeId")
 
@@ -116,9 +116,6 @@ class Lot(BaseAlbertModel):
     @field_serializer("inventory_on_hand", return_type=str)
     def serialize_inventory_on_hand(self, inventory_on_hand: NonNegativeFloat):
         return str(inventory_on_hand)
-
-    location_serializer = field_serializer("location")(serialize_to_entity_link)
-    owner_serializer = field_serializer("owner")(serialize_to_entity_link_list)
 
     @property
     def has_notes(self) -> bool:

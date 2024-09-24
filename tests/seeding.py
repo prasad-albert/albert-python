@@ -126,16 +126,21 @@ def generate_cas_seeds() -> list[Cas]:
 
     return [
         # CAS with basic fields
-        Cas(number="50-00-0", description="Formaldehyde", category=CasCategory.USER, smiles="C=O"),
         Cas(
-            number="64-17-5",
+            number="TEST-50-00-0",
+            description="Formaldehyde",
+            category=CasCategory.USER,
+            smiles="C=O",
+        ),
+        Cas(
+            number="TEST-64-17-5",
             description="Ethanol",
             category=CasCategory.TSCA_PUBLIC,
             smiles="C2H5OH",
         ),
         # CAS with optional fields filled out
         Cas(
-            number="7732-18-5",
+            number="TEST-7732-18-5",
             description="Water",
             notes="Common solvent",
             category=CasCategory.NOT_TSCA,
@@ -146,7 +151,7 @@ def generate_cas_seeds() -> list[Cas]:
         ),
         # CAS with external database reference
         Cas(
-            number="7440-57-5",
+            number="TEST-7440-57-5",
             description="Gold",
             category=CasCategory.EXTERNAL,
             smiles="[Au]",
@@ -155,7 +160,9 @@ def generate_cas_seeds() -> list[Cas]:
             name="Gold",
         ),
         # CAS with unknown classification
-        Cas(number="1234-56-7", description="Unknown substance", category=CasCategory.UNKNOWN),
+        Cas(
+            number="TEST-1234-56-7", description="Unknown substance", category=CasCategory.UNKNOWN
+        ),
     ]
 
 
@@ -280,12 +287,10 @@ def generate_tag_seeds() -> list[Tag]:
     """
 
     return [
-        # INVENTORY tags
-        Tag(tag="inventory-tag-1"),
-        Tag(tag="inventory-tag-2"),
-        # COMPANY tags
-        Tag(tag="company-tag-1"),
-        Tag(tag="company-tag-2"),  # No id provided
+        Tag(tag="TEST-TAG-inventory-tag-1"),
+        Tag(tag="TEST-TAG-inventory-tag-2"),
+        Tag(tag="TEST-TAG-company-tag-1"),
+        Tag(tag="TEST-TAG-company-tag-2"),
     ]
 
 

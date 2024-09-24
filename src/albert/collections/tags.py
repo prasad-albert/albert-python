@@ -4,7 +4,7 @@ from collections.abc import Generator, Iterator
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.tags import Tag
 from albert.session import AlbertSession
-from albert.utils.exceptions import NotFoundError
+from albert.utils.exceptions import AlbertException
 
 
 class TagCollection(BaseCollection):
@@ -250,7 +250,7 @@ class TagCollection(BaseCollection):
         if not found_tag:
             msg = f'Tag "{old_name}" not found.'
             logging.error(msg)
-            raise NotFoundError(msg)
+            raise AlbertException(msg)
         tag_id = found_tag.id
         payload = [
             {

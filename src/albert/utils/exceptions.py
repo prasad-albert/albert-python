@@ -1,90 +1,92 @@
-import logging
+from http.client import responses
+from typing import Any
 
 import requests
 
+from albert.utils.logging import logger
+
 
 class AlbertException(Exception):
-    def __init__(self, message, details=None):
+    def __init__(self, message: str):
         super().__init__(message)
-        self.details = details
-
-
-def handle_api_error(response: requests.Response) -> None:
-    try:
-        # Raise an HTTPError if the HTTP request returned an unsuccessful status code
-        response.raise_for_status()
-    except requests.HTTPError as e:
-        # Log the initial error with status code and reason
-        error_message = (
-            f"API request failed with status code {response.status_code}: {response.reason}"
-        )
-
-        try:
-            # Attempt to extract additional error details from the response JSON, if available
-            response_json = response.json()
-            error_details = response_json.get("errors", {})
-            error_message += f"\nDetails: {response_json.get('title', 'Unknown Error')}"
-        except ValueError:
-            # Handle case where the response body is not JSON
-            error_details = {}
-            error_message += "\nDetails: No JSON body found in the response."
-
-        # Log the complete error message including URL and request body
-        logging.error(
-            f"Failed to perform the request to {response.request.url}. \n{error_message}\nBody sent: {response.request.body}"
-        )
-
-        # Raise specific exceptions based on status code
-        if response.status_code == 400:
-            raise BadRequestError(error_message, error_details) from e
-        elif response.status_code == 401:
-            raise UnauthorizedError(error_message, error_details) from e
-        elif response.status_code == 403:
-            raise ForbiddenError(error_message, error_details) from e
-        elif response.status_code == 404:
-            raise NotFoundError(error_message, error_details) from e
-        elif response.status_code == 500:
-            raise InternalServerError(error_message, error_details) from e
-        else:
-            raise AlbertAPIError(error_message, error_details) from e
-
-
-# Custom Exception classes for API errors
 
 
 class AlbertAPIError(AlbertException):
     """Base class for all API-related errors."""
 
-    def __init__(self, message, details=None):
+    def __init__(self, status_code: int, error: dict[str, Any] | None = None):
+        message = f"API request failed with status code {status_code}: {responses[status_code]}"
+        if error is not None:
+            if url := error.get("url"):
+                message = f"{message}\nPath: {url}"
+            if messages := error.get("errors"):
+                message = f"{message}\nDetails: {messages}"
         super().__init__(message)
-        self.details = details
 
 
 class BadRequestError(AlbertAPIError):
     """Exception raised for a 400 Bad Request response."""
 
-    pass
+    def __init__(self, error: dict[str, Any] | None = None):
+        super().__init__(400, error)
 
 
 class UnauthorizedError(AlbertAPIError):
     """Exception raised for a 401 Unauthorized response."""
 
-    pass
+    def __init__(self, error: dict[str, Any] | None = None):
+        super().__init__(401, error)
 
 
 class ForbiddenError(AlbertAPIError):
     """Exception raised for a 403 Forbidden response."""
 
-    pass
+    def __init__(self, error: dict[str, Any] | None = None):
+        super().__init__(403, error)
 
 
 class NotFoundError(AlbertAPIError):
     """Exception raised for a 404 Not Found response."""
 
-    pass
+    def __init__(self, error: dict[str, Any] | None = None):
+        super().__init__(404, error)
 
 
 class InternalServerError(AlbertAPIError):
     """Exception raised for a 500 Internal Server Error response."""
 
-    pass
+    def __init__(self, error: dict[str, Any] | None = None):
+        super().__init__(500, error)
+
+
+def handle_api_error(response: requests.Response) -> None:
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as e:
+        try:
+            # TODO: Parse the error as a structured type since the shape is always the same
+            error_json = response.json()
+        except ValueError:
+            error_json = None
+
+        logger.debug(
+            f"Request to {response.request.url} failed with status {response.status_code}. "
+            f"Response: {response.text}"
+            f"Body: {response.request.body}"
+        )
+
+        # Raise specific exceptions based on status code
+        if response.status_code == 400:
+            albert_error = BadRequestError(error_json)
+        elif response.status_code == 401:
+            albert_error = UnauthorizedError(error_json)
+        elif response.status_code == 403:
+            albert_error = ForbiddenError(error_json)
+        elif response.status_code == 404:
+            albert_error = NotFoundError(error_json)
+        elif response.status_code == 500:
+            albert_error = InternalServerError(error_json)
+        else:
+            albert_error = AlbertAPIError(response.status_code, error_json)
+
+        raise albert_error from e

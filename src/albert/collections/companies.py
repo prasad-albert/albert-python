@@ -4,7 +4,7 @@ from collections.abc import Generator, Iterator
 from albert.collections.base import BaseCollection
 from albert.resources.companies import Company
 from albert.session import AlbertSession
-from albert.utils.exceptions import NotFoundError
+from albert.utils.exceptions import AlbertException
 
 
 class CompanyCollection(BaseCollection):
@@ -234,7 +234,7 @@ class CompanyCollection(BaseCollection):
         if not company:
             msg = f'Company "{old_name}" not found.'
             logging.error(msg)
-            raise NotFoundError(msg)
+            raise AlbertException(msg)
         company_id = company.id
         endpoint = f"{self.base_path}/{company_id}"
         payload = {
