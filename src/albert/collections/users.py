@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
@@ -98,21 +99,17 @@ class UserCollection(BaseCollection):
             The created User
         """
 
-        # May need to rehydrate location?
-        roles = [
-            {"id": r.tenant + "#" + r.id} if "#" not in r.id else {"id": r.id} for r in user.roles
-        ]
+        hits = self.list(text=user.email)
+        for u in hits:
+            if u.email == user.email:
+                logging.warning(
+                    f"User with email {user.email} already exists. Returning existing user."
+                )
+                return u
 
-        payload = {
-            "name": user.name,
-            "email": user.email,
-            "Roles": roles,
-            "Location": {"id": user.location.id},
-            "userClass": "standard",
-        }
-
-        # build and run query
-        response = self.session.post(self.base_path, json=payload)
+        response = self.session.post(
+            self.base_path, json=user.model_dump(by_alias=True, exclude_none=True)
+        )
         user = User(**response.json())
         return user
 

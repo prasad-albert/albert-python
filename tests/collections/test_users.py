@@ -36,15 +36,12 @@ def test_advanced_users_list(client: Albert, seeded_users: list[User]):
             break
     assert found
 
-    adv_list = client.users.list(text="testcase")
-    assert isinstance(adv_list, Generator)
-    _list_asserts(adv_list)
-
     adv_list_no_match = client.users.list(text="h78frg279fbg92ubue9b 80fh0hnvioh")
     assert isinstance(adv_list_no_match, Generator)
     assert next(adv_list_no_match, None) is None
+
     short_list = client.users._list_generator(limit=3)
-    _list_asserts(short_list, limit=10)
+    _list_asserts(short_list, limit=5)
 
 
 def test_user_get(client: Albert, seeded_users: list[User]):

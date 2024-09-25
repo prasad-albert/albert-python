@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
 
 from albert.session import AlbertSession
 from albert.utils.exceptions import AlbertException
@@ -37,6 +37,7 @@ class BaseAlbertModel(BaseModel):
         use_enum_values=True,
         exclude={"session"},
         arbitrary_types_allowed=True,
+        validate_assignment=True,
     )
 
     def __init__(self, **data: Any):
@@ -48,6 +49,19 @@ class BaseAlbertModel(BaseModel):
             self._created = AuditFields(**data["Created"])
         if "Updated" in data:
             self._updated = AuditFields(**data["Updated"])
+
+    @model_validator(mode="before")
+    def ensure_enum_values(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """populate_by_name=True blocks the setting of enum values by name. This method allows for that."""
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, Enum):
+                    data[key] = value.value
+                if isinstance(value, list):
+                    data[key] = [v.value if isinstance(v, Enum) else v for v in value]
+        else:
+            print(type(data))
+        return data
 
     @property
     def created(self) -> AuditFields | None:
@@ -69,7 +83,7 @@ class BaseSessionModel(BaseAlbertModel):
     )
 
 
-class BaseEntityLink(BaseAlbertModel):
+class BaseEntityLink(BaseModel):
     id: str
     name: str | None = Field(default=None, exclude=True)
 
@@ -77,10 +91,7 @@ class BaseEntityLink(BaseAlbertModel):
 class EntityLinkConvertible:
     def to_entity_link(self) -> BaseEntityLink:
         if hasattr(self, "id"):
-            return BaseEntityLink(
-                id=self.id,
-                name=getattr(self, "name", None),
-            )
+            return BaseEntityLink(id=self.id)
         return AlbertException(
             "`id` is required to create an entity link. Ensure the linked object is registered."
         )

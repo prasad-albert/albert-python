@@ -76,12 +76,10 @@ class ParameterCollection(BaseCollection):
     ) -> Iterator[Parameter]:
         return self._list_generator(order_by=order_by, names=names, exact_match=exact_match)
 
-    # Not working as expected
     def update(self, *, updated_parameter) -> Parameter:
         param_id = updated_parameter.id
         patch_params = self._generate_patch_payload(
             existing=self.get_by_id(id=param_id), updated=updated_parameter
         )
-        print(patch_params)
         self.session.patch(f"{self.base_path}/{param_id}", json=patch_params)
         return updated_parameter

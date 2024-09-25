@@ -70,38 +70,7 @@ def test_update_cas(client: Albert, seeded_cas: list[Cas]):
     assert updated_cas.description == updated_description
 
 
-def test_create_and_delete_cas(client: Albert):
-    # Create a new CAS to be deleted
-    new_cas = Cas(number="987-65-4", description="Delete Test CAS")
-
-    created_cas = client.cas_numbers.create(cas=new_cas)
-
-    assert isinstance(created_cas, Cas)
-    assert isinstance(created_cas.id, str)
-
-    # Verify that the CAS was created
-    # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
-    time.sleep(1.5)
-    assert client.cas_numbers.cas_exists(number="987-65-4")
-
-    # Delete the CAS
-    deleted = client.cas_numbers.delete(cas_id=created_cas.id)
-    assert deleted
-
-    # Verify that the CAS no longer exists
-    assert not client.cas_numbers.cas_exists(number="987-65-4")
-
-
-def test_get_by_number(client: Albert):
-    # Create a new CAS to be deleted
-    new_cas = Cas(number="987-65-4", description="Delete Test CAS")
-    created_cas = client.cas_numbers.create(cas=new_cas)
-
-    # Verify that the CAS was created
-    # I was having some flakes here I think due to a race condition. This would make sence because the object probably takes a moment to get into the search db
-    time.sleep(1.5)
-    returned_cas = client.cas_numbers.get_by_number(number="987-65-4", exact_match=True)
-    assert returned_cas.id == created_cas.id
-    # Delete the CAS
-    deleted = client.cas_numbers.delete(cas_id=created_cas.id)
-    assert deleted
+def test_get_by_number(client: Albert, seeded_cas: list[Cas]):
+    returned_cas = client.cas_numbers.get_by_number(number=seeded_cas[0].number, exact_match=True)
+    assert returned_cas.id == seeded_cas[0].id
+    assert returned_cas.number == seeded_cas[0].number

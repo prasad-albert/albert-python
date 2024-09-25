@@ -17,7 +17,6 @@ def test_serialize_as_entity_link():
     entity = FakeEntity(id="E123", name="test-entity", data=4.0)
     link = entity.to_entity_link()
     assert link.id == entity.id
-    assert link.name == entity.name
 
     container = FakeContainer(entity=entity, entity_list=[entity, link])
     container = FakeContainer(**container.model_dump(mode="json"))

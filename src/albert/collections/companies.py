@@ -201,7 +201,7 @@ class CompanyCollection(BaseCollection):
             company = Company(name=company)
         hit = self.get_by_name(name=company.name, exact_match=True)
         if check_if_exists and hit:
-            logging.warning(f"Company {company.name} already exists with id {company.id}.")
+            logging.warning(f"Company {company.name} already exists with id {hit.id}.")
             return hit
 
         payload = company.model_dump(by_alias=True, exclude_unset=True)

@@ -223,12 +223,8 @@ class Sheet(BaseSessionModel):
 
     @model_validator(mode="after")
     def set_sheet_fields(self) -> "Sheet":
-        sheet_set_designs = []
-        for d in self.designs:
-            d._sheet = self
-            sheet_set_designs.append(d)
-        self.designs = sheet_set_designs
-        for d in self.designs:
+        for idx, d in enumerate(self.designs):  # Instead of creating a new list
+            d._sheet = self  # Set the reference to the sheet
             if d.design_type == DesignType.APPS:
                 self._app_design = d
             elif d.design_type == DesignType.PRODUCTS:
