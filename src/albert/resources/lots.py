@@ -49,16 +49,18 @@ class Lot(BaseAlbertModel):
     notes: str | None = Field(default=None)
     expiration_date: str | None = Field(None, alias="expirationDate")
     manufacturer_lot_number: str | None = Field(None, alias="manufacturerLotNumber")
-    location: SerializeAsEntityLink[Location] | None = Field(default=None)
-    storage_location: SerializeAsEntityLink[StorageLocation] = Field(alias="storageLocation")
+    storage_location: SerializeAsEntityLink[StorageLocation] | None = Field(
+        alias="StorageLocation", default=None
+    )
     pack_size: str | None = Field(None, alias="packSize")
-    initial_quantity: NonNegativeFloat = Field(alias="initialQuantity")
+    initial_quantity: NonNegativeFloat | None = Field(default=None, alias="initialQuantity")
     cost: NonNegativeFloat | None = Field(default=None)
     inventory_on_hand: NonNegativeFloat = Field(alias="inventoryOnHand")
     owner: list[SerializeAsEntityLink[User]] | None = Field(default=None)
     lot_number: str | None = Field(None, alias="lotNumber")
     external_barcode_id: str | None = Field(None, alias="externalBarcodeId")
 
+    _location: SerializeAsEntityLink[Location] | None = PrivateAttr(default=None)
     _has_notes: bool | None = PrivateAttr(default=None)
     _notes: str | None = PrivateAttr(default=None)
     _has_attachments: bool | None = PrivateAttr(default=None)
@@ -97,6 +99,8 @@ class Lot(BaseAlbertModel):
             self._parent_category = data["parentIdCategory"]
         if "status" in data:
             self._status = LotStatus(data["status"])
+        if "Location" in data:
+            self._location = data["Location"]
 
         if "notes" in data:
             self._notes = data["notes"]

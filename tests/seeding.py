@@ -9,6 +9,7 @@ from albert.resources.inventory import (
     InventoryUnitCategory,
 )
 from albert.resources.locations import Location
+from albert.resources.lots import Lot, LotMetadata, LotStatus
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
 
@@ -483,71 +484,73 @@ def generate_inventory_seeds(
     ]
 
 
-# def generate_lot_seeds(seeded_locations: list[Location], seeded_inventory:list[Inventory]) -> list[Lot]:
-#     """
-#     Generates a list of Lot seed objects for testing without IDs.
+def generate_lot_seeds(
+    seeded_locations: list[Location],
+    seeded_inventory: list[InventoryItem],
+    seeded_storage_locations: list[StorageLocation],
+) -> list[Lot]:
+    """
+    Generates a list of Lot seed objects for testing without IDs.
 
-#     Returns
-#     -------
-#     List[Lot]
-#         A list of Lot objects with different permutations.
-#     """
+    Returns
+    -------
+    List[Lot]
+        A list of Lot objects with different permutations.
+    """
 
-#     return [
-#         # Basic Lot with metadata and default status
-#         Lot(
-#             inventory_id="INV123",
-#             storage_location=BaseEntityLink(id=seeded_stroage_locations[0].id),
-#             initial_quantity=100.0,
-#             cost=50.0,
-#             inventory_on_hand=90.0,
-#             lot_number="LOT001",
-#             expiration_date="2025-12-31",
-#             manufacturer_lot_number="MLN12345",
-#             location=BaseEntityLink(id=seeded_locations[1].id),
-#             metadata=LotMetadata(
-#                 asset_tag="ASSET001",
-#                 serial_number="SN123",
-#                 quality_number="QN123",
-#                 distributor="Distributor A",
-#             ),
-#             notes="This is a test lot with default status.",
-#             external_barcode_id="EXT123456",
-#         ),
-#         # Lot with active status and no metadata
-#         Lot(
-#             inventory_id="INV456",
-#             storage_location=BaseEntityLink(id=seeded_stroage_locations[1].id),
-#             initial_quantity=500.0,
-#             cost=200.0,
-#             inventory_on_hand=400.0,
-#             lot_number="LOT002",
-#             expiration_date="2026-01-31",
-#             manufacturer_lot_number="MLN67890",
-#             location=BaseEntityLink(id=seeded_locations[0].id),
-#             notes="This is an active lot with no metadata.",
-#             external_barcode_id="EXT654321",
-#             _status=LotStatus.ACTIVE,
-#         ),
-#         # Lot with quarantined status and full metadata
-#         Lot(
-#             inventory_id="INV789",
-#             storage_location=BaseEntityLink(id=seeded_stroage_locations[1].id),
-#             initial_quantity=1000.0,
-#             cost=750.0,
-#             inventory_on_hand=1000.0,
-#             lot_number="LOT003",
-#             expiration_date="2024-11-30",
-#             manufacturer_lot_number="MLN112233",
-#             location=BaseEntityLink(id=seeded_locations[1].id),
-#             metadata=LotMetadata(
-#                 asset_tag="ASSET789",
-#                 serial_number="SN789",
-#                 quality_number="QN789",
-#                 distributor="Distributor B",
-#             ),
-#             notes="This lot is quarantined due to quality issues.",
-#             external_barcode_id="EXT789012",
-#             _status=LotStatus.QUARANTINED,
-#         ),
-#     ]
+    return [
+        # Basic Lot with metadata and default status
+        Lot(
+            inventory_id=seeded_inventory[0].id,
+            storage_location=BaseEntityLink(id=seeded_storage_locations[0].id),
+            initial_quantity=100.0,
+            cost=50.0,
+            inventory_on_hand=90.0,
+            lot_number="LOT001",
+            expiration_date="2025-12-31",
+            manufacturer_lot_number="MLN12345",
+            location=BaseEntityLink(id=seeded_locations[1].id),
+            metadata=LotMetadata(
+                asset_tag="ASSET001",
+                serial_number="SN123",
+                quality_number="QN123",
+                distributor="Distributor A",
+            ),
+            notes="This is a test lot with default status.",
+            external_barcode_id="EXT123456",
+        ),
+        # Lot with active status and no metadata
+        Lot(
+            inventory_id=seeded_inventory[0].id,
+            storage_location=BaseEntityLink(id=seeded_storage_locations[1].id),
+            initial_quantity=500.0,
+            cost=200.0,
+            inventory_on_hand=400.0,
+            lot_number="LOT002",
+            expiration_date="2026-01-31",
+            manufacturer_lot_number="MLN67890",
+            location=BaseEntityLink(id=seeded_locations[0].id),
+            notes="This is an active lot with no metadata.",
+            external_barcode_id="EXT654321",
+        ),
+        # Lot with quarantined status and full metadata
+        Lot(
+            inventory_id=seeded_inventory[1].id,
+            storage_location=BaseEntityLink(id=seeded_storage_locations[1].id),
+            initial_quantity=1000.0,
+            cost=750.0,
+            inventory_on_hand=1000.0,
+            lot_number="LOT003",
+            expiration_date="2024-11-30",
+            manufacturer_lot_number="MLN112233",
+            location=BaseEntityLink(id=seeded_locations[1].id),
+            metadata=LotMetadata(
+                asset_tag="ASSET789",
+                serial_number="SN789",
+                quality_number="QN789",
+                distributor="Distributor B",
+            ),
+            notes="This lot is quarantined due to quality issues.",
+            external_barcode_id="EXT789012",
+        ),
+    ]

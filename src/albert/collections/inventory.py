@@ -243,7 +243,6 @@ class InventoryCollection(BaseCollection):
             raw_inventory = response_data.get("Items", [])
             start_offset = response_data.get("offset")
             params["offset"] = int(start_offset) + int(limit)
-
             for item in raw_inventory:
                 # Unfortunetly, list only returns partial objects, so I need to do a GET on each.
                 this_aid = (
