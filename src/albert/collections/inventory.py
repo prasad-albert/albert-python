@@ -326,10 +326,8 @@ class InventoryCollection(BaseCollection):
         for attribute in _updatable_attributes_special:
             old_value = getattr(existing, attribute)
             new_value = getattr(updated, attribute)
-            # # Get the serialization alias name for the attribute, if it exists
-            if (old_value is None or old_value == []) and new_value is not None:
-                # company can never start as none so it's not covered in this case
-                if attribute == "cas":
+            if attribute == "cas":
+                if (old_value is None or old_value == []) and new_value is not None:
                     for c in new_value:
                         payload["data"].append(
                             {
@@ -341,7 +339,68 @@ class InventoryCollection(BaseCollection):
                                 "min": c.min,
                             }
                         )
-                elif attribute == "tags":
+                else:
+                    # Get the IDs from both sets
+                    old_set = set() if old_value is None else {obj.id for obj in old_value}
+                    new_set = set() if new_value is None else {obj.id for obj in new_value}
+                    old_lookup = (
+                        dict() if old_value is None else {obj.id: obj for obj in old_value}
+                    )
+                    new_lookup = (
+                        dict() if new_value is None else {obj.id: obj for obj in new_value}
+                    )
+
+                    # Find what's in set 1 but not in set 2
+                    to_del = old_set - new_set
+
+                    # Find what's in set 2 but not in set 1
+                    to_add = new_set - old_set
+
+                    to_check_for_update = old_set.intersection(new_set)
+
+                    for id in to_add:
+                        payload["data"].append(
+                            {
+                                "operation": "add",
+                                "attribute": "casId",
+                                "newValue": new_lookup[id].id,
+                                "max": new_lookup[id].max,
+                                "min": new_lookup[id].min,
+                            }
+                        )
+                    for id in to_del:
+                        payload["data"].append(
+                            {
+                                "operation": "delete",
+                                "attribute": "casId",
+                                "entityId": id,
+                                "oldValue": id,
+                            }
+                        )
+                    for id in to_check_for_update:
+                        if old_lookup[id].max != new_lookup[id].max:
+                            payload["data"].append(
+                                {
+                                    "operation": "update",
+                                    "attribute": "max",
+                                    "entityId": id,
+                                    "oldValue": str(old_lookup[id].max),
+                                    "newValue": str(new_lookup[id].max),
+                                }
+                            )
+                        if old_lookup[id].min != new_lookup[id].min:
+                            payload["data"].append(
+                                {
+                                    "operation": "update",
+                                    "attribute": "min",
+                                    "entityId": id,
+                                    "oldValue": str(old_lookup[id].min),
+                                    "newValue": str(new_lookup[id].min),
+                                }
+                            )
+
+            elif attribute == "tags":
+                if (old_value is None or old_value == []) and new_value is not None:
                     for t in new_value:
                         payload["data"].append(
                             {
@@ -351,106 +410,182 @@ class InventoryCollection(BaseCollection):
                                 "entityId": t.id,
                             }
                         )
-            elif old_value is not None and new_value != old_value:
-                if attribute == "company":
-                    if new_value is not None:
-                        # Update existing attribute
+                else:
+                    if old_value is None:  # pragma: no cover
+                        old_value = []
+                    if new_value is None:  # pragma: no cover
+                        new_value = []
+                    old_set = {obj.id for obj in old_value}
+                    new_set = {obj.id for obj in new_value}
+
+                    # Find what's in set 1 but not in set 2
+                    to_del = old_set - new_set
+
+                    # Find what's in set 2 but not in set 1
+                    to_add = new_set - old_set
+
+                    for id in to_add:
                         payload["data"].append(
                             {
-                                "operation": "update",
-                                "attribute": "companyId",
-                                "oldValue": old_value.id,
-                                "newValue": new_value.id,
+                                "operation": "add",
+                                "attribute": "tagId",
+                                "newValue": id,
                             }
                         )
-                    else:
+                    for id in to_del:
                         payload["data"].append(
                             {
                                 "operation": "delete",
-                                "attribute": "companyId",
-                                "entityId": old_value.id,
-                                "oldValue": old_value.id,
+                                "attribute": "tagId",
+                                "oldValue": id,
                             }
                         )
-                elif attribute == "cas":
-                    old_cas_map = {x.id: x for x in old_value}
-                    if new_value is not None:
-                        for c in new_value:
-                            if c.id in old_cas_map:
-                                this_old_cas = old_cas_map[c.id]
-                                if this_old_cas.max == c.max and this_old_cas.min == c.min:
-                                    continue
-                                if this_old_cas.max != c.max:
-                                    payload["data"].append(
-                                        {
-                                            "operation": "update",
-                                            "attribute": "max",
-                                            "entityId": c.id,
-                                            "oldValue": this_old_cas.max,
-                                            "newValue": c.max,
-                                        }
-                                    )
-                                if this_old_cas.min != c.min:
-                                    payload["data"].append(
-                                        {
-                                            "operation": "update",
-                                            "attribute": "min",
-                                            "entityId": c.id,
-                                            "oldValue": this_old_cas.min,
-                                            "newValue": c.min,
-                                        }
-                                    )
-                            else:
-                                payload["data"].append(
-                                    {
-                                        "operation": "add",
-                                        "attribute": "casId",
-                                        "newValue": c.id,  # This will be a CasAmount Object,
-                                        "max": c.max,
-                                        "min": c.min,
-                                    }
-                                )
-                    for cas_id in old_cas_map:
-                        if new_value is None or cas_id not in [x.id for x in new_value]:
-                            payload["data"].append(
-                                {
-                                    "operation": "delete",
-                                    "attribute": "casId",
-                                    "entityId": cas_id,
-                                    "oldValue": cas_id,
-                                }
-                            )
-                elif attribute == "tags":
-                    if isinstance(old_value, list):
-                        old_tag_map = {x.id: x for x in old_value}
-                    else:
-                        old_tag_map = dict()
-                    old_keys = old_tag_map.keys()
-                    if new_value is not None:
-                        new_keys = [x.id for x in new_value]
-                    else:
-                        new_keys = []
-                        new_value = []
-                    for c in new_value:
-                        if c.id in old_keys:
-                            continue
-                        else:
-                            payload["data"].append(
-                                {
-                                    "operation": "add",
-                                    "attribute": "tagId",
-                                    "newValue": c.id,
-                                }
-                            )
-                    for tag_id in old_keys:
-                        if tag_id not in new_keys:
-                            payload["data"].append(
-                                {
-                                    "operation": "delete",
-                                    "attribute": "tagId",
-                                    "oldValue": tag_id,
-                                }
-                            )
+            elif attribute == "company":
+                if old_value is None and new_value is not None:
+                    payload["data"].append(
+                        {
+                            "operation": "add",
+                            "attribute": "companyId",
+                            "newValue": new_value.id,
+                        }
+                    )
+                elif old_value is not None and new_value is None:
+                    payload["data"].append(
+                        {"operation": "delete", "attribute": "companyId", "entityId": old_value.id}
+                    )
+                elif old_value.id != new_value.id:
+                    payload["data"].append(
+                        {
+                            "operation": "update",
+                            "attribute": "companyId",
+                            "oldValue": old_value.id,
+                            "newValue": new_value.id,
+                        }
+                    )
+
+            # # First handle the case where we're just adding
+            # if (old_value is None or old_value == []) and new_value is not None:
+            #     # company can never start as none so it's not covered in this case
+            #     if attribute == "cas":
+            #         for c in new_value:
+            #             payload["data"].append(
+            #                 {
+            #                     "operation": "add",
+            #                     "attribute": "casId",
+            #                     "newValue": c.id,  # This will be a CasAmount Object,
+            #                     "entityId": c.id,
+            #                     "max": c.max,
+            #                     "min": c.min,
+            #                 }
+            #             )
+            #     elif attribute == "tags":
+            #         for t in new_value:
+            #             payload["data"].append(
+            #                 {
+            #                     "operation": "add",
+            #                     "attribute": "tagId",
+            #                     "newValue": t.id,  # This will be a CasAmount Object,
+            #                     "entityId": t.id,
+            #                 }
+            #             )
+
+            # elif old_value is not None and new_value != old_value:
+            #     elif attribute == "company":
+            #         if new_value is not None and new_value.id != old_value.id:
+            #             # Update existing attribute
+            #             payload["data"].append(
+            #                 {
+            #                     "operation": "update",
+            #                     "attribute": "companyId",
+            #                     "oldValue": old_value.id,
+            #                     "newValue": new_value.id,
+            #                 }
+            #             )
+            #     elif new_value is None:  # pragma: no cover you cant remove a company
+            #         payload["data"].append(
+            #             {
+            #                 "operation": "delete",
+            #                 "attribute": "companyId",
+            #                 "entityId": old_value.id,
+            #                 "oldValue": old_value.id,
+            #             }
+            #         )
+            # elif attribute == "cas":
+            #     old_cas_map = {x.id: x for x in old_value}
+            #     if new_value is not None:
+            #         for c in new_value:
+            #             if c.id in old_cas_map:
+            #                 this_old_cas = old_cas_map[c.id]
+            #                 if this_old_cas.max == c.max and this_old_cas.min == c.min:
+            #                     continue
+            #                 if this_old_cas.max != c.max:
+            #                     payload["data"].append(
+            #                         {
+            #                             "operation": "update",
+            #                             "attribute": "max",
+            #                             "entityId": c.id,
+            #                             "oldValue": str(this_old_cas.max),
+            #                             "newValue": str(c.max),
+            #                         }
+            #                     )
+            #                 if this_old_cas.min != c.min:
+            #                     payload["data"].append(
+            #                         {
+            #                             "operation": "update",
+            #                             "attribute": "min",
+            #                             "entityId": c.id,
+            #                             "oldValue": str(this_old_cas.min),
+            #                             "newValue": str(c.min),
+            #                         }
+            #                     )
+            #             else:
+            #                 payload["data"].append(
+            #                     {
+            #                         "operation": "add",
+            #                         "attribute": "casId",
+            #                         "newValue": c.id,  # This will be a CasAmount Object,
+            #                         "max": c.max,
+            #                         "min": c.min,
+            #                     }
+            #                 )
+            #     for cas_id in old_cas_map:
+            #         if new_value is None or cas_id not in [x.id for x in new_value]:
+            #             payload["data"].append(
+            #                 {
+            #                     "operation": "delete",
+            #                     "attribute": "casId",
+            #                     "entityId": cas_id,
+            #                     "oldValue": cas_id,
+            #                 }
+            #             )
+            # elif attribute == "tags":
+            #     if new_value is not None and isinstance(old_value, list):
+            #         old_tag_map = {x.id: x for x in old_value}
+            #         old_keys = old_tag_map.keys()
+            #         new_keys = [x.id for x in new_value]
+            #     else:
+            #         new_keys = []
+            #         new_value = []
+            #     for c in new_value:
+            #         if c.id in old_keys:
+            #             continue
+            #         else:
+            #             payload["data"].append(
+            #                 {
+            #                     "operation": "add",
+            #                     "attribute": "tagId",
+            #                     "newValue": c.id,
+            #                 }
+            #             )
+            #     for tag_id in old_keys:
+            #         if tag_id not in new_keys:
+            #             payload["data"].append(
+            #                 {
+            #                     "operation": "delete",
+            #                     "attribute": "tagId",
+            #                     "oldValue": tag_id,
+            #                 }
+            #             )
         return payload
 
     def update(self, *, updated_object: InventoryItem) -> InventoryItem:

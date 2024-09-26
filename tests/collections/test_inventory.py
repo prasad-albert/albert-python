@@ -164,7 +164,7 @@ def test_update_inventory_item_advanced_attributes(
     """
 
     updated_inventory_item = copy.deepcopy(seeded_inventory[0])
-    # Update the attributes
+    # Update the attributes that were previously none/[]
     updated_inventory_item.cas = [CasAmount(id=seeded_cas[1].id, min=0.5, max=0.75)]
     updated_inventory_item.company = seeded_companies[1]
     updated_inventory_item.tags = [seeded_tags[1], seeded_tags[2]]
@@ -188,7 +188,34 @@ def test_update_inventory_item_advanced_attributes(
     assert seeded_tags[1].id in [x.id for x in fetched_item.tags]
     assert seeded_tags[2].id in [x.id for x in fetched_item.tags]
 
+    # Update existing values
+
+    fetched_item.cas = [
+        CasAmount(id=seeded_cas[1].id, min=0.1, max=0.5),
+        CasAmount(id=seeded_cas[0].id, min=0.4, max=0.9),
+    ]
+    fetched_item.company = seeded_companies[0]
+    fetched_item.tags = [seeded_tags[0]]
+
+    returned_item = client.inventory.update(updated_object=fetched_item)
+
+    for c in returned_item.cas:
+        if c.id == seeded_cas[1].id:
+            assert c.min == 0.1
+            assert c.max == 0.5
+        elif c.id == seeded_cas[0].id:
+            assert c.min == 0.4
+            assert c.max == 0.9
+
+    assert returned_item.company.id == seeded_inventory[0].company.id
+    assert len(returned_item.tags) == 1
+    assert seeded_tags[0].id in [x.id for x in returned_item.tags]
+
+    # remove an existing Cas
+    fetched_item.cas = [CasAmount(id=seeded_cas[0].id, min=0.4, max=0.9)]
+    returned_item = client.inventory.update(updated_object=fetched_item)
+    assert len(returned_item.cas) == 1
     # You can't unset a company
-    fetched_item.company = None
     with pytest.raises(BadRequestError):
+        fetched_item.company = None
         client.inventory.update(updated_object=fetched_item)

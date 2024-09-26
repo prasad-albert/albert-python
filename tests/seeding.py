@@ -5,6 +5,7 @@ from albert.resources.inventory import (
     CasAmount,
     InventoryCategory,
     InventoryItem,
+    InventoryMinimum,
     InventoryUnitCategory,
 )
 from albert.resources.locations import Location
@@ -435,7 +436,10 @@ def generate_parameter_group_seeds(
 
 
 def generate_inventory_seeds(
-    seeded_cas: list[Cas], seeded_tags: list[Tag], seeded_companies: list[Company]
+    seeded_cas: list[Cas],
+    seeded_tags: list[Tag],
+    seeded_companies: list[Company],
+    seeded_locations: list[Location],
 ) -> list[InventoryItem]:
     """Generates a list of InventoryItem seed objects for testing."""
     return [
@@ -463,11 +467,17 @@ def generate_inventory_seeds(
             category=InventoryCategory.RAW_MATERIALS,
             unit_category=InventoryUnitCategory.VOLUME,
             cas=[
-                CasAmount(id=seeded_cas[0].id, min=0.50, max=1.0),
+                CasAmount(
+                    cas=seeded_cas[0], min=0.50, max=1.0
+                ),  # ensure it will reslove the cas obj to an id
                 CasAmount(id=seeded_cas[1].id, min=0.30, max=0.6),
             ],
             security_class=SecurityClass.SHARED,
             company=seeded_companies[1],
+            minimim=[
+                InventoryMinimum(minimum=10.0, location=seeded_locations[0]),
+                InventoryMinimum(minimum=20.0, id=seeded_locations[1].id),
+            ],
             tags=[seeded_tags[0].tag],  # make sure it knows to use the tag object
         ),
     ]

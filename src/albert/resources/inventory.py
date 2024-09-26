@@ -46,12 +46,12 @@ class CasAmount(BaseAlbertModel):
         The CAS object associated with this amount.
     """
 
-    id: str
+    id: str | None = Field(default=None)
     min: float = Field(default=None)
     max: float = Field(default=None)
 
     # Define a private attribute to store the Cas object
-    _cas: Cas = PrivateAttr(None)
+    cas: Cas = Field(default=None, exclude=True)
 
     @model_validator(mode="before")
     def ensure_floats_and_cas(cls, values: dict[str, Any]) -> dict[str, Any]:
@@ -87,21 +87,19 @@ class CasAmount(BaseAlbertModel):
 
 
 class InventoryMinimum(BaseAlbertModel):
-    """
-    InventoryMinimum is a Pydantic model representing the minimum amount of an inventory item.
-
+    """Defined the minimum amount of an InventoryItem that must be kept in stock at a given Location.
     Attributes
     ----------
+    location : Location
+        The Location object associated with this InventoryMinimum. Provide either a Location or a location id.
     id : str
-        The unique identifier of the minimum amount.
-    min : float
-        The minimum amount of the inventory item.
-    max : float
-        The maximum amount of the inventory item.
+        The unique identifier of the Location object associated with this InventoryMinimum. Provide either a Location or a location id.
+    minimum : float
+        The minimum amount of the InventoryItem that must be kept in stock at the given Location.
     """
 
     location: Location | None = Field(exclude=True, default=None)
-    id: str = Field(default=None)
+    id: str | None = Field(default=None)
     minimum: float = Field(gt=0, lt=1000000000000000)
 
     @model_validator(mode="before")
@@ -119,14 +117,19 @@ class InventoryMinimum(BaseAlbertModel):
                 "Only an id or a location can be provided for an InventoryMinimum, not both."
             )
 
-        if values.get("location"):
-            values["id"] = values["location"]["id"]
-            values["name"] = values["location"]["name"]
+        if values.get("location") is not None:
+            values["id"] = values["location"].id
+            values["name"] = values["location"].name
 
         return values
 
 
 class InventoryMetadata(BaseAlbertModel):
+    """Stores metadata for an InventoryItem.
+    Not every combination of attributes apply to every InventoryItem Category.
+
+    """
+
     IDH: list[BaseEntityLink] | None = Field(
         default=None,
         description="List of IDH objects, unique items, each having an id and a name.",
@@ -191,33 +194,6 @@ class InventoryMetadata(BaseAlbertModel):
 
 
 class InventoryItem(BaseTaggedEntity):
-    """
-    InventoryItem is a Pydantic model representing an inventory item.
-
-    Attributes
-    ----------
-    name : str
-        The name of the inventory item.
-    description : Optional[str]
-        The description of the inventory item.
-    category : InventoryCategory
-        The category of the inventory item.
-    project_id : Optional[str]
-        Reqired for Formulas
-    unit_category : Optional[UnitCategory]
-        The unit category of the inventory item.
-    tags : Optional[List[Union[Tag,str]]]
-        The tags associated with the inventory item.
-    cas : Optional[str]
-        The CAS number of the inventory item.
-    security_class : Optional[SecurityClass]
-        The class of the inventory item.
-    id : Optional[str]
-        The Albert ID of the inventory item.
-    company : Optional[Company]
-        The company associated with the inventory item.
-    """
-
     id: str | None = Field(None, alias="albertId")
     name: str | None = None
     description: str | None = None
@@ -241,7 +217,7 @@ class InventoryItem(BaseTaggedEntity):
         # handle aliases on private attributes
         if "ACL" in data:
             self._acls = data["ACL"]
-        if "unNumber" in data:
+        if "unNumber" in data:  # pragma: no cover (We need them to seed UnNumbers for us)
             self._un_number = data["unNumber"]
         if "Symbols" in data:
             self._symbols = data["Symbols"]
@@ -337,16 +313,11 @@ class InventoryItem(BaseTaggedEntity):
         AttributeError
             If a required project_id is missing for formulas.
         """
-        category_raw = data.get("category")
-        category = (
-            category_raw
-            if category_raw is None or isinstance(category_raw, str)
-            else category_raw.value
-        )
+        category = data.get("category")
         if category == "Formulas":
             this_project = data.get("project_id")
             if not this_project and not data.get("albertId"):
-                # Some on platform formulas somehow don't have a project_id so check if its already on platform
+                # Some legacy on platform formulas don't have a project_id so check if its already on platform
                 raise AttributeError("A project_id must be supplied for all formulas.")
         return data
 

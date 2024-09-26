@@ -194,14 +194,14 @@ def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[lis
 
 @pytest.fixture(scope="session")
 def seeded_inventory(
-    client: Albert,
-    seeded_cas,
-    seeded_tags,
-    seeded_companies,
+    client: Albert, seeded_cas, seeded_tags, seeded_companies, seeded_locations
 ) -> Iterator[list[InventoryItem]]:
     seeded = []
     for inventory in generate_inventory_seeds(
-        seeded_cas=seeded_cas, seeded_tags=seeded_tags, seeded_companies=seeded_companies
+        seeded_cas=seeded_cas,
+        seeded_tags=seeded_tags,
+        seeded_companies=seeded_companies,
+        seeded_locations=seeded_locations,
     ):
         created_inventory = client.inventory.create(inventory_item=inventory)
         seeded.append(created_inventory)

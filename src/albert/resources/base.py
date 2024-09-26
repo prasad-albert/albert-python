@@ -59,8 +59,6 @@ class BaseAlbertModel(BaseModel):
                     data[key] = value.value
                 if isinstance(value, list):
                     data[key] = [v.value if isinstance(v, Enum) else v for v in value]
-        else:
-            print(type(data))
         return data
 
     @property
