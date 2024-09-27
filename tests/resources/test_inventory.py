@@ -7,14 +7,14 @@ from albert.utils.exceptions import AlbertException
 def test_inventory_minimum(seeded_locations):
     with pytest.raises(AlbertException):
         InventoryMinimum(
-            minimum=0,
+            minimum=1,
         )
 
     with pytest.raises(AlbertException):
         InventoryMinimum(
             minimum=0,
             location=seeded_locations[0],
-            id=seeded_locations[0].id,
+            id=seeded_locations[2].id,
         )
 
 
@@ -24,7 +24,7 @@ def test_inventory_item_private_attributes(seeded_inventory: list[InventoryItem]
 
 
 def test_formula_requirements():
-    with pytest.raises(AttributeError):
+    with pytest.raises(AlbertException):
         InventoryItem(
             name="Test",
             description="Test",

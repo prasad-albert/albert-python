@@ -52,35 +52,15 @@ class CasAmount(BaseAlbertModel):
     # Define a private attribute to store the Cas object
     cas: Cas = Field(default=None, exclude=True)
 
-    @model_validator(mode="before")
-    def ensure_floats_and_cas(cls, values: dict[str, Any]) -> dict[str, Any]:
-        """
-        Ensure that min and max are floats and handle the CAS object initialization.
-        """
-
-        # Ensure min and max are converted to floats if necessary
-        min_val = values.get("min")
-        max_val = values.get("max")
-
-        if isinstance(min_val, int):
-            values["min"] = float(min_val)
-        if isinstance(max_val, int):
-            values["max"] = float(max_val)
-
-        # If a Cas object is provided, update the id field
-        cas = values.get("cas")
-        if cas and isinstance(cas, Cas):
-            values["id"] = cas.id
-
-        return values
-
     @model_validator(mode="after")
-    def set_cas_private_attr(cls, values: "CasAmount"):
+    def set_cas_private_attr(cls, values: "CasAmount") -> "CasAmount":
         """
         Set the _cas attribute after model initialization.
         """
         if hasattr(values, "cas") and isinstance(values.cas, Cas):
-            values._cas = values.cas  # Set the private _cas attribute
+            # Avoid recursion by setting the attribute directly
+            object.__setattr__(values, "_cas", values.cas)  # Set the private _cas attribute
+            object.__setattr__(values, "id", values.cas.id)  # Set the id to the Cas id
 
         return values
 
@@ -99,28 +79,28 @@ class InventoryMinimum(BaseAlbertModel):
 
     location: Location | None = Field(exclude=True, default=None)
     id: str | None = Field(default=None)
-    minimum: float = Field(gt=0, lt=1000000000000000)
+    minimum: float = Field(ge=0, le=1000000000000000)
 
-    @model_validator(mode="before")
-    def check_id_or_location(cls, values: dict[str, Any]) -> dict[str, Any]:
+    @model_validator(mode="after")
+    def check_id_or_location(self) -> "InventoryMinimum":
         """
         Ensure that either an id or a location is provided.
         """
-        if not values.get("id") and not values.get("location"):
+        if self.id is None and self.location is None:
             raise AlbertException(
                 "Either an id or a location must be provided for an InventoryMinimum."
             )
-
-        if values.get("id") and values.get("location"):
+        if self.id and self.location and self.location.id != self.id:
             raise AlbertException(
                 "Only an id or a location can be provided for an InventoryMinimum, not both."
             )
 
-        if values.get("location") is not None:
-            values["id"] = values["location"].id
-            values["name"] = values["location"].name
+        elif self.location:
+            # Avoid recursion by setting the attribute directly
+            object.__setattr__(self, "id", self.location.id)
+            object.__setattr__(self, "name", self.location.name)
 
-        return values
+        return self
 
 
 class InventoryMetadata(BaseAlbertModel):
@@ -217,9 +197,10 @@ class InventoryItem(BaseTaggedEntity):
     alias: str | None = Field(default=None)
     cas: list[CasAmount] | None = Field(default=None, alias="Cas")
     metadata: InventoryMetadata | None = Field(default=None, alias="Metadata")
+    project_id: str | None = Field(default=None, alias="parentId")
+
     _task_config: list[dict] | None = PrivateAttr(default=None)
     _formula_id: str | None = PrivateAttr(default=None)
-    _project_id: str | None = PrivateAttr(default=None)
     _symbols: list[dict] | None = PrivateAttr(default=None)  # read only: comes from attachments
     _un_number: UnNumber | None = PrivateAttr(default=None)  # Read only: Comes from attachments
     _acls: list[ACL] | None = PrivateAttr(default=None)  # read only
@@ -239,10 +220,10 @@ class InventoryItem(BaseTaggedEntity):
             self._minimum = data["Minimum"]
         if "formulaId" in data:
             self._formula_id = data["formulaId"]
-        if "parentId" in data:
-            self._project_id = data["parentId"]
 
-    @model_validator(mode="before")
+    @model_validator(
+        mode="before"
+    )  # Must happen before the model is created so unit_category is set
     @classmethod
     def set_unit_category(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
@@ -277,7 +258,7 @@ class InventoryItem(BaseTaggedEntity):
                 values["unit_category"] = InventoryUnitCategory.UNITS.value
         return values
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # must happen before to keep type consistency
     @classmethod
     def convert_company(cls, data: dict[str, Any]) -> dict[str, Any]:
         """
@@ -301,12 +282,11 @@ class InventoryItem(BaseTaggedEntity):
                 data["company"] = Company(name=company)
             else:
                 pass
-                # We do not expect this else to be hit because comapanies should only be Tag or str
+                # We do not expect this else to be hit because comapanies should only be Company or str
         return data
 
-    @model_validator(mode="before")
-    @classmethod
-    def ensure_formula_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
+    @model_validator(mode="after")
+    def ensure_formula_fields(self) -> "InventoryItem":
         """
         Ensure required fields are present for formulas.
 
@@ -325,18 +305,11 @@ class InventoryItem(BaseTaggedEntity):
         AttributeError
             If a required project_id is missing for formulas.
         """
-        category = data.get("category")
-        if category == "Formulas":
-            this_project = data.get("project_id")
-            if not this_project and not data.get("albertId"):
-                # Some legacy on platform formulas don't have a project_id so check if its already on platform
-                raise AttributeError("A project_id must be supplied for all formulas.")
-        return data
+        if self.category == "Formulas" and not self.project_id and not self.id:
+            # Some legacy on platform formulas don't have a project_id so check if its already on platform
+            raise AlbertException("A project_id must be supplied for all formulas.")
+        return self
 
     @property
     def formula_id(self) -> str | None:
         return self._formula_id
-
-    @property
-    def project_id(self) -> str | None:
-        return self._project_id

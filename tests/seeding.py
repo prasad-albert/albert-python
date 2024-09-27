@@ -466,7 +466,7 @@ def generate_inventory_seeds(
             category=InventoryCategory.CONSUMABLES.value,
             unit_category=InventoryUnitCategory.VOLUME.value,
             tags=seeded_tags[0:2],
-            cas=[CasAmount(id=seeded_cas[1].id, min=0.98, max=1.0)],
+            cas=[CasAmount(id=seeded_cas[1].id, min=0.98, max=1)],
             security_class=SecurityClass.SHARED,
             company=seeded_companies[1].name,  # ensure it knows to use the company object
         ),
