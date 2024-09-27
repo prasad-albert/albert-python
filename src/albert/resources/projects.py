@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, Field, PrivateAttr
 
 from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, EntityLinkConvertible
