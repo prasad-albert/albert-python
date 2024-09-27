@@ -208,9 +208,9 @@ def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
             description="TEST - A basic development project.",
             locations=[BaseEntityLink(id=seeded_locations[0].id)],
             project_class=ProjectClass.PRIVATE,
-            metadata=Metadata(
-                adpNumber="adp123",
-            ),
+            # metadata=Metadata(
+            #     adpNumber="adp123",
+            # ),
         ),
         # Project with shared classification and advanced metadata
         Project(
@@ -512,12 +512,12 @@ def generate_lot_seeds(
             expiration_date="2025-12-31",
             manufacturer_lot_number="MLN12345",
             location=BaseEntityLink(id=seeded_locations[1].id),
-            metadata=LotMetadata(
-                asset_tag="ASSET001",
-                serial_number="SN123",
-                quality_number="QN123",
-                distributor="Distributor A",
-            ),
+            # metadata=LotMetadata(
+            #     asset_tag="ASSET001",
+            #     serial_number="SN123",
+            #     quality_number="QN123",
+            #     distributor="Distributor A",
+            # ),
             notes="This is a test lot with default status.",
             external_barcode_id=str(uuid4()),
         ),
@@ -546,12 +546,12 @@ def generate_lot_seeds(
             expiration_date="2024-11-30",
             manufacturer_lot_number="MLN112233",
             location=BaseEntityLink(id=seeded_locations[1].id),
-            metadata=LotMetadata(
-                asset_tag="ASSET789",
-                serial_number="SN789",
-                quality_number="QN789",
-                distributor="Distributor B",
-            ),
+            # metadata=LotMetadata(
+            #     asset_tag="ASSET789",
+            #     serial_number="SN789",
+            #     quality_number="QN789",
+            #     distributor="Distributor B",
+            # ),
             notes="This lot is quarantined due to quality issues.",
             external_barcode_id=str(uuid4()),
         ),
