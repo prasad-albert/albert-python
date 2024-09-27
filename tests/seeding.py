@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from albert.resources.base import BaseEntityLink, SecurityClass
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
@@ -517,7 +519,7 @@ def generate_lot_seeds(
                 distributor="Distributor A",
             ),
             notes="This is a test lot with default status.",
-            external_barcode_id="EXT123456",
+            external_barcode_id=str(uuid4()),
         ),
         # Lot with active status and no metadata
         Lot(
@@ -531,7 +533,7 @@ def generate_lot_seeds(
             manufacturer_lot_number="MLN67890",
             location=BaseEntityLink(id=seeded_locations[0].id),
             notes="This is an active lot with no metadata.",
-            external_barcode_id="EXT654321",
+            external_barcode_id=str(uuid4()),
         ),
         # Lot with quarantined status and full metadata
         Lot(
@@ -551,6 +553,6 @@ def generate_lot_seeds(
                 distributor="Distributor B",
             ),
             notes="This lot is quarantined due to quality issues.",
-            external_barcode_id="EXT789012",
+            external_barcode_id=str(uuid4()),
         ),
     ]

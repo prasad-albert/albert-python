@@ -13,9 +13,15 @@ class LotCollection(BaseCollection):
         self.base_path = f"/api/{LotCollection._api_version}/lots"
 
     def create(self, *, lots: list[Lot]) -> list[Lot]:
+        # TODO: Once thi endpoint is fixed, go back to passing the whole list at once
         payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
-        response = self.session.post(self.base_path, json=payload)
-        return [Lot(**lot) for lot in response.json().get("CreatedLots", [])]
+        all_lots = []
+        for lot in payload:
+            response = self.session.post(self.base_path, json=[lot])
+            all_lots.append(Lot(**response.json()[0]))
+        # response = self.session.post(self.base_path, json=payload)
+        # return [Lot(**lot) for lot in response.json().get("CreatedLots", [])]
+        return all_lots
 
     def get_by_id(self, *, lot_id: str) -> Lot:
         url = f"{self.base_path}/{lot_id}"
@@ -31,7 +37,7 @@ class LotCollection(BaseCollection):
     #     return lot_id
 
     def delete(self, *, lot_id: str) -> bool:
-        url = f"{self.base_path}/{lot_id}"
+        url = f"{self.base_path}?id={lot_id}"
         self.session.delete(url)
 
         return True
@@ -81,25 +87,20 @@ class LotCollection(BaseCollection):
         Generator
             A generator of Lot objects.
         """
-        params = {"limit": limit}
-        if start_key:
-            params["startKey"] = start_key
-        if parent_id:
-            params["parentId"] = parent_id
-        if inventory_id:
-            params["inventoryId"] = inventory_id
-        if barcode_id:
-            params["barcodeId"] = barcode_id
-        if parent_id_category:
-            params["parentIdCategory"] = parent_id_category
-        if inventory_on_hand:
-            params["inventoryOnHand"] = inventory_on_hand
-        if location_id:
-            params["locationId"] = location_id
-        if exact_match:
-            params["exactMatch"] = exact_match
-        if begins_with:
-            params["beginsWith"] = begins_with
+        params = {
+            "limit": limit,
+            "startKey": start_key,
+            "parentId": parent_id,
+            "inventoryId": inventory_id,
+            "barcodeId": barcode_id,
+            "parentIdCategory": parent_id_category,
+            "inventoryOnHand": inventory_on_hand,
+            "locationId": location_id,
+            "exactMatch": "true" if exact_match else "false",
+            "beginsWith": "true" if begins_with else "false",
+        }
+
+        params = {k: v for k, v in params.items() if v is not None}
 
         while True:
             response = self.session.get(self.base_path, params=params)

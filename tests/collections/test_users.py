@@ -30,6 +30,7 @@ def test_advanced_users_list(client: Albert, seeded_users: list[User]):
     adv_list = client.users.list(text=faux_name, status=Status.ACTIVE)
     found = False
     for i, u in enumerate(adv_list):
+        print(i)
         if i == 20:
             break
         if seeded_users[1].name.lower() == u.name.lower():

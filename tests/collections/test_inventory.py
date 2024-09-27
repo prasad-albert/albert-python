@@ -1,4 +1,3 @@
-import copy
 from collections.abc import Generator
 
 import pytest
@@ -92,8 +91,7 @@ def test_collection_blocks_formulation(client: Albert, seeded_projects):
 
 
 def test_blocks_dupes(caplog, client: Albert, seeded_inventory: list[InventoryItem]):
-    ii_copy = copy.deepcopy(seeded_inventory[0])
-    ii_copy.id = None
+    ii_copy = seeded_inventory[0].model_copy(update={"id": None})
     returned_ii = client.inventory.create(inventory_item=ii_copy)
 
     assert returned_ii.id == seeded_inventory[0].id
@@ -119,13 +117,16 @@ def test_update_inventory_item_standard_attributes(
     """
 
     # Assume we have at least one seeded inventory item
-    updated_inventory_item = copy.deepcopy(seeded_inventory[0])
 
-    updated_inventory_item.name = "Updated Inventory Name"
-    updated_inventory_item.description = "Updated Description"
-    updated_inventory_item.unit_category = InventoryUnitCategory.VOLUME.value
-    updated_inventory_item.security_class = "confidential"
-    updated_inventory_item.alias = "Updated Alias"
+    updated_inventory_item = seeded_inventory[0].model_copy(
+        update={
+            "name": "Updated Inventory Name",
+            "description": "Updated Description",
+            "unit_category": InventoryUnitCategory.VOLUME.value,
+            "security_class": "confidential",
+            "alias": "Updated Alias",
+        }
+    )
     # Perform the update
     updated_item = client.inventory.update(updated_object=updated_inventory_item)
 
@@ -163,11 +164,13 @@ def test_update_inventory_item_advanced_attributes(
         A list of seeded inventory items.
     """
 
-    updated_inventory_item = copy.deepcopy(seeded_inventory[0])
-    # Update the attributes that were previously none/[]
-    updated_inventory_item.cas = [CasAmount(id=seeded_cas[1].id, min=0.5, max=0.75)]
-    updated_inventory_item.company = seeded_companies[1]
-    updated_inventory_item.tags = [seeded_tags[1], seeded_tags[2]]
+    updated_inventory_item = seeded_inventory[0].model_copy(
+        update={
+            "cas": [CasAmount(id=seeded_cas[1].id, min=0.5, max=0.75)],
+            "company": seeded_companies[1],
+            "tags": [seeded_tags[1], seeded_tags[2]],
+        }
+    )
 
     returned_item = client.inventory.update(updated_object=updated_inventory_item)
     assert returned_item.cas[0].id == seeded_cas[1].id

@@ -1,4 +1,3 @@
-import copy
 from collections.abc import Generator
 
 from albert import Albert
@@ -49,8 +48,8 @@ def test_pagination(client: Albert, seeded_storage_locations: list[StorageLocati
 
 
 def test_avoids_dupes(caplog, client: Albert, seeded_storage_locations: list[StorageLocation]):
-    sl = copy.deepcopy(seeded_storage_locations[0])
-    sl.id = None
+    sl = seeded_storage_locations[0].model_copy(update={"id": None})
+
     duped = client.storage_locations.create(storage_location=sl)
     assert (
         f"Storage location with name {sl.name} already exists, returning existing." in caplog.text

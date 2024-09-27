@@ -130,51 +130,64 @@ class InventoryMetadata(BaseAlbertModel):
 
     """
 
-    IDH: list[BaseEntityLink] | None = Field(
+    idh: list[BaseEntityLink] | None = Field(
         default=None,
+        alias="IDH",
         description="List of IDH objects, unique items, each having an id and a name.",
     )
-    RSN: str | None = Field(
-        default=None, min_length=1, max_length=50, description="RSN identifier."
+    rsn: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+        description="Relative Solubility Number (RSN)",
+        alias="RSN",
     )
-    RSNe: str | None = Field(
-        default=None, min_length=1, max_length=50, description="RSNe identifier."
+    rsne: str | None = Field(
+        default=None, min_length=1, max_length=50, description="RSNe identifier.", alias="RSNe"
     )
-    INCIName: str | None = Field(
+    inci_name: str | None = Field(
         default=None,
         min_length=1,
         max_length=255,
-        description="INCI name of the substance.",
+        alias="INCIName",
+        description="International Nomenclature of Cosmetic Ingredients (INCI) name of the substance.",
     )
-    substanceNumber: str | None = Field(
+    substance_number: str | None = Field(
         default=None,
         min_length=1,
         max_length=255,
+        alias="substanceNumber",
         description="Substance number of the inventory.",
     )
-    RMFMCode: str | None = Field(
+    rmfm_code: str | None = Field(
         default=None,
         min_length=1,
         max_length=255,
+        alias="RMFMCode",
         description="RMFM Code of the raw material or formula.",
     )
-    productCode: str | None = Field(
+    product_code: str | None = Field(
         default=None,
         min_length=1,
         max_length=40,
+        alias="productCode",
         description="Product code of the item.",
     )
-    articleNumber: str | None = Field(
+    article_number: str | None = Field(
         default=None,
         max_length=50,
+        alias="articleNumber",
         description="Article number associated with the item.",
     )
-    uvpNumber: str | None = Field(
+    uvp_number: str | None = Field(
         default=None,
         max_length=50,
+        alias="uvpNumber",
         description="UVP number associated with the item.",
     )
-    CuD: str | None = Field(default=None, max_length=50, description="CuD metadata field.")
+    cu_d: str | None = Field(
+        default=None, max_length=50, description="CuD metadata field.", alias="CuD"
+    )
     features: str | None = Field(default=None, description="Features metadata field.")
     solubility: str | None = Field(default=None, description="Solubility metadata field.")
     potentialApplications: str | None = Field(
@@ -189,7 +202,7 @@ class InventoryMetadata(BaseAlbertModel):
         default=None, description="Equipment type for the inventories under Equipment category."
     )
     articleStatus: BaseEntityLink | None = Field(
-        default=None, description="Article status of the inventory, with an id and name."
+        default=None, description="Article status of the inventory."
     )
 
 

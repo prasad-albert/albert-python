@@ -243,17 +243,17 @@ def seeded_parameter_groups(
 
 
 # PUT on lots is currently bugged. Teams discussion ongoing
-# @pytest.fixture(scope="session")
-# def seeded_lots(client: Albert, seeded_inventory, seeded_storage_locations, seeded_locations):
-#     seeded = []
-#     all_lots = generate_lot_seeds(
-#         seeded_inventory=seeded_inventory,
-#         seeded_storage_locations=seeded_storage_locations,
-#         seeded_locations=seeded_locations,
-#     )
-#     seeded = client.lots.create(lots=all_lots)
-#     # seeded.append(created_lot)
-#     yield seeded
-#     for lot in seeded:
-#         with suppress(NotFoundError):
-#             client.lots.delete(lot_id=lot.id)
+@pytest.fixture(scope="session")
+def seeded_lots(client: Albert, seeded_inventory, seeded_storage_locations, seeded_locations):
+    seeded = []
+    all_lots = generate_lot_seeds(
+        seeded_inventory=seeded_inventory,
+        seeded_storage_locations=seeded_storage_locations,
+        seeded_locations=seeded_locations,
+    )
+    seeded = client.lots.create(lots=all_lots)
+    # seeded.append(created_lot)
+    yield seeded
+    for lot in seeded:
+        with suppress(NotFoundError):
+            client.lots.delete(lot_id=lot.id)
