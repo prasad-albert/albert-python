@@ -11,12 +11,18 @@ from albert.resources.inventory import (
     InventoryUnitCategory,
 )
 from albert.resources.locations import Location
-from albert.resources.lots import Lot, LotMetadata
+from albert.resources.lots import (
+    Lot,
+    # LotMetadata,
+)
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
-
-# from albert.resources.lots import Lot, LotMetadata, LotStatus
-from albert.resources.projects import GridDefault, Metadata, Project, ProjectClass
+from albert.resources.projects import (
+    GridDefault,
+    # Metadata,
+    Project,
+    ProjectClass,
+)
 from albert.resources.roles import Role
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
