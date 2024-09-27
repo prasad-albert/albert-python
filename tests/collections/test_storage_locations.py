@@ -39,7 +39,7 @@ def test_advanced_list(
     list_response = list(list_response)
     _list_asserts(list_response)
     for sl in list_response:
-        assert sl.location == seeded_storage_locations[0].location
+        assert sl.location.id == seeded_storage_locations[0].location.id
 
 
 def test_pagination(client: Albert, seeded_storage_locations: list[StorageLocation]):

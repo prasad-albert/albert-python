@@ -50,17 +50,6 @@ class BaseAlbertModel(BaseModel):
         if "Updated" in data:
             self._updated = AuditFields(**data["Updated"])
 
-    @model_validator(mode="before")
-    def ensure_enum_values(cls, data: dict[str, Any]) -> dict[str, Any]:
-        """populate_by_name=True blocks the setting of enum values by name. This method allows for that."""
-        if isinstance(data, dict):
-            for key, value in data.items():
-                if isinstance(value, Enum):
-                    data[key] = value.value
-                if isinstance(value, list):
-                    data[key] = [v.value if isinstance(v, Enum) else v for v in value]
-        return data
-
     @property
     def created(self) -> AuditFields | None:
         return self._created
