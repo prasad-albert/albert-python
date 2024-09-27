@@ -5,7 +5,6 @@ from pydantic import Field, PrivateAttr, model_validator
 
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
-from albert.collections.tags import Tag
 from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass

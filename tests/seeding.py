@@ -11,7 +11,7 @@ from albert.resources.inventory import (
     InventoryUnitCategory,
 )
 from albert.resources.locations import Location
-from albert.resources.lots import Lot, LotMetadata, LotStatus
+from albert.resources.lots import Lot, LotMetadata
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
 
