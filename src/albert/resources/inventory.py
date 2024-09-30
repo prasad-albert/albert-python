@@ -53,16 +53,16 @@ class CasAmount(BaseAlbertModel):
     cas: Cas = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
-    def set_cas_private_attr(cls, values: "CasAmount") -> "CasAmount":
+    def set_cas_private_attr(self: "CasAmount") -> "CasAmount":
         """
         Set the _cas attribute after model initialization.
         """
-        if hasattr(values, "cas") and isinstance(values.cas, Cas):
+        if hasattr(self, "cas") and isinstance(self.cas, Cas):
             # Avoid recursion by setting the attribute directly
-            object.__setattr__(values, "_cas", values.cas)  # Set the private _cas attribute
-            object.__setattr__(values, "id", values.cas.id)  # Set the id to the Cas id
+            object.__setattr__(self, "_cas", self.cas)  # Set the private _cas attribute
+            object.__setattr__(self, "id", self.cas.id)  # Set the id to the Cas id
 
-        return values
+        return self
 
 
 class InventoryMinimum(BaseAlbertModel):
@@ -82,7 +82,7 @@ class InventoryMinimum(BaseAlbertModel):
     minimum: float = Field(ge=0, le=1000000000000000)
 
     @model_validator(mode="after")
-    def check_id_or_location(self) -> "InventoryMinimum":
+    def check_id_or_location(self: "InventoryMinimum") -> "InventoryMinimum":
         """
         Ensure that either an id or a location is provided.
         """
@@ -286,7 +286,7 @@ class InventoryItem(BaseTaggedEntity):
         return data
 
     @model_validator(mode="after")
-    def ensure_formula_fields(self) -> "InventoryItem":
+    def ensure_formula_fields(self: "InventoryMinimum") -> "InventoryItem":
         """
         Ensure required fields are present for formulas.
 
