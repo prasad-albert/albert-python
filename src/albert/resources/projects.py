@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, Field, PrivateAttr
 
 from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, EntityLinkConvertible
@@ -50,7 +50,7 @@ class Project(BaseAlbertModel, EntityLinkConvertible):
     locations: list[SerializeAsEntityLink[Location]] | None = Field(
         default=None, min_length=1, max_length=20, alias="Locations"
     )
-    project_class: ProjectClass | None = Field(default=None, alias="class")
+    project_class: ProjectClass | None = Field(default=ProjectClass.PRIVATE, alias="class")
     prefix: str | None = Field(default=None)
     application_engineering_inventory_ids: list[str] | None = Field(
         default=None,
@@ -73,23 +73,3 @@ class Project(BaseAlbertModel, EntityLinkConvertible):
     @property
     def state(self):
         return self._state
-
-    @model_validator(mode="before")
-    @classmethod
-    def set_default_class(cls, values: dict[str, Any]) -> dict[str, Any]:
-        """
-            Set the default project class to PRIVATE if none is provided.
-
-        #     Parameters
-        #     ----------
-        #     values : Dict[str, Any]
-        #         A dictionary of field values.
-
-            Returns
-            -------
-            Dict[str, Any]
-                Updated field values with a default project class if not provided.
-        """
-        if "project_class" not in values or values["project_class"] is None:
-            values["project_class"] = ProjectClass.PRIVATE
-        return values

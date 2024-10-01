@@ -1,6 +1,4 @@
-import copy
 from collections import Counter
-from copy import deepcopy
 from enum import Enum
 from typing import Any, Union
 
@@ -222,13 +220,9 @@ class Sheet(BaseSessionModel):
         return self._result_design
 
     @model_validator(mode="after")
-    def set_sheet_fields(self) -> "Sheet":
-        sheet_set_designs = []
-        for d in self.designs:
-            d._sheet = self
-            sheet_set_designs.append(d)
-        self.designs = sheet_set_designs
-        for d in self.designs:
+    def set_sheet_fields(self: "Sheet") -> "Sheet":
+        for _idx, d in enumerate(self.designs):  # Instead of creating a new list
+            d._sheet = self  # Set the reference to the sheet
             if d.design_type == DesignType.APPS:
                 self._app_design = d
             elif d.design_type == DesignType.PRODUCTS:
@@ -322,9 +316,7 @@ class Sheet(BaseSessionModel):
         cleared_cells = []
         for cell in column.cells:
             if cell.type == CellType.INVENTORY:
-                cell_copy = deepcopy(cell)
-                cell_copy.calculation = ""
-                cell_copy.value = ""
+                cell_copy = cell.model_copy(update={"value": "", "calculation": ""})
                 cleared_cells.append(cell_copy)
         r = self.update_cells(cells=cleared_cells)
         return r
@@ -771,8 +763,7 @@ class Column(BaseSessionModel):
     def recolor_cells(self, color: CellColor):
         new_cells = []
         for c in self.cells:
-            cell_copy = copy.deepcopy(c)
-            cell_copy.format = {"bgColor": color.value}
+            cell_copy = c.model_copy(update={"format": {"bgColor": color.value}})
             new_cells.append(cell_copy)
         return self.sheet.update_cells(cells=new_cells)
 
@@ -797,7 +788,7 @@ class Row(BaseSessionModel):
     def recolor_cells(self, color: CellColor):
         new_cells = []
         for c in self.cells:
-            cell_copy = copy.deepcopy(c)
+            cell_copy = c.model_copy(update={"format": {"bgColor": color.value}})
             cell_copy.format = {"bgColor": color.value}
             new_cells.append(cell_copy)
         return self.sheet.update_cells(cells=new_cells)

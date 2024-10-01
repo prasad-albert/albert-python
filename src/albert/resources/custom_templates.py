@@ -62,15 +62,6 @@ class SamConfig(BaseAlbertModel):
     input: list[SamInput] | None = Field(default=None)
     job_status: JobStatus | None = Field(default=None, alias="status")
 
-    @model_validator(mode="before")
-    @classmethod
-    def rename_status(cls, data: dict[str, Any]) -> dict[str, Any]:
-        if "status" in data:
-            # avoids trying to set status on BaseAlbertModel
-            data["job_status"] = data["status"]
-            data.pop("status")
-        return data
-
 
 class Workflow(BaseAlbertModel):
     id: str
@@ -176,7 +167,7 @@ class CustomTemplate(BaseTaggedEntity):
     team: list[TeamACL] | None = Field(default=[])
     acl: TemplateACL | None = Field(default=[], alias="ACL")
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # Must happen before construction so the data are captured
     @classmethod
     def add_missing_category(cls, data: dict[str, Any]) -> dict[str, Any]:
         """

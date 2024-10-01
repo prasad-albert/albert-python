@@ -8,6 +8,7 @@ from albert import Albert
 from albert.resources.base import Status
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
+from albert.resources.inventory import InventoryItem
 from albert.resources.locations import Location
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
@@ -15,11 +16,13 @@ from albert.resources.roles import Role
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.users import User
-from albert.utils.exceptions import BadRequestError, NotFoundError
+from albert.utils.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,
+    generate_inventory_seeds,
     generate_location_seeds,
+    generate_lot_seeds,
     generate_parameter_group_seeds,
     generate_parameter_seeds,
     generate_project_seeds,
@@ -84,7 +87,8 @@ def seeded_companies(client: Albert) -> Iterator[list[Company]]:
     yield seeded  # Provide the seeded companies to the test
 
     # Teardown - delete the seeded companies after the test
-    with suppress(NotFoundError):
+    # ForbiddenError is raised when trying to delete a company that has InventoryItems associated with it (may be a bug. Teams discussion ongoing)
+    with suppress(NotFoundError, ForbiddenError):
         for company in seeded:
             client.companies.delete(id=company.id)
 
@@ -176,6 +180,7 @@ def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[lis
                 created_user.status = Status.ACTIVE.value
                 client.users.update(updated_object=created_user)
                 found = True
+                break
         if not found:
             created_user = client.users.create(user=user)
         seeded.append(created_user)
@@ -186,6 +191,25 @@ def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[lis
     for user in seeded:
         user.status = Status.INACTIVE.value
         client.users.update(updated_object=user)
+
+
+@pytest.fixture(scope="session")
+def seeded_inventory(
+    client: Albert, seeded_cas, seeded_tags, seeded_companies, seeded_locations
+) -> Iterator[list[InventoryItem]]:
+    seeded = []
+    for inventory in generate_inventory_seeds(
+        seeded_cas=seeded_cas,
+        seeded_tags=seeded_tags,
+        seeded_companies=seeded_companies,
+        seeded_locations=seeded_locations,
+    ):
+        created_inventory = client.inventory.create(inventory_item=inventory)
+        seeded.append(created_inventory)
+    yield seeded
+    for inventory in seeded:
+        with suppress(NotFoundError):
+            client.inventory.delete(inventory_id=inventory.id)
 
 
 @pytest.fixture(scope="session")
@@ -216,3 +240,20 @@ def seeded_parameter_groups(
     for parameter_group in seeded:
         with suppress(NotFoundError):
             client.parameter_groups.delete(id=parameter_group.id)
+
+
+# PUT on lots is currently bugged. Teams discussion ongoing
+@pytest.fixture(scope="session")
+def seeded_lots(client: Albert, seeded_inventory, seeded_storage_locations, seeded_locations):
+    seeded = []
+    all_lots = generate_lot_seeds(
+        seeded_inventory=seeded_inventory,
+        seeded_storage_locations=seeded_storage_locations,
+        seeded_locations=seeded_locations,
+    )
+    seeded = client.lots.create(lots=all_lots)
+    # seeded.append(created_lot)
+    yield seeded
+    for lot in seeded:
+        with suppress(NotFoundError):
+            client.lots.delete(lot_id=lot.id)

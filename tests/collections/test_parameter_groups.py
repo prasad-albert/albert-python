@@ -1,4 +1,3 @@
-import copy
 from collections.abc import Generator
 
 from albert.albert import Albert
@@ -30,8 +29,7 @@ def test_advanced_list(client: Albert, seeded_parameter_groups: list[ParameterGr
 
 
 def test_returns_existing(caplog, client: Albert, seeded_parameter_groups: list[ParameterGroup]):
-    pg = copy.deepcopy(seeded_parameter_groups[0])
-    pg.id = None
+    pg = seeded_parameter_groups[0].model_copy(update={"id": None})
     returned_pg = client.parameter_groups.create(parameter_group=pg)
     assert (
         f"Parameter Group {pg.name} already exists. Returning the exiting parameter group."

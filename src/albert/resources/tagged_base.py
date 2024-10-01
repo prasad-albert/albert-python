@@ -24,9 +24,9 @@ class BaseTaggedEntity(BaseAlbertModel):
         Converts tag strings to Tag objects.
     """
 
-    tags: list[SerializeAsEntityLink[Tag]] | None = Field(None)
+    tags: list[SerializeAsEntityLink[Tag]] | None = Field(None, alias="Tags")
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # must happen before to keep type validation
     @classmethod
     def convert_tags(cls, data: dict[str, Any]) -> dict[str, Any]:
         tags = data.get("tags")
@@ -44,6 +44,6 @@ class BaseTaggedEntity(BaseAlbertModel):
                 else:
                     # We do not expect this else to be hit because tags should only be Tag or str
                     logging.warning(f"Unexpected value for Tag. {t} of type {type(t)}")
-                    pass
+                    continue
             data["tags"] = new_tags
         return data

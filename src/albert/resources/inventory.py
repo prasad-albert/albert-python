@@ -5,11 +5,13 @@ from pydantic import Field, PrivateAttr, model_validator
 
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
-from albert.collections.tags import Tag
 from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, SecurityClass
+from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass
+from albert.resources.locations import Location
+from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
+from albert.utils.exceptions import AlbertException
 
 
 class InventoryCategory(str, Enum):
@@ -19,7 +21,7 @@ class InventoryCategory(str, Enum):
     FORMULAS = "Formulas"
 
 
-class UnitCategory(str, Enum):
+class InventoryUnitCategory(str, Enum):
     MASS = "mass"
     VOLUME = "volume"
     LENGTH = "length"
@@ -34,7 +36,7 @@ class CasAmount(BaseAlbertModel):
     Attributes
     ----------
     id : str
-        The unique identifier of the CAS amount.
+        The unique identifier of the CAS Number this amount represents.
     min : float, optional
         The minimum amount of the CAS in the formulation.
     max : float, optional
@@ -43,128 +45,172 @@ class CasAmount(BaseAlbertModel):
         The CAS object associated with this amount.
     """
 
-    id: str
+    id: str | None = Field(default=None)
     min: float = Field(default=None)
     max: float = Field(default=None)
 
     # Define a private attribute to store the Cas object
-    _cas: Cas = PrivateAttr(None)
-
-    @model_validator(mode="before")
-    def ensure_floats_and_cas(cls, values: dict[str, Any]) -> dict[str, Any]:
-        """
-        Ensure that min and max are floats and handle the CAS object initialization.
-        """
-
-        # Ensure min and max are converted to floats if necessary
-        min_val = values.get("min")
-        max_val = values.get("max")
-
-        if isinstance(min_val, int):
-            values["min"] = float(min_val)
-        if isinstance(max_val, int):
-            values["max"] = float(max_val)
-
-        # If a Cas object is provided, update the id field
-        cas = values.get("cas")
-        if cas and isinstance(cas, Cas):
-            values["id"] = cas.id
-
-        return values
+    cas: Cas = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
-    def set_cas_private_attr(cls, values: "CasAmount"):
+    def set_cas_private_attr(self: "CasAmount") -> "CasAmount":
         """
         Set the _cas attribute after model initialization.
         """
-        if hasattr(values, "cas") and isinstance(values.cas, Cas):
-            values._cas = values.cas  # Set the private _cas attribute
+        if hasattr(self, "cas") and isinstance(self.cas, Cas):
+            # Avoid recursion by setting the attribute directly
+            object.__setattr__(self, "_cas", self.cas)  # Set the private _cas attribute
+            object.__setattr__(self, "id", self.cas.id)  # Set the id to the Cas id
 
-        return values
+        return self
+
+
+class InventoryMinimum(BaseAlbertModel):
+    """Defined the minimum amount of an InventoryItem that must be kept in stock at a given Location.
+    Attributes
+    ----------
+    location : Location
+        The Location object associated with this InventoryMinimum. Provide either a Location or a location id.
+    id : str
+        The unique identifier of the Location object associated with this InventoryMinimum. Provide either a Location or a location id.
+    minimum : float
+        The minimum amount of the InventoryItem that must be kept in stock at the given Location.
+    """
+
+    location: Location | None = Field(exclude=True, default=None)
+    id: str | None = Field(default=None)
+    minimum: float = Field(ge=0, le=1000000000000000)
+
+    @model_validator(mode="after")
+    def check_id_or_location(self: "InventoryMinimum") -> "InventoryMinimum":
+        """
+        Ensure that either an id or a location is provided.
+        """
+        if self.id is None and self.location is None:
+            raise AlbertException(
+                "Either an id or a location must be provided for an InventoryMinimum."
+            )
+        if self.id and self.location and self.location.id != self.id:
+            raise AlbertException(
+                "Only an id or a location can be provided for an InventoryMinimum, not both."
+            )
+
+        elif self.location:
+            # Avoid recursion by setting the attribute directly
+            object.__setattr__(self, "id", self.location.id)
+            object.__setattr__(self, "name", self.location.name)
+
+        return self
+
+
+class InventoryMetadata(BaseAlbertModel):
+    """Stores metadata for an InventoryItem.
+    Not every combination of attributes apply to every InventoryItem Category.
+
+    """
+
+    idh: list[BaseEntityLink] | None = Field(
+        default=None,
+        alias="IDH",
+        description="List of IDH objects, unique items, each having an id and a name.",
+    )
+    rsn: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+        description="Relative Solubility Number (RSN)",
+        alias="RSN",
+    )
+    rsne: str | None = Field(
+        default=None, min_length=1, max_length=50, description="RSNe identifier.", alias="RSNe"
+    )
+    inci_name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+        alias="INCIName",
+        description="International Nomenclature of Cosmetic Ingredients (INCI) name of the substance.",
+    )
+    substance_number: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+        alias="substanceNumber",
+        description="Substance number of the inventory.",
+    )
+    rmfm_code: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+        alias="RMFMCode",
+        description="RMFM Code of the raw material or formula.",
+    )
+    product_code: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=40,
+        alias="productCode",
+        description="Product code of the item.",
+    )
+    article_number: str | None = Field(
+        default=None,
+        max_length=50,
+        alias="articleNumber",
+        description="Article number associated with the item.",
+    )
+    uvp_number: str | None = Field(
+        default=None,
+        max_length=50,
+        alias="uvpNumber",
+        description="UVP number associated with the item.",
+    )
+    cu_d: str | None = Field(
+        default=None, max_length=50, description="CuD metadata field.", alias="CuD"
+    )
+    features: str | None = Field(default=None, description="Features metadata field.")
+    solubility: str | None = Field(default=None, description="Solubility metadata field.")
+    potentialApplications: str | None = Field(
+        default=None, description="Potential applications metadata field."
+    )
+    compatibility: str | None = Field(default=None, description="Compatibility metadata field.")
+    packaging: str | None = Field(default=None, description="Packaging metadata field.")
+    storageRecommendation: str | None = Field(
+        default=None, description="Storage recommendation metadata field."
+    )
+    equipmentType: BaseEntityLink | None = Field(
+        default=None, description="Equipment type for the inventories under Equipment category."
+    )
+    articleStatus: BaseEntityLink | None = Field(
+        default=None, description="Article status of the inventory."
+    )
 
 
 class InventoryItem(BaseTaggedEntity):
-    """
-    InventoryItem is a Pydantic model representing an inventory item.
-
-    Attributes
-    ----------
-    name : str
-        The name of the inventory item.
-    description : Optional[str]
-        The description of the inventory item.
-    category : InventoryCategory
-        The category of the inventory item.
-    project_id : Optional[str]
-        Reqired for Formulas
-    unit_category : Optional[UnitCategory]
-        The unit category of the inventory item.
-    tags : Optional[List[Union[Tag,str]]]
-        The tags associated with the inventory item.
-    cas : Optional[str]
-        The CAS number of the inventory item.
-    security_class : Optional[SecurityClass]
-        The class of the inventory item.
-    id : Optional[str]
-        The Albert ID of the inventory item.
-    company : Optional[Company]
-        The company associated with the inventory item.
-    """
-
+    id: str | None = Field(None, alias="albertId")
     name: str | None = None
     description: str | None = None
     category: InventoryCategory
-    unit_category: UnitCategory = Field(default=None, alias="unitCategory")
+    unit_category: InventoryUnitCategory = Field(default=None, alias="unitCategory")
     security_class: SecurityClass | None = Field(default=None, alias="class")
-    id: str | None = Field(None, alias="albertId")
-    company: Company | None = Field(default=None, alias="Company")
-    tags: list[Tag] | None = Field(default_factory=list, alias="Tags")
-    formula_id: str | None = Field(default=None, alias="formulaId")
-    project_id: str | None = Field(default=None, alias="parentId")
+    company: SerializeAsEntityLink[Company] | None = Field(default=None, alias="Company")
+    minimum: list[InventoryMinimum] | None = Field(default=None)  # To do
     alias: str | None = Field(default=None)
     cas: list[CasAmount] | None = Field(default=None, alias="Cas")
-    _task_config: list[dict] | None = PrivateAttr(
-        default=None
-    )  # Read only: comes from task generation
+    metadata: InventoryMetadata | None = Field(default=None, alias="Metadata")
+    project_id: str | None = Field(default=None, alias="parentId")
+
+    _task_config: list[dict] | None = PrivateAttr(default=None)
+    _formula_id: str | None = PrivateAttr(default=None)
     _symbols: list[dict] | None = PrivateAttr(default=None)  # read only: comes from attachments
     _un_number: UnNumber | None = PrivateAttr(default=None)  # Read only: Comes from attachments
     _acls: list[ACL] | None = PrivateAttr(default=None)  # read only
-    metadata: dict | None = Field(default=None, alias="Metadata")
-    _minimum: list[dict[str, Any]] | None = PrivateAttr(default=None)  # To do
 
     def __init__(self, **data: Any):
-        """
-        Initalize an an inventory item.
-
-        Attributes
-        ----------
-        name : str
-            The name of the inventory item.
-        description : Optional[str]
-            The description of the inventory item.
-        category : InventoryCategory
-            The category of the inventory item.
-        unit_category : Optional[UnitCategory]
-            The unit category of the inventory item.
-        tags : Optional[List[Union[Tag,str]]]
-            The tags associated with the inventory item.
-        cas : Optional[str]
-            The CAS number of the inventory item.
-        security_class : Optional[InventoryClass]
-            The class of the inventory item.
-        id : Optional[str]
-            The Albert ID of the inventory item.
-        company : Optional[Company]
-            The company associated with the inventory item.
-        metadata : dict | None
-            Any additional medatadata fields available to this InventoryItem.
-        """
-
         super().__init__(**data)
         # handle aliases on private attributes
         if "ACL" in data:
             self._acls = data["ACL"]
-        if "unNumber" in data:
+        if "unNumber" in data:  # pragma: no cover (We need them to seed UnNumbers for us)
             self._un_number = data["unNumber"]
         if "Symbols" in data:
             self._symbols = data["Symbols"]
@@ -172,8 +218,12 @@ class InventoryItem(BaseTaggedEntity):
             self._task_config = data["TaskConfig"]
         if "Minimum" in data:
             self._minimum = data["Minimum"]
+        if "formulaId" in data:
+            self._formula_id = data["formulaId"]
 
-    @model_validator(mode="before")
+    @model_validator(
+        mode="before"
+    )  # Must happen before the model is created so unit_category is set
     @classmethod
     def set_unit_category(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
@@ -198,17 +248,17 @@ class InventoryItem(BaseTaggedEntity):
                 InventoryCategory.FORMULAS,
                 InventoryCategory.FORMULAS.value,
             ):
-                values["unit_category"] = UnitCategory.MASS.value
+                values["unit_category"] = InventoryUnitCategory.MASS.value
             elif category in (
                 InventoryCategory.EQUIPMENT,
                 InventoryCategory.EQUIPMENT.value,
                 InventoryCategory.CONSUMABLES,
                 InventoryCategory.CONSUMABLES.value,
             ):
-                values["unit_category"] = UnitCategory.UNITS.value
+                values["unit_category"] = InventoryUnitCategory.UNITS.value
         return values
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # must happen before to keep type consistency
     @classmethod
     def convert_company(cls, data: dict[str, Any]) -> dict[str, Any]:
         """
@@ -232,12 +282,11 @@ class InventoryItem(BaseTaggedEntity):
                 data["company"] = Company(name=company)
             else:
                 pass
-                # We do not expect this else to be hit because comapanies should only be Tag or str
+                # We do not expect this else to be hit because comapanies should only be Company or str
         return data
 
-    @model_validator(mode="before")
-    @classmethod
-    def ensure_formula_fields(cls, data: dict[str, Any]) -> dict[str, Any]:
+    @model_validator(mode="after")
+    def ensure_formula_fields(self: "InventoryMinimum") -> "InventoryItem":
         """
         Ensure required fields are present for formulas.
 
@@ -256,38 +305,11 @@ class InventoryItem(BaseTaggedEntity):
         AttributeError
             If a required project_id is missing for formulas.
         """
-        category_raw = data.get("category")
-        category = (
-            category_raw
-            if category_raw is None or isinstance(category_raw, str)
-            else category_raw.value
-        )
-        if category == "Formulas":
-            this_project = data.get("project_id")
-            if not this_project and not data.get("albertId"):
-                # Some on platform formulas somehow don't have a project_id so check if its already on platform
-                raise AttributeError("A project_id must be supplied for all formulas.")
-        return data
+        if self.category == "Formulas" and not self.project_id and not self.id:
+            # Some legacy on platform formulas don't have a project_id so check if its already on platform
+            raise AlbertException("A project_id must be supplied for all formulas.")
+        return self
 
-    def _to_create_api(self):
-        """
-        Convert the model to a dictionary suitable for API creation requests.
-
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary representation of the model suitable for API requests.
-        """
-        dumped_model = self.model_dump(by_alias=True, exclude_none=True)
-        if "Company" in dumped_model and "albertId" in dumped_model["Company"]:
-            dumped_model["Company"] = {"id": dumped_model["Company"]["albertId"]}
-        if "Tags" in dumped_model:
-            new_tags = []
-            for t in dumped_model["Tags"]:
-                if "albertId" in t:
-                    new_tags.append({"id": t["albertId"]})
-        if len(new_tags) > 0:
-            dumped_model["Tags"] = new_tags
-        else:
-            del dumped_model["Tags"]
-        return dumped_model
+    @property
+    def formula_id(self) -> str | None:
+        return self._formula_id

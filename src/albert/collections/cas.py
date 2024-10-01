@@ -6,37 +6,6 @@ from albert.session import AlbertSession
 
 
 class CasCollection(BaseCollection):
-    """
-    CasCollection is a collection class for managing CAS entities.
-
-    Parameters
-    ----------
-    session : AlbertSession
-        The Albert session instance.
-
-    Attributes
-    ----------
-    base_path : str
-        The base path for CAS API.
-
-    Methods
-    -------
-    list(limit=50, start_key=None, number=None, albert_id=None, order_by=OrderBy.DESCENDING, filter=None, created_by=None, updated_by=None) -> List[Cas]
-        Lists CAS entities with optional filters.
-    cas_exists(number, exact_match=True) -> bool
-        Checks if a CAS exists by its number.
-    create(cas) -> Cas
-        Creates a new CAS entity.
-    get_by_id(cas_id) -> Cas
-        Retrieves a CAS by its ID.
-    get_by_number(number, exact_match=True) -> Optional[Cas]
-        Retrieves a CAS by its number.
-    delete(cas_id) -> bool
-        Deletes a CAS by its ID.
-    rename(old_number, new_number) -> Optional[Cas]
-        Renames an existing CAS entity.
-    """
-
     _updatable_attributes = {"notes", "description", "smiles"}
     _api_version = "v3"
 

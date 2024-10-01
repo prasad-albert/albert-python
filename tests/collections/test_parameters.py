@@ -1,4 +1,3 @@
-import copy
 from collections.abc import Generator
 
 from albert.albert import Albert
@@ -34,8 +33,7 @@ def test_get(client: Albert, seeded_parameters: list[Parameter]):
 
 
 def test_returns_dupe(caplog, client: Albert, seeded_parameters: list[Parameter]):
-    p = copy.deepcopy(seeded_parameters[0])
-    p.id = None
+    p = seeded_parameters[0].model_copy(update={"id": None})
     returned = client.parameters.create(parameter=p)
     assert (
         f"Parameter with name {p.name} already exists. Returning existing parameter."

@@ -1,12 +1,28 @@
+from uuid import uuid4
+
 from albert.resources.base import BaseEntityLink, SecurityClass
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
+from albert.resources.inventory import (
+    CasAmount,
+    InventoryCategory,
+    InventoryItem,
+    InventoryMinimum,
+    InventoryUnitCategory,
+)
 from albert.resources.locations import Location
+from albert.resources.lots import (
+    Lot,
+    # LotMetadata,
+)
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
-
-# from albert.resources.lots import Lot, LotMetadata, LotStatus
-from albert.resources.projects import GridDefault, Metadata, Project, ProjectClass
+from albert.resources.projects import (
+    GridDefault,
+    # Metadata,
+    Project,
+    ProjectClass,
+)
 from albert.resources.roles import Role
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
@@ -78,13 +94,13 @@ def generate_company_seeds() -> list[Company]:
 
     return [
         # Basic company with name only
-        Company(name="Acme Corporation"),
+        Company(name="TEST - Acme Corporation"),
         # Company with a full name and additional private attribute (distance)
-        Company(name="Globex Corporation"),
+        Company(name="TEST - Globex Corporation"),
         # Another company
-        Company(name="Initech"),
+        Company(name="TEST - Initech"),
         # One more company with a distance attribute
-        Company(name="Umbrella Corp"),
+        Company(name="TEST - Umbrella Corp"),
     ]
 
 
@@ -195,23 +211,23 @@ def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
     return [
         # Project with basic metadata and public classification
         Project(
-            description="A basic development project.",
+            description="TEST - A basic development project.",
             locations=[BaseEntityLink(id=seeded_locations[0].id)],
             project_class=ProjectClass.PRIVATE,
-            metadata=Metadata(
-                adpNumber="adp123",
-            ),
+            # metadata=Metadata(
+            #     adpNumber="adp123",
+            # ),
         ),
         # Project with shared classification and advanced metadata
         Project(
-            description="A public research project focused on new materials.",
+            description="TEST - A public research project focused on new materials.",
             locations=[BaseEntityLink(id=seeded_locations[1].id)],
             project_class=ProjectClass.PUBLIC,
             grid=GridDefault.WKS,
         ),
         # Project with production category and custom ACLs
         Project(
-            description="A private production project",
+            description="TEST - A private production project",
             locations=[
                 BaseEntityLink(id=seeded_locations[0].id),
                 BaseEntityLink(id=seeded_locations[1].id),
@@ -252,27 +268,27 @@ def generate_unit_seeds() -> list[Unit]:
     return [
         # Basic unit with length category
         Unit(
-            name="Meter",
+            name="TEST - Meter",
             symbol="m",
             synonyms=["Metre"],
             category=UnitCategory.LENGTH,
             verified=True,
         ),
         # Unit with mass category
-        Unit(name="Kilogram", symbol="kg", category=UnitCategory.MASS, verified=True),
+        Unit(name="TEST - Kilogram", symbol="kg", category=UnitCategory.MASS, verified=True),
         # Unit with temperature category and synonyms
         Unit(
-            name="Celsius",
+            name="TEST - Celsius",
             symbol="°C",
             synonyms=["Centigrade"],
             category=UnitCategory.TEMPERATURE,
             verified=False,
         ),
         # Unit with energy category
-        Unit(name="Joule", symbol="J", category=UnitCategory.ENERGY, verified=True),
+        Unit(name="TEST - Joule", symbol="J", category=UnitCategory.ENERGY, verified=True),
         # Unit with volume category
         Unit(
-            name="Liter",
+            name="TEST - Liter",
             symbol="L",
             synonyms=["Litre"],
             category=UnitCategory.VOLUME,
@@ -301,7 +317,7 @@ def generate_user_seeds(seeded_locations: list[Location], seeded_roles: list[Rol
     return [
         # Basic standard user with metadata and one role
         User(
-            name="Alice Smith",
+            name="TEST - Alice Smith",
             location=seeded_locations[0],
             email="testcase_alice.smith@example.com",
             roles=[seeded_roles[0]],
@@ -310,7 +326,7 @@ def generate_user_seeds(seeded_locations: list[Location], seeded_roles: list[Rol
         ),
         # Privileged user with no metadata
         User(
-            name="Bob Johnson",
+            name="TEST - Bob Johnson",
             location=seeded_locations[1],
             email="testcase_bob.johnson@example.com",
             roles=[seeded_roles[0]],
@@ -318,7 +334,7 @@ def generate_user_seeds(seeded_locations: list[Location], seeded_roles: list[Rol
         ),
         # Admin user with full metadata
         User(
-            name="Charlie Brown",
+            name="TEST - Charlie Brown",
             location=seeded_locations[2],
             email="testcase_charlie.brown@example.com",
             roles=[seeded_roles[0]],
@@ -339,20 +355,20 @@ def generate_parameter_seeds() -> list[Parameter]:
     """
 
     return [
-        Parameter(name="Temperature", category=ParameterCategory.NORMAL),
+        Parameter(name="TEST - Temperature", category=ParameterCategory.NORMAL),
         Parameter(
-            name="Pressure",
+            name="TEST - Pressure",
             category=ParameterCategory.SPECIAL,
         ),
         Parameter(
-            name="Volume",
+            name="TEST - Volume",
         ),
         Parameter(
-            name="Mass",
+            name="TEST - Mass",
             category=ParameterCategory.NORMAL,
         ),
         Parameter(
-            name="Length",
+            name="TEST - Length",
             category=ParameterCategory.NORMAL,
         ),
     ]
@@ -378,7 +394,7 @@ def generate_parameter_group_seeds(
     return [
         # Basic ParameterGroup with required fields
         ParameterGroup(
-            name="General Parameters",
+            name="TEST - General Parameters",
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
@@ -390,7 +406,7 @@ def generate_parameter_group_seeds(
         ),
         # ParameterGroup with all fields filled out
         ParameterGroup(
-            name="Batch Parameters",
+            name="TEST - Batch Parameters",
             description="Parameters for batch processing",
             type=PGType.BATCH,
             security_class=SecurityClass.RESTRICTED,
@@ -406,10 +422,11 @@ def generate_parameter_group_seeds(
                     unit=seeded_units[2],
                 ),
             ],
+            tags=[seeded_tags[0]],
         ),
         # ParameterGroup with no tags or metadata
         ParameterGroup(
-            name="Property Parameters",
+            name="TEST - Property Parameters",
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
@@ -427,71 +444,121 @@ def generate_parameter_group_seeds(
     ]
 
 
-# def generate_lot_seeds(seeded_locations: list[Location], seeded_inventory:list[Inventory]) -> list[Lot]:
-#     """
-#     Generates a list of Lot seed objects for testing without IDs.
+def generate_inventory_seeds(
+    seeded_cas: list[Cas],
+    seeded_tags: list[Tag],
+    seeded_companies: list[Company],
+    seeded_locations: list[Location],
+) -> list[InventoryItem]:
+    """Generates a list of InventoryItem seed objects for testing."""
+    return [
+        InventoryItem(
+            name="TEST - Sodium Chloride",
+            description="TEST - Common salt used in various applications.",
+            category=InventoryCategory.RAW_MATERIALS,
+            unit_category=InventoryUnitCategory.MASS,
+            security_class=SecurityClass.SHARED,
+            company=seeded_companies[0],
+        ),
+        InventoryItem(
+            name="TEST - Ethanol",
+            description="TEST - A volatile, flammable liquid used in chemical synthesis.",
+            category=InventoryCategory.CONSUMABLES.value,
+            unit_category=InventoryUnitCategory.VOLUME.value,
+            tags=seeded_tags[0:2],
+            cas=[CasAmount(id=seeded_cas[1].id, min=0.98, max=1)],
+            security_class=SecurityClass.SHARED,
+            company=seeded_companies[1].name,  # ensure it knows to use the company object
+        ),
+        InventoryItem(
+            name="TEST - Hydrochloric Acid",
+            description="TEST - Strong acid used in various industrial processes.",
+            category=InventoryCategory.RAW_MATERIALS,
+            unit_category=InventoryUnitCategory.VOLUME,
+            cas=[
+                CasAmount(
+                    cas=seeded_cas[0], min=0.50, max=1.0
+                ),  # ensure it will reslove the cas obj to an id
+                CasAmount(id=seeded_cas[1].id, min=0.30, max=0.6),
+            ],
+            security_class=SecurityClass.SHARED,
+            company=seeded_companies[1],
+            minimim=[
+                InventoryMinimum(minimum=10.0, location=seeded_locations[0]),
+                InventoryMinimum(minimum=20.0, id=seeded_locations[1].id),
+            ],
+            tags=[seeded_tags[0].tag],  # make sure it knows to use the tag object
+        ),
+    ]
 
-#     Returns
-#     -------
-#     List[Lot]
-#         A list of Lot objects with different permutations.
-#     """
 
-#     return [
-#         # Basic Lot with metadata and default status
-#         Lot(
-#             inventory_id="INV123",
-#             storage_location=BaseEntityLink(id=seeded_stroage_locations[0].id),
-#             initial_quantity=100.0,
-#             cost=50.0,
-#             inventory_on_hand=90.0,
-#             lot_number="LOT001",
-#             expiration_date="2025-12-31",
-#             manufacturer_lot_number="MLN12345",
-#             location=BaseEntityLink(id=seeded_locations[1].id),
-#             metadata=LotMetadata(
-#                 asset_tag="ASSET001",
-#                 serial_number="SN123",
-#                 quality_number="QN123",
-#                 distributor="Distributor A",
-#             ),
-#             notes="This is a test lot with default status.",
-#             external_barcode_id="EXT123456",
-#         ),
-#         # Lot with active status and no metadata
-#         Lot(
-#             inventory_id="INV456",
-#             storage_location=BaseEntityLink(id=seeded_stroage_locations[1].id),
-#             initial_quantity=500.0,
-#             cost=200.0,
-#             inventory_on_hand=400.0,
-#             lot_number="LOT002",
-#             expiration_date="2026-01-31",
-#             manufacturer_lot_number="MLN67890",
-#             location=BaseEntityLink(id=seeded_locations[0].id),
-#             notes="This is an active lot with no metadata.",
-#             external_barcode_id="EXT654321",
-#             _status=LotStatus.ACTIVE,
-#         ),
-#         # Lot with quarantined status and full metadata
-#         Lot(
-#             inventory_id="INV789",
-#             storage_location=BaseEntityLink(id=seeded_stroage_locations[1].id),
-#             initial_quantity=1000.0,
-#             cost=750.0,
-#             inventory_on_hand=1000.0,
-#             lot_number="LOT003",
-#             expiration_date="2024-11-30",
-#             manufacturer_lot_number="MLN112233",
-#             location=BaseEntityLink(id=seeded_locations[1].id),
-#             metadata=LotMetadata(
-#                 asset_tag="ASSET789",
-#                 serial_number="SN789",
-#                 quality_number="QN789",
-#                 distributor="Distributor B",
-#             ),
-#             notes="This lot is quarantined due to quality issues.",
-#             external_barcode_id="EXT789012",
-#             _status=LotStatus.QUARANTINED,
-#         ),
-#     ]
+def generate_lot_seeds(
+    seeded_locations: list[Location],
+    seeded_inventory: list[InventoryItem],
+    seeded_storage_locations: list[StorageLocation],
+) -> list[Lot]:
+    """
+    Generates a list of Lot seed objects for testing without IDs.
+
+    Returns
+    -------
+    List[Lot]
+        A list of Lot objects with different permutations.
+    """
+
+    return [
+        # Basic Lot with metadata and default status
+        Lot(
+            inventory_id=seeded_inventory[0].id,
+            storage_location=BaseEntityLink(id=seeded_storage_locations[0].id),
+            initial_quantity=100.0,
+            cost=50.0,
+            inventory_on_hand=90.0,
+            lot_number="LOT001",
+            expiration_date="2025-12-31",
+            manufacturer_lot_number="MLN12345",
+            location=BaseEntityLink(id=seeded_locations[1].id),
+            # metadata=LotMetadata(
+            #     asset_tag="ASSET001",
+            #     serial_number="SN123",
+            #     quality_number="QN123",
+            #     distributor="Distributor A",
+            # ),
+            notes="This is a test lot with default status.",
+            external_barcode_id=str(uuid4()),
+        ),
+        # Lot with active status and no metadata
+        Lot(
+            inventory_id=seeded_inventory[0].id,
+            storage_location=BaseEntityLink(id=seeded_storage_locations[1].id),
+            initial_quantity=500.0,
+            cost=200.0,
+            inventory_on_hand=400.0,
+            lot_number="LOT002",
+            expiration_date="2026-01-31",
+            manufacturer_lot_number="MLN67890",
+            location=BaseEntityLink(id=seeded_locations[0].id),
+            notes="This is an active lot with no metadata.",
+            external_barcode_id=str(uuid4()),
+        ),
+        # Lot with quarantined status and full metadata
+        Lot(
+            inventory_id=seeded_inventory[1].id,
+            storage_location=BaseEntityLink(id=seeded_storage_locations[1].id),
+            initial_quantity=1000.0,
+            cost=750.0,
+            inventory_on_hand=1000.0,
+            lot_number="LOT003",
+            expiration_date="2024-11-30",
+            manufacturer_lot_number="MLN112233",
+            location=BaseEntityLink(id=seeded_locations[1].id),
+            # metadata=LotMetadata(
+            #     asset_tag="ASSET789",
+            #     serial_number="SN789",
+            #     quality_number="QN789",
+            #     distributor="Distributor B",
+            # ),
+            notes="This lot is quarantined due to quality issues.",
+            external_barcode_id=str(uuid4()),
+        ),
+    ]

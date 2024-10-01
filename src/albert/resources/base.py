@@ -37,6 +37,7 @@ class BaseAlbertModel(BaseModel):
         use_enum_values=True,
         exclude={"session"},
         arbitrary_types_allowed=True,
+        validate_assignment=True,
     )
 
     def __init__(self, **data: Any):
@@ -69,7 +70,7 @@ class BaseSessionModel(BaseAlbertModel):
     )
 
 
-class BaseEntityLink(BaseAlbertModel):
+class BaseEntityLink(BaseModel):
     id: str
     name: str | None = Field(default=None, exclude=True)
 
@@ -77,10 +78,7 @@ class BaseEntityLink(BaseAlbertModel):
 class EntityLinkConvertible:
     def to_entity_link(self) -> BaseEntityLink:
         if hasattr(self, "id"):
-            return BaseEntityLink(
-                id=self.id,
-                name=getattr(self, "name", None),
-            )
+            return BaseEntityLink(id=self.id)
         return AlbertException(
             "`id` is required to create an entity link. Ensure the linked object is registered."
         )
