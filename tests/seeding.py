@@ -13,13 +13,11 @@ from albert.resources.inventory import (
 from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
-    # LotMetadata,
 )
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.projects import (
     GridDefault,
-    # Metadata,
     Project,
     ProjectClass,
 )
@@ -27,7 +25,7 @@ from albert.resources.roles import Role
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
 from albert.resources.units import Unit, UnitCategory
-from albert.resources.users import User, UserClass, UserMetadata
+from albert.resources.users import User, UserClass
 
 
 def generate_cas_seeds() -> list[Cas]:
@@ -322,7 +320,6 @@ def generate_user_seeds(seeded_locations: list[Location], seeded_roles: list[Rol
             email="testcase_alice.smith@example.com",
             roles=[seeded_roles[0]],
             user_class=UserClass.STANDARD,
-            metadata=UserMetadata(sbu="SBU1"),
         ),
         # Privileged user with no metadata
         User(
@@ -339,7 +336,6 @@ def generate_user_seeds(seeded_locations: list[Location], seeded_roles: list[Rol
             email="testcase_charlie.brown@example.com",
             roles=[seeded_roles[0]],
             user_class=UserClass.STANDARD,
-            metadata=UserMetadata(sbu="SBU2"),
         ),
     ]
 
