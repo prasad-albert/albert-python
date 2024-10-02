@@ -18,30 +18,6 @@ class LotStatus(str, Enum):
     QUARANTINED = "quarantined"
 
 
-class LotMetadata(BaseAlbertModel):
-    asset_tag: str | None = Field(default=None, alias="assetTag")
-    serial_number: str | None = Field(default=None, alias="serialNumber")
-    quality_number: str | None = Field(default=None, alias="qualityNumber")
-    distributor: str | None = Field(default=None)
-    _raw_cost: str | None = PrivateAttr(default=None)
-    _cogs: str | None = PrivateAttr(default=None)
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if "rawCost" in data:
-            self._raw_cost = data["rawCost"]
-        if "cogs" in data:
-            self._raw_cost = data["cogs"]
-
-    @property
-    def cogs(self):
-        return self._cogs
-
-    @property
-    def raw_cost(self):
-        return self._raw_cost
-
-
 class Lot(BaseAlbertModel):
     id: str | None = Field(None, alias="albertId")
     inventory_id: str = Field(alias="parentId")
@@ -68,7 +44,7 @@ class Lot(BaseAlbertModel):
     _parent_unit: str | None = PrivateAttr(default=None)
     _parent_category: InventoryCategory | None = PrivateAttr(default=None)
     _barcode_id: str | None = PrivateAttr(default=None)
-    metadata: LotMetadata | None = Field(default=None, alias="Metadata")
+    metadata: dict[str, Any] | None = Field(alias="Metadata", default=None)
 
     # because quarantined is an allowed Lot status, we need to extend the normal status
     _status: LotStatus | None = PrivateAttr(default=None)

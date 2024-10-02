@@ -7,7 +7,7 @@ from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass
+from albert.resources.base import BaseAlbertModel, SecurityClass
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
@@ -103,88 +103,6 @@ class InventoryMinimum(BaseAlbertModel):
         return self
 
 
-class InventoryMetadata(BaseAlbertModel):
-    """Stores metadata for an InventoryItem.
-    Not every combination of attributes apply to every InventoryItem Category.
-
-    """
-
-    idh: list[BaseEntityLink] | None = Field(
-        default=None,
-        alias="IDH",
-        description="List of IDH objects, unique items, each having an id and a name.",
-    )
-    rsn: str | None = Field(
-        default=None,
-        min_length=1,
-        max_length=50,
-        description="Relative Solubility Number (RSN)",
-        alias="RSN",
-    )
-    rsne: str | None = Field(
-        default=None, min_length=1, max_length=50, description="RSNe identifier.", alias="RSNe"
-    )
-    inci_name: str | None = Field(
-        default=None,
-        min_length=1,
-        max_length=255,
-        alias="INCIName",
-        description="International Nomenclature of Cosmetic Ingredients (INCI) name of the substance.",
-    )
-    substance_number: str | None = Field(
-        default=None,
-        min_length=1,
-        max_length=255,
-        alias="substanceNumber",
-        description="Substance number of the inventory.",
-    )
-    rmfm_code: str | None = Field(
-        default=None,
-        min_length=1,
-        max_length=255,
-        alias="RMFMCode",
-        description="RMFM Code of the raw material or formula.",
-    )
-    product_code: str | None = Field(
-        default=None,
-        min_length=1,
-        max_length=40,
-        alias="productCode",
-        description="Product code of the item.",
-    )
-    article_number: str | None = Field(
-        default=None,
-        max_length=50,
-        alias="articleNumber",
-        description="Article number associated with the item.",
-    )
-    uvp_number: str | None = Field(
-        default=None,
-        max_length=50,
-        alias="uvpNumber",
-        description="UVP number associated with the item.",
-    )
-    cu_d: str | None = Field(
-        default=None, max_length=50, description="CuD metadata field.", alias="CuD"
-    )
-    features: str | None = Field(default=None, description="Features metadata field.")
-    solubility: str | None = Field(default=None, description="Solubility metadata field.")
-    potentialApplications: str | None = Field(
-        default=None, description="Potential applications metadata field."
-    )
-    compatibility: str | None = Field(default=None, description="Compatibility metadata field.")
-    packaging: str | None = Field(default=None, description="Packaging metadata field.")
-    storageRecommendation: str | None = Field(
-        default=None, description="Storage recommendation metadata field."
-    )
-    equipmentType: BaseEntityLink | None = Field(
-        default=None, description="Equipment type for the inventories under Equipment category."
-    )
-    articleStatus: BaseEntityLink | None = Field(
-        default=None, description="Article status of the inventory."
-    )
-
-
 class InventoryItem(BaseTaggedEntity):
     id: str | None = Field(None, alias="albertId")
     name: str | None = None
@@ -196,7 +114,7 @@ class InventoryItem(BaseTaggedEntity):
     minimum: list[InventoryMinimum] | None = Field(default=None)  # To do
     alias: str | None = Field(default=None)
     cas: list[CasAmount] | None = Field(default=None, alias="Cas")
-    metadata: InventoryMetadata | None = Field(default=None, alias="Metadata")
+    metadata: dict[str, Any] | None = Field(alias="Metadata", default=None)
     project_id: str | None = Field(default=None, alias="parentId")
 
     _task_config: list[dict] | None = PrivateAttr(default=None)

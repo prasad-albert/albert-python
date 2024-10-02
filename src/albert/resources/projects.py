@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel, Field, PrivateAttr
 
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, EntityLinkConvertible
+from albert.resources.base import BaseAlbertModel, EntityLinkConvertible
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 
@@ -36,15 +36,6 @@ class GridDefault(str, Enum):
     WKS = "WKS"
 
 
-class Metadata(BaseModel):
-    adpNumber: str | None = Field(default=None, min_length=1, max_length=255)
-    segment: str | None = Field(default=None, min_length=1, max_length=255)
-    applications: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
-    technologies: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
-    sub_categories: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
-    adpType: list[BaseEntityLink] | None = Field(default_factory=list, max_length=20)
-
-
 class Project(BaseAlbertModel, EntityLinkConvertible):
     description: str = Field(min_length=1, max_length=2000)
     locations: list[SerializeAsEntityLink[Location]] | None = Field(
@@ -62,7 +53,7 @@ class Project(BaseAlbertModel, EntityLinkConvertible):
     old_api_params: dict | None = None
     task_config: list[TaskConfig] | None = Field(default_factory=list)
     grid: GridDefault | None = None
-    metadata: Metadata | None = Field(alias="Metadata", default=None)
+    metadata: dict[str, Any] | None = Field(alias="Metadata", default=None)
     _state: State | None = PrivateAttr(default=None)
 
     def __init__(self, **data: Any):

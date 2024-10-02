@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 from pydantic import Field
 
@@ -16,10 +17,6 @@ class UserClass(str, Enum):
     ADMIN = "admin"
 
 
-class UserMetadata(BaseAlbertModel):
-    sbu: str | None = Field(alias="SBU", default=None)
-
-
 class User(BaseAlbertModel, EntityLinkConvertible):
     """Represents a User on the Albert Platform"""
 
@@ -31,4 +28,4 @@ class User(BaseAlbertModel, EntityLinkConvertible):
         max_length=1, default_factory=list, alias="Roles"
     )
     user_class: UserClass = Field(default=UserClass.STANDARD, alias="userClass")
-    metadata: UserMetadata | None = Field(default=None, alias="Metadata")
+    metadata: dict[str, Any] | None = Field(alias="Metadata", default=None)
