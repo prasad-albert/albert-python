@@ -9,6 +9,7 @@ from albert.resources.base import Status
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.inventory import InventoryItem
+from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
@@ -21,6 +22,7 @@ from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,
     generate_inventory_seeds,
+    generate_list_item_seeds,
     generate_location_seeds,
     generate_lot_seeds,
     generate_parameter_group_seeds,
@@ -122,6 +124,20 @@ def seeded_storage_locations(
     with suppress(NotFoundError):
         for storage_location in seeded:
             client.storage_locations.delete(id=storage_location.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_lists(
+    client: Albert,
+) -> Iterator[list[ListItem]]:
+    seeded = []
+    # Seed the lists
+    for list_item in generate_list_item_seeds():
+        created_list = client.lists.create(list_item=list_item)
+        seeded.append(created_list)
+
+    yield seeded
+    # NOTE: There is NO delete method for lists. This is because the list Items cannot be deleted in the Albert API.
 
 
 @pytest.fixture(scope="session")

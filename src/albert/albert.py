@@ -4,6 +4,7 @@ from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_templates import CustomTemplatesCollection
 from albert.collections.inventory import InventoryCollection
+from albert.collections.lists import ListsCollection
 from albert.collections.locations import LocationCollection
 from albert.collections.lots import LotCollection
 from albert.collections.parameter_groups import ParameterGroupCollection
@@ -100,6 +101,10 @@ class Albert:
     @property
     def locations(self) -> LocationCollection:
         return LocationCollection(session=self.session)
+
+    @property
+    def lists(self) -> ListsCollection:
+        return ListsCollection(session=self.session)
 
     @property
     def roles(self) -> RoleCollection:

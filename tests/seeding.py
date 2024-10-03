@@ -10,6 +10,7 @@ from albert.resources.inventory import (
     InventoryMinimum,
     InventoryUnitCategory,
 )
+from albert.resources.lists import ListItem, ListItemCategory
 from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
@@ -26,6 +27,44 @@ from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
 from albert.resources.units import Unit, UnitCategory
 from albert.resources.users import User, UserClass
+
+
+def generate_list_item_seeds() -> list[ListItem]:
+    """
+    Generates a list of ListItem seed objects for testing without IDs.
+
+    Returns
+    -------
+    List[ListItem]
+        A list of ListItem objects with different permutations.
+    """
+
+    return [
+        ListItem(
+            name="TEST - List Item 1", category=ListItemCategory.BUSINESS_DEFINED, list_type="test"
+        ),
+        ListItem(
+            name="TEST - List Item 2", category=ListItemCategory.USER_DEFINED, list_type="test"
+        ),
+        ListItem(
+            name="TEST - List Item 3", category=ListItemCategory.PROJECTS, list_type="projectState"
+        ),
+        ListItem(
+            name="TEST - List Item 4", category=ListItemCategory.EXTENSIONS, list_type="extensions"
+        ),
+        ListItem(
+            name="TEST - List Item 5", category=ListItemCategory.BUSINESS_DEFINED, list_type="test"
+        ),
+        ListItem(
+            name="TEST - List Item 6", category=ListItemCategory.USER_DEFINED, list_type="test"
+        ),
+        ListItem(
+            name="TEST - List Item 7", category=ListItemCategory.PROJECTS, list_type="projectState"
+        ),
+        ListItem(
+            name="TEST - List Item 8", category=ListItemCategory.EXTENSIONS, list_type="extensions"
+        ),
+    ]
 
 
 def generate_cas_seeds() -> list[Cas]:
