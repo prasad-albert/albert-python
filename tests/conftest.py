@@ -5,6 +5,7 @@ from contextlib import suppress
 import pytest
 
 from albert import Albert
+from albert.collections.worksheets import WorksheetCollection
 from albert.resources.base import Status
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
@@ -13,9 +14,11 @@ from albert.resources.locations import Location
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
 from albert.resources.roles import Role
+from albert.resources.sheets import Sheet
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.users import User
+from albert.resources.worksheets import Worksheet
 from albert.utils.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from tests.seeding import (
     generate_cas_seeds,
@@ -191,6 +194,33 @@ def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[lis
     for user in seeded:
         user.status = Status.INACTIVE.value
         client.users.update(updated_object=user)
+
+
+# Move to conftest.py in a bit
+@pytest.fixture(scope="session")
+def worksheet(client: Albert, seeded_projects: list[Project]) -> Worksheet:
+    collection = WorksheetCollection(session=client.session)
+    try:
+        wksht = collection.get_by_project_id(project_id=seeded_projects[0].id)
+    except NotFoundError:
+        wksht = collection.setup_worksheet(project_id=seeded_projects[0].id)
+    if wksht.sheets is None or wksht.sheets == []:
+        wksht = collection.setup_new_worksheet_blank(
+            project_id=seeded_projects[0].id, sheet_name="test"
+        )
+    else:
+        for s in wksht.sheets:
+            if not s.name.lower().startswith("test"):
+                s.rename(new_name=f"test {s.name}")
+                return collection.get_by_project_id(project_id=seeded_projects[0].id)
+    return wksht
+
+
+@pytest.fixture(scope="session")
+def sheet(worksheet: Worksheet) -> Sheet:
+    for s in worksheet.sheets:
+        if s.name.lower().startswith("test"):
+            return s
 
 
 @pytest.fixture(scope="session")
