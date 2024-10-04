@@ -7,7 +7,7 @@ from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.session import AlbertSession
-from albert.utils.exceptions import AlbertException, ForbiddenError
+from albert.utils.exceptions import ForbiddenError
 
 
 class InventoryCollection(BaseCollection):
