@@ -91,7 +91,7 @@ def seeded_companies(client: Albert) -> Iterator[list[Company]]:
 
     # Teardown - delete the seeded companies after the test
     # ForbiddenError is raised when trying to delete a company that has InventoryItems associated with it (may be a bug. Teams discussion ongoing)
-    with suppress(NotFoundError, ForbiddenError):
+    with suppress(NotFoundError, ForbiddenError, BadRequestError):
         for company in seeded:
             client.companies.delete(id=company.id)
 
@@ -238,7 +238,8 @@ def seeded_inventory(
         seeded.append(created_inventory)
     yield seeded
     for inventory in seeded:
-        with suppress(NotFoundError):
+        # If the inv has been used in a formulation, it cannot be deleted and will give a BadRequestError
+        with suppress(NotFoundError, BadRequestError):
             client.inventory.delete(inventory_id=inventory.id)
 
 
