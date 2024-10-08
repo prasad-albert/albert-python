@@ -77,7 +77,7 @@ def test_tag_exists(client: Albert, seeded_tags: list[Tag]):
 
 def test_tag_update(client: Albert, seeded_tags: list[Tag]):
     test_tag = seeded_tags[3]
-    renamed_tag = "TEST - SDK test tag UPDATED!"
+    renamed_tag = "TEST - SDK test tag that has been Updated!"
 
     assert test_tag.id is not None
 

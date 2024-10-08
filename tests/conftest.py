@@ -138,7 +138,7 @@ def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
     yield seeded  # Provide the seeded tags to the test
 
     # Teardown - delete the seeded tags after the test
-    with suppress(NotFoundError):
+    with suppress(NotFoundError, BadRequestError):
         for tag in seeded:
             client.tags.delete(tag_id=tag.id)
 

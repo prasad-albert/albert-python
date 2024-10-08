@@ -461,7 +461,7 @@ def generate_inventory_seeds(
             description="TEST - A volatile, flammable liquid used in chemical synthesis.",
             category=InventoryCategory.CONSUMABLES.value,
             unit_category=InventoryUnitCategory.VOLUME.value,
-            tags=seeded_tags[0:2],
+            tags=seeded_tags[0:1],
             cas=[CasAmount(id=seeded_cas[1].id, min=0.98, max=1)],
             security_class=SecurityClass.SHARED,
             company=seeded_companies[1].name,  # ensure it knows to use the company object

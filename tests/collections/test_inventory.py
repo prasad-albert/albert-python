@@ -168,7 +168,7 @@ def test_update_inventory_item_advanced_attributes(
         update={
             "cas": [CasAmount(id=seeded_cas[1].id, min=0.5, max=0.75)],
             "company": seeded_companies[1],
-            "tags": [seeded_tags[1], seeded_tags[2]],
+            "tags": [seeded_tags[0], seeded_tags[1]],
         }
     )
 
@@ -179,7 +179,7 @@ def test_update_inventory_item_advanced_attributes(
     assert returned_item.company.id == seeded_inventory[1].company.id
     assert len(returned_item.tags) == 2
     assert seeded_tags[1].id in [x.id for x in returned_item.tags]
-    assert seeded_tags[2].id in [x.id for x in returned_item.tags]
+    assert seeded_tags[0].id in [x.id for x in returned_item.tags]
 
     # Get the updated item and verify the changes are persisted
     fetched_item = client.inventory.get_by_id(inventory_id=updated_inventory_item.id)
@@ -189,7 +189,7 @@ def test_update_inventory_item_advanced_attributes(
     assert fetched_item.company.id == seeded_inventory[1].company.id
     assert len(fetched_item.tags) == 2
     assert seeded_tags[1].id in [x.id for x in fetched_item.tags]
-    assert seeded_tags[2].id in [x.id for x in fetched_item.tags]
+    assert seeded_tags[0].id in [x.id for x in fetched_item.tags]
 
     # Update existing values
 
