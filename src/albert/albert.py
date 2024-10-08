@@ -2,6 +2,7 @@ import os
 
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
+from albert.collections.custom_fields import CustomFieldCollection
 from albert.collections.custom_templates import CustomTemplatesCollection
 from albert.collections.inventory import InventoryCollection
 from albert.collections.lists import ListsCollection
@@ -105,6 +106,10 @@ class Albert:
     @property
     def lists(self) -> ListsCollection:
         return ListsCollection(session=self.session)
+
+    @property
+    def custom_fields(self) -> CustomFieldCollection:
+        return CustomFieldCollection(session=self.session)
 
     @property
     def roles(self) -> RoleCollection:
