@@ -324,7 +324,7 @@ class Sheet(BaseSessionModel):
     def add_formulation(self, *, formulation_name: str, components: list[Component]) -> "Column":
         existing_formulation_names = [x.name for x in self.columns]
         if formulation_name not in existing_formulation_names:
-            col = self.add_formulation_columns(formulation_names=[formulation_name])
+            col = self.add_formulation_columns(formulation_names=[formulation_name])[0]
         else:
             # get the existing column and clear it out to put the new formulation in
             col = self.get_column(column_name=formulation_name)
