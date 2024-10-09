@@ -3,6 +3,12 @@ from uuid import uuid4
 from albert.resources.base import BaseEntityLink, SecurityClass
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
+from albert.resources.custom_fields import (
+    CustomField,
+    FieldCategory,
+    FieldType,
+    ServiceType,
+)
 from albert.resources.inventory import (
     CasAmount,
     InventoryCategory,
@@ -10,6 +16,7 @@ from albert.resources.inventory import (
     InventoryMinimum,
     InventoryUnitCategory,
 )
+from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
@@ -26,6 +33,68 @@ from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
 from albert.resources.units import Unit, UnitCategory
 from albert.resources.users import User, UserClass
+
+
+def generate_custom_fields() -> list[CustomField]:
+    services = [
+        ServiceType.INVENTORIES,
+        ServiceType.LOTS,
+        ServiceType.PROJECTS,
+        ServiceType.TASKS,
+        ServiceType.USERS,
+    ]
+
+    seeds = []
+
+    for service in services:
+        # Create a string-type field for the service
+        seeds.append(
+            CustomField(
+                name=f"test_{service.value}_string_field",
+                field_type=FieldType.STRING,
+                display_name=f"TEST {service.value.capitalize()} String Field",
+                service=service,
+            )
+        )
+
+        # Create a list-type field for the service
+        seeds.append(
+            CustomField(
+                name=f"test_{service.value}_list_field",
+                field_type=FieldType.LIST,
+                display_name=f"TEST {service.value.capitalize()} List Field",
+                service=service,
+                category=FieldCategory.USER_DEFINED,
+                min=1,
+                max=5,
+            )
+        )
+
+    return seeds
+
+
+def generate_list_item_seeds(seeded_custom_fields: list[CustomField]) -> list[ListItem]:
+    """
+    Generates a list of ListItem seed objects for testing without IDs.
+
+    Returns
+    -------
+    List[ListItem]
+        A list of ListItem objects with different permutations.
+    """
+
+    list_custom_fields = [x for x in seeded_custom_fields if x.field_type == FieldType.LIST]
+    all_list_items = []
+    for custom_field in list_custom_fields:
+        for i in range(0, 2):
+            all_list_items.append(
+                ListItem(
+                    name=f"{custom_field.display_name} Option {i}",
+                    category=custom_field.category,
+                    list_type=custom_field.name,
+                )
+            )
+    return all_list_items
 
 
 def generate_cas_seeds() -> list[Cas]:
@@ -461,7 +530,7 @@ def generate_inventory_seeds(
             description="TEST - A volatile, flammable liquid used in chemical synthesis.",
             category=InventoryCategory.CONSUMABLES.value,
             unit_category=InventoryUnitCategory.VOLUME.value,
-            tags=seeded_tags[0:2],
+            tags=seeded_tags[0:1],
             cas=[CasAmount(id=seeded_cas[1].id, min=0.98, max=1)],
             security_class=SecurityClass.SHARED,
             company=seeded_companies[1].name,  # ensure it knows to use the company object

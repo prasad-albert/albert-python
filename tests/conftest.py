@@ -8,7 +8,9 @@ from albert import Albert
 from albert.resources.base import Status
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
+from albert.resources.custom_fields import CustomField
 from albert.resources.inventory import InventoryItem
+from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
@@ -20,7 +22,9 @@ from albert.utils.exceptions import BadRequestError, ForbiddenError, NotFoundErr
 from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,
+    generate_custom_fields,
     generate_inventory_seeds,
+    generate_list_item_seeds,
     generate_location_seeds,
     generate_lot_seeds,
     generate_parameter_group_seeds,
@@ -36,6 +40,23 @@ from tests.seeding import (
 @pytest.fixture(scope="session")
 def client() -> Albert:
     return Albert()
+
+
+@pytest.fixture(scope="session")
+def seeded_custom_fields(client: Albert):
+    seeded = []
+    for cf in generate_custom_fields():
+        try:
+            registered_cf = client.custom_fields.create(custom_field=cf)
+        except BadRequestError as e:
+            # If it's already registered, this will raise a BadRequestError
+            registered_cf = client.custom_fields.get_by_name(name=cf.name)
+            if registered_cf is None:  # If it was something else, raise the error
+                raise e
+        seeded.append(registered_cf)
+    yield seeded
+
+    # Custom Fields cannot be deleted
 
 
 @pytest.fixture(scope="session")
@@ -55,8 +76,8 @@ def seeded_projects(client: Albert, seeded_locations) -> Iterator[list[Project]]
     yield seeded  # Provide the seeded projects to the test
 
     # Teardown - delete the seeded projects after the test
-    with suppress(NotFoundError):
-        for project in seeded:
+    for project in seeded:
+        with suppress(NotFoundError):
             client.projects.delete(project_id=project.id)
 
 
@@ -71,8 +92,8 @@ def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
     yield seeded  # Provide the seeded CAS to the test
 
     # Teardown - delete the seeded CAS after the test
-    with suppress(BadRequestError | NotFoundError):
-        for cas in seeded:
+    for cas in seeded:
+        with suppress(BadRequestError | NotFoundError):
             client.cas_numbers.delete(cas_id=cas.id)
 
 
@@ -88,8 +109,8 @@ def seeded_companies(client: Albert) -> Iterator[list[Company]]:
 
     # Teardown - delete the seeded companies after the test
     # ForbiddenError is raised when trying to delete a company that has InventoryItems associated with it (may be a bug. Teams discussion ongoing)
-    with suppress(NotFoundError, ForbiddenError, BadRequestError):
-        for company in seeded:
+    for company in seeded:
+        with suppress(NotFoundError, ForbiddenError, BadRequestError):
             client.companies.delete(id=company.id)
 
 
@@ -104,8 +125,8 @@ def seeded_locations(client: Albert) -> Iterator[list[Location]]:
     yield seeded  # Provide the seeded Locations to the test
 
     # Teardown - delete the seeded Locations after the test
-    with suppress(NotFoundError):
-        for location in seeded:
+    for location in seeded:
+        with suppress(NotFoundError):
             client.locations.delete(location_id=location.id)
 
 
@@ -119,9 +140,31 @@ def seeded_storage_locations(
         seeded.append(created_location)
     yield seeded
 
-    with suppress(NotFoundError):
-        for storage_location in seeded:
+    for storage_location in seeded:
+        with suppress(NotFoundError):
             client.storage_locations.delete(id=storage_location.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_lists(
+    client: Albert, seeded_custom_fields: list[CustomField]
+) -> Iterator[list[ListItem]]:
+    seeded = []
+    # Seed the lists
+    for list_item in generate_list_item_seeds(seeded_custom_fields=seeded_custom_fields):
+        try:
+            created_list = client.lists.create(list_item=list_item)
+        except BadRequestError as e:
+            # If it's already registered, this will raise a BadRequestError
+            created_list = client.lists.get_matching_item(
+                name=list_item.name, list_type=list_item.list_type
+            )
+            if created_list is None:
+                raise e
+        seeded.append(created_list)
+
+    yield seeded
+    # NOTE: There is NO delete method for lists. This is because the list Items cannot be deleted in the Albert API.
 
 
 @pytest.fixture(scope="session")
@@ -135,8 +178,8 @@ def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
     yield seeded  # Provide the seeded tags to the test
 
     # Teardown - delete the seeded tags after the test
-    with suppress(NotFoundError):
-        for tag in seeded:
+    for tag in seeded:
+        with suppress(NotFoundError, BadRequestError):
             client.tags.delete(tag_id=tag.id)
 
 
@@ -151,8 +194,8 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
     yield seeded  # Provide the seeded units to the test
 
     # Teardown - delete the seeded units after the test
-    with suppress(NotFoundError):
-        for unit in seeded:
+    for unit in seeded:
+        with suppress(NotFoundError):
             client.units.delete(unit_id=unit.id)
 
 
