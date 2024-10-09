@@ -1,7 +1,6 @@
-import logging
-from collections.abc import Generator, Iterator
+from collections.abc import Generator
 
-from albert.collections.base import BaseCollection, OrderBy
+from albert.collections.base import BaseCollection
 from albert.resources.lists import ListItem, ListItemCategory
 from albert.session import AlbertSession
 
@@ -25,7 +24,7 @@ class ListsCollection(BaseCollection):
         self,
         *,
         limit: int = 100,
-        order_by: OrderBy = OrderBy.DESCENDING,
+        # order_by: OrderBy = OrderBy.DESCENDING,
         names: list[str] = None,
         category: ListItemCategory = None,
         list_type: str = None,
@@ -52,7 +51,7 @@ class ListsCollection(BaseCollection):
         """
         params = {
             "limit": limit,
-            "order": order_by.value,
+            # "order": order_by.value,
             "startKey": start_key,
             "name": names,
             "category": category,
@@ -61,13 +60,14 @@ class ListsCollection(BaseCollection):
         params = {k: v for k, v in params.items() if v is not None}
         while True:
             response = self.session.get(self.base_path, params=params)
-            items = response.json().get("Items", [])
+            response_json = response.json()
+            items = response_json.get("Items", [])
             if items == []:
                 break
             for list_data in items:
                 yield ListItem(**list_data)
-            start_key = response.json().get("lastKey")
-            if not start_key:
+            start_key = response_json.get("lastKey")
+            if not start_key or len(items) < limit:
                 break
             params["startKey"] = start_key
 
@@ -75,7 +75,7 @@ class ListsCollection(BaseCollection):
         self,
         *,
         limit: int = 100,
-        order_by: OrderBy = OrderBy.DESCENDING,
+        # order_by: OrderBy = OrderBy.DESCENDING,
         names: list[str] = None,
         category: ListItemCategory = None,
         list_type: str = None,
@@ -104,12 +104,10 @@ class ListsCollection(BaseCollection):
         if isinstance(category, ListItemCategory):
             category = category.value
         return list(
-            self._list_generator(
-                limit=limit, order_by=order_by, names=names, category=category, list_type=list_type
-            )
+            self._list_generator(limit=limit, names=names, category=category, list_type=list_type)
         )
 
-    def get_by_id(self, id: str) -> ListItem:
+    def get_by_id(self, *, id: str) -> ListItem:
         """
         Retrieves a list entity by its ID.
 
@@ -126,7 +124,7 @@ class ListsCollection(BaseCollection):
         response = self.session.get(f"{self.base_path}/{id}")
         return ListItem(**response.json())
 
-    def create(self, list_item: ListItem) -> ListItem:
+    def create(self, *, list_item: ListItem) -> ListItem:
         """
         Creates a list entity.
 
@@ -144,3 +142,9 @@ class ListsCollection(BaseCollection):
             self.base_path, json=list_item.model_dump(by_alias=True, exclude_none=True)
         )
         return ListItem(**response.json())
+
+    def get_matching_item(self, *, name: str, list_type):
+        for list_item in self.list(names=[name], list_type=list_type):
+            if list_item.name.lower() == name.lower():
+                return list_item
+        return None

@@ -8,6 +8,7 @@ from albert import Albert
 from albert.resources.base import Status
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
+from albert.resources.custom_fields import CustomField
 from albert.resources.inventory import InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
@@ -21,6 +22,7 @@ from albert.utils.exceptions import BadRequestError, ForbiddenError, NotFoundErr
 from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,
+    generate_custom_fields,
     generate_inventory_seeds,
     generate_list_item_seeds,
     generate_location_seeds,
@@ -38,6 +40,23 @@ from tests.seeding import (
 @pytest.fixture(scope="session")
 def client() -> Albert:
     return Albert()
+
+
+@pytest.fixture(scope="session")
+def seeded_custom_fields(client: Albert):
+    seeded = []
+    for cf in generate_custom_fields():
+        try:
+            registered_cf = client.custom_fields.create(custom_field=cf)
+        except BadRequestError as e:
+            # If it's already registered, this will raise a BadRequestError
+            registered_cf = client.custom_fields.get_by_name(name=cf.name)
+            if registered_cf is None:  # If it was something else, raise the error
+                raise e
+        seeded.append(registered_cf)
+    yield seeded
+
+    # Custom Fields cannot be deleted
 
 
 @pytest.fixture(scope="session")
@@ -128,12 +147,20 @@ def seeded_storage_locations(
 
 @pytest.fixture(scope="session")
 def seeded_lists(
-    client: Albert,
+    client: Albert, seeded_custom_fields: list[CustomField]
 ) -> Iterator[list[ListItem]]:
     seeded = []
     # Seed the lists
-    for list_item in generate_list_item_seeds():
-        created_list = client.lists.create(list_item=list_item)
+    for list_item in generate_list_item_seeds(seeded_custom_fields=seeded_custom_fields):
+        try:
+            created_list = client.lists.create(list_item=list_item)
+        except BadRequestError as e:
+            # If it's already registered, this will raise a BadRequestError
+            created_list = client.lists.get_matching_item(
+                name=list_item.name, list_type=list_item.list_type
+            )
+            if created_list is None:
+                raise e
         seeded.append(created_list)
 
     yield seeded

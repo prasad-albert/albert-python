@@ -45,7 +45,7 @@ class CustomField(BaseAlbertModel):
     display_name: str = Field(default=None, alias="labelName")
     searchable: bool | None = Field(default=None)
     service: ServiceType
-    hidden: bool = Field(default=False)
+    hidden: bool | None = Field(default=None)
     lookup_column: bool | None = Field(default=None, alias="lkpColumn")
     lookup_row: bool | None = Field(default=None, alias="lkpRow")
     multiselect: bool | None = Field(default=None)

@@ -3,6 +3,12 @@ from uuid import uuid4
 from albert.resources.base import BaseEntityLink, SecurityClass
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
+from albert.resources.custom_fields import (
+    CustomField,
+    FieldCategory,
+    FieldType,
+    ServiceType,
+)
 from albert.resources.inventory import (
     CasAmount,
     InventoryCategory,
@@ -10,7 +16,7 @@ from albert.resources.inventory import (
     InventoryMinimum,
     InventoryUnitCategory,
 )
-from albert.resources.lists import ListItem, ListItemCategory
+from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
@@ -29,7 +35,45 @@ from albert.resources.units import Unit, UnitCategory
 from albert.resources.users import User, UserClass
 
 
-def generate_list_item_seeds() -> list[ListItem]:
+def generate_custom_fields() -> list[CustomField]:
+    services = [
+        ServiceType.INVENTORIES,
+        ServiceType.LOTS,
+        ServiceType.PROJECTS,
+        ServiceType.TASKS,
+        ServiceType.USERS,
+    ]
+
+    seeds = []
+
+    for service in services:
+        # Create a string-type field for the service
+        seeds.append(
+            CustomField(
+                name=f"test_{service.value}_string_field",
+                field_type=FieldType.STRING,
+                display_name=f"TEST {service.value.capitalize()} String Field",
+                service=service,
+            )
+        )
+
+        # Create a list-type field for the service
+        seeds.append(
+            CustomField(
+                name=f"test_{service.value}_list_field",
+                field_type=FieldType.LIST,
+                display_name=f"TEST {service.value.capitalize()} List Field",
+                service=service,
+                category=FieldCategory.USER_DEFINED,
+                min=1,
+                max=5,
+            )
+        )
+
+    return seeds
+
+
+def generate_list_item_seeds(seeded_custom_fields: list[CustomField]) -> list[ListItem]:
     """
     Generates a list of ListItem seed objects for testing without IDs.
 
@@ -39,32 +83,18 @@ def generate_list_item_seeds() -> list[ListItem]:
         A list of ListItem objects with different permutations.
     """
 
-    return [
-        ListItem(
-            name="TEST - List Item 1", category=ListItemCategory.BUSINESS_DEFINED, list_type="test"
-        ),
-        ListItem(
-            name="TEST - List Item 2", category=ListItemCategory.USER_DEFINED, list_type="test"
-        ),
-        ListItem(
-            name="TEST - List Item 3", category=ListItemCategory.PROJECTS, list_type="projectState"
-        ),
-        ListItem(
-            name="TEST - List Item 4", category=ListItemCategory.EXTENSIONS, list_type="extensions"
-        ),
-        ListItem(
-            name="TEST - List Item 5", category=ListItemCategory.BUSINESS_DEFINED, list_type="test"
-        ),
-        ListItem(
-            name="TEST - List Item 6", category=ListItemCategory.USER_DEFINED, list_type="test"
-        ),
-        ListItem(
-            name="TEST - List Item 7", category=ListItemCategory.PROJECTS, list_type="projectState"
-        ),
-        ListItem(
-            name="TEST - List Item 8", category=ListItemCategory.EXTENSIONS, list_type="extensions"
-        ),
-    ]
+    list_custom_fields = [x for x in seeded_custom_fields if x.field_type == FieldType.LIST]
+    all_list_items = []
+    for custom_field in list_custom_fields:
+        for i in range(0, 2):
+            all_list_items.append(
+                ListItem(
+                    name=f"{custom_field.display_name} Option {i}",
+                    category=custom_field.category,
+                    list_type=custom_field.name,
+                )
+            )
+    return all_list_items
 
 
 def generate_cas_seeds() -> list[Cas]:
