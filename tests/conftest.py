@@ -181,13 +181,6 @@ def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
     for tag in seeded:
         with suppress(NotFoundError, BadRequestError):
             client.tags.delete(tag_id=tag.id)
-    # for tag in seeded:
-    #     print(client.tags.get_by_id(tag_id=tag.id))
-    #     try:
-    #         client.tags.delete(tag_id=tag.id)
-    #     except BadRequestError as e:
-    #         print(e)
-    #         pass
 
 
 @pytest.fixture(scope="session")
