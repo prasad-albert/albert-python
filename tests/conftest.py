@@ -76,8 +76,8 @@ def seeded_projects(client: Albert, seeded_locations) -> Iterator[list[Project]]
     yield seeded  # Provide the seeded projects to the test
 
     # Teardown - delete the seeded projects after the test
-    with suppress(NotFoundError):
-        for project in seeded:
+    for project in seeded:
+        with suppress(NotFoundError):
             client.projects.delete(project_id=project.id)
 
 
@@ -92,8 +92,8 @@ def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
     yield seeded  # Provide the seeded CAS to the test
 
     # Teardown - delete the seeded CAS after the test
-    with suppress(BadRequestError | NotFoundError):
-        for cas in seeded:
+    for cas in seeded:
+        with suppress(BadRequestError | NotFoundError):
             client.cas_numbers.delete(cas_id=cas.id)
 
 
@@ -109,8 +109,8 @@ def seeded_companies(client: Albert) -> Iterator[list[Company]]:
 
     # Teardown - delete the seeded companies after the test
     # ForbiddenError is raised when trying to delete a company that has InventoryItems associated with it (may be a bug. Teams discussion ongoing)
-    with suppress(NotFoundError, ForbiddenError, BadRequestError):
-        for company in seeded:
+    for company in seeded:
+        with suppress(NotFoundError, ForbiddenError, BadRequestError):
             client.companies.delete(id=company.id)
 
 
@@ -125,8 +125,8 @@ def seeded_locations(client: Albert) -> Iterator[list[Location]]:
     yield seeded  # Provide the seeded Locations to the test
 
     # Teardown - delete the seeded Locations after the test
-    with suppress(NotFoundError):
-        for location in seeded:
+    for location in seeded:
+        with suppress(NotFoundError):
             client.locations.delete(location_id=location.id)
 
 
@@ -140,8 +140,8 @@ def seeded_storage_locations(
         seeded.append(created_location)
     yield seeded
 
-    with suppress(NotFoundError):
-        for storage_location in seeded:
+    for storage_location in seeded:
+        with suppress(NotFoundError):
             client.storage_locations.delete(id=storage_location.id)
 
 
@@ -178,9 +178,16 @@ def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
     yield seeded  # Provide the seeded tags to the test
 
     # Teardown - delete the seeded tags after the test
-    with suppress(NotFoundError):
-        for tag in seeded:
+    for tag in seeded:
+        with suppress(NotFoundError, BadRequestError):
             client.tags.delete(tag_id=tag.id)
+    # for tag in seeded:
+    #     print(client.tags.get_by_id(tag_id=tag.id))
+    #     try:
+    #         client.tags.delete(tag_id=tag.id)
+    #     except BadRequestError as e:
+    #         print(e)
+    #         pass
 
 
 @pytest.fixture(scope="session")
@@ -194,8 +201,8 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
     yield seeded  # Provide the seeded units to the test
 
     # Teardown - delete the seeded units after the test
-    with suppress(NotFoundError):
-        for unit in seeded:
+    for unit in seeded:
+        with suppress(NotFoundError):
             client.units.delete(unit_id=unit.id)
 
 
