@@ -16,6 +16,7 @@ class ParameterGroupCollection(BaseCollection):
     def get_by_id(self, *, id: str) -> ParameterGroup:
         path = f"{self.base_path}/{id}"
         response = self.session.get(path)
+        print(response.json())
         return ParameterGroup(**response.json())
 
     def _list_generator(
