@@ -82,20 +82,19 @@ class InventoryCollection(BaseCollection):
         Union[InventoryItem, None]
             The matching inventory item or None if not found.
         """
-        hits = self.list(name=inventory_item.name, company=[inventory_item.company])
-        first_hit = next(hits, None)
-
+        hits = self.list(name=inventory_item.name, company=[inventory_item.company])  
         inv_company = (
-            inventory_item.company.name
-            if isinstance(inventory_item.company, Company)
-            else inventory_item.company
-        )
-        if (
-            first_hit
-            and first_hit.name == inventory_item.name
-            and first_hit.company.name == inv_company
-        ):
-            return first_hit
+                inventory_item.company.name
+                if isinstance(inventory_item.company, Company)
+                else inventory_item.company
+            )
+        for inv in hits:
+            if (
+                inv
+                and inv.name == inventory_item.name
+                and inv.company.name == inv_company
+            ):
+                return inv
         else:
             return None
 
