@@ -424,7 +424,7 @@ class Sheet(BaseSessionModel):
         design: DesignType | str | None = DesignType.PRODUCTS,
         position: dict | None = None,
     ):
-        if design is DesignType.RESULTS:
+        if design == DesignType.RESULTS:
             raise AlbertException("You cannot add rows to the results design")
         if position is None:
             position = {"reference_id": "ROW1", "position": "above"}
