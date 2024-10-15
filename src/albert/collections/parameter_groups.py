@@ -2,7 +2,6 @@ import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.resources.base import BaseAlbertModel
 from albert.resources.parameter_groups import ParameterGroup, PGType
 from albert.session import AlbertSession
 
