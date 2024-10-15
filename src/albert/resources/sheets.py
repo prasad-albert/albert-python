@@ -1,6 +1,6 @@
 from collections import Counter
 from enum import Enum
-from typing import Any, Union
+from typing import Union
 
 import pandas as pd
 from pydantic import Field, PrivateAttr, model_validator
@@ -198,14 +198,12 @@ class Sheet(BaseSessionModel):
     project_id: str
     _grid: pd.DataFrame = PrivateAttr(default=None)
 
-    @model_validator(mode="before")
-    @classmethod
-    def set_session(cls, data: dict[str, Any]) -> dict[str, Any]:
-        category_raw = data.get("Designs")
-        if category_raw:
-            for c in category_raw:
-                c["session"] = data["session"]
-        return data
+    @model_validator(mode="after")
+    def set_session(self):
+        if self.session is not None:
+            for d in self.designs:
+                d.session = self.session
+        return self
 
     @property
     def app_design(self):

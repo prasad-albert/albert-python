@@ -1,4 +1,3 @@
-import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
@@ -67,18 +66,12 @@ class ParameterGroupCollection(BaseCollection):
         return True
 
     def create(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
-        match = self.get_by_name(name=parameter_group.name)
-        if match is not None:
-            logging.warning(
-                f"Parameter Group {match.name} already exists. Returning the exiting parameter group."
-            )
-            return match
         response = self.session.post(
             self.base_path, json=parameter_group.model_dump(by_alias=True, exclude_none=True)
         )
         return ParameterGroup(**response.json())
 
-    def get_by_name(self, *, name: str) -> ParameterGroup:
+    def get_by_name(self, *, name: str) -> ParameterGroup | None:
         matches = self.list(text=name)
         for m in matches:
             if m.name.lower() == name.lower():
