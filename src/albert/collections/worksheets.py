@@ -34,7 +34,7 @@ class WorksheetCollection(BaseCollection):
 
     def setup_worksheet(self, *, project_id: str, add_sheet=False) -> Worksheet:
         if not project_id.startswith("PRO"):
-            project_id = "PRO" + project_id
+            project_id = f"PRO{project_id}"
         params = {"sheets": str(add_sheet).lower()}
         path = f"{self.base_path}/{project_id}/setup"
         self.session.post(path, json=params)
