@@ -1,6 +1,6 @@
 from collections import Counter
 from enum import Enum
-from typing import Any, Union
+from typing import Union
 
 import pandas as pd
 from pydantic import Field, PrivateAttr, model_validator
@@ -198,14 +198,12 @@ class Sheet(BaseSessionModel):
     project_id: str
     _grid: pd.DataFrame = PrivateAttr(default=None)
 
-    @model_validator(mode="before")
-    @classmethod
-    def set_session(cls, data: dict[str, Any]) -> dict[str, Any]:
-        category_raw = data.get("Designs")
-        if category_raw:
-            for c in category_raw:
-                c["session"] = data["session"]
-        return data
+    @model_validator(mode="after")
+    def set_session(self):
+        if self.session is not None:
+            for d in self.designs:
+                d.session = self.session
+        return self
 
     @property
     def app_design(self):
@@ -312,7 +310,7 @@ class Sheet(BaseSessionModel):
             new_dicts.append(this_dict)
         return new_dicts
 
-    def _clear_formulation_from_column(self, *, column):
+    def _clear_formulation_from_column(self, *, column: "Column"):
         cleared_cells = []
         for cell in column.cells:
             if cell.type == CellType.INVENTORY:
@@ -329,7 +327,6 @@ class Sheet(BaseSessionModel):
             # get the existing column and clear it out to put the new formulation in
             col = self.get_column(column_name=formulation_name)
             self._clear_formulation_from_column(column=col)
-
         col_id = col.column_id
         component_dict = {}
         for c in components:
@@ -368,7 +365,7 @@ class Sheet(BaseSessionModel):
             all_cells.append(this_cell)
 
         self.update_cells(cells=all_cells)
-        return all_cells
+        return self.get_column(column_id=col_id)
 
     def _get_row_id_for_component(self, *, inventory_item, existing_cells):
         self.grid = None
@@ -425,6 +422,8 @@ class Sheet(BaseSessionModel):
         design: DesignType | str | None = DesignType.PRODUCTS,
         position: dict | None = None,
     ):
+        if design == DesignType.RESULTS:
+            raise AlbertException("You cannot add rows to the results design")
         if position is None:
             position = {"reference_id": "ROW1", "position": "above"}
         endpoint = f"/api/v3/worksheet/design/{self._get_design_id(design=design)}/rows"

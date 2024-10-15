@@ -1,4 +1,3 @@
-import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
@@ -8,6 +7,8 @@ from albert.session import AlbertSession
 
 class ParameterGroupCollection(BaseCollection):
     _api_version = "v3"
+    _updatable_attributes = {"name", "shortName"}
+    # To do: Add the rest of the allowed attributes
 
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
@@ -65,14 +66,21 @@ class ParameterGroupCollection(BaseCollection):
         return True
 
     def create(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
-        matches = self.list(text=parameter_group.name)
-        for m in matches:
-            if m.name == parameter_group.name:
-                logging.warning(
-                    f"Parameter Group {parameter_group.name} already exists. Returning the exiting parameter group."
-                )
-                return m
         response = self.session.post(
             self.base_path, json=parameter_group.model_dump(by_alias=True, exclude_none=True)
         )
+        return ParameterGroup(**response.json())
+
+    def get_by_name(self, *, name: str) -> ParameterGroup | None:
+        matches = self.list(text=name)
+        for m in matches:
+            if m.name.lower() == name.lower():
+                return m
+        return None
+
+    def update(self, *, updated: ParameterGroup) -> ParameterGroup:
+        existing = self.get_by_id(id=updated.id)
+        path = f"{self.base_path}/{existing.id}"
+        payload = self._generate_patch_payload(existing=existing, updated=updated)
+        response = self.session.patch(path, json=payload)
         return ParameterGroup(**response.json())
