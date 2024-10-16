@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import Field, model_validator
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 
 
 class FieldType(str, Enum):
@@ -38,7 +38,7 @@ class UIComponent(str, Enum):
     DETAILS = "details"
 
 
-class CustomField(BaseAlbertModel):
+class CustomField(BaseResource):
     name: str
     id: str | None = Field(default=None, alias="albertId")
     field_type: FieldType = Field(alias="type")

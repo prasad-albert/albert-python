@@ -5,7 +5,7 @@ from typing import Any
 from pydantic import Field, NonNegativeFloat, PrivateAttr, field_serializer
 
 from albert.collections.inventory import InventoryCategory
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.storage_locations import StorageLocation
@@ -18,7 +18,7 @@ class LotStatus(str, Enum):
     QUARANTINED = "quarantined"
 
 
-class Lot(BaseAlbertModel):
+class Lot(BaseResource):
     id: str | None = Field(None, alias="albertId")
     inventory_id: str = Field(alias="parentId")
     task_id: str | None = Field(default=None, alias="taskId")

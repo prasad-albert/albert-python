@@ -2,10 +2,11 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
+from pydantic import ConfigDict, Field, PrivateAttr
 
 from albert.session import AlbertSession
 from albert.utils.exceptions import AlbertException
+from albert.utils.types import BaseAlbertModel
 
 
 class Status(str, Enum):
@@ -21,23 +22,19 @@ class SecurityClass(str, Enum):
     PUBLIC = "public"
 
 
-class AuditFields(BaseModel):
+class AuditFields(BaseAlbertModel):
     by: str = Field(None)
     by_name: str | None = Field(None, alias="byName")
     at: datetime | None = Field(None)
 
 
-class BaseAlbertModel(BaseModel):
+class BaseResource(BaseAlbertModel):
     _created: AuditFields | None = PrivateAttr(default=None)
     _updated: AuditFields | None = PrivateAttr(default=None)
     status: Status | None = Field(default=None)
 
     model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
         exclude={"session"},
-        arbitrary_types_allowed=True,
-        validate_assignment=True,
     )
 
     def __init__(self, **data: Any):
@@ -59,18 +56,18 @@ class BaseAlbertModel(BaseModel):
         return self._updated
 
 
-class BaseSessionModel(BaseAlbertModel):
+class BaseSessionResource(BaseResource):
     session: AlbertSession | None = Field(
         default=None,
         description=(
             "Albert session for accessing the Albert API. "
-            "The session is included as an optional field to allow for models of this type "
+            "The session is included as an optional field to allow for resources of this type "
             "to be created independently from calls to the API."
         ),
     )
 
 
-class BaseEntityLink(BaseModel):
+class BaseEntityLink(BaseAlbertModel):
     id: str
     name: str | None = Field(default=None, exclude=True)
 
