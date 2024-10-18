@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, EmailStr
 
 from albert.collections.locations import Location
 from albert.collections.roles import Role
@@ -21,7 +21,7 @@ class User(BaseAlbertModel, EntityLinkConvertible):
     """Represents a User on the Albert Platform"""
 
     id: str | None = Field(None, alias="albertId")
-    name: str
+    name: EmailStr
     location: SerializeAsEntityLink[Location] | None = Field(default=None, alias="Location")
     email: str = Field(default=None, alias="email")
     roles: list[SerializeAsEntityLink[Role]] = Field(
