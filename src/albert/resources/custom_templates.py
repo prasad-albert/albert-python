@@ -162,7 +162,7 @@ class CustomTemplate(BaseTaggedEntity):
     id: str = Field(alias="albertId")
     name: str
     category: TemplateCategory = Field(default=TemplateCategory.GENERAL)
-    metadata: dict | None = Field(default=None, alias="Metadata")
+    metadata: dict[str, str | list[BaseEntityLink]] | None = Field(default=None, alias="Metadata")
     data: None | CustomTemplateData = Field(default=None, alias="Data")
     team: list[TeamACL] | None = Field(default=[])
     acl: TemplateACL | None = Field(default=[], alias="ACL")

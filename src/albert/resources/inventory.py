@@ -7,7 +7,12 @@ from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, EntityLinkConvertible, SecurityClass
+from albert.resources.base import (
+    BaseAlbertModel,
+    BaseEntityLink,
+    EntityLinkConvertible,
+    SecurityClass,
+)
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
@@ -114,7 +119,9 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     minimum: list[InventoryMinimum] | None = Field(default=None)  # To do
     alias: str | None = Field(default=None)
     cas: list[CasAmount] | None = Field(default=None, alias="Cas")
-    metadata: dict[str, Any] | None = Field(alias="Metadata", default=None)
+    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
+        alias="Metadata", default=None
+    )
     project_id: str | None = Field(default=None, alias="parentId")
 
     _task_config: list[dict] | None = PrivateAttr(default=None)

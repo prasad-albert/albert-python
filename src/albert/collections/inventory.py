@@ -45,6 +45,7 @@ class InventoryCollection(BaseCollection):
         "unit_category",
         "security_class",
         "alias",
+        "metadata",
     }
 
     def __init__(self, *, session: AlbertSession):
