@@ -1,7 +1,7 @@
 # Albert SDK
 The Albert SDK provides a comprehensive and easy-to-use interface for interacting with the Albert API. The SDK is designed to simplify the process of working with various resources such as inventories, projects, companies, and tags by providing Resource Collections and Resource Models.
 
-> [!WARNING]  
+> [!WARNING]
 > The Albert SDK is still in the early phases of development. As such, patterns may change, and methods may not work as expected. Do not use this package unless you are comfortable with these limitations.
 
 ## Installation
@@ -35,7 +35,7 @@ from albert.albert import Albert
 client = Albert(
     base_url="https://dev.albertinventdev.com", # default value
     token = os.getenv("ALBERT_TOKEN") # default value
-    )
+)
 ```
 
 ## Working with Resource Collections and Models
@@ -43,7 +43,7 @@ client = Albert(
 You can interact with inventory items using the InventoryCollection class. Here is an example of how to create a new inventory item, list all inventory items, and fetch an inventory item by its ID.
 
 ```python
-from albert.albert import Albert
+from albert import Albert
 from albert.resources.inventory import InventoryItem, InventoryCategory, UnitCategory
 from albert.collections.base import OrderBy
 
