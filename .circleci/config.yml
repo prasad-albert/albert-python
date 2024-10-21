@@ -36,6 +36,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Add versioning plugin
+          command: poetry self add "poetry-dynamic-versioning[plugin]"
+      - run:
           name: Publish package
           command: poetry publish --build --repository albert
 
