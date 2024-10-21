@@ -32,6 +32,10 @@ class BaseCollection:
         existing_metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink],
         updated_metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink],
     ):
+        if existing_metadata is None:
+            existing_metadata = {}
+        if updated_metadata is None:
+            updated_metadata = {}
         payload = []
         for key, value in existing_metadata.items():
             if key not in updated_metadata:
