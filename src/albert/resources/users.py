@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, EmailStr
+from pydantic import EmailStr, Field
 
 from albert.collections.locations import Location
 from albert.collections.roles import Role
