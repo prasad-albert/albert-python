@@ -9,7 +9,7 @@ from albert.session import AlbertSession
 
 class UserCollection(BaseCollection):
     _api_version = "v3"
-    _updatable_attributes = {"name", "status", "email"}
+    _updatable_attributes = {"name", "status", "email", "metadata"}
 
     def __init__(self, *, session: AlbertSession):
         """

@@ -2,11 +2,11 @@ from typing import Any
 
 from pydantic import Field, PrivateAttr
 
-from albert.resources.base import BaseAlbertModel, Status
+from albert.resources.base import BaseResource, Status
 from albert.resources.serialization import EntityLinkConvertible
 
 
-class Company(BaseAlbertModel, EntityLinkConvertible):
+class Company(BaseResource, EntityLinkConvertible):
     """
     Company is a Pydantic model representing a company entity.
 

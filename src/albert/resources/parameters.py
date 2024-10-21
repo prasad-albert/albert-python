@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import Field, PrivateAttr
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 
 
 class ParameterCategory(str, Enum):
@@ -10,7 +10,7 @@ class ParameterCategory(str, Enum):
     SPECIAL = "Special"
 
 
-class Parameter(BaseAlbertModel):
+class Parameter(BaseResource):
     id: str | None = Field(alias="albertId", default=None)
     name: str
     _category: ParameterCategory | None = PrivateAttr(default=None)
