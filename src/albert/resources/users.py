@@ -21,9 +21,9 @@ class User(BaseResource, EntityLinkConvertible):
     """Represents a User on the Albert Platform"""
 
     id: str | None = Field(None, alias="albertId")
-    name: EmailStr
+    name: str
     location: SerializeAsEntityLink[Location] | None = Field(default=None, alias="Location")
-    email: str = Field(default=None, alias="email")
+    email: EmailStr = Field(default=None, alias="email")
     roles: list[SerializeAsEntityLink[Role]] = Field(
         max_length=1, default_factory=list, alias="Roles"
     )
