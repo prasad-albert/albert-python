@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import Field, PrivateAttr
 
-from albert.resources.base import AuditFields, BaseAlbertModel, BaseEntityLink, SecurityClass
+from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, SecurityClass
 from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter
 from albert.resources.serialization import SerializeAsEntityLink
@@ -18,11 +18,11 @@ class PGType(str, Enum):
     PROPERTY = "property"
 
 
-class PGMetadata(BaseAlbertModel):
+class PGMetadata(BaseResource):
     standards: list[BaseEntityLink] = Field(alias="Standards")
 
 
-class ParameterValue(BaseAlbertModel):
+class ParameterValue(BaseResource):
     parameter: Parameter = Field(default=None, exclude=True)
     id: str | None = Field(default=None)
     _name = PrivateAttr(default=None)
@@ -71,7 +71,7 @@ class ParameterValue(BaseAlbertModel):
         return self._sequence
 
 
-class ParameterGroup(BaseAlbertModel):
+class ParameterGroup(BaseResource):
     id: str | None = Field(None, alias="albertId")
     name: str
     description: str | None = Field(default=None)
