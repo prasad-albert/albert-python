@@ -7,6 +7,7 @@ from albert.session import AlbertSession
 
 class LotCollection(BaseCollection):
     _api_version = "v3"
+    _updatable_attributes = {"metadata"}
 
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)

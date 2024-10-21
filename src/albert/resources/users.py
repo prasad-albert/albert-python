@@ -1,11 +1,10 @@
 from enum import Enum
-from typing import Any
 
 from pydantic import Field
 
 from albert.collections.locations import Location
 from albert.collections.roles import Role
-from albert.resources.base import BaseResource, EntityLinkConvertible
+from albert.resources.base import BaseEntityLink, BaseResource, EntityLinkConvertible
 from albert.resources.serialization import SerializeAsEntityLink
 
 
@@ -28,4 +27,4 @@ class User(BaseResource, EntityLinkConvertible):
         max_length=1, default_factory=list, alias="Roles"
     )
     user_class: UserClass = Field(default=UserClass.STANDARD, alias="userClass")
-    metadata: dict[str, Any] | None = Field(alias="Metadata", default=None)
+    metadata: dict[str, str | list[BaseEntityLink]] | None = Field(alias="Metadata", default=None)
