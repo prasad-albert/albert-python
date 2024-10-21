@@ -10,6 +10,7 @@ from albert.collections.locations import LocationCollection
 from albert.collections.lots import LotCollection
 from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
+from albert.collections.pricings import PricingCollection
 from albert.collections.projects import ProjectCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.storage_locations import StorageLocationsCollection
@@ -134,3 +135,7 @@ class Albert:
     @property
     def storage_locations(self) -> StorageLocationsCollection:
         return StorageLocationsCollection(session=self.session)
+
+    @property
+    def pricings(self) -> PricingCollection:
+        return PricingCollection(session=self.session)

@@ -32,6 +32,7 @@ from tests.seeding import (
     generate_lot_seeds,
     generate_parameter_group_seeds,
     generate_parameter_seeds,
+    generate_pricing_seeds,
     generate_project_seeds,
     generate_storage_location_seeds,
     generate_tag_seeds,
@@ -331,3 +332,18 @@ def seeded_lots(client: Albert, seeded_inventory, seeded_storage_locations, seed
     for lot in seeded:
         with suppress(NotFoundError):
             client.lots.delete(lot_id=lot.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_pricings(client: Albert, seeded_inventory, seeded_locations):
+    seeded = []
+    all_pricing = generate_pricing_seeds(
+        seeded_inventory=seeded_inventory,
+        seeded_locations=seeded_locations,
+    )
+    for p in all_pricing:
+        seeded.append(client.pricings.create(pricing=p))
+    yield seeded
+    for p in seeded:
+        with suppress(NotFoundError):
+            client.pricings.delete(pricing_id=p.id)
