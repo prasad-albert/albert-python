@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import Field
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 
 
 class WGK(str, Enum):
@@ -22,7 +22,7 @@ class CasCategory(str, Enum):
     CL_INVENTORY_UPLOAD = "CL_Inventory Upload"
 
 
-class Cas(BaseAlbertModel):
+class Cas(BaseResource):
     """
     Cas is a Pydantic model representing a CAS entity.
 

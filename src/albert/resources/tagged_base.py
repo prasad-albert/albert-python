@@ -3,12 +3,12 @@ from typing import Any
 
 from pydantic import Field, model_validator
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tags import Tag
 
 
-class BaseTaggedEntity(BaseAlbertModel):
+class BaseTaggedEntity(BaseResource):
     """
     BaseTaggedEntity is a Pydantic model that includes functionality for handling tags.
     This BaseModel is in its own module so that it can utilize Tags

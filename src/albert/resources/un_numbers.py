@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 
 
-class UnNumber(BaseAlbertModel):
+class UnNumber(BaseResource):
     id: str = Field(alias="albertId")
     storage_class_name: str = Field(alias="storageClassName")
     shipping_description: str = Field(alias="shippingDescription")

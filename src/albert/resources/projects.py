@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel, Field, PrivateAttr
 
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, EntityLinkConvertible
+from albert.resources.base import BaseEntityLink, BaseResource, EntityLinkConvertible
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 
@@ -36,7 +36,7 @@ class GridDefault(str, Enum):
     WKS = "WKS"
 
 
-class Project(BaseAlbertModel, EntityLinkConvertible):
+class Project(BaseResource, EntityLinkConvertible):
     description: str = Field(min_length=1, max_length=2000)
     locations: list[SerializeAsEntityLink[Location]] | None = Field(
         default=None, min_length=1, max_length=20, alias="Locations"

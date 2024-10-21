@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, BaseEntityLink
+from albert.resources.base import BaseEntityLink, BaseResource
 from albert.resources.inventory import InventoryCategory
 from albert.resources.locations import Location
 from albert.resources.projects import Project
@@ -49,13 +49,13 @@ class JobStatus(str, Enum):
     QUEUED = "queued"
 
 
-class SamInput(BaseAlbertModel):
+class SamInput(BaseResource):
     value: str | None = Field(alias="Value", default=None)
     unit: str | None = Field(alias="Unit", default=None)
     name: str = Field(alias="Name")
 
 
-class SamConfig(BaseAlbertModel):
+class SamConfig(BaseResource):
     configuration_name: str = Field(alias="configurationName")
     configurationId: str
     machineId: str | None = Field(default=None)
@@ -63,7 +63,7 @@ class SamConfig(BaseAlbertModel):
     job_status: JobStatus | None = Field(default=None, alias="status")
 
 
-class Workflow(BaseAlbertModel):
+class Workflow(BaseResource):
     id: str
     name: str
     sam_config: list[SamConfig] | None = Field(
@@ -153,7 +153,7 @@ class MemberACL(ACL):
 ACLEntry = Annotated[TeamACL | OwnerACL | MemberACL, Field(discriminator="type")]
 
 
-class TemplateACL(BaseAlbertModel):
+class TemplateACL(BaseResource):
     fgclist: list[ACLEntry] = Field(default=None)
     acl_class: str = Field(alias="class")
 
