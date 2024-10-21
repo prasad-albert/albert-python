@@ -5,7 +5,7 @@ from pydantic import Field, EmailStr
 
 from albert.collections.locations import Location
 from albert.collections.roles import Role
-from albert.resources.base import BaseAlbertModel, EntityLinkConvertible
+from albert.resources.base import BaseResource, EntityLinkConvertible
 from albert.resources.serialization import SerializeAsEntityLink
 
 
@@ -17,7 +17,7 @@ class UserClass(str, Enum):
     ADMIN = "admin"
 
 
-class User(BaseAlbertModel, EntityLinkConvertible):
+class User(BaseResource, EntityLinkConvertible):
     """Represents a User on the Albert Platform"""
 
     id: str | None = Field(None, alias="albertId")

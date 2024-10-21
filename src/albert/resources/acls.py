@@ -1,6 +1,8 @@
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from albert.utils.types import BaseAlbertModel
 
 
 class AccessControlLevel(str, Enum):
@@ -15,7 +17,7 @@ class AccessControlLevel(str, Enum):
     INVENTORY_VIEWER = "InventoryViewer"
 
 
-class ACL(BaseModel):
+class ACL(BaseAlbertModel):
     id: str = Field(description="The id of the user for which this ACL applies")
     fgc: AccessControlLevel | None = Field(
         default=None, description="The Fine-Grain Control Level"

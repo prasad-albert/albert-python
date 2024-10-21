@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import Field
 
-from albert.resources.base import BaseAlbertModel, EntityLinkConvertible
+from albert.resources.base import BaseResource, EntityLinkConvertible
 
 
 class TagEntity(str, Enum):
@@ -21,7 +21,7 @@ class TagEntity(str, Enum):
     COMPANY = "Company"
 
 
-class Tag(BaseAlbertModel, EntityLinkConvertible):
+class Tag(BaseResource, EntityLinkConvertible):
     """
     Tag is a Pydantic model representing a tag entity.
 

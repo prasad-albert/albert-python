@@ -5,7 +5,7 @@ from typing import Union
 import pandas as pd
 from pydantic import Field, PrivateAttr, model_validator
 
-from albert.resources.base import BaseAlbertModel, BaseSessionModel
+from albert.resources.base import BaseResource, BaseSessionResource
 from albert.resources.inventory import InventoryItem
 from albert.utils.exceptions import AlbertException
 
@@ -43,7 +43,7 @@ class DesignType(str, Enum):
     RESULTS = "results"
 
 
-class Cell(BaseAlbertModel):
+class Cell(BaseResource):
     column_id: str = Field(alias="colId")
     row_id: str = Field(alias="rowId")
     value: str | dict = ""
@@ -65,7 +65,7 @@ class Cell(BaseAlbertModel):
         return self.format.get("bgColor", None)
 
 
-class Component(BaseAlbertModel):
+class Component(BaseResource):
     inventory_item: InventoryItem
     amount: float
     _cell: Cell = None  # read only property set on registrstion
@@ -75,11 +75,11 @@ class Component(BaseAlbertModel):
         return self._cell
 
 
-class DesignState(BaseAlbertModel):
+class DesignState(BaseResource):
     collapsed: bool | None = False
 
 
-class Design(BaseSessionModel):
+class Design(BaseSessionResource):
     state: DesignState | None = Field({})
     id: str = Field(alias="albertId")
     design_type: DesignType = Field(alias="designType")
@@ -186,7 +186,7 @@ class Design(BaseSessionModel):
         return self._rows
 
 
-class Sheet(BaseSessionModel):
+class Sheet(BaseSessionResource):
     id: str = Field(alias="albertId")
     name: str
     # formulations: list[Formulations] | None = Field(None)
@@ -720,7 +720,7 @@ class Sheet(BaseSessionModel):
             )
 
 
-class Column(BaseSessionModel):
+class Column(BaseSessionResource):
     column_id: str = Field(alias="colId")
     name: str | None = Field(default=None)
     type: CellType
@@ -767,7 +767,7 @@ class Column(BaseSessionModel):
         return self.sheet.update_cells(cells=new_cells)
 
 
-class Row(BaseSessionModel):
+class Row(BaseSessionResource):
     row_id: str = Field(alias="rowId")
     type: CellType
     design: Design
