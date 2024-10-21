@@ -7,7 +7,7 @@ from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, SecurityClass
+from albert.resources.base import BaseResource, EntityLinkConvertible, SecurityClass
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
@@ -29,7 +29,7 @@ class InventoryUnitCategory(str, Enum):
     UNITS = "units"
 
 
-class CasAmount(BaseAlbertModel):
+class CasAmount(BaseResource):
     """
     CasAmount is a Pydantic model representing an amount of a given CAS.
 
@@ -65,7 +65,7 @@ class CasAmount(BaseAlbertModel):
         return self
 
 
-class InventoryMinimum(BaseAlbertModel):
+class InventoryMinimum(BaseResource):
     """Defined the minimum amount of an InventoryItem that must be kept in stock at a given Location.
     Attributes
     ----------
@@ -103,7 +103,7 @@ class InventoryMinimum(BaseAlbertModel):
         return self
 
 
-class InventoryItem(BaseTaggedEntity):
+class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     id: str | None = Field(None, alias="albertId")
     name: str | None = None
     description: str | None = None

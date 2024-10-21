@@ -3,7 +3,8 @@ from typing import Any
 
 from pydantic import Field, PrivateAttr
 
-from albert.resources.base import AuditFields, BaseAlbertModel, BaseEntityLink, SecurityClass
+from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, SecurityClass
+from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
@@ -17,17 +18,17 @@ class PGType(str, Enum):
     PROPERTY = "property"
 
 
-class PGMetadata(BaseAlbertModel):
+class PGMetadata(BaseResource):
     standards: list[BaseEntityLink] = Field(alias="Standards")
 
 
-class ParameterValue(BaseAlbertModel):
+class ParameterValue(BaseResource):
     parameter: Parameter = Field(default=None, exclude=True)
     id: str | None = Field(default=None)
     _name = PrivateAttr(default=None)
     short_name: str | None = Field(alias="shortName", default=None)
-    value: str | None = Field(default=None)
-    unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit")
+    value: str | None | SerializeAsEntityLink[InventoryItem] = Field(default=None)
+    unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
     _sequence: int | None = PrivateAttr(default=None)
     added: AuditFields | None = Field(alias="Added", default=None)
 
@@ -41,7 +42,11 @@ class ParameterValue(BaseAlbertModel):
             if "albertId" in data or "id" in data:
                 AlbertException("Please provide either an id or an parameter object, not both.")
             else:
-                param_id = data["parameter"].get("albertId", None)
+                param_id = (
+                    data["parameter"].get("albertId", None)
+                    if isinstance(data["parameter"], dict)
+                    else data["parameter"].id
+                )
                 if param_id is None:
                     param_id = data["parameter"].get("id", None)
                 if param_id is None:
@@ -49,7 +54,11 @@ class ParameterValue(BaseAlbertModel):
                         "You must first create the parameter before creating a parameter value. Your parameter object must have an id."
                     )
                 data["albertId"] = param_id
-                data["name"] = data["parameter"]["name"]
+                data["name"] = (
+                    data["parameter"]["name"]
+                    if isinstance(data["parameter"], dict)
+                    else data["parameter"].name
+                )
         elif "id" not in data and not data["parameter"]:
             AlbertException("Please provide either an id or an parameter object.")
 
@@ -62,7 +71,7 @@ class ParameterValue(BaseAlbertModel):
         return self._sequence
 
 
-class ParameterGroup(BaseAlbertModel):
+class ParameterGroup(BaseResource):
     id: str | None = Field(None, alias="albertId")
     name: str
     description: str | None = Field(default=None)

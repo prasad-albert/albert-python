@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import Field, model_validator
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 
 
 class ListItemCategory(str, Enum):
@@ -12,7 +12,7 @@ class ListItemCategory(str, Enum):
     EXTENSIONS = "extensions"
 
 
-class ListItem(BaseAlbertModel):
+class ListItem(BaseResource):
     name: str
     id: str | None = Field(default=None, alias="albertId")
     category: ListItemCategory | None = Field(default=None)

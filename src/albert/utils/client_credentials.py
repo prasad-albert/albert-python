@@ -1,10 +1,12 @@
 import os
 from typing import Union
 
-from pydantic import BaseModel, SecretStr
+from pydantic import SecretStr
+
+from albert.utils.types import BaseAlbertModel
 
 
-class ClientCredentials(BaseModel):
+class ClientCredentials(BaseAlbertModel):
     """Client authentication credentials for the Albert API."""
 
     id: str

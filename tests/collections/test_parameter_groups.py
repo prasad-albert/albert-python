@@ -1,7 +1,10 @@
 from collections.abc import Generator
 
+import pytest
+
 from albert.albert import Albert
 from albert.resources.parameter_groups import ParameterGroup
+from albert.utils.exceptions import BadRequestError
 
 
 def _list_asserts(returned_list):
@@ -28,12 +31,11 @@ def test_advanced_list(client: Albert, seeded_parameter_groups: list[ParameterGr
     _list_asserts(list_response)
 
 
-def test_returns_existing(caplog, client: Albert, seeded_parameter_groups: list[ParameterGroup]):
+def test_dupe_raises_error(client: Albert, seeded_parameter_groups: list[ParameterGroup]):
     pg = seeded_parameter_groups[0].model_copy(update={"id": None})
-    returned_pg = client.parameter_groups.create(parameter_group=pg)
-    assert (
-        f"Parameter Group {pg.name} already exists. Returning the exiting parameter group."
-        in caplog.text
-    )
-    assert returned_pg.id == seeded_parameter_groups[0].id
-    assert returned_pg.name == seeded_parameter_groups[0].name
+    # reset audit fields
+    pg._created = None
+    pg._updated = None
+    pg.parameters = []
+    with pytest.raises(BadRequestError):
+        client.parameter_groups.create(parameter_group=pg)

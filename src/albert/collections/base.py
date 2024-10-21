@@ -1,6 +1,6 @@
 from enum import Enum
 
-from albert.resources.base import BaseAlbertModel
+from albert.resources.base import BaseResource
 from albert.session import AlbertSession
 
 
@@ -26,9 +26,7 @@ class BaseCollection:
     # Class property specifying updatable attributes
     _updatable_attributes = {}
 
-    def _generate_patch_payload(
-        self, *, existing: BaseAlbertModel, updated: BaseAlbertModel
-    ) -> dict:
+    def _generate_patch_payload(self, *, existing: BaseResource, updated: BaseResource) -> dict:
         """Generates a payload for PATCH requests based on the changes. This is overriden for some clases with more compex patch formation"""
         payload = {"data": []}
         for attribute in self._updatable_attributes:
