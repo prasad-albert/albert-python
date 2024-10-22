@@ -2,6 +2,7 @@ import os
 
 from albert.collections.btdataset import BTDatasetCollection
 from albert.collections.btinsight import BTInsightCollection
+from albert.collections.btmodel import BTModelSessionCollection
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_fields import CustomFieldCollection
@@ -152,9 +153,9 @@ class Albert:
         return BTDatasetCollection(session=self.session)
 
     @property
-    def btmodels(self) -> None:
-        return
+    def btmodels(self) -> BTModelSessionCollection:
+        return BTModelSessionCollection(session=self.session)
 
     @property
-    def btinsights(self) -> None:
+    def btinsights(self) -> BTInsightCollection:
         return BTInsightCollection(session=self.session)
