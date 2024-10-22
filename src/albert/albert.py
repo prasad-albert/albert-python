@@ -1,6 +1,7 @@
 import os
 
 from albert.collections.btdataset import BTDatasetCollection
+from albert.collections.btinsight import BTInsightCollection
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_fields import CustomFieldCollection
@@ -156,4 +157,4 @@ class Albert:
 
     @property
     def btinsights(self) -> None:
-        return
+        return BTInsightCollection(session=self.session)
