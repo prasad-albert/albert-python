@@ -37,7 +37,7 @@ def test_advanced_users_list(client: Albert, seeded_users: list[User]):
             break
     assert found
 
-    adv_list_no_match = client.users.list(text="h78frg279fbg92ubue9b 80fh0hnvioh")
+    adv_list_no_match = client.users.list(text="h78frg279fbg92ubue9b80fhXBGYF&*0hnvioh")
     assert isinstance(adv_list_no_match, Generator)
     assert next(adv_list_no_match, None) is None
 
