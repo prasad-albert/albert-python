@@ -53,7 +53,7 @@ class Lot(BaseResource):
         The lot number of the lot. Optional.
     external_barcode_id : str | None
         The external barcode ID of the lot. Optional.
-    metadata : dict[str, str | list[BaseEntityLink]] | None
+    metadata : dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None
         The metadata of the lot. Optional. Metadata allowed values can be found using the Custom Fields API.
     has_notes : bool
         Whether the lot has notes. Read-only.
@@ -88,7 +88,9 @@ class Lot(BaseResource):
     _parent_unit: str | None = PrivateAttr(default=None)
     _parent_category: InventoryCategory | None = PrivateAttr(default=None)
     _barcode_id: str | None = PrivateAttr(default=None)
-    metadata: dict[str, str | list[BaseEntityLink]] | None = Field(alias="Metadata", default=None)
+    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
+        alias="Metadata", default=None
+    )
 
     # because quarantined is an allowed Lot status, we need to extend the normal status
     _status: LotStatus | None = PrivateAttr(default=None)

@@ -57,7 +57,7 @@ class Project(BaseResource, EntityLinkConvertible):
         The locations associated with the project. Optional.
     project_class : ProjectClass
         The class of the project. Defaults to PRIVATE.
-    metadata : dict[str, str | list[BaseEntityLink]] | None
+    metadata : dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None
         The metadata of the project. Optional. Metadata allowed values can be found using the Custom Fields API.
     prefix : str | None
         The prefix of the project. Optional.
@@ -91,7 +91,9 @@ class Project(BaseResource, EntityLinkConvertible):
     old_api_params: dict | None = None
     task_config: list[TaskConfig] | None = Field(default_factory=list)
     grid: GridDefault | None = None
-    metadata: dict[str, str | list[BaseEntityLink]] | None = Field(alias="Metadata", default=None)
+    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
+        alias="Metadata", default=None
+    )
     _state: State | None = PrivateAttr(default=None)
 
     def __init__(self, **data: Any):
