@@ -8,12 +8,12 @@ def test_update(client: Albert):
     # modify locally
     cf.hidden = True
     # update
-    cf_updated = client.update(updated_object=cf)
+    cf_updated = client.custom_fields.update(updated_object=cf)
     assert isinstance(cf_updated, CustomField)
     assert cf_updated.hidden == True
     # modify locally
     cf_updated.hidden = False
     # update
-    cf = client.update(updated_object=cf_updated)
+    cf = client.custom_fields.update(updated_object=cf_updated)
     assert isinstance(cf, CustomField)
     assert cf.hidden == True
