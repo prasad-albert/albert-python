@@ -4,6 +4,7 @@ from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_fields import CustomFieldCollection
 from albert.collections.custom_templates import CustomTemplatesCollection
+from albert.collections.files import FileCollection
 from albert.collections.inventory import InventoryCollection
 from albert.collections.lists import ListsCollection
 from albert.collections.locations import LocationCollection
@@ -139,3 +140,7 @@ class Albert:
     @property
     def pricings(self) -> PricingCollection:
         return PricingCollection(session=self.session)
+
+    @property
+    def files(self) -> FileCollection:
+        return FileCollection(session=self.session)
