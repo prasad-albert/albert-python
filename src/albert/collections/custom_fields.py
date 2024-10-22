@@ -1,5 +1,3 @@
-import logging
-
 from albert.collections.base import BaseCollection
 from albert.resources.custom_fields import CustomField, ServiceType
 from albert.session import AlbertSession

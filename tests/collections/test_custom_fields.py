@@ -1,5 +1,3 @@
-from collections.abc import Generator
-
 from albert.albert import Albert
 from albert.resources.custom_fields import CustomField
 
