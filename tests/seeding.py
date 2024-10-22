@@ -23,6 +23,7 @@ from albert.resources.lots import (
 )
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
+from albert.resources.pricings import Pricing
 from albert.resources.projects import (
     GridDefault,
     Project,
@@ -625,5 +626,40 @@ def generate_lot_seeds(
             # ),
             notes="This lot is quarantined due to quality issues.",
             external_barcode_id=str(uuid4()),
+        ),
+    ]
+
+
+def generate_pricing_seeds(
+    seeded_inventory: list[InventoryItem], seeded_locations: list[Location]
+) -> list[Pricing]:
+    return [
+        Pricing(
+            inventory_item_id=seeded_inventory[0].id,
+            company=seeded_inventory[0].company,
+            location=seeded_locations[0],
+            description="TEST - Pricing seed 1",
+            price=42.0,
+        ),
+        Pricing(
+            inventory_item_id=seeded_inventory[0].id,
+            company=seeded_inventory[0].company,
+            location=seeded_locations[1],
+            description="TEST - Pricing seed 2",
+            price=50.0,
+        ),
+        Pricing(
+            inventory_item_id=seeded_inventory[1].id,
+            company=seeded_inventory[2].company,
+            location=seeded_locations[0],
+            description="TEST - Pricing seed 3",
+            price=10.50,
+        ),
+        Pricing(
+            inventory_item_id=seeded_inventory[2].id,
+            company=seeded_inventory[2].company,
+            location=seeded_locations[1],
+            description="TEST - Pricing seed 4",
+            price=5375.97,
         ),
     ]

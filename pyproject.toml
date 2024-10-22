@@ -23,13 +23,18 @@ Homepage = "https://github.com/MoleculeEngineering/albert-sdk"
 python = "^3.10"
 requests = "2.32.3"
 pandas = "2.2.2"
-pydantic = "2.8.2"
+pydantic = { version = "2.8.2", extras = ["email"] }
 python-jose = "^3.3.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "0.6.4"
 pytest = "8.3.2"
 jupyter = "1.1.1"
+
+[[tool.poetry.source]]
+name = "albert"
+url = "https://pypi.ai.albertinvent.com"
+priority = "supplemental"
 
 [tool.poetry-dynamic-versioning]
 enable = true

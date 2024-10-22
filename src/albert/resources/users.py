@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import Field
+from pydantic import EmailStr, Field
 
 from albert.collections.locations import Location
 from albert.collections.roles import Role
@@ -22,7 +22,7 @@ class User(BaseResource, EntityLinkConvertible):
     id: str | None = Field(None, alias="albertId")
     name: str
     location: SerializeAsEntityLink[Location] | None = Field(default=None, alias="Location")
-    email: str = Field(default=None, alias="email")
+    email: EmailStr = Field(default=None, alias="email")
     roles: list[SerializeAsEntityLink[Role]] = Field(
         max_length=1, default_factory=list, alias="Roles"
     )
