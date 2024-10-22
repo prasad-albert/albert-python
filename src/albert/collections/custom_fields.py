@@ -1,4 +1,5 @@
 import logging
+
 from albert.collections.base import BaseCollection
 from albert.resources.custom_fields import CustomField, ServiceType
 from albert.session import AlbertSession
@@ -83,33 +84,15 @@ class CustomFieldCollection(BaseCollection):
         return None
 
     def create(self, *, custom_field: CustomField, avoid_duplicates: bool = True):
-        # Check to see if there is a match on name
-        if avoid_duplicates:
-            existing = self.get_match_or_none(custom_field=custom_field)
-            if isinstance(existing, CustomField):
-                logging.warning(
-                    f"CustomField item already exists with name {existing.name} and id {existing.id}, returning existing item."
-                )
-                return existing
         # post new customfield
         response = self.session.post(
             self.base_path, json=custom_field.model_dump(by_alias=True, exclude_none=True)
         )
         return CustomField(**response.json())
-    
-    def get_match_or_none(self, *, custom_field: CustomField) -> CustomField | None:
-        """
-        Get a matching custom field item or return None if not found.
-        """
-        # search
-        hits = self.list(name=custom_field.name)
-        first_hit = next(hits)
-        if first_hit:
-            return first_hit
-        else:
-            return None
-    
-    def _generate_customfields_patch_payload(self, *, existing: CustomField, updated: CustomField) -> dict:
+
+    def _generate_customfields_patch_payload(
+        self, *, existing: CustomField, updated: CustomField
+    ) -> dict:
         """
         Generate the PATCH payload for updating a custom field item.
         """
@@ -117,17 +100,16 @@ class CustomFieldCollection(BaseCollection):
         payload = self._generate_patch_payload(existing=existing, updated=updated)
         # modify
         for _patch in payload["data"]:
-            if _patch["attribute"] ==  "hidden":
+            if _patch["attribute"] == "hidden":
                 if existing.hidden is None:
                     # update
-                    _patch["operation"] = 'update'
+                    _patch["operation"] = "update"
                     _patch["newValue"] = bool(updated.hidden)  # to avoid string type in payload
                 else:
                     _patch["oldValue"] = bool(existing.hidden)  # to avoid string type in payload
                     _patch["newValue"] = bool(updated.hidden)  # to avoid string type in payload
         return payload
 
-    
     def update(self, *, updated_object: CustomField) -> CustomField:
         """
         Update a CustomField item.
@@ -145,4 +127,3 @@ class CustomFieldCollection(BaseCollection):
         self.session.patch(url, json=patch_payload)
         updated_ctf = self.get_by_id(id=updated_object.id)
         return updated_ctf
-
