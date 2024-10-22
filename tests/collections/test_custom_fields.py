@@ -2,9 +2,9 @@ from albert.albert import Albert
 from albert.resources.custom_fields import CustomField
 
 
-def test_update(client: Albert):
+def test_update(client: Albert, seeded_custom_fields):
     # get field
-    cf = next(client.custom_fields.list())
+    cf = seeded_custom_fields[0]
     # modify locally
     cf.hidden = True
     # update
