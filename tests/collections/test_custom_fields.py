@@ -4,7 +4,7 @@ from albert.resources.custom_fields import CustomField
 
 def test_update(client: Albert):
     # get field
-    cf = client.next(client.custom_fields.list())
+    cf = next(client.custom_fields.list())
     # modify locally
     cf.hidden = True
     # update
