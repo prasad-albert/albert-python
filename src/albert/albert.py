@@ -1,5 +1,6 @@
 import os
 
+from albert.collections.btdataset import BTDatasetCollection
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_fields import CustomFieldCollection
@@ -144,3 +145,15 @@ class Albert:
     @property
     def files(self) -> FileCollection:
         return FileCollection(session=self.session)
+
+    @property
+    def btdatasets(self) -> BTDatasetCollection:
+        return BTDatasetCollection(session=self.session)
+
+    @property
+    def btmodels(self) -> None:
+        return
+
+    @property
+    def btinsights(self) -> None:
+        return
