@@ -155,7 +155,7 @@ class Design(BaseSessionResource):
     _grid: pd.DataFrame | None = PrivateAttr(default=None)
     _rows: list["Row"] | None = PrivateAttr(default=None)
     _columns: list["Column"] | None = PrivateAttr(default=None)
-    _sheet: Union["Sheet", None] = PrivateAttr(default=None)  # ruff: noqa
+    _sheet: Union["Sheet", None] = PrivateAttr(default=None)  # noqa
 
     def _grid_to_cell_df(self, *, grid_response):
         all_rows = []
@@ -255,7 +255,7 @@ class Design(BaseSessionResource):
         return self._rows
 
 
-class Sheet(BaseSessionResource):
+class Sheet(BaseSessionResource):  # noqa:F811
     """A Sheet in Albert
 
     Attributes
@@ -812,7 +812,7 @@ class Sheet(BaseSessionResource):
             )
 
 
-class Column(BaseSessionResource):
+class Column(BaseSessionResource):  # noqa:F811
     """A column in a Sheet
 
     Attributes
@@ -877,7 +877,7 @@ class Column(BaseSessionResource):
         return self.sheet.update_cells(cells=new_cells)
 
 
-class Row(BaseSessionResource):
+class Row(BaseSessionResource):  # noqa:F811
     """A row in a Sheet
 
     Attributes
