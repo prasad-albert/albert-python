@@ -31,6 +31,4 @@ def test_file_round_trip(client: Albert):
 
     # Last: Download the file and compare the data
     response = requests.get(download_url)
-    response_data = json.loads(response.content)
-
-    assert response_data == file_data
+    assert response.json() == file_data
