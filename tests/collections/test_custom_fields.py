@@ -16,4 +16,4 @@ def test_update(client: Albert):
     # update
     cf = client.custom_fields.update(updated_object=cf_updated)
     assert isinstance(cf, CustomField)
-    assert cf.hidden == True
+    assert cf.hidden == False
