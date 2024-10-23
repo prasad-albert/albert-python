@@ -142,6 +142,7 @@ class BaseCollection:
         *,
         existing: BaseResource,
         updated: BaseResource,
+        generate_metadata_diff: bool = True,
     ) -> PatchPayload:
         """Generate a payload for PATCH requests based on the changes.
 
@@ -149,9 +150,9 @@ class BaseCollection:
         """
         data = []
         for attribute in self._updatable_attributes:
-            old_value = getattr(existing, attribute, None)
+            old_value = getattr(existing, attribute, None) if existing else None
             new_value = getattr(updated, attribute, None)
-            if attribute == "metadata":
+            if attribute == "metadata" and generate_metadata_diff:
                 data.extend(
                     self._generate_metadata_diff(
                         existing_metadata=old_value,

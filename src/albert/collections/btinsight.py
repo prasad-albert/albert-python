@@ -172,6 +172,7 @@ class BTInsightCollection(BaseCollection):
         payload = self._generate_patch_payload(
             existing=self.get_by_id(id=insight.id),
             updated=insight,
+            generate_metadata_diff=False,
         )
         self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=insight.id)
