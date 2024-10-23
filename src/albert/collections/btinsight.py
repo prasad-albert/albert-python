@@ -1,7 +1,9 @@
-from albert.collections.base import BaseCollection
-from albert.resources.btinsight import BTInsight, BTInsightCategory
+from albert.collections.base import BaseCollection, OrderBy
+from albert.resources.btinsight import BTInsight, BTInsightCategory, BTInsightState
 from albert.session import AlbertSession
-from albert.utils.pagination import ListIterator
+from albert.utils.exceptions import InternalServerError
+from albert.utils.logging import logger
+from albert.utils.pagination import SearchPaginator
 
 
 class BTInsightCollection(BaseCollection):
@@ -22,6 +24,7 @@ class BTInsightCollection(BaseCollection):
     _updatable_attributes = {
         "name",
         "state",
+        "metadata",
         "dataset_id",
         "model_session_id",
         "output_key",
@@ -29,7 +32,6 @@ class BTInsightCollection(BaseCollection):
         "end_time",
         "total_time",
         "registry",
-        "tags",
     }
     _api_version = "v3"
 
@@ -47,17 +49,17 @@ class BTInsightCollection(BaseCollection):
 
     def create(self, *, insight: BTInsight) -> BTInsight:
         """
-        Create a new Breakthrough insight.
+        Create a new BTInsight.
 
         Parameters
         ----------
         insight : BTInsight
-            The dataset record to create.
+            The BTInsight record to create.
 
         Returns
         -------
         BTInsight
-            The created Breakthrough insight.
+            The created BTInsight.
         """
         response = self.session.post(
             self.base_path,
@@ -67,7 +69,7 @@ class BTInsightCollection(BaseCollection):
 
     def get_by_id(self, *, id: str) -> BTInsight:
         """
-        Get a Breakthrough insight by ID.
+        Get a BTInsight by ID.
 
         Parameters
         ----------
@@ -77,7 +79,7 @@ class BTInsightCollection(BaseCollection):
         Returns
         -------
         BTInsight
-            The retrived Breakthrough insight.
+            The retrived BTInsight.
         """
         response = self.session.get(f"{self.base_path}/{id}")
         return BTInsight(**response.json())
@@ -86,30 +88,104 @@ class BTInsightCollection(BaseCollection):
         self,
         *,
         limit: int = 100,
-        name: str | None = None,
-        created_by: str | None = None,
-        category: BTInsightCategory | None = None,
-        start_key: str | None = None,
-    ) -> ListIterator[BTInsight]:
+        offset: int | None = None,
+        order_by: OrderBy | None = None,
+        sort_by: str | None = None,
+        text: str | None = None,
+        name: str | list[str] | None = None,
+        state: BTInsightState | list[BTInsightState] | None = None,
+        category: BTInsightCategory | list[BTInsightCategory] | None = None,
+    ) -> SearchPaginator[BTInsight | None]:
+        """List items in the BTInsight collection.
+
+        Parameters
+        ----------
+        limit : int, optional
+            Number of items to return per page, default 100
+        offset : int | None, optional
+            Item offset to begin search at, default None
+        order_by : OrderBy | None, optional
+            Asc/desc ordering, default None
+        sort_by : str | None
+            Sort field, default None
+        text : str | None
+            Text field in search query, default None
+        name : str | list[str] | None
+            BTInsight name search filter, default None
+        state : BTInsightState | list[BTInsightState] | None
+            BTInsight state search filter, default None
+        category : BTInsightCategory | list[BTInsightCategory] | None
+            BTInsight category search filter, default None
+
+        Returns
+        -------
+        SearchPaginator[BTInsight | None]
+            An iterator over the BTInsight search query.
+        """
+
+        def deserialize(data: dict) -> BTInsight | None:
+            id = data["albertId"]
+            try:
+                return self.get_by_id(id=id)
+            except InternalServerError as e:
+                logger.warning(f"Error fetching insight '{id}': {e}")
+                return None
+
         params = {
             "limit": limit,
+            "offset": offset,
+            "order": OrderBy(order_by).value if order_by else None,
+            "sortBy": sort_by,
+            "text": text,
             "name": name,
-            "createdBy": created_by,
-            "category": category.value if category else None,
-            "startKey": start_key,
         }
-        return ListIterator(
-            path=self.base_path,
+        if state:
+            state = state if isinstance(state, list) else [state]
+            params["state"] = [BTInsightState(x).value for x in state]
+        if category:
+            category = category if isinstance(category, list) else [category]
+            params["category"] = [BTInsightCategory(x).value for x in category]
+
+        return SearchPaginator(
+            path=f"{self.base_path}/search",
             session=self.session,
-            resource_cls=BTInsight,
+            deserialize=deserialize,
             params=params,
         )
 
-    def update(self, *, dataset: BTInsight) -> BTInsight:
-        path = f"{self.base_path}/{dataset.id}"
+    def update(self, *, insight: BTInsight) -> BTInsight:
+        """Update a BTInsight.
+
+        Parameters
+        ----------
+        insight : BTInsight
+            The BTInsight to update.
+
+        Returns
+        -------
+        BTInsight
+            The updated BTInsight.
+        """
+        path = f"{self.base_path}/{insight.id}"
         patch = self._generate_patch_payload(
-            existing=self.get_by_id(id=dataset.id),
-            updated=dataset,
+            existing=self.get_by_id(id=insight.id),
+            updated=insight,
         )
         self.session.patch(path, json=patch)
-        return self.get_by_id(id=dataset.id)
+        return self.get_by_id(id=insight.id)
+
+    def delete(self, *, id: str) -> bool:
+        """Delete a BTInsight by ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the BTInsight to delete.
+
+        Returns
+        -------
+        bool
+            If the BTInsight was deleted.
+        """
+        self.session.delete(f"{self.base_path}/{id}")
+        return True

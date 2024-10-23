@@ -19,7 +19,7 @@ class BTModelState(str, Enum):
     ERROR = "Error"
 
 
-class BTModelSession(BaseSessionResource):
+class BTModelSession(BaseSessionResource, protected_namespaces=()):
     name: str
     category: BTModelCategory
     dataset_id: str = Field(..., alias="datasetId")

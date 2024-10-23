@@ -134,7 +134,12 @@ class BaseCollection:
                     )
         return payload
 
-    def _generate_patch_payload(self, *, existing: BaseResource, updated: BaseResource) -> dict:
+    def _generate_patch_payload(
+        self,
+        *,
+        existing: BaseResource,
+        updated: BaseResource,
+    ) -> dict:
         """Generates a payload for PATCH requests based on the changes. This is overriden for some clases with more compex patch formation"""
         payload = {"data": []}
         for attribute in self._updatable_attributes:
@@ -143,7 +148,8 @@ class BaseCollection:
             if attribute == "metadata":
                 payload["data"].extend(
                     self._generate_metadata_diff(
-                        existing_metadata=old_value, updated_metadata=new_value
+                        existing_metadata=old_value,
+                        updated_metadata=new_value,
                     )
                 )
             else:

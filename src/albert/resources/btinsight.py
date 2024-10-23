@@ -33,10 +33,10 @@ class BTInsightRegistry(BaseAlbertModel):
     metrics: dict[str, Any] | None = Field(None, alias="Metrics")
 
 
-class BTInsight(BaseResource):
+class BTInsight(BaseResource, protected_namespaces=()):
     name: str
     category: BTInsightCategory
-    metadata: dict[str, Any] | None = Field(alias="Metadata")
+    metadata: dict[str, Any] = Field(alias="Metadata")
     state: BTInsightState | None = Field(default=None)
     id: str | None = Field(default=None, alias="albertId")
     dataset_id: str | None = Field(default=None, alias="datasetId")
@@ -48,5 +48,4 @@ class BTInsight(BaseResource):
     raw_payload: dict[str, Any] | None = Field(default=None, alias="RawPayload")
     payload_type: BTInsightPayloadType | None = Field(default=None, alias="payloadType")
     registry: BTInsightRegistry | None = Field(default=None, alias="Registry")
-    # tags: Tag | None = Field(default=None, alias="Tags")
     content_edited: bool | None = Field(default=None, alias="contentEdited")

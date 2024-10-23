@@ -1,39 +1,46 @@
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import Generic, TypeVar
 
-from albert.resources.base import BaseResource
 from albert.session import AlbertSession
 
-ResourceType = TypeVar("ResourceType", bound=BaseResource)
+ItemType = TypeVar("ItemType")
 
 
-class ListIterator(Generic[ResourceType]):
+class SearchPaginator(Generic[ItemType]):
+    """Helper class for paginating through Albert 'search' endpoints.
+
+    The search endpoints use a limit/offset pagination scheme which can be handled generally.
+    A custom 'deserialize' function is provided when additional logic is required to load
+    the raw items returned by the search listing, e.g., making additional Albert API calls.
+    """
+
     def __init__(
         self,
         *,
         path: str,
         session: AlbertSession,
-        resource_cls: type[ResourceType],
+        deserialize: Callable[[dict], ItemType],
         params: dict[str, str] | None = None,
-        items_key: str = "Items",
     ):
         self.path = path
         self.session = session
-        self.resource_cls = resource_cls
+        self.deserialize = deserialize
         self.params = {k: v for k, v in params.items() if v is not None}
-        self.items_key = items_key
 
-    def __iter__(self) -> Iterator[ResourceType]:
+    def __iter__(self) -> Iterator[ItemType]:
         while True:
             response = self.session.get(self.path, params=self.params)
             response_data = response.json()
 
-            items = response_data.get(self.items_key, [])
-            for item in items:
-                yield self.resource_cls(**item)
-
-            start_key = response_data.get("lastKey")
-            limit = self.params.get("limit")
-            if not start_key or (limit is not None and len(items) < limit):
+            items = response_data.get("Items", [])
+            if len(items) == 0:
                 return
-            self.params["startKey"] = start_key
+
+            for item in items:
+                yield self.deserialize(item)
+
+            offset = response_data.get("offset")
+            if not offset:
+                return
+
+            self.params["offset"] = int(offset) + len(items)
