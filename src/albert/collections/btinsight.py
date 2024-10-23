@@ -21,6 +21,7 @@ class BTInsightCollection(BaseCollection):
         The base path for BTInsight API requests.
     """
 
+    _api_version = "v3"
     _updatable_attributes = {
         "name",
         "state",
@@ -33,7 +34,6 @@ class BTInsightCollection(BaseCollection):
         "total_time",
         "registry",
     }
-    _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
         """

@@ -19,7 +19,7 @@ class BTModelSessionCollection(BaseCollection):
     """
 
     _api_version = "v3"
-    _updatable_attributes = {}
+    _updatable_attributes = {"name", "flag", "registry"}
 
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
@@ -42,7 +42,13 @@ class BTModelSessionCollection(BaseCollection):
         return self._deserialize_with_session(response.json())
 
     def update(self, *, model_session: BTModelSession) -> BTModelSession:
-        pass
+        path = f"{self.base_path}/{model_session.id}"
+        patch = self._generate_patch_payload(
+            existing=self.get_by_id(id=model_session.id),
+            updated=model_session,
+        )
+        self.session.patch(path, json=patch)
+        return self.get_by_id(id=model_session.id)
 
 
 class BTModelCollection(BaseCollection):
@@ -56,7 +62,7 @@ class BTModelCollection(BaseCollection):
     session : AlbertSession
         The Albert session instance.
     parent_id: str
-        The Albert ID for the parent model session.
+        The Albert ID for the parent BTModelSession.
 
     Attributes
     ----------
@@ -64,12 +70,13 @@ class BTModelCollection(BaseCollection):
         The base path for BTModel API requests.
     """
 
-    _updatable_attributes = {}
+    _api_version = "v3"
+    _updatable_attributes = {"state", "start_time", "end_time", "total_time", "model_binary_key"}
 
     def __init__(self, *, session: AlbertSession, parent_id: str):
         super().__init__(session=session)
         self.parent_id = parent_id
-        self.base_path = f"/api/{BTModelSessionCollection._api_version}/btmodel/{parent_id}/model"
+        self.base_path = f"/api/{BTModelCollection._api_version}/btmodel/{parent_id}/model"
 
     def create(self, *, model: BTModel) -> BTModel:
         response = self.session.post(
@@ -83,4 +90,10 @@ class BTModelCollection(BaseCollection):
         return BTModel(**response.json())
 
     def update(self, *, model: BTModel) -> BTModel:
-        pass
+        path = f"{self.base_path}/{model.id}"
+        patch = self._generate_patch_payload(
+            existing=self.get_by_id(id=model.id),
+            updated=model,
+        )
+        self.session.patch(path, json=patch)
+        return self.get_by_id(id=model.id)

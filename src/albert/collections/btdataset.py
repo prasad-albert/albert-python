@@ -18,8 +18,8 @@ class BTDatasetCollection(BaseCollection):
         The base path for btdataset API requests.
     """
 
-    _updatable_attributes = {"name", "key", "file_name", "report"}
     _api_version = "v3"
+    _updatable_attributes = {"name", "key", "file_name"}
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -35,17 +35,17 @@ class BTDatasetCollection(BaseCollection):
 
     def create(self, *, dataset: BTDataset) -> BTDataset:
         """
-        Create a new Breakthrough dataset.
+        Create a new BTDataset.
 
         Parameters
         ----------
         dataset : BTDataset
-            The dataset record to create.
+            The BTDataset record to create.
 
         Returns
         -------
         BTDataset
-            The created Breakthrough dataset.
+            The created BTDataset.
         """
         response = self.session.post(
             self.base_path,
@@ -55,24 +55,24 @@ class BTDatasetCollection(BaseCollection):
 
     def get_by_id(self, *, id: str) -> BTDataset:
         """
-        Get a Breakthrough dataset by ID.
+        Get a BTDataset by ID.
 
         Parameters
         ----------
         id : str
-            The Albert ID of the dataset.
+            The Albert ID of the BTDataset.
 
         Returns
         -------
         BTDataset
-            The retrived Breakthrough dataset.
+            The retrived BTDataset.
         """
         response = self.session.get(f"{self.base_path}/{id}")
         return BTDataset(**response.json())
 
     def update(self, *, dataset: BTDataset) -> BTDataset:
         """
-        Update a Breakthrough dataset.
+        Update a BTDataset.
 
         The provided dataset must be registered with an Albert ID.
 
@@ -87,9 +87,9 @@ class BTDatasetCollection(BaseCollection):
             The updated BTDataset object.
         """
         path = f"{self.base_path}/{dataset.id}"
-        patch = self._generate_patch_payload(
+        payload = self._generate_patch_payload(
             existing=self.get_by_id(id=dataset.id),
             updated=dataset,
         )
-        self.session.patch(path, json=patch)
+        self.session.patch(path, json=payload)
         return self.get_by_id(id=dataset.id)
