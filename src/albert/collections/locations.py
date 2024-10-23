@@ -83,7 +83,9 @@ class LocationCollection(BaseCollection):
         current_object = self.get_by_id(id=updated_object.id)
         # Generate the PATCH payload
         patch_payload = self._generate_patch_payload(
-            existing=current_object, updated=updated_object
+            existing=current_object,
+            updated=updated_object,
+            stringify_values=True,
         )
         url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))

@@ -143,6 +143,7 @@ class BaseCollection:
         existing: BaseResource,
         updated: BaseResource,
         generate_metadata_diff: bool = True,
+        stringify_values: bool = False,
     ) -> PatchPayload:
         """Generate a payload for PATCH requests based on the changes.
 
@@ -165,6 +166,7 @@ class BaseCollection:
 
                 if old_value is None and new_value is not None:
                     # Add new attribute
+                    new_value = str(new_value) if stringify_values else new_value
                     data.append(
                         PatchDatum(
                             operation=PatchOperation.ADD,
@@ -174,6 +176,8 @@ class BaseCollection:
                     )
                 elif old_value is not None and new_value != old_value:
                     # Update existing attribute
+                    old_value = str(old_value) if stringify_values else old_value
+                    new_value = str(new_value) if stringify_values else new_value
                     data.append(
                         PatchDatum(
                             operation=PatchOperation.UPDATE,
