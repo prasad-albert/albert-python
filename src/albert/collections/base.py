@@ -3,6 +3,7 @@ from enum import Enum
 from albert.resources.base import BaseResource
 from albert.resources.serialization import BaseEntityLink
 from albert.session import AlbertSession
+from albert.utils.patches import PatchDatum, PatchOperation, PatchPayload
 
 
 class OrderBy(str, Enum):
@@ -31,48 +32,49 @@ class BaseCollection:
         self,
         existing_metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink],
         updated_metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink],
-    ):
+    ) -> list[PatchDatum]:
         if existing_metadata is None:
             existing_metadata = {}
         if updated_metadata is None:
             updated_metadata = {}
-        payload = []
+
+        data = []
         for key, value in existing_metadata.items():
             if key not in updated_metadata:
                 if isinstance(value, str):
-                    payload.append(
-                        {
-                            "attribute": f"Metadata.{key}",
-                            "operation": "delete",
-                            "oldValue": value,
-                        }
+                    data.append(
+                        PatchDatum(
+                            attribute=f"Metadata.{key}",
+                            operation=PatchOperation.DELETE,
+                            old_value=value,
+                        )
                     )
                 elif isinstance(value, list):
                     for v in value:
-                        payload.append(
-                            {
-                                "attribute": f"Metadata.{key}",
-                                "operation": "delete",
-                                "oldValue": v.id,
-                            }
+                        data.append(
+                            PatchDatum(
+                                attribute=f"Metadata.{key}",
+                                operation=PatchOperation.DELETE,
+                                old_value=v.id,
+                            )
                         )
                 else:
-                    payload.append(
-                        {
-                            "attribute": f"Metadata.{key}",
-                            "operation": "delete",
-                            "oldValue": value.id,
-                        }
+                    data.append(
+                        PatchDatum(
+                            attribute=f"Metadata.{key}",
+                            operation=PatchOperation.DELETE,
+                            old_value=value.id,
+                        )
                     )
             elif value != updated_metadata[key]:
                 if isinstance(value, str):
-                    payload.append(
-                        {
-                            "attribute": f"Metadata.{key}",
-                            "operation": "update",
-                            "oldValue": value,
-                            "newValue": updated_metadata[key],
-                        }
+                    data.append(
+                        PatchDatum(
+                            attribute=f"Metadata.{key}",
+                            operation=PatchOperation.UPDATE,
+                            old_value=value,
+                            new_value=updated_metadata[key],
+                        )
                     )
                 elif isinstance(value, list):
                     existing_id = {v.id for v in value}
@@ -81,72 +83,76 @@ class BaseCollection:
                     to_remove = existing_id - updated_id
 
                     for v in to_add:
-                        payload.append(
-                            {
-                                "attribute": f"Metadata.{key}",
-                                "operation": "add",
-                                "newValue": v,
-                            }
+                        data.append(
+                            PatchDatum(
+                                attribute=f"Metadata.{key}",
+                                operation=PatchOperation.ADD,
+                                new_value=v,
+                            )
                         )
                     for v in to_remove:
-                        payload.append(
-                            {
-                                "attribute": f"Metadata.{key}",
-                                "operation": "delete",
-                                "oldValue": v,
-                            }
+                        data.append(
+                            PatchDatum(
+                                attribute=f"Metadata.{key}",
+                                operation=PatchOperation.DELETE,
+                                old_value=v,
+                            )
                         )
                 else:
-                    payload.append(
-                        {
-                            "attribute": f"Metadata.{key}",
-                            "operation": "update",
-                            "oldValue": value.id,
-                            "newValue": updated_metadata[key].id,
-                        }
+                    data.append(
+                        PatchDatum(
+                            attribute=f"Metadata.{key}",
+                            operation=PatchOperation.UPDATE,
+                            old_value=value.id,
+                            new_value=updated_metadata[key].id,
+                        )
                     )
         for key, value in updated_metadata.items():
             if key not in existing_metadata:
                 if isinstance(value, str):
-                    payload.append(
-                        {
-                            "attribute": f"Metadata.{key}",
-                            "operation": "add",
-                            "newValue": value,
-                        }
+                    data.append(
+                        PatchDatum(
+                            attribute=f"Metadata.{key}",
+                            operation=PatchOperation.ADD,
+                            new_value=value,
+                        )
                     )
                 elif isinstance(value, list):
                     for v in value:
-                        payload.append(
-                            {
-                                "attribute": f"Metadata.{key}",
-                                "operation": "add",
-                                "newValue": v.id,
-                            }
+                        data.append(
+                            PatchDatum(
+                                attribute=f"Metadata.{key}",
+                                operation=PatchOperation.ADD,
+                                new_value=v.id,
+                            )
                         )
                 else:
-                    payload.append(
-                        {
-                            "attribute": f"Metadata.{key}",
-                            "operation": "add",
-                            "newValue": value.id,
-                        }
+                    data.append(
+                        PatchDatum(
+                            attribute=f"Metadata.{key}",
+                            operation=PatchOperation.ADD,
+                            new_value=value.id,
+                        )
                     )
-        return payload
+
+        return data
 
     def _generate_patch_payload(
         self,
         *,
         existing: BaseResource,
         updated: BaseResource,
-    ) -> dict:
-        """Generates a payload for PATCH requests based on the changes. This is overriden for some clases with more compex patch formation"""
-        payload = {"data": []}
+    ) -> PatchPayload:
+        """Generate a payload for PATCH requests based on the changes.
+
+        This is overriden for some clases with more compex patch formation.
+        """
+        data = []
         for attribute in self._updatable_attributes:
             old_value = getattr(existing, attribute, None)
             new_value = getattr(updated, attribute, None)
             if attribute == "metadata":
-                payload["data"].extend(
+                data.extend(
                     self._generate_metadata_diff(
                         existing_metadata=old_value,
                         updated_metadata=new_value,
@@ -158,18 +164,22 @@ class BaseCollection:
 
                 if old_value is None and new_value is not None:
                     # Add new attribute
-                    payload["data"].append(
-                        {"operation": "add", "attribute": alias, "newValue": str(new_value)}
+                    data.append(
+                        PatchDatum(
+                            operation=PatchOperation.ADD,
+                            attribute=alias,
+                            new_value=new_value,
+                        )
                     )
                 elif old_value is not None and new_value != old_value:
                     # Update existing attribute
-                    payload["data"].append(
-                        {
-                            "operation": "update",
-                            "attribute": alias,
-                            "oldValue": str(old_value),
-                            "newValue": str(new_value),
-                        }
+                    data.append(
+                        PatchDatum(
+                            operation=PatchOperation.UPDATE,
+                            attribute=alias,
+                            old_value=old_value,
+                            new_value=new_value,
+                        )
                     )
 
-        return payload
+        return PatchPayload(data=data)

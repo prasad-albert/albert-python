@@ -215,7 +215,7 @@ class CasCollection(BaseCollection):
         )
 
         url = f"{self.base_path}/{updated_object.id}"
-        self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
 
         updated_cas = self.get_by_id(cas_id=updated_object.id)
         return updated_cas

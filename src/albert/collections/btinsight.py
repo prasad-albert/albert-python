@@ -22,16 +22,18 @@ class BTInsightCollection(BaseCollection):
     """
 
     _api_version = "v3"
+    # name, state, Metadata, outputKey, startTime, endTime, totalTime, RawPayload, contentEdited, payloadType, Registry'
     _updatable_attributes = {
         "name",
         "state",
         "metadata",
-        "dataset_id",
-        "model_session_id",
         "output_key",
         "start_time",
         "end_time",
         "total_time",
+        "raw_payload",
+        "content_edited",
+        "payload_type",
         "registry",
     }
 
@@ -167,11 +169,11 @@ class BTInsightCollection(BaseCollection):
             The updated BTInsight.
         """
         path = f"{self.base_path}/{insight.id}"
-        patch = self._generate_patch_payload(
+        payload = self._generate_patch_payload(
             existing=self.get_by_id(id=insight.id),
             updated=insight,
         )
-        self.session.patch(path, json=patch)
+        self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=insight.id)
 
     def delete(self, *, id: str) -> bool:

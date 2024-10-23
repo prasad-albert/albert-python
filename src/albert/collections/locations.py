@@ -86,7 +86,7 @@ class LocationCollection(BaseCollection):
             existing=current_object, updated=updated_object
         )
         url = f"{self.base_path}/{updated_object.id}"
-        self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=updated_object.id)
 
     def location_exists(self, *, location: Location):

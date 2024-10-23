@@ -324,6 +324,7 @@ class InventoryCollection(BaseCollection):
 
         _updatable_attributes_special = {"company", "tags", "cas"}
         payload = self._generate_patch_payload(existing=existing, updated=updated)
+        payload = payload.model_dump(mode="json", by_alias=True)
         for attribute in _updatable_attributes_special:
             old_value = getattr(existing, attribute)
             new_value = getattr(updated, attribute)

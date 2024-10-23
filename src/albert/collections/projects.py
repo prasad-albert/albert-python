@@ -97,7 +97,7 @@ class ProjectCollection(BaseCollection):
         )
         url = f"{self.base_path}/{updated_project.id}"
 
-        self.session.patch(url, json=patch_data)
+        self.session.patch(url, json=patch_data.model_dump(mode="json", by_alias=True))
 
         return updated_project
 

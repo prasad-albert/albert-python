@@ -91,9 +91,9 @@ class BTModelCollection(BaseCollection):
 
     def update(self, *, model: BTModel) -> BTModel:
         path = f"{self.base_path}/{model.id}"
-        patch = self._generate_patch_payload(
+        payload = self._generate_patch_payload(
             existing=self.get_by_id(id=model.id),
             updated=model,
         )
-        self.session.patch(path, json=patch)
+        self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=model.id)
