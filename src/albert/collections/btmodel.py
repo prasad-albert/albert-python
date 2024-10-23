@@ -1,4 +1,5 @@
 from albert.collections.base import BaseCollection
+from albert.resources.btmodel import BTModel, BTModelSession
 from albert.session import AlbertSession
 
 
@@ -19,6 +20,29 @@ class BTModelSessionCollection(BaseCollection):
 
     _api_version = "v3"
     _updatable_attributes = {}
+
+    def __init__(self, *, session: AlbertSession):
+        super().__init__(session=session)
+        self.base_path = f"/api/{BTModelSessionCollection._api_version}/btmodel"
+
+    def _deserialize_with_session(self, data: dict) -> BTModelSession:
+        mds = BTModelSession(**data)
+        mds.session = self.session
+        return mds
+
+    def create(self, *, model_session: BTModelSession) -> BTModelSession:
+        response = self.session.post(
+            self.base_path,
+            json=model_session.model_dump(by_alias=True, exclude_none=True),
+        )
+        return self._deserialize_with_session(response.json())
+
+    def get_by_id(self, *, id: str) -> BTModelSession:
+        response = self.session.get(f"{self.base_path}/{id}")
+        return self._deserialize_with_session(response.json())
+
+    def update(self, *, model_session: BTModelSession) -> BTModelSession:
+        pass
 
 
 class BTModelCollection(BaseCollection):
@@ -44,4 +68,19 @@ class BTModelCollection(BaseCollection):
 
     def __init__(self, *, session: AlbertSession, parent_id: str):
         super().__init__(session=session)
-        self.base_path = f"/api/{BTModelSessionCollection._api_version}/btmodel/{parent_id}"
+        self.parent_id = parent_id
+        self.base_path = f"/api/{BTModelSessionCollection._api_version}/btmodel/{parent_id}/model"
+
+    def create(self, *, model: BTModel) -> BTModel:
+        response = self.session.post(
+            self.base_path,
+            json=model.model_dump(by_alias=True, exclude_none=True),
+        )
+        return BTModel(**response.json())
+
+    def get_by_id(self, *, id: str) -> BTModel:
+        response = self.session.get(f"{self.base_path}/{id}")
+        return BTModel(**response.json())
+
+    def update(self, *, model: BTModel) -> BTModel:
+        pass

@@ -21,8 +21,8 @@ class BTModelState(str, Enum):
 
 class BTModelSession(BaseSessionResource):
     name: str
-    dataset_id: str
     category: BTModelCategory
+    dataset_id: str = Field(..., alias="datasetId")
     id: str | None = Field(default=None)
     default_model: str | None = Field(default=None, alias="defaultModel")
     total_time: str | None = Field(default=None, alias="totalTime")
@@ -44,12 +44,12 @@ class BTModelSession(BaseSessionResource):
 
 class BTModel(BaseResource):
     name: str
-    dataset_id: str
+    target: list[str]
+    state: BTModelState
+    dataset_id: str = Field(..., alias="datasetId")
     id: str | None = Field(default=None)
     parent_id: str | None = Field(default=None, alias="parentId")
     start_time: str | None = Field(default=None, alias="startTime")
     end_time: str | None = Field(default=None, alias="endTime")
     total_time: str | None = Field(default=None, alias="totalTime")
-    target: list[str] | None = Field(default=None)
-    state: BTModelState | None = Field(default=None)
     flag: bool = Field(default=False)
