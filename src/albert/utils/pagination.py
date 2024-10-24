@@ -1,12 +1,12 @@
-from collections.abc import Callable, Iterator
-from typing import Generic, TypeVar
+from collections.abc import Callable, Iterable, Iterator
+from typing import TypeVar
 
 from albert.session import AlbertSession
 
 ItemType = TypeVar("ItemType")
 
 
-class SearchPaginator(Generic[ItemType]):
+class SearchPaginator(Iterable[ItemType]):
     """Helper class for paginating through Albert 'search' endpoints.
 
     The search endpoints use a limit/offset pagination scheme which can be handled generally.
