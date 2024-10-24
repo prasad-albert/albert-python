@@ -151,7 +151,7 @@ class BaseCollection:
         """
         data = []
         for attribute in self._updatable_attributes:
-            old_value = getattr(existing, attribute, None) if existing else None
+            old_value = getattr(existing, attribute, None)
             new_value = getattr(updated, attribute, None)
             if attribute == "metadata" and generate_metadata_diff:
                 data.extend(

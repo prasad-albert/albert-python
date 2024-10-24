@@ -5,8 +5,6 @@ from pydantic import Field
 
 from albert.utils.types import BaseAlbertModel
 
-PatchValue = str | int | float | list | dict | BaseAlbertModel | None
-
 
 class PatchOperation(str, Enum):
     ADD = "add"
@@ -17,14 +15,19 @@ class PatchOperation(str, Enum):
 class PatchDatum(BaseAlbertModel):
     operation: str
     attribute: str
-    new_value: PatchValue = Field(..., alias="newValue")
-    old_value: PatchValue = Field(default=None, alias="oldValue")
+    new_value: Any | None = Field(..., alias="newValue")
+    old_value: Any | None = Field(default=None, alias="oldValue")
+
+    def model_dump(self, **kwargs) -> dict[str, Any]:
+        # Default to exclude_unset=True to avoid oldValue when not explicitly set
+        kwargs.setdefault("exclude_unset", True)
+        return super().model_dump(**kwargs)
 
 
 class PatchPayload(BaseAlbertModel):
     data: list[PatchDatum]
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
-        """Default to exclude_unset=True so the old value is dropped when not expliclty passed."""
+        # Default to exclude_unset=True to avoid oldValue when not explicitly set
         kwargs.setdefault("exclude_unset", True)
         return super().model_dump(**kwargs)
