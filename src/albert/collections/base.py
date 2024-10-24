@@ -40,11 +40,12 @@ class BaseCollection:
 
         data = []
         for key, value in existing_metadata.items():
+            attribute = f"Metadata.{key}"
             if key not in updated_metadata:
                 if isinstance(value, str):
                     data.append(
                         PatchDatum(
-                            attribute=f"Metadata.{key}",
+                            attribute=attribute,
                             operation=PatchOperation.DELETE,
                             old_value=value,
                         )
@@ -53,7 +54,7 @@ class BaseCollection:
                     for v in value:
                         data.append(
                             PatchDatum(
-                                attribute=f"Metadata.{key}",
+                                attribute=attribute,
                                 operation=PatchOperation.DELETE,
                                 old_value=v.id,
                             )
@@ -61,7 +62,7 @@ class BaseCollection:
                 else:
                     data.append(
                         PatchDatum(
-                            attribute=f"Metadata.{key}",
+                            attribute=attribute,
                             operation=PatchOperation.DELETE,
                             old_value=value.id,
                         )
@@ -70,7 +71,7 @@ class BaseCollection:
                 if isinstance(value, str):
                     data.append(
                         PatchDatum(
-                            attribute=f"Metadata.{key}",
+                            attribute=attribute,
                             operation=PatchOperation.UPDATE,
                             old_value=value,
                             new_value=updated_metadata[key],
@@ -85,7 +86,7 @@ class BaseCollection:
                     for v in to_add:
                         data.append(
                             PatchDatum(
-                                attribute=f"Metadata.{key}",
+                                attribute=attribute,
                                 operation=PatchOperation.ADD,
                                 new_value=v,
                             )
@@ -93,7 +94,7 @@ class BaseCollection:
                     for v in to_remove:
                         data.append(
                             PatchDatum(
-                                attribute=f"Metadata.{key}",
+                                attribute=attribute,
                                 operation=PatchOperation.DELETE,
                                 old_value=v,
                             )
@@ -101,7 +102,7 @@ class BaseCollection:
                 else:
                     data.append(
                         PatchDatum(
-                            attribute=f"Metadata.{key}",
+                            attribute=attribute,
                             operation=PatchOperation.UPDATE,
                             old_value=value.id,
                             new_value=updated_metadata[key].id,
@@ -112,7 +113,7 @@ class BaseCollection:
                 if isinstance(value, str):
                     data.append(
                         PatchDatum(
-                            attribute=f"Metadata.{key}",
+                            attribute=attribute,
                             operation=PatchOperation.ADD,
                             new_value=value,
                         )
@@ -121,7 +122,7 @@ class BaseCollection:
                     for v in value:
                         data.append(
                             PatchDatum(
-                                attribute=f"Metadata.{key}",
+                                attribute=attribute,
                                 operation=PatchOperation.ADD,
                                 new_value=v.id,
                             )
@@ -129,7 +130,7 @@ class BaseCollection:
                 else:
                     data.append(
                         PatchDatum(
-                            attribute=f"Metadata.{key}",
+                            attribute=attribute,
                             operation=PatchOperation.ADD,
                             new_value=value.id,
                         )
@@ -169,8 +170,8 @@ class BaseCollection:
                     new_value = str(new_value) if stringify_values else new_value
                     data.append(
                         PatchDatum(
-                            operation=PatchOperation.ADD,
                             attribute=alias,
+                            operation=PatchOperation.ADD,
                             new_value=new_value,
                         )
                     )
@@ -180,8 +181,8 @@ class BaseCollection:
                     new_value = str(new_value) if stringify_values else new_value
                     data.append(
                         PatchDatum(
-                            operation=PatchOperation.UPDATE,
                             attribute=alias,
+                            operation=PatchOperation.UPDATE,
                             old_value=old_value,
                             new_value=new_value,
                         )

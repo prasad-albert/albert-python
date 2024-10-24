@@ -15,11 +15,11 @@ class PatchOperation(str, Enum):
 class PatchDatum(BaseAlbertModel):
     operation: str
     attribute: str
-    new_value: Any | None = Field(..., alias="newValue")
+    new_value: Any | None = Field(default=None, alias="newValue")
     old_value: Any | None = Field(default=None, alias="oldValue")
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
-        # Default to exclude_unset=True to avoid oldValue when not explicitly set
+        # Default to exclude_unset=True to remove old/new value when not explicitly set
         kwargs.setdefault("exclude_unset", True)
         return super().model_dump(**kwargs)
 
@@ -28,6 +28,6 @@ class PatchPayload(BaseAlbertModel):
     data: list[PatchDatum]
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
-        # Default to exclude_unset=True to avoid oldValue when not explicitly set
+        # Default to exclude_unset=True to remove old/new value when not explicitly set
         kwargs.setdefault("exclude_unset", True)
         return super().model_dump(**kwargs)
