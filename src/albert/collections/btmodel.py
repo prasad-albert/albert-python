@@ -33,7 +33,7 @@ class BTModelSessionCollection(BaseCollection):
     def create(self, *, model_session: BTModelSession) -> BTModelSession:
         response = self.session.post(
             self.base_path,
-            json=model_session.model_dump(by_alias=True, exclude_none=True),
+            json=model_session.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         return self._deserialize_with_session(response.json())
 
@@ -81,7 +81,7 @@ class BTModelCollection(BaseCollection):
     def create(self, *, model: BTModel) -> BTModel:
         response = self.session.post(
             self.base_path,
-            json=model.model_dump(by_alias=True, exclude_none=True),
+            json=model.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         return BTModel(**response.json())
 

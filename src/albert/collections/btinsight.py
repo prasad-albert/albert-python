@@ -65,7 +65,7 @@ class BTInsightCollection(BaseCollection):
         """
         response = self.session.post(
             self.base_path,
-            json=insight.model_dump(by_alias=True, exclude_none=True),
+            json=insight.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         return BTInsight(**response.json())
 

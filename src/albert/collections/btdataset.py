@@ -49,7 +49,7 @@ class BTDatasetCollection(BaseCollection):
         """
         response = self.session.post(
             self.base_path,
-            json=dataset.model_dump(by_alias=True, exclude_none=True),
+            json=dataset.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         return BTDataset(**response.json())
 
