@@ -91,7 +91,5 @@ class BTDatasetCollection(BaseCollection):
             existing=self.get_by_id(id=dataset.id),
             updated=dataset,
         )
-        self.session.patch(
-            path, json=payload.model_dump(mode="json", by_alias=True, exclude_unset=True)
-        )
+        self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=dataset.id)

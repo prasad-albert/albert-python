@@ -1,7 +1,7 @@
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.btinsight import BTInsight, BTInsightCategory, BTInsightState
 from albert.session import AlbertSession
-from albert.utils.exceptions import InternalServerError
+from albert.utils.exceptions import ForbiddenError, InternalServerError
 from albert.utils.logging import logger
 from albert.utils.pagination import SearchPaginator
 
@@ -127,9 +127,10 @@ class BTInsightCollection(BaseCollection):
 
         def deserialize(data: dict) -> BTInsight | None:
             id = data["albertId"]
+            print(data)
             try:
                 return self.get_by_id(id=id)
-            except InternalServerError as e:
+            except (ForbiddenError, InternalServerError) as e:
                 logger.warning(f"Error fetching insight '{id}': {e}")
                 return None
 

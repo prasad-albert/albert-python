@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 from pydantic import Field
 
@@ -22,3 +23,8 @@ class PatchDatum(BaseAlbertModel):
 
 class PatchPayload(BaseAlbertModel):
     data: list[PatchDatum]
+
+    def model_dump(self, **kwargs) -> dict[str, Any]:
+        """Default to exclude_unset=True so the old value is dropped when not expliclty passed."""
+        kwargs.setdefault("exclude_unset", True)
+        return super().model_dump(**kwargs)
