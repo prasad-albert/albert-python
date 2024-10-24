@@ -122,12 +122,11 @@ class BTInsightCollection(BaseCollection):
         Returns
         -------
         SearchPaginator[BTInsight | None]
-            An iterator over the BTInsight search query.
+            An iterable of elements returned by the BTInsight search query.
         """
 
         def deserialize(data: dict) -> BTInsight | None:
             id = data["albertId"]
-            print(data)
             try:
                 return self.get_by_id(id=id)
             except (ForbiddenError, InternalServerError) as e:
