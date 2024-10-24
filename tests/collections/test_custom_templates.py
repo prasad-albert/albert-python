@@ -1,10 +1,10 @@
-from collections.abc import Iterator
+from collections.abc import Iterable
 
 from albert.albert import Albert
 from albert.resources.custom_templates import CustomTemplate, _CustomTemplateDataUnion
 
 
-def _list_asserts(list_iterator: Iterator[CustomTemplate]):
+def _list_asserts(list_iterator: Iterable[CustomTemplate]):
     # found = False
     for i, u in enumerate(list_iterator):
         if i == 50:
@@ -19,5 +19,5 @@ def _list_asserts(list_iterator: Iterator[CustomTemplate]):
 
 def test_basics(client: Albert):
     list_response = client.templates.list()
-    assert isinstance(list_response, Iterator)
+    assert isinstance(list_response, Iterable)
     _list_asserts(list_response)

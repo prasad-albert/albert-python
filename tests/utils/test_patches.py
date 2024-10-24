@@ -17,7 +17,7 @@ def test_exclude_unset_default():
             ),
         ]
     )
-    dumped = payload.model_dump(mode="json", by_alias=True, exclude_unset=True)
+    dumped = payload.model_dump(mode="json", by_alias=True)
 
     datum0 = dumped["data"][0]
     assert datum0["oldValue"] is None
