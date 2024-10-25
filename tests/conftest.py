@@ -21,6 +21,7 @@ from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.users import User
 from albert.resources.worksheets import Worksheet
+from albert.utils.client_credentials import ClientCredentials
 from albert.utils.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from tests.seeding import (
     generate_cas_seeds,
@@ -43,7 +44,11 @@ from tests.seeding import (
 
 @pytest.fixture(scope="session")
 def client() -> Albert:
-    return Albert()
+    credentials = ClientCredentials.from_env(
+        client_id_env="ALBERT_CLIENT_ID_SDK",
+        client_secret_env="ALBERT_CLIENT_SECRET_SDK",
+    )
+    return Albert(client_credentials=credentials)
 
 
 @pytest.fixture(scope="session")
