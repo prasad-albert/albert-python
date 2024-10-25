@@ -39,8 +39,8 @@ class Albert:
     token : str, optional
         The token for authentication (default is read from environment variable "ALBERT_TOKEN").
     client_credentials: ClientCredentials, optional
-        The client credentials for programmatic authentication
-        (default is read from the environment varaibles "ALBERT_CLIENT_ID" and "ALBERT_CLIENT_SECRET").
+        The client credentials for programmatic authentication.
+        Client credentials can be read from the environment by `ClientCredentials.from_env()`.
 
     Attributes
     ----------
@@ -66,7 +66,7 @@ class Albert:
         self.session = AlbertSession(
             base_url=base_url or os.getenv("ALBERT_BASE_URL") or "https://app.albertinvent.com",
             token=token or os.getenv("ALBERT_TOKEN"),
-            client_credentials=client_credentials or ClientCredentials.from_env(),
+            client_credentials=client_credentials,
         )
 
     @property

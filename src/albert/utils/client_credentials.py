@@ -16,8 +16,13 @@ class ClientCredentials(BaseAlbertModel):
     def from_env(cls) -> Union["ClientCredentials", None]:
         """Read `ClientCredentials` from the environment.
 
-        Returns `None` if the `ALBERT_CLIENT_ID` and `ALBERT_CLIENT_SECRET` environment variables
+        Returns None if the `ALBERT_CLIENT_ID` and `ALBERT_CLIENT_SECRET` environment variables
         are not defined.
+
+        Returns
+        -------
+        ClientCredentials | None
+            The client credentials obtained from the environment, if present.
         """
         client_id = os.getenv("ALBERT_CLIENT_ID")
         client_secret = os.getenv("ALBERT_CLIENT_SECRET")

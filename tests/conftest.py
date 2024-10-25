@@ -21,6 +21,7 @@ from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.users import User
 from albert.resources.worksheets import Worksheet
+from albert.utils.client_credentials import ClientCredentials
 from albert.utils.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from tests.seeding import (
     generate_cas_seeds,
@@ -43,7 +44,8 @@ from tests.seeding import (
 
 @pytest.fixture(scope="session")
 def client() -> Albert:
-    return Albert()
+    credentials = ClientCredentials.from_env()
+    return Albert(client_credentials=credentials)
 
 
 @pytest.fixture(scope="session")
@@ -199,7 +201,7 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
 
     # Teardown - delete the seeded units after the test
     for unit in seeded:
-        with suppress(NotFoundError):
+        with suppress(BadRequestError, NotFoundError):
             client.units.delete(unit_id=unit.id)
 
 
