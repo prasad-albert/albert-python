@@ -185,13 +185,13 @@ class InventoryCollection(BaseCollection):
         )
         return [InventoryItem(**item) for item in response.json()["Items"]]
 
-    def delete(self, *, inventory_id: str) -> bool:
+    def delete(self, *, inventory_id: str | InventoryItem) -> bool:
         """
         Delete an inventory item by its ID.
 
         Parameters
         ----------
-        inventory_id : str
+        inventory_id : str | InventoryItem
             The ID of the inventory item.
 
         Returns
