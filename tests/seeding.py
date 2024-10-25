@@ -9,6 +9,7 @@ from albert.resources.custom_fields import (
     FieldType,
     ServiceType,
 )
+from albert.resources.data_columns import DataColumn
 from albert.resources.inventory import (
     CasAmount,
     InventoryCategory,
@@ -361,6 +362,40 @@ def generate_unit_seeds() -> list[Unit]:
             synonyms=["Litre"],
             category=UnitCategory.VOLUME,
             verified=True,
+        ),
+    ]
+
+
+def generate_data_column_seeds(seeded_units) -> list[DataColumn]:
+    """
+    Generates a list of DataColumn seed objects for testing without IDs.
+
+    Returns
+    -------
+    List[DataColumn]
+        A list of DataColumn objects with different permutations.
+    """
+
+    return [
+        # Basic data column with required fields
+        DataColumn(
+            name="TEST - only unit 1",
+            unit=BaseEntityLink(id=seeded_units[0].id),
+        ),
+        # Data column with full fields including optional calculation
+        DataColumn(
+            name="TEST - unit and calculation",
+            unit=BaseEntityLink(id=seeded_units[1].id),
+            calculation="Pressure = Force / Area",
+        ),
+        # Data column with required fields but without the calculation
+        DataColumn(
+            name="TEST - only name",
+        ),
+        # Another data column with all fields
+        DataColumn(
+            name="TEST - only calculation",
+            calculation="Mass = Density * Volume",
         ),
     ]
 

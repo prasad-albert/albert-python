@@ -4,6 +4,7 @@ from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_fields import CustomFieldCollection
 from albert.collections.custom_templates import CustomTemplatesCollection
+from albert.collections.data_columns import DataColumnsCollection
 from albert.collections.files import FileCollection
 from albert.collections.inventory import InventoryCollection
 from albert.collections.lists import ListsCollection
@@ -92,6 +93,10 @@ class Albert:
     @property
     def cas_numbers(self) -> CasCollection:
         return CasCollection(session=self.session)
+
+    @property
+    def data_columns(self) -> DataColumnsCollection:
+        return DataColumnsCollection(session=self.session)
 
     @property
     def un_numbers(self) -> UnNumberCollection:
