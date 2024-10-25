@@ -1,5 +1,8 @@
 import os
 
+from albert.collections.btdataset import BTDatasetCollection
+from albert.collections.btinsight import BTInsightCollection
+from albert.collections.btmodel import BTModelCollection, BTModelSessionCollection
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_fields import CustomFieldCollection
@@ -144,3 +147,18 @@ class Albert:
     @property
     def files(self) -> FileCollection:
         return FileCollection(session=self.session)
+
+    @property
+    def btdatasets(self) -> BTDatasetCollection:
+        return BTDatasetCollection(session=self.session)
+
+    @property
+    def btmodelsessions(self) -> BTModelSessionCollection:
+        return BTModelSessionCollection(session=self.session)
+
+    def btmodels(self, *, parent_id: str) -> BTModelCollection:
+        return BTModelCollection(session=self.session, parent_id=parent_id)
+
+    @property
+    def btinsights(self) -> BTInsightCollection:
+        return BTInsightCollection(session=self.session)
