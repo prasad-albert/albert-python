@@ -5,16 +5,16 @@ from albert.resources.data_columns import DataColumn
 from albert.session import AlbertSession
 
 
-class DataColumnsCollection(BaseCollection):
+class DataColumnCollection(BaseCollection):
     """A collection for interacting with Data Columns in Albert."""
 
     _api_version = "v3"
     _updatable_attributes = {"name"}
 
     def __init__(self, *, session: AlbertSession):
-        """Initialize the DataColumnsCollection with the provided session."""
+        """Initialize the DataColumnCollection with the provided session."""
         super().__init__(session=session)
-        self.base_path = f"/api/{DataColumnsCollection._api_version}/datacolumns"
+        self.base_path = f"/api/{DataColumnCollection._api_version}/datacolumns"
 
     def _list_generator(
         self,
