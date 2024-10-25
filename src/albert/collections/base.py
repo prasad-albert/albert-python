@@ -109,6 +109,7 @@ class BaseCollection:
                         )
                     )
         for key, value in updated_metadata.items():
+            attribute = f"Metadata.{key}"
             if key not in existing_metadata:
                 if isinstance(value, str):
                     data.append(

@@ -19,7 +19,7 @@ class SearchPaginator(Iterable[ItemType]):
         *,
         path: str,
         session: AlbertSession,
-        deserialize: Callable[[dict], ItemType],
+        deserialize: Callable[[dict], ItemType | None],
         params: dict[str, str] | None = None,
     ):
         self.path = path
@@ -37,7 +37,10 @@ class SearchPaginator(Iterable[ItemType]):
                 return
 
             for item in items:
-                yield self.deserialize(item)
+                item_deser = self.deserialize(item)
+                if item_deser is None:
+                    continue
+                yield item_deser
 
             offset = response_data.get("offset")
             if not offset:
