@@ -10,21 +10,21 @@ from albert.resources.btmodel import BTModel, BTModelRegistry, BTModelSession
 def model_session(client: Albert) -> BTModelSession:
     # api-btmodel does not have working list/delete functionality,
     # so we need to hard-code an existing resource to play with
-    return client.btmodels.get_by_id(id="MDS1")
+    return client.btmodelsessions.get_by_id(id="MDS1")
 
 
 @pytest.fixture
-def model(model_session: BTModelSession) -> BTModel:
+def model(client: Albert) -> BTModel:
     # api-btmodel does not have working list/delete functionality,
     # so we need to hard-code an existing resource to play with
-    return model_session.models.get_by_id(id="MDL1")
+    return client.btmodels(parent_id="MDS1").get_by_id(id="MDL1")
 
 
 def test_update_model_session(client: Albert, model_session: BTModelSession):
     marker = uuid.uuid4()
     model_session.registry = BTModelRegistry(build_logs={"status": f"status-{marker}"})
 
-    updated_model_session = client.btmodels.update(model_session=model_session)
+    updated_model_session = client.btmodelsessions.update(model_session=model_session)
     assert updated_model_session.registry == model_session.registry
 
 

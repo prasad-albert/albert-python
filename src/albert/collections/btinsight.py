@@ -97,7 +97,7 @@ class BTInsightCollection(BaseCollection):
         name: str | list[str] | None = None,
         state: BTInsightState | list[BTInsightState] | None = None,
         category: BTInsightCategory | list[BTInsightCategory] | None = None,
-    ) -> SearchPaginator[BTInsight | None]:
+    ) -> SearchPaginator[BTInsight]:
         """List items in the BTInsight collection.
 
         Parameters
