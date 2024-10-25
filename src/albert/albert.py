@@ -16,6 +16,7 @@ from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
 from albert.collections.pricings import PricingCollection
 from albert.collections.projects import ProjectCollection
+from albert.collections.reports import ReportCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.storage_locations import StorageLocationsCollection
 from albert.collections.tags import TagCollection
@@ -115,6 +116,10 @@ class Albert:
     @property
     def custom_fields(self) -> CustomFieldCollection:
         return CustomFieldCollection(session=self.session)
+
+    @property
+    def reports(self) -> ReportCollection:
+        return ReportCollection(session=self.session)
 
     @property
     def roles(self) -> RoleCollection:
