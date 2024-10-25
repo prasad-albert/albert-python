@@ -32,10 +32,9 @@ class ParameterCollection(BaseCollection):
         )
         return Parameter(**response.json())
 
-    def delete(self, *, id: str) -> bool:
+    def delete(self, *, id: str) -> None:
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
-        return True
 
     def _list_generator(
         self,

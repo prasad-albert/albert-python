@@ -4,7 +4,7 @@ import pytest
 
 from albert.albert import Albert
 from albert.resources.companies import Company
-from albert.utils.exceptions import AlbertException
+from albert.utils.exceptions import AlbertException, NotFoundError
 
 
 def _list_asserts(returned_list):
@@ -50,11 +50,14 @@ def test_company_get_by(client: Albert, seeded_companies: list[Company]):
     assert company_by_id.name == test_name
 
 
-def test_basic_create(client: Albert):
+def test_basic_create_delete(client: Albert):
     simple_company = client.companies.create(company="Simple test company name!")
     assert isinstance(simple_company, Company)
     assert simple_company.id is not None
-    assert client.companies.delete(id=simple_company.id)
+
+    client.companies.delete(id=simple_company.id)
+    with pytest.raises(NotFoundError):
+        client.companies.get_by_id(id=simple_company.id)
 
 
 def test_company_crud(client: Albert):
@@ -83,8 +86,8 @@ def test_company_crud(client: Albert):
 
     renamed_company.name = "A second cool name"
     renamed_company = client.companies.update(updated_object=renamed_company)
-    deleted = client.companies.delete(id=renamed_company.id)
-    assert deleted
+
+    client.companies.delete(id=renamed_company.id)
     assert not client.companies.company_exists(name="SDK Testing Corp. UPDATED")
     with pytest.raises(AlbertException):
         client.companies.rename(old_name="SDK Testing Corp. UPDATED", new_name="nope")

@@ -125,7 +125,7 @@ class LocationCollection(BaseCollection):
 
         return Location(**response.json())
 
-    def delete(self, *, location_id: str) -> bool:
+    def delete(self, *, location_id: str) -> None:
         """
         Deletes a Location entity.
 
@@ -136,9 +136,7 @@ class LocationCollection(BaseCollection):
 
         Returns
         -------
-        bool
-            True if deleted.
+        None
         """
         url = f"{self.base_path}/{location_id}"
         self.session.delete(url)
-        return True

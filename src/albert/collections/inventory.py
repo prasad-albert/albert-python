@@ -164,7 +164,7 @@ class InventoryCollection(BaseCollection):
         response = self.session.get(url)
         return InventoryItem(**response.json())
 
-    def delete(self, *, inventory_id: str) -> bool:
+    def delete(self, *, inventory_id: str) -> None:
         """
         Delete an inventory item by its ID.
 
@@ -175,15 +175,13 @@ class InventoryCollection(BaseCollection):
 
         Returns
         -------
-        bool
-            True if the item was deleted, False otherwise.
+        None
         """
         if isinstance(inventory_id, InventoryItem):
             inventory_id = inventory_id.id
         inventory_id = inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
         url = f"{self.base_path}/{inventory_id}"
         self.session.delete(url)
-        return True
 
     def _list_generator(
         self,
