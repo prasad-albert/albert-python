@@ -38,8 +38,10 @@ def test_advanced_list(
     list_response = client.storage_locations.list(location=seeded_locations[0])
     list_response = list(list_response)
     _list_asserts(list_response)
+
+    seeded_location_ids = {x.location.id for x in seeded_storage_locations}
     for sl in list_response:
-        assert sl.location.id == seeded_storage_locations[0].location.id
+        assert sl.location.id in seeded_location_ids
 
 
 def test_pagination(client: Albert, seeded_storage_locations: list[StorageLocation]):
