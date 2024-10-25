@@ -1,3 +1,4 @@
+import uuid
 from collections.abc import Generator
 
 from albert import Albert
@@ -62,8 +63,9 @@ def test_avoids_dupes(caplog, client: Albert, seeded_storage_locations: list[Sto
 
 
 def test_update(client: Albert, seeded_storage_locations: list[StorageLocation]):
-    sl = seeded_storage_locations[0]
-    sl.name = "TEST - New Name"
+    sl = seeded_storage_locations[0].model_copy()
+    updated_name = f"TEST - {uuid.uuid4()}"
+    sl.name = updated_name
     updated = client.storage_locations.update(storage_location=sl)
     assert updated.id == seeded_storage_locations[0].id
-    assert updated.name == seeded_storage_locations[0].name
+    assert updated.name == sl.name
