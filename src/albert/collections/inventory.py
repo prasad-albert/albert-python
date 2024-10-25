@@ -164,6 +164,27 @@ class InventoryCollection(BaseCollection):
         response = self.session.get(url)
         return InventoryItem(**response.json())
 
+    def get_by_ids(self, *, inventory_ids: list[str]) -> list[InventoryItem]:
+        """
+        Retrieve an set of inventory items by their IDs.
+
+        Parameters
+        ----------
+        inventory_ids : str
+            The list of IDs of the inventory items.
+
+        Returns
+        -------
+        list[InventoryItem]
+            The retrieved inventory items.
+        """
+        inventory_ids = [x if x.startswith("INV") else f"INV{x}" for x in inventory_ids]
+        response = self.session.get(
+            f"{self.base_path}/ids",
+            params={"id": inventory_ids},
+        )
+        return [InventoryItem(**item) for item in response.json()["Items"]]
+
     def delete(self, *, inventory_id: str) -> bool:
         """
         Delete an inventory item by its ID.
