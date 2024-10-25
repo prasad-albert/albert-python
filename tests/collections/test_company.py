@@ -4,7 +4,7 @@ import pytest
 
 from albert.albert import Albert
 from albert.resources.companies import Company
-from albert.utils.exceptions import AlbertException, NotFoundError
+from albert.utils.exceptions import AlbertException
 
 
 def _list_asserts(returned_list):
@@ -56,8 +56,7 @@ def test_basic_create_delete(client: Albert):
     assert simple_company.id is not None
 
     client.companies.delete(id=simple_company.id)
-    with pytest.raises(NotFoundError):
-        client.companies.get_by_id(id=simple_company.id)
+    assert not client.companies.company_exists(name=simple_company.name)
 
 
 def test_company_crud(client: Albert):
