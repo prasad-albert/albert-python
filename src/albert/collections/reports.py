@@ -1,6 +1,5 @@
-from typing import Any
-
 from albert.collections.base import BaseCollection
+from albert.resources.reports import Report
 from albert.session import AlbertSession
 
 
@@ -25,10 +24,10 @@ class ReportCollection(BaseCollection):
         report_id: str,
         project_ids: list[str],
         unique_ids: list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> Report:
         path = f"{self.base_path}/datascience/{report_id}"
         params = {"inputData[projectId]": project_ids}
         if unique_ids is not None:
             params["inputData[uniqueId]"] = unique_ids
         response = self.session.get(path, params=params)
-        return response.json()
+        return Report(**response.json())
