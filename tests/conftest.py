@@ -11,6 +11,7 @@ from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.custom_fields import CustomField
 from albert.resources.data_columns import DataColumn
+from albert.resources.data_templates import DataTemplate
 from albert.resources.inventory import InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
@@ -28,6 +29,7 @@ from tests.seeding import (
     generate_company_seeds,
     generate_custom_fields,
     generate_data_column_seeds,
+    generate_data_template_seeds,
     generate_inventory_seeds,
     generate_list_item_seeds,
     generate_location_seeds,
@@ -201,7 +203,7 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
 
     # Teardown - delete the seeded units after the test
     for unit in seeded:
-        with suppress(NotFoundError):
+        with suppress(NotFoundError, BadRequestError):
             client.units.delete(unit_id=unit.id)
 
 
@@ -258,6 +260,29 @@ def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[lis
     for user in seeded:
         user.status = Status.INACTIVE.value
         client.users.update(updated_object=user)
+
+
+@pytest.fixture(scope="session")
+def seeded_data_templates(
+    client: Albert,
+    seeded_data_columns: list[DataColumn],
+    seeded_users: list[User],
+    seeded_units: list[Unit],
+) -> Iterator[list[DataTemplate]]:
+    seeded = []
+    for data_template in generate_data_template_seeds(
+        seeded_data_columns=seeded_data_columns,
+        seeded_units=seeded_units,
+        seeded_users=seeded_users,
+    ):
+        dt = client.data_templates.get_by_name(name=data_template.name)
+        if dt is None:
+            dt = client.data_templates.create(data_template=data_template)
+        seeded.append(dt)
+    yield seeded
+    for data_template in seeded:
+        with suppress(NotFoundError):
+            client.data_templates.delete(data_template_id=data_template.id)
 
 
 # Move to conftest.py in a bit
