@@ -201,7 +201,7 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
 
     # Teardown - delete the seeded units after the test
     for unit in seeded:
-        with suppress(NotFoundError):
+        with suppress(BadRequestError, NotFoundError):
             client.units.delete(unit_id=unit.id)
 
 
