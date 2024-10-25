@@ -14,9 +14,9 @@ def dataset(client: Albert) -> BTDataset:
 
 
 def test_update(client: Albert, dataset: BTDataset):
-    marker = uuid.uuid4()
-    dataset.key = f"key-{marker}"
-    dataset.file_name = f"file-{marker}"
+    marker = f"TEST - {uuid.uuid4()}"
+    dataset.key = marker
+    dataset.file_name = marker
 
     updated_dataset = client.btdatasets.update(dataset=dataset)
     assert updated_dataset.key == dataset.key

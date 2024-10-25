@@ -209,10 +209,9 @@ class CompanyCollection(BaseCollection):
         this_company = Company(**response.json())
         return this_company
 
-    def delete(self, *, id: str) -> bool:
+    def delete(self, *, id: str) -> None:
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
-        return True
 
     def rename(self, *, old_name: str, new_name: str) -> Company | None:
         """

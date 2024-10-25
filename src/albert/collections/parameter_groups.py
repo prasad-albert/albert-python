@@ -60,10 +60,9 @@ class ParameterGroupCollection(BaseCollection):
             order_by=order_by,
         )
 
-    def delete(self, *, id: str) -> bool:
+    def delete(self, *, id: str) -> None:
         path = f"{self.base_path}/{id}"
         self.session.delete(path)
-        return True
 
     def create(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
         response = self.session.post(

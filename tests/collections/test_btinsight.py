@@ -14,12 +14,12 @@ def insight(client: Albert) -> BTInsight:
 
 
 def test_update(client: Albert, insight: BTInsight):
-    marker = uuid.uuid4()
-    insight.output_key = f"key-{marker}"
-    insight.start_time = f"time-{marker}"
-    insight.end_time = f"time-{marker}"
-    insight.total_time = f"time-{marker}"
-    insight.registry = BTInsightRegistry(build_logs={"status": f"status-{marker}"})
+    marker = f"TEST - {uuid.uuid4()}"
+    insight.output_key = marker
+    insight.start_time = marker
+    insight.end_time = marker
+    insight.total_time = marker
+    insight.registry = BTInsightRegistry(build_logs={"status": marker})
 
     updated_insight = client.btinsights.update(insight=insight)
     assert updated_insight.output_key == insight.output_key

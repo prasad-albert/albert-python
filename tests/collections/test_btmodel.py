@@ -21,19 +21,19 @@ def model(client: Albert) -> BTModel:
 
 
 def test_update_model_session(client: Albert, model_session: BTModelSession):
-    marker = uuid.uuid4()
-    model_session.registry = BTModelRegistry(build_logs={"status": f"status-{marker}"})
+    marker = f"TEST - {uuid.uuid4()}"
+    model_session.registry = BTModelRegistry(build_logs={"status": marker})
 
     updated_model_session = client.btmodelsessions.update(model_session=model_session)
     assert updated_model_session.registry == model_session.registry
 
 
 def test_update_model(model_session: BTModelSession, model: BTModel):
-    marker = uuid.uuid4()
-    model.start_time = f"time-{marker}"
-    model.end_time = f"time-{marker}"
-    model.total_time = f"time-{marker}"
-    model.model_binary_key = f"key-{marker}"
+    marker = f"TEST - {uuid.uuid4()}"
+    model.start_time = marker
+    model.end_time = marker
+    model.total_time = marker
+    model.model_binary_key = marker
 
     updated_model = model_session.models.update(model=model)
     assert updated_model.start_time == model.start_time

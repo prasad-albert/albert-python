@@ -177,7 +177,7 @@ class BTInsightCollection(BaseCollection):
         self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=insight.id)
 
-    def delete(self, *, id: str) -> bool:
+    def delete(self, *, id: str) -> None:
         """Delete a BTInsight by ID.
 
         Parameters
@@ -187,8 +187,6 @@ class BTInsightCollection(BaseCollection):
 
         Returns
         -------
-        bool
-            If the BTInsight was deleted.
+        None
         """
         self.session.delete(f"{self.base_path}/{id}")
-        return True

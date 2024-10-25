@@ -60,10 +60,9 @@ class PricingCollection(BaseCollection):
         items = response.json().get("Items", [])
         return [Pricing(**x) for x in items]
 
-    def delete(self, *, pricing_id: str) -> bool:
+    def delete(self, *, pricing_id: str) -> None:
         url = f"{self.base_path}/{pricing_id}"
         self.session.delete(url)
-        return True
 
     def _pricing_patch_payload(self, *, existing: Pricing, updated: Pricing) -> PatchPayload:
         patch_payload = self._generate_patch_payload(existing=existing, updated=updated)
