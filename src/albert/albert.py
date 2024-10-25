@@ -1,5 +1,8 @@
 import os
 
+from albert.collections.btdataset import BTDatasetCollection
+from albert.collections.btinsight import BTInsightCollection
+from albert.collections.btmodel import BTModelCollection, BTModelSessionCollection
 from albert.collections.cas import CasCollection
 from albert.collections.companies import CompanyCollection
 from albert.collections.custom_fields import CustomFieldCollection
@@ -14,6 +17,7 @@ from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
 from albert.collections.pricings import PricingCollection
 from albert.collections.projects import ProjectCollection
+from albert.collections.reports import ReportCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.storage_locations import StorageLocationsCollection
 from albert.collections.tags import TagCollection
@@ -119,6 +123,10 @@ class Albert:
         return CustomFieldCollection(session=self.session)
 
     @property
+    def reports(self) -> ReportCollection:
+        return ReportCollection(session=self.session)
+
+    @property
     def roles(self) -> RoleCollection:
         return RoleCollection(session=self.session)
 
@@ -149,3 +157,18 @@ class Albert:
     @property
     def files(self) -> FileCollection:
         return FileCollection(session=self.session)
+
+    @property
+    def btdatasets(self) -> BTDatasetCollection:
+        return BTDatasetCollection(session=self.session)
+
+    @property
+    def btmodelsessions(self) -> BTModelSessionCollection:
+        return BTModelSessionCollection(session=self.session)
+
+    def btmodels(self, *, parent_id: str) -> BTModelCollection:
+        return BTModelCollection(session=self.session, parent_id=parent_id)
+
+    @property
+    def btinsights(self) -> BTInsightCollection:
+        return BTInsightCollection(session=self.session)
