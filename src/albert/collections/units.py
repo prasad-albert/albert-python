@@ -121,7 +121,7 @@ class UnitCollection(BaseCollection):
         updated_unit = self.get_by_id(unit_id=unit_id)
         return updated_unit
 
-    def delete(self, *, unit_id: str) -> bool:
+    def delete(self, *, unit_id: str) -> None:
         """
         Deletes a unit by its ID.
 
@@ -132,12 +132,10 @@ class UnitCollection(BaseCollection):
 
         Returns
         -------
-        bool
-            True if the unit was successfully deleted, False otherwise.
+        None
         """
         url = f"{self.base_path}/{unit_id}"
         self.session.delete(url)
-        return True
 
     def list(
         self,

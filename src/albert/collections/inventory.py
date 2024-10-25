@@ -7,7 +7,7 @@ from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.session import AlbertSession
-from albert.utils.exceptions import ForbiddenError
+from albert.utils.exceptions import ForbiddenError, NotFoundError
 
 
 class InventoryCollection(BaseCollection):
@@ -196,15 +196,13 @@ class InventoryCollection(BaseCollection):
 
         Returns
         -------
-        bool
-            True if the item was deleted, False otherwise.
+        None
         """
         if isinstance(inventory_id, InventoryItem):
             inventory_id = inventory_id.id
         inventory_id = inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
         url = f"{self.base_path}/{inventory_id}"
         self.session.delete(url)
-        return True
 
     def _list_generator(
         self,
@@ -275,7 +273,7 @@ class InventoryCollection(BaseCollection):
                 )
                 try:
                     yield self.get_by_id(inventory_id=this_aid)
-                except ForbiddenError:
+                except (NotFoundError, ForbiddenError):
                     # Sometimes InventoryItems are listed that the current user does not have full access to. Just skip those
                     continue
             if not raw_inventory or raw_inventory == [] or len(raw_inventory) < limit:

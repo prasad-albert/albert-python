@@ -187,7 +187,7 @@ class CasCollection(BaseCollection):
                     return f
         return next(found, None)
 
-    def delete(self, *, cas_id: str) -> bool:
+    def delete(self, *, cas_id: str) -> None:
         """
         Deletes a CAS by its ID.
 
@@ -198,12 +198,10 @@ class CasCollection(BaseCollection):
 
         Returns
         -------
-        bool
-            True if the CAS was successfully deleted, False otherwise.
+        None
         """
         url = f"{self.base_path}/{cas_id}"
         self.session.delete(url)
-        return True
 
     def update(self, *, updated_object: Cas) -> Cas:
         # Fetch the current object state from the server or database

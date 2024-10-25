@@ -81,10 +81,9 @@ class StorageLocationsCollection(BaseCollection):
         )
         return StorageLocation(**response.json())
 
-    def delete(self, *, id: str) -> bool:
+    def delete(self, *, id: str) -> None:
         path = f"{self.base_path}/{id}"
         self.session.delete(path)
-        return True
 
     def update(self, *, storage_location: StorageLocation) -> StorageLocation:
         path = f"{self.base_path}/{storage_location.id}"

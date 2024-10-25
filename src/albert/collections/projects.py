@@ -101,7 +101,7 @@ class ProjectCollection(BaseCollection):
 
         return updated_project
 
-    def delete(self, *, project_id: str) -> bool:
+    def delete(self, *, project_id: str) -> None:
         """
         Delete a project by its ID.
 
@@ -112,14 +112,10 @@ class ProjectCollection(BaseCollection):
 
         Returns
         -------
-        bool
-            True if the deletion was successful
+        None
         """
         url = f"{self.base_path}/{project_id}"
-
         self.session.delete(url)
-
-        return True
 
     def _list_generator(
         self,

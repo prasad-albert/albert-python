@@ -79,8 +79,8 @@ def test_inventory_update(client: Albert, seeded_inventory):
     assert updated.description == d
     assert updated.id == seeded_inventory[2].id
 
-    deleted = client.inventory.delete(inventory_id=test_inv_item)
-    assert deleted
+    client.inventory.delete(inventory_id=test_inv_item)
+    assert not client.inventory.inventory_exists(inventory_item=test_inv_item)
 
 
 def test_collection_blocks_formulation(client: Albert, seeded_projects):
