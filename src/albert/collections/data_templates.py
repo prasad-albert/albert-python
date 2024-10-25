@@ -3,7 +3,7 @@ from albert.resources.data_templates import DataTemplate
 from albert.session import AlbertSession
 from albert.utils.exceptions import ForbiddenError, InternalServerError
 from albert.utils.logging import logger
-from albert.utils.pagination import SearchPaginator
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class DataTemplateCollection(BaseCollection):
@@ -20,7 +20,7 @@ class DataTemplateCollection(BaseCollection):
         name: str = None,
         limit: int = 25,
         offset: int = 0,
-    ) -> SearchPaginator[DataTemplate]:
+    ) -> AlbertPaginator[DataTemplate]:
         """
         Lists data template entities with optional filters.
 
@@ -55,7 +55,8 @@ class DataTemplateCollection(BaseCollection):
         }
         params = {k: v for k, v in params.items() if v is not None}
 
-        return SearchPaginator(
+        return AlbertPaginator(
+            mode=PaginationMode.OFFSET,
             path=f"{self.base_path}/search",
             session=self.session,
             deserialize=deserialize,
