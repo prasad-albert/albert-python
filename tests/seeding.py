@@ -9,6 +9,8 @@ from albert.resources.custom_fields import (
     FieldType,
     ServiceType,
 )
+from albert.resources.data_columns import DataColumn
+from albert.resources.data_templates import DataColumnValue, DataTemplate
 from albert.resources.inventory import (
     CasAmount,
     InventoryCategory,
@@ -361,6 +363,85 @@ def generate_unit_seeds() -> list[Unit]:
             synonyms=["Litre"],
             category=UnitCategory.VOLUME,
             verified=True,
+        ),
+    ]
+
+
+def generate_data_column_seeds(seeded_units) -> list[DataColumn]:
+    """
+    Generates a list of DataColumn seed objects for testing without IDs.
+
+    Returns
+    -------
+    List[DataColumn]
+        A list of DataColumn objects with different permutations.
+    """
+
+    return [
+        # Basic data column with required fields
+        DataColumn(
+            name="TEST - only unit 1",
+            unit=BaseEntityLink(id=seeded_units[0].id),
+        ),
+        # Data column with full fields including optional calculation
+        DataColumn(
+            name="TEST - unit and calculation",
+            unit=BaseEntityLink(id=seeded_units[1].id),
+            calculation="Pressure = Force / Area",
+        ),
+        # Data column with required fields but without the calculation
+        DataColumn(
+            name="TEST - only name",
+        ),
+        # Another data column with all fields
+        DataColumn(
+            name="TEST - only calculation",
+            calculation="Mass = Density * Volume",
+        ),
+    ]
+
+
+def generate_data_template_seeds(
+    seeded_data_columns: list[DataColumn], seeded_units: list[Unit], seeded_users: list[User]
+) -> list[DataTemplate]:
+    return [
+        DataTemplate(
+            name="TEST - Basic Data Template",
+            description="A basic data template with no metadata.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column=seeded_data_columns[0],
+                    value="25.0",
+                    unit=BaseEntityLink(id=seeded_units[0].id),
+                )
+            ],
+        ),
+        DataTemplate(
+            name="TEST - ACL Data Template",
+            description="A basic data template with no metadata.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column=seeded_data_columns[0],
+                    value="45.0",
+                    unit=seeded_units[0],
+                )
+            ],
+            users_with_access=[seeded_users[0], seeded_users[1]],
+        ),
+        DataTemplate(
+            name="TEST - Data Template with Calculations",
+            description="A data template with calculations.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column_id=seeded_data_columns[0].id,
+                    unit=seeded_units[0],
+                ),
+                DataColumnValue(
+                    data_column=seeded_data_columns[1],
+                    calculation=f"={seeded_data_columns[0].name}/2",
+                    unit=seeded_units[0],
+                ),
+            ],
         ),
     ]
 
