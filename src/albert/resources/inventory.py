@@ -36,12 +36,12 @@ class CasAmount(BaseAlbertModel):
 
     Attributes
     ----------
+    min : float
+        The minimum amount of the CAS in the formulation.
+    max : float
+        The maximum amount of the CAS in the formulation.
     id : str | None
         The Albert ID of the CAS Number Resource this amount represents. Provide either a Cas or an ID.
-    min : float | None
-        The minimum amount of the CAS in the formulation.
-    max : float | None
-        The maximum amount of the CAS in the formulation.
     cas : Cas | None
         The CAS object associated with this amount. Provide either a Cas or an id.
     cas_smiles: str | None
@@ -50,9 +50,9 @@ class CasAmount(BaseAlbertModel):
         The CAS number. Obtained from the Cas object when provided.
     """
 
+    min: float
+    max: float
     id: str | None = Field(default=None)
-    min: float | None = Field(default=None)
-    max: float | None = Field(default=None)
 
     # Excluded, read-only fields
     cas: Cas = Field(default=None, exclude=True)
