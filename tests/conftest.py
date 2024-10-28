@@ -48,7 +48,10 @@ from tests.seeding import (
 
 @pytest.fixture(scope="session")
 def client() -> Albert:
-    credentials = ClientCredentials.from_env()
+    credentials = ClientCredentials.from_env(
+        client_id_env="ALBERT_CLIENT_ID_SDK",
+        client_secret_env="ALBERT_CLIENT_SECRET_SDK",
+    )
     return Albert(client_credentials=credentials)
 
 
