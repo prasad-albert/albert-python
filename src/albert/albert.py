@@ -37,7 +37,7 @@ class Albert:
     Parameters
     ----------
     base_url : str, optional
-        The base URL of the Albert API (default is "https://dev.albertinventdev.com").
+        The base URL of the Albert API (default is "https://app.albertinvent.com").
     token : str, optional
         The token for authentication (default is read from environment variable "ALBERT_TOKEN").
     client_credentials: ClientCredentials, optional
