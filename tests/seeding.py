@@ -613,7 +613,7 @@ def generate_inventory_seeds(
             category=InventoryCategory.CONSUMABLES.value,
             unit_category=InventoryUnitCategory.VOLUME.value,
             tags=seeded_tags[0:1],
-            cas=[CasAmount(id=seeded_cas[1].id, min=0.98, max=1)],
+            cas=[CasAmount(id=seeded_cas[1].id, min=0.98, max=1, cas_smiles=seeded_cas[1].smiles)],
             security_class=SecurityClass.SHARED,
             company=seeded_companies[1].name,  # ensure it knows to use the company object
         ),
@@ -623,10 +623,9 @@ def generate_inventory_seeds(
             category=InventoryCategory.RAW_MATERIALS,
             unit_category=InventoryUnitCategory.VOLUME,
             cas=[
-                CasAmount(
-                    cas=seeded_cas[0], min=0.50, max=1.0
-                ),  # ensure it will reslove the cas obj to an id
-                CasAmount(id=seeded_cas[1].id, min=0.30, max=0.6),
+                # ensure it will reslove the cas obj to an id
+                CasAmount(cas=seeded_cas[0], min=0.50, max=1.0, cas_smiles=seeded_cas[0].smiles),
+                CasAmount(id=seeded_cas[1].id, min=0.30, max=0.6, cas_smiles=seeded_cas[1].smiles),
             ],
             security_class=SecurityClass.SHARED,
             company=seeded_companies[1],

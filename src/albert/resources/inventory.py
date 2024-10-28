@@ -54,6 +54,7 @@ class CasAmount(BaseResource):
     id: str | None = Field(default=None)
     min: float = Field(default=None)
     max: float = Field(default=None)
+    cas_smiles: str | None = Field(default=None, alias="casSmiles", frozen=True)
 
     # Define a private attribute to store the Cas object
     cas: Cas = Field(default=None, exclude=True)
