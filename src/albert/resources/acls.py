@@ -6,7 +6,7 @@ from albert.utils.types import BaseAlbertModel
 
 
 class AccessControlLevel(str, Enum):
-    """The Fine grain control"""
+    """The fine grain control"""
 
     PROJECT_OWNER = "ProjectOwner"
     PROJECT_EDITOR = "ProjectEditor"
@@ -15,9 +15,12 @@ class AccessControlLevel(str, Enum):
     PROJECT_PROPERTY_TASKS = "ProjectPropertyTask"
     INVENTORY_OWNER = "InventoryOwner"
     INVENTORY_VIEWER = "InventoryViewer"
+    CUSTOM_TEMPLATE_OWNER = "CustomTemplateOwner"
 
 
 class ACL(BaseAlbertModel):
+    """The Access Control List (ACL) for a user"""
+
     id: str = Field(description="The id of the user for which this ACL applies")
     fgc: AccessControlLevel | None = Field(
         default=None, description="The Fine-Grain Control Level"

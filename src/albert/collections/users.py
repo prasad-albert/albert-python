@@ -30,6 +30,7 @@ class UserCollection(BaseCollection):
         offset: int | None = None,
         limit: int = 50,
         status=None,
+        search_fields=None,
     ) -> Generator[User, None, None]:
         params = {"limit": limit}
         if status:
@@ -38,6 +39,8 @@ class UserCollection(BaseCollection):
             params["text"] = text.lower()
         if offset:  # pragma: no cover
             params["offset"] = offset
+        if search_fields:
+            params["searchFields"] = search_fields
         while True:
             response = self.session.get(self.base_path + "/search", params=params)
             user_data = response.json().get("Items", [])
@@ -51,7 +54,9 @@ class UserCollection(BaseCollection):
                 break
             params["offset"] = int(offset) + int(limit)
 
-    def list(self, *, text: str | None = None, status: Status = None) -> Iterator[User]:
+    def list(
+        self, *, text: str | None = None, status: Status = None, search_fields=None
+    ) -> Iterator[User]:
         """Lists Users based on criteria
 
         Parameters
@@ -64,7 +69,7 @@ class UserCollection(BaseCollection):
         Generator
             Generator of matching Users or None
         """
-        return self._list_generator(text=text, status=status)
+        return self._list_generator(text=text, status=status, search_fields=search_fields)
 
     def get_by_id(self, *, user_id: str) -> User | None:
         """
@@ -118,12 +123,10 @@ class UserCollection(BaseCollection):
         current_object = self.get_by_id(user_id=updated_object.id)
 
         # Generate the PATCH payload
-        patch_payload = self._generate_patch_payload(
-            existing=current_object, updated=updated_object
-        )
+        payload = self._generate_patch_payload(existing=current_object, updated=updated_object)
 
         url = f"{self.base_path}/{updated_object.id}"
-        self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=payload.model_dump(mode="json", by_alias=True))
 
         updated_user = self.get_by_id(user_id=updated_object.id)
         return updated_user
