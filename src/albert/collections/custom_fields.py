@@ -1,6 +1,7 @@
 from albert.collections.base import BaseCollection
 from albert.resources.custom_fields import CustomField, ServiceType
 from albert.session import AlbertSession
+from albert.utils.patches import PatchOperation
 
 
 class CustomFieldCollection(BaseCollection):
@@ -97,15 +98,15 @@ class CustomFieldCollection(BaseCollection):
         # init payload
         payload = self._generate_patch_payload(existing=existing, updated=updated)
         # modify
-        for _patch in payload["data"]:
-            if _patch["attribute"] == "hidden":
+        for _patch in payload.data:
+            if _patch.attribute == "hidden":
                 if existing.hidden is None:
                     # update
-                    _patch["operation"] = "update"
-                    _patch["newValue"] = bool(updated.hidden)  # to avoid string type in payload
+                    _patch.operation = PatchOperation.UPDATE
+                    _patch.new_value = bool(updated.hidden)  # to avoid string type in payload
                 else:
-                    _patch["oldValue"] = bool(existing.hidden)  # to avoid string type in payload
-                    _patch["newValue"] = bool(updated.hidden)  # to avoid string type in payload
+                    _patch.old_value = bool(existing.hidden)  # to avoid string type in payload
+                    _patch.newValue = bool(updated.hidden)  # to avoid string type in payload
         return payload
 
     def update(self, *, updated_object: CustomField) -> CustomField:
