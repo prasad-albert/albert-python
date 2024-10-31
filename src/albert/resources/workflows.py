@@ -1,5 +1,3 @@
-import logging
-
 from pydantic import Field, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
@@ -11,7 +9,16 @@ from albert.utils.exceptions import AlbertException
 
 
 class Interval(BaseAlbertModel):
-    """A Pydantic class representing an interval."""
+    """A Pydantic class representing an interval.
+
+    Attrubutes
+    ----------
+    value : str
+        The value of the interval setpoint.
+    unit : Unit
+        The unit of the related value.
+
+    """
 
     value: str = Field(default=None)
     unit: SerializeAsEntityLink[Unit] = Field(default=None, alias="Unit")
@@ -21,6 +28,20 @@ class ParameterSetpoint(BaseAlbertModel):
     """A Pydantic class representing the setpoint or intervals of a parameter to use.
     For a single value, provide the value and unit. For multiple values, provide intervals.
     a parameter or parameter_id must be provided.
+
+    Attributes
+    ----------
+    parameter : Parameter
+        The parameter to set the setpoint on. Provide either a parameter or a parameter_id.
+    parameter_id : str
+        The id of the parameter. Provide either a parameter or a parameter_id.
+    value : str | dict[str, str]
+        The value of the setpoint. If the parameter is a InventoryItem, provide a dictionary of values.
+    unit : Unit
+        The unit of the setpoint.
+    intervals : list[Interval]
+        The intervals of the setpoint. Either ether intervals or value + unit
+
     """
 
     parameter: Parameter = Field(exclude=True, default=None)
@@ -47,7 +68,20 @@ class ParameterSetpoint(BaseAlbertModel):
 
 
 class ParameterGroupSetpoints(BaseAlbertModel):
-    """A class that represents the setpoints on a parameter group."""
+    """A class that represents the setpoints on a parameter group.
+
+
+    Attributes
+    ----------
+    parameter_group : ParameterGroup
+        The parameter group to set the setpoints on. Provide either a parameter_group or a paramerter_group_id
+    parameter_group_id : str
+        The id of the parameter group.  Provide either a parameter_group or a paramerter_group_id
+    parameter_group_name : str
+        The name of the parameter group. This is a read-only field.
+    parameter_setpoints : list[ParameterSetpoint]
+        The setpoints to apply to the parameter group.
+    """
 
     parameter_group: ParameterGroup = Field(exclude=True, default=None)
     parameter_group_id: str = Field(alias="id", default=None)
@@ -70,6 +104,15 @@ class ParameterGroupSetpoints(BaseAlbertModel):
 class Workflow(BaseResource):
     """A Pydantic Class representing a workflow in Albert.
     Workflows are combinations of Data Templates and Parameter groups and their associated setpoints.
+
+    Attributes
+    ----------
+    name : str
+        The name of the workflow.
+    parameter_group_setpoints : list[ParameterGroupSetpoints]
+        The setpoints to apply to the parameter groups in the workflow.
+    id : str | None
+        The AlbertID of the workflow. This is set when a workflow is retrived from the platform.
     """
 
     name: str
