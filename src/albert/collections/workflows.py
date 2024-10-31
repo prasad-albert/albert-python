@@ -39,12 +39,12 @@ class WorkflowCollection(BaseCollection):
             deserialize=deserialize,
         )
 
-    def get_by_id(self, id):
+    def get_by_id(self, *, id):
         response = self.session.get(f"{self.base_path}/{id}")
         return Workflow(**response.json())
 
-    def create(self, workflow: Workflow):
+    def create(self, *, workflow: Workflow):
         response = self.session.post(
-            self.base_path, json=workflow.model_dump(by_alias=True, exclude_none=True)
+            self.base_path, json=workflow.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return Workflow(**response.json())
