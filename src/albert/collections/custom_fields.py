@@ -89,26 +89,6 @@ class CustomFieldCollection(BaseCollection):
         )
         return CustomField(**response.json())
 
-    def _generate_customfields_patch_payload(
-        self, *, existing: CustomField, updated: CustomField
-    ) -> dict:
-        """
-        Generate the PATCH payload for updating a custom field item.
-        """
-        # init payload
-        payload = self._generate_patch_payload(existing=existing, updated=updated)
-        # modify
-        for _patch in payload.data:
-            if _patch.attribute == "hidden":
-                if existing.hidden is None:
-                    # update
-                    _patch.operation = PatchOperation.UPDATE
-                    _patch.new_value = bool(updated.hidden)  # to avoid string type in payload
-                else:
-                    _patch.old_value = bool(existing.hidden)  # to avoid string type in payload
-                    _patch.newValue = bool(updated.hidden)  # to avoid string type in payload
-        return payload
-
     def update(self, *, updated_object: CustomField) -> CustomField:
         """
         Update a CustomField item.
@@ -117,12 +97,15 @@ class CustomFieldCollection(BaseCollection):
         current_object = self.get_by_id(id=updated_object.id)
 
         # generate the patch payload
-        patch_payload = self._generate_customfields_patch_payload(
-            existing=current_object, updated=updated_object
+        payload = self._generate_patch_payload(
+            existing=current_object,
+            updated=updated_object,
+            generate_metadata_diff=False,
+            stringify_values=False,
         )
 
         # run patch
         url = f"{self.base_path}/{updated_object.id}"
-        self.session.patch(url, json=patch_payload)
+        self.session.patch(url, json=payload.model_dump(mode="json", by_alias=True))
         updated_ctf = self.get_by_id(id=updated_object.id)
         return updated_ctf
