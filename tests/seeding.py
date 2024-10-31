@@ -832,3 +832,6 @@ def generate_workflow_seeds(
             ],
         ),
     ]
+
+def generate_task_seeds():
+    
