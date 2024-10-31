@@ -86,3 +86,18 @@ class CustomFieldCollection(BaseCollection):
             self.base_path, json=custom_field.model_dump(by_alias=True, exclude_none=True)
         )
         return CustomField(**response.json())
+
+    def update(self, *, updated_object: CustomField) -> CustomField:
+        # Fetch the current object state from the server or database
+        current_object = self.get_by_id(id=updated_object.id)
+
+        # Generate the PATCH payload
+        patch_payload = self._generate_patch_payload(
+            existing=current_object, updated=updated_object
+        )
+
+        url = f"{self.base_path}/{updated_object.id}"
+        self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
+
+        updated_field = self.get_by_id(cas_id=updated_object.id)
+        return updated_field
