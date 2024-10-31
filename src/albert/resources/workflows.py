@@ -3,7 +3,7 @@ from pydantic import Field, model_validator
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter
-from albert.resources.serialization import SerializeAsEntityLink
+from albert.resources.serialization import EntityLinkConvertible, SerializeAsEntityLink
 from albert.resources.units import Unit
 from albert.utils.exceptions import AlbertException
 
@@ -101,7 +101,7 @@ class ParameterGroupSetpoints(BaseAlbertModel):
         return self
 
 
-class Workflow(BaseResource):
+class Workflow(BaseResource, EntityLinkConvertible):
     """A Pydantic Class representing a workflow in Albert.
     Workflows are combinations of Data Templates and Parameter groups and their associated setpoints.
 
