@@ -64,7 +64,11 @@ class AlbertPaginator(Iterable[ItemType]):
 
             items = response_data.get("Items", [])
             item_count = len(items)
-            if item_count == 0:
+
+            # Return early for insufficient items
+            no_items = item_count == 0
+            under_limit = "limit" in self.params and item_count < self.params["limit"]
+            if no_items or under_limit:
                 return
 
             for item in items:
