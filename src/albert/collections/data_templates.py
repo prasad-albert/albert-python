@@ -74,14 +74,14 @@ class DataTemplateCollection(BaseCollection):
         response = self.session.get(f"{self.base_path}/{id}")
         return DataTemplate(**response.json())
 
-    def get_by_name(self, *, name: str) -> DataTemplate:
+    def get_by_name(self, *, name: str) -> DataTemplate | None:
         hits = list(self.list(name=name))
         for h in hits:
             if h.name.lower() == name.lower():
                 return h
         return None
 
-    def update(self, *, updated_data_template: DataTemplate) -> DataTemplate:
+    def update(self, *, data_template: DataTemplate) -> DataTemplate:
         raise NotImplementedError("Data templates cannot be updated yet.")
 
     def delete(self, *, data_template_id: str) -> None:
