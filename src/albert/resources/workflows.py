@@ -51,14 +51,11 @@ class ParameterSetpoint(BaseAlbertModel):
     intervals: list[Interval] = Field(default=None, alias="Intervals")
 
     @model_validator(mode="after")
-    def check_parameter_setpoit_validity(self):
+    def check_parameter_setpoint_validity(self):
         if self.parameter:
-            if self.parameter_id is not None:
-                if self.parameter_id != self.parameter.id:
-                    raise AlbertException(
-                        "Provided parameter_id does not match the parameter's id."
-                    )
-            else:
+            if self.parameter_id is not None and self.parameter_id != self.parameter.id:
+                raise AlbertException("Provided parameter_id does not match the parameter's id.")
+            if self.parameter_id is None:
                 self.parameter_id = self.parameter.id
         elif self.parameter is None and self.parameter_id is None:
             raise AlbertException("Either parameter or parameter_id must be provided.")
@@ -103,6 +100,7 @@ class ParameterGroupSetpoints(BaseAlbertModel):
 
 class Workflow(BaseResource, EntityLinkConvertible):
     """A Pydantic Class representing a workflow in Albert.
+
     Workflows are combinations of Data Templates and Parameter groups and their associated setpoints.
 
     Attributes
