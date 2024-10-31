@@ -11,7 +11,7 @@ def test_basic_list(client: Albert, seeded_workflows: list[Workflow]):
 
 def test_get_by_id(client: Albert, seeded_workflows: list[Workflow]):
     wf = seeded_workflows[0]
-    retrieved_wf = client.workflows.get_by_id(wf.id)
+    retrieved_wf = client.workflows.get_by_id(id=wf.id)
     assert retrieved_wf.id == wf.id
 
 
@@ -20,5 +20,5 @@ def test_blocks_dupes(client: Albert, seeded_workflows: list[Workflow]):
     wf.id = None
     wf.status = None
 
-    r = client.workflows.create(wf)
+    r = client.workflows.create(workflow=wf)
     assert r.id == seeded_workflows[0].id
