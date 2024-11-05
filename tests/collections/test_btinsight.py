@@ -3,7 +3,6 @@ import pytest
 from albert import Albert
 from albert.resources.btinsight import BTInsight, BTInsightRegistry
 from tests.seeding import PRELOAD_BTINSIGHT_ID
-from tests.test_utils import random_name
 
 
 @pytest.fixture
@@ -14,7 +13,7 @@ def insight(client: Albert) -> BTInsight:
 
 
 def test_update(client: Albert, insight: BTInsight):
-    marker = random_name()
+    marker = "TEST"
     insight.output_key = marker
     insight.start_time = marker
     insight.end_time = marker

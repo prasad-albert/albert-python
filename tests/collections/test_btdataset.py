@@ -3,7 +3,6 @@ import pytest
 from albert import Albert
 from albert.resources.btdataset import BTDataset
 from tests.seeding import PRELOAD_BTDATASET_ID
-from tests.test_utils import random_name
 
 
 @pytest.fixture
@@ -14,7 +13,7 @@ def dataset(client: Albert) -> BTDataset:
 
 
 def test_update(client: Albert, dataset: BTDataset):
-    marker = random_name()
+    marker = "TEST"
     dataset.key = marker
     dataset.file_name = marker
 

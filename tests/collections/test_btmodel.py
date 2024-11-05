@@ -3,7 +3,6 @@ import pytest
 from albert import Albert
 from albert.resources.btmodel import BTModel, BTModelRegistry, BTModelSession
 from tests.seeding import PRELOAD_BTMODEL_ID, PRELOAD_BTMODELSESSION_ID
-from tests.test_utils import random_name
 
 
 @pytest.fixture
@@ -21,7 +20,7 @@ def model(client: Albert) -> BTModel:
 
 
 def test_update_model_session(client: Albert, model_session: BTModelSession):
-    marker = random_name()
+    marker = "TEST"
     model_session.registry = BTModelRegistry(build_logs={"status": marker})
 
     updated_model_session = client.btmodelsessions.update(model_session=model_session)
@@ -29,7 +28,7 @@ def test_update_model_session(client: Albert, model_session: BTModelSession):
 
 
 def test_update_model(model_session: BTModelSession, model: BTModel):
-    marker = random_name()
+    marker = "TEST"
     model.start_time = marker
     model.end_time = marker
     model.total_time = marker
