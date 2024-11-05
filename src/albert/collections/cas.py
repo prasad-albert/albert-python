@@ -203,17 +203,15 @@ class CasCollection(BaseCollection):
         url = f"{self.base_path}/{cas_id}"
         self.session.delete(url)
 
-    def update(self, *, updated_object: Cas) -> Cas:
+    def update(self, *, cas: Cas) -> Cas:
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(cas_id=updated_object.id)
+        existing_cas = self.get_by_id(cas_id=cas.id)
 
         # Generate the PATCH payload
-        patch_payload = self._generate_patch_payload(
-            existing=current_object, updated=updated_object
-        )
+        patch_payload = self._generate_patch_payload(existing=existing_cas, updated=cas)
 
-        url = f"{self.base_path}/{updated_object.id}"
+        url = f"{self.base_path}/{cas.id}"
         self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
 
-        updated_cas = self.get_by_id(cas_id=updated_object.id)
+        updated_cas = self.get_by_id(cas_id=cas.id)
         return updated_cas

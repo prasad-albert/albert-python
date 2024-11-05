@@ -1,27 +1,27 @@
-import uuid
-
 import pytest
 
 from albert import Albert
 from albert.resources.btmodel import BTModel, BTModelRegistry, BTModelSession
+from tests.seeding import PRELOAD_BTMODEL_ID, PRELOAD_BTMODELSESSION_ID
+from tests.test_utils import random_name
 
 
 @pytest.fixture
 def model_session(client: Albert) -> BTModelSession:
     # api-btmodel does not have working list/delete functionality,
     # so we need to hard-code an existing resource to play with
-    return client.btmodelsessions.get_by_id(id="MDS1")
+    return client.btmodelsessions.get_by_id(id=PRELOAD_BTMODELSESSION_ID)
 
 
 @pytest.fixture
 def model(client: Albert) -> BTModel:
     # api-btmodel does not have working list/delete functionality,
     # so we need to hard-code an existing resource to play with
-    return client.btmodels(parent_id="MDS1").get_by_id(id="MDL1")
+    return client.btmodels(parent_id=PRELOAD_BTMODELSESSION_ID).get_by_id(id=PRELOAD_BTMODEL_ID)
 
 
 def test_update_model_session(client: Albert, model_session: BTModelSession):
-    marker = f"TEST - {uuid.uuid4()}"
+    marker = random_name()
     model_session.registry = BTModelRegistry(build_logs={"status": marker})
 
     updated_model_session = client.btmodelsessions.update(model_session=model_session)
@@ -29,7 +29,7 @@ def test_update_model_session(client: Albert, model_session: BTModelSession):
 
 
 def test_update_model(model_session: BTModelSession, model: BTModel):
-    marker = f"TEST - {uuid.uuid4()}"
+    marker = random_name()
     model.start_time = marker
     model.end_time = marker
     model.total_time = marker

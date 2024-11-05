@@ -23,15 +23,32 @@ def _list_asserts(returned_list):
     assert found
 
 
-def test_simple_cas_list(client: Albert):
-    simple_list = client.cas_numbers.list()
-    assert isinstance(simple_list, Generator)
-    _list_asserts(simple_list)
+def test_cas_crud(client: Albert):
+    # Update the description of a seeded CAS entry
+    cas_number = f"TEST - {uuid.uuid4()}"
+    cas = Cas(number=cas_number)
+    cas = client.cas_numbers.create(cas=cas)
+
+    try:
+        updated_description = f"TEST - {uuid.uuid4()}"
+        cas.description = updated_description
+        cas = client.cas_numbers.update(cas=cas)
+        assert cas.description == updated_description
+    finally:
+        client.cas_numbers.delete(cas_id=cas.id)
+
+    assert not client.cas_numbers.cas_exists(number=cas_number)
 
 
 def test_cas_not_found(client: Albert):
     with pytest.raises(AlbertAPIError):
-        client.cas_numbers.get_by_id(cas_id="foo bar")
+        client.cas_numbers.get_by_id(cas_id=f"{uuid.uuid4()}")
+
+
+def test_simple_cas_list(client: Albert):
+    simple_list = client.cas_numbers.list()
+    assert isinstance(simple_list, Generator)
+    _list_asserts(simple_list)
 
 
 def test_advanced_cas_list(client: Albert, seeded_cas: list[Cas]):
@@ -56,18 +73,7 @@ def test_cas_exists(client: Albert, seeded_cas: list[Cas]):
     assert client.cas_numbers.cas_exists(number=cas_number)
 
     # Check if CAS does not exist for a non-existent CAS number
-    assert not client.cas_numbers.cas_exists(number="999-99-9xxxx")
-
-
-def test_update_cas(client: Albert, seeded_cas: list[Cas]):
-    # Update the description of a seeded CAS entry
-    cas_to_update = seeded_cas[0]
-    updated_description = f"TEST - {uuid.uuid4()}"
-    cas_to_update.description = updated_description
-
-    updated_cas = client.cas_numbers.update(updated_object=cas_to_update)
-
-    assert updated_cas.description == updated_description
+    assert not client.cas_numbers.cas_exists(number=str(uuid.uuid4()))
 
 
 def test_get_by_number(client: Albert, seeded_cas: list[Cas]):

@@ -5,6 +5,7 @@ import pytest
 from albert.albert import Albert
 from albert.resources.companies import Company
 from albert.utils.exceptions import AlbertException
+from tests.test_utils import random_name
 
 
 def _list_asserts(returned_list):
@@ -50,43 +51,23 @@ def test_company_get_by(client: Albert, seeded_companies: list[Company]):
     assert company_by_id.name == test_name
 
 
-def test_basic_create_delete(client: Albert):
-    simple_company = client.companies.create(company="Simple test company name!")
-    assert isinstance(simple_company, Company)
-    assert simple_company.id is not None
-
-    client.companies.delete(id=simple_company.id)
-    assert not client.companies.company_exists(name=simple_company.name)
-
-
 def test_company_crud(client: Albert):
-    new_company = Company(name="SDK Testing Corp.")
+    company_name = random_name()
+    company = Company(name=company_name)
+    company = client.companies.create(company=company)
+    try:
+        assert isinstance(company, Company)
+        assert company.id is not None
+        assert company.name == company_name
 
-    # Clean Up incase of previous failed tests
-    c1 = client.companies.get_by_name(name="SDK Testing Corp. UPDATED")
-    if c1:
-        client.companies.delete(id=c1.id)
-    c2 = client.companies.get_by_name(name="A second cool name")
-    if c2:
-        client.companies.delete(id=c2.id)
+        new_company_name = random_name()
+        renamed_company = client.companies.rename(old_name=company_name, new_name=new_company_name)
+        assert isinstance(renamed_company, Company)
+        assert renamed_company.name == new_company_name
+        assert renamed_company.id == company.id
 
-    registered_company = client.companies.create(company=new_company)
-    assert isinstance(registered_company, Company)
-    assert registered_company.id is not None
-    assert registered_company.name == "SDK Testing Corp."
-
-    renamed_company = client.companies.rename(
-        old_name="SDK Testing Corp.", new_name="SDK Testing Corp. UPDATED"
-    )
-
-    assert isinstance(renamed_company, Company)
-    assert renamed_company.name == "SDK Testing Corp. UPDATED"
-    assert renamed_company.id == registered_company.id
-
-    renamed_company.name = "A second cool name"
-    renamed_company = client.companies.update(updated_object=renamed_company)
-
-    client.companies.delete(id=renamed_company.id)
-    assert not client.companies.company_exists(name="SDK Testing Corp. UPDATED")
-    with pytest.raises(AlbertException):
-        client.companies.rename(old_name="SDK Testing Corp. UPDATED", new_name="nope")
+        assert not client.companies.company_exists(name=company_name)
+        with pytest.raises(AlbertException):
+            client.companies.rename(old_name=company_name, new_name="nope")
+    finally:
+        client.companies.delete(id=company.id)

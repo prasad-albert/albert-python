@@ -1,20 +1,20 @@
-import uuid
-
 import pytest
 
 from albert import Albert
 from albert.resources.btdataset import BTDataset
+from tests.seeding import PRELOAD_BTDATASET_ID
+from tests.test_utils import random_name
 
 
 @pytest.fixture
 def dataset(client: Albert) -> BTDataset:
     # api-btdataset does not have working list/delete functionality,
     # so we need to hard-code an existing resource to play with
-    return client.btdatasets.get_by_id(id="DST1")
+    return client.btdatasets.get_by_id(id=PRELOAD_BTDATASET_ID)
 
 
 def test_update(client: Albert, dataset: BTDataset):
-    marker = f"TEST - {uuid.uuid4()}"
+    marker = random_name()
     dataset.key = marker
     dataset.file_name = marker
 
