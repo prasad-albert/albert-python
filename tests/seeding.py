@@ -34,6 +34,16 @@ from albert.resources.projects import (
 from albert.resources.roles import Role
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
+from albert.resources.tasks import (
+    BaseTask,
+    BatchSizeUnit,
+    BatchTask,
+    Block,
+    InventoryInformation,
+    PropertyTask,
+    TaskCategory,
+    TaskPriority,
+)
 from albert.resources.units import Unit, UnitCategory
 from albert.resources.users import User, UserClass
 from albert.resources.workflows import (
@@ -833,5 +843,98 @@ def generate_workflow_seeds(
         ),
     ]
 
-def generate_task_seeds():
-    
+
+def generate_task_seeds(
+    seeded_inventory,
+    seeded_lots,
+    seeded_projects,
+    seeded_locations,
+    seeded_users,
+    seeded_data_templates,
+    seeded_workflows,
+    seeded_formulations,
+) -> list[BaseTask]:
+    return [
+        # Property Task 1
+        PropertyTask(
+            name="TEST - Property Task 1",
+            category=TaskCategory.PROPERTY,
+            inventory_information=[
+                InventoryInformation(inventory_id=seeded_inventory[0].id, lot_id=seeded_lots[0].id)
+            ],
+            parent_id=seeded_inventory[0].id,
+            location=seeded_locations[0],
+            priority=TaskPriority.MEDIUM,
+            project=seeded_projects[0],
+            blocks=[
+                Block(
+                    workflow=[seeded_workflows[0]],
+                    data_template=[seeded_data_templates[0]],
+                )
+            ],
+            assigned_to=seeded_users[0],
+            due_date="2024-10-31",
+        ),
+        # Property Task 2
+        PropertyTask(
+            name="TEST - Property Task 2",
+            category=TaskCategory.PROPERTY,
+            inventory_information=[
+                InventoryInformation(
+                    inventory_id=seeded_inventory[1].id,
+                    lot_id=[l for l in seeded_lots if l.inventory_id == seeded_inventory[1].id][
+                        0
+                    ].id,
+                )
+            ],
+            priority=TaskPriority.HIGH,
+            blocks=[
+                Block(
+                    workflow=[seeded_workflows[1]],
+                    data_template=[seeded_data_templates[1]],
+                )
+            ],
+            due_date="2024-10-31",
+            location=seeded_locations[1],
+        ),
+        # Batch Task 1
+        # Use the Formulations used in #tests/resources/test_sheets/py defined as seeded_formulations
+        BatchTask(
+            name="TEST - Batch Task 1",
+            category=TaskCategory.BATCH,
+            batch_size_unit=BatchSizeUnit.KILOGRAMS,
+            inventory_information=[
+                InventoryInformation(
+                    inventory_id=seeded_formulations[2].id,
+                    batch_size=100.0,
+                )
+            ],
+            location=seeded_locations[1],
+            priority=TaskPriority.LOW,
+            project=seeded_projects[2],
+            parent_id=seeded_formulations[2].project_id,
+            assigned_to=seeded_users[1],
+            start_date="2024-10-01",
+            due_date="2024-10-31",
+            workflows=[seeded_workflows[1]],
+        ),
+        # Batch Task 2
+        BatchTask(
+            name="TEST - Batch Task 2",
+            category=TaskCategory.BATCH,
+            batch_size_unit=BatchSizeUnit.GRAMS,
+            inventory_information=[
+                InventoryInformation(
+                    inventory_id=seeded_formulations[1].id,
+                    batch_size=250.0,
+                )
+            ],
+            location=seeded_locations[2],
+            priority=TaskPriority.MEDIUM,
+            project=seeded_projects[2],
+            parent_id=seeded_formulations[2].project_id,
+            assigned_to=seeded_users[0],
+            start_date="2024-10-01",
+            due_date="2024-10-31",
+        ),
+    ]
