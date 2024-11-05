@@ -1,5 +1,3 @@
-from enum import Enum
-
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.tasks import (
     BaseTask,
@@ -21,11 +19,10 @@ class TaskCollection(BaseCollection):
         self.base_path = f"/api/{TaskCollection._api_version}/tasks"
 
     def create(self, *, task: BaseTask) -> BaseTask:
-        payload = [task.model_dump(by_alias=True, exclude_none=True)]
-        category = task.category.value if isinstance(task.category, Enum) else str(task.category)
-        url = f"{self.base_path}/multi?category={category}"
+        payload = [task.model_dump(mode="json", by_alias=True, exclude_none=True)]
+        url = f"{self.base_path}/multi?category={task.category}"
         if task.parent_id is not None:
-            url += f"&parentId={task.parent_id}"
+            url = f"{url}&parentId={task.parent_id}"
         response = self.session.post(url=url, json=payload)
         task_data = response.json()[0]
         return TaskAdapter.validate_python(task_data)
