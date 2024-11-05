@@ -22,6 +22,7 @@ from albert.collections.reports import ReportCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.storage_locations import StorageLocationsCollection
 from albert.collections.tags import TagCollection
+from albert.collections.tasks import TaskCollection
 from albert.collections.un_numbers import UnNumberCollection
 from albert.collections.units import UnitCollection
 from albert.collections.users import UserCollection
@@ -139,6 +140,10 @@ class Albert:
     @property
     def worksheets(self) -> WorksheetCollection:
         return WorksheetCollection(session=self.session)
+
+    @property
+    def tasks(self) -> TaskCollection:
+        return TaskCollection(session=self.session)
 
     @property
     def templates(self) -> CustomTemplatesCollection:

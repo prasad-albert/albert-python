@@ -12,14 +12,14 @@ from albert.resources.companies import Company
 from albert.resources.custom_fields import CustomField
 from albert.resources.data_columns import DataColumn
 from albert.resources.data_templates import DataTemplate
-from albert.resources.inventory import InventoryItem
+from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
 from albert.resources.roles import Role
-from albert.resources.sheets import Sheet
+from albert.resources.sheets import Component, Sheet
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.users import User
@@ -43,6 +43,7 @@ from tests.seeding import (
     generate_project_seeds,
     generate_storage_location_seeds,
     generate_tag_seeds,
+    generate_task_seeds,
     generate_unit_seeds,
     generate_user_seeds,
     generate_workflow_seeds,
@@ -419,3 +420,56 @@ def seeded_workflows(
         seeded.append(client.workflows.create(workflow=wf))
     yield seeded
     # workflows cannot be deleted
+
+
+@pytest.fixture(scope="session")
+def seeded_products(
+    client: Albert, sheet: Sheet, seeded_inventory: list[InventoryItem]
+) -> list[InventoryItem]:
+    formulations = []
+
+    components = [
+        Component(inventory_item=seeded_inventory[0], amount=66),
+        Component(inventory_item=seeded_inventory[1], amount=34),
+    ]
+    for n in range(4):
+        formulations.append(
+            sheet.add_formulation(
+                formulation_name=f"TEST my cool formulation {str(n)}",
+                components=components,
+            )
+        )
+    return list(
+        client.inventory.list(category=InventoryCategory.FORMULAS, name="TEST my cool formulation")
+    )
+
+
+@pytest.fixture(scope="session")
+def seeded_tasks(
+    client: Albert,
+    seeded_inventory,
+    seeded_lots,
+    seeded_projects,
+    seeded_locations,
+    seeded_users,
+    seeded_data_templates,
+    seeded_workflows,
+    seeded_products,
+):
+    seeded = []
+    all_tasks = generate_task_seeds(
+        seeded_inventory=seeded_inventory,
+        seeded_lots=seeded_lots,
+        seeded_projects=seeded_projects,
+        seeded_locations=seeded_locations,
+        seeded_users=seeded_users,
+        seeded_data_templates=seeded_data_templates,
+        seeded_workflows=seeded_workflows,
+        seeded_products=seeded_products,
+    )
+    for t in all_tasks:
+        seeded.append(client.tasks.create(task=t))
+    yield seeded
+    for t in seeded:
+        with suppress(NotFoundError, BadRequestError):
+            client.tasks.delete(task_id=t.id)
