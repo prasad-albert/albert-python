@@ -423,7 +423,7 @@ def seeded_workflows(
 
 
 @pytest.fixture(scope="session")
-def seeded_formulations(
+def seeded_products(
     client: Albert, sheet: Sheet, seeded_inventory: list[InventoryItem]
 ) -> list[InventoryItem]:
     formulations = []
@@ -454,7 +454,7 @@ def seeded_tasks(
     seeded_users,
     seeded_data_templates,
     seeded_workflows,
-    seeded_formulations,
+    seeded_products,
 ):
     seeded = []
     all_tasks = generate_task_seeds(
@@ -465,7 +465,7 @@ def seeded_tasks(
         seeded_users=seeded_users,
         seeded_data_templates=seeded_data_templates,
         seeded_workflows=seeded_workflows,
-        seeded_formulations=seeded_formulations,
+        seeded_products=seeded_products,
     )
     for t in all_tasks:
         seeded.append(client.tasks.create(task=t))

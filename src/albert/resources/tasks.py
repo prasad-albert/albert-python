@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, TypeAdapter
 
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass
 from albert.resources.data_templates import DataTemplate
@@ -167,3 +167,7 @@ class BatchTask(BaseTask):
 
 class GeneralTask(BaseTask):
     category: Literal[TaskCategory.GENERAL] = TaskCategory.GENERAL
+
+
+TaskUnion = Annotated[PropertyTask | BatchTask, Field(..., discriminator="category")]
+TaskAdapter = TypeAdapter(TaskUnion)

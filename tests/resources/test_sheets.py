@@ -35,7 +35,7 @@ def test_crud_empty_column(sheet: Sheet):
     sheet.delete_column(column_id=new_col.column_id)
 
 
-def test_add_formulation(sheet: Sheet, seeded_inventory, seeded_formulations):
+def test_add_formulation(sheet: Sheet, seeded_inventory, seeded_products):
     components_updated = [
         Component(inventory_item=seeded_inventory[0], amount=33),
         Component(inventory_item=seeded_inventory[1], amount=67),

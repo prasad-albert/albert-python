@@ -1,5 +1,9 @@
 from albert.collections.base import BaseCollection, OrderBy
-from albert.resources.tasks import BaseTask, BatchTask, GeneralTask, PropertyTask, TaskCategory
+from albert.resources.tasks import (
+    BaseTask,
+    TaskAdapter,
+    TaskCategory,
+)
 from albert.session import AlbertSession
 from albert.utils.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.utils.logging import logger
@@ -9,12 +13,6 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 class TaskCollection(BaseCollection):
     _api_version = "v3"
     _updatable_attributes = {"metadata"}
-    # Mapping TaskCategory to the corresponding Task subclass
-    category_to_class = {
-        TaskCategory.PROPERTY: PropertyTask,
-        TaskCategory.BATCH: BatchTask,
-        TaskCategory.GENERAL: GeneralTask,
-    }
 
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
@@ -27,8 +25,7 @@ class TaskCollection(BaseCollection):
             url += f"&parentId={task.parent_id}"
         response = self.session.post(url=url, json=payload)
         task_data = response.json()[0]
-        task_class = self.category_to_class.get(task_data.get("category"), BaseTask)
-        return task_class(**task_data)
+        return TaskAdapter.validate_python(task_data)
 
     def delete(self, *, task_id: str) -> None:
         url = f"{self.base_path}/{task_id}"
@@ -41,8 +38,7 @@ class TaskCollection(BaseCollection):
         url = f"{self.base_path}/{task_id}"
         response = self.session.get(url)
         task_data = response.json()
-        task_class = self.category_to_class.get(task_data.get("category"), BaseTask)
-        return task_class(**task_data)
+        return TaskAdapter.validate_python(task_data)
 
     def list(
         self,

@@ -852,7 +852,7 @@ def generate_task_seeds(
     seeded_users,
     seeded_data_templates,
     seeded_workflows,
-    seeded_formulations,
+    seeded_products,
 ) -> list[BaseTask]:
     return [
         # Property Task 1
@@ -898,21 +898,21 @@ def generate_task_seeds(
             location=seeded_locations[1],
         ),
         # Batch Task 1
-        # Use the Formulations used in #tests/resources/test_sheets/py defined as seeded_formulations
+        # Use the Formulations used in #tests/resources/test_sheets/py defined as seeded_products
         BatchTask(
             name="TEST - Batch Task 1",
             category=TaskCategory.BATCH,
             batch_size_unit=BatchSizeUnit.KILOGRAMS,
             inventory_information=[
                 InventoryInformation(
-                    inventory_id=seeded_formulations[2].id,
+                    inventory_id=seeded_products[2].id,
                     batch_size=100.0,
                 )
             ],
             location=seeded_locations[1],
             priority=TaskPriority.LOW,
             project=seeded_projects[2],
-            parent_id=seeded_formulations[2].project_id,
+            parent_id=seeded_products[2].project_id,
             assigned_to=seeded_users[1],
             start_date="2024-10-01",
             due_date="2024-10-31",
@@ -925,14 +925,14 @@ def generate_task_seeds(
             batch_size_unit=BatchSizeUnit.GRAMS,
             inventory_information=[
                 InventoryInformation(
-                    inventory_id=seeded_formulations[1].id,
+                    inventory_id=seeded_products[1].id,
                     batch_size=250.0,
                 )
             ],
             location=seeded_locations[2],
             priority=TaskPriority.MEDIUM,
             project=seeded_projects[2],
-            parent_id=seeded_formulations[2].project_id,
+            parent_id=seeded_products[2].project_id,
             assigned_to=seeded_users[0],
             start_date="2024-10-01",
             due_date="2024-10-31",
