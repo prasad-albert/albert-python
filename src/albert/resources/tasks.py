@@ -169,5 +169,5 @@ class GeneralTask(BaseTask):
     category: Literal[TaskCategory.GENERAL] = TaskCategory.GENERAL
 
 
-TaskUnion = Annotated[PropertyTask | BatchTask, Field(..., discriminator="category")]
+TaskUnion = Annotated[PropertyTask | BatchTask | GeneralTask, Field(..., discriminator="category")]
 TaskAdapter = TypeAdapter(TaskUnion)
