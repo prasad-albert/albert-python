@@ -7,6 +7,9 @@ import pytest
 from albert import Albert
 from albert.collections.worksheets import WorksheetCollection
 from albert.resources.base import Status
+from albert.resources.btdataset import BTDataset
+from albert.resources.btinsight import BTInsight
+from albert.resources.btmodel import BTModel, BTModelSession
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.custom_fields import CustomField
@@ -62,8 +65,11 @@ def client() -> Albert:
     )
 
 
+### STATIC RESOURCES -- CANNOT BE DELETED
+
+
 @pytest.fixture(scope="session")
-def seeded_custom_fields(client: Albert):
+def seeded_custom_fields(client: Albert) -> list[CustomField]:
     seeded = []
     for cf in generate_custom_fields():
         try:
@@ -74,103 +80,15 @@ def seeded_custom_fields(client: Albert):
             if registered_cf is None:  # If it was something else, raise the error
                 raise e
         seeded.append(registered_cf)
-    yield seeded
-
-    # Custom Fields cannot be deleted
-
-
-@pytest.fixture(scope="session")
-def seeded_projects(client: Albert, seeded_locations) -> Iterator[list[Project]]:
-    # Seed the projects using seeded locations
-
-    seeded = []
-
-    for project in generate_project_seeds(seeded_locations=seeded_locations):
-        existing = client.projects.list()
-        for m in existing:
-            if m.description.lower() == project.description.lower():
-                client.projects.delete(project_id=m.id)
-        created_project = client.projects.create(project=project)
-        seeded.append(created_project)
-
-    yield seeded  # Provide the seeded projects to the test
-
-    # Teardown - delete the seeded projects after the test
-    for project in seeded:
-        with suppress(NotFoundError):
-            client.projects.delete(project_id=project.id)
-
-
-@pytest.fixture(scope="session")
-def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
-    # Seed the CAS
-    seeded = []
-    for cas in generate_cas_seeds():
-        created_cas = client.cas_numbers.create(cas=cas)
-        seeded.append(created_cas)
-    time.sleep(1.5)  # avoid race condition while it populated through DBs
-    yield seeded  # Provide the seeded CAS to the test
-
-    # Teardown - delete the seeded CAS after the test
-    for cas in seeded:
-        with suppress(BadRequestError | NotFoundError):
-            client.cas_numbers.delete(cas_id=cas.id)
-
-
-@pytest.fixture(scope="session")
-def seeded_companies(client: Albert) -> Iterator[list[Company]]:
-    # Seed the companies
-    seeded = []
-    for company in generate_company_seeds():
-        created_company = client.companies.create(company=company)
-        seeded.append(created_company)
-
-    yield seeded  # Provide the seeded companies to the test
-
-    # Teardown - delete the seeded companies after the test
-    # ForbiddenError is raised when trying to delete a company that has InventoryItems associated with it (may be a bug. Teams discussion ongoing)
-    for company in seeded:
-        with suppress(NotFoundError, ForbiddenError, BadRequestError):
-            client.companies.delete(id=company.id)
-
-
-@pytest.fixture(scope="session")
-def seeded_locations(client: Albert) -> Iterator[list[Location]]:
-    # Seed the Locations
-    seeded = []
-    for location in generate_location_seeds():
-        created_location = client.locations.create(location=location)
-        seeded.append(created_location)
-
-    yield seeded  # Provide the seeded Locations to the test
-
-    # Teardown - delete the seeded Locations after the test
-    for location in seeded:
-        with suppress(NotFoundError):
-            client.locations.delete(location_id=location.id)
-
-
-@pytest.fixture(scope="session")
-def seeded_storage_locations(
-    client: Albert, seeded_locations: list[Location]
-) -> Iterator[list[Location]]:
-    seeded = []
-    for storage_location in generate_storage_location_seeds(seeded_locations=seeded_locations):
-        created_location = client.storage_locations.create(storage_location=storage_location)
-        seeded.append(created_location)
-    yield seeded
-
-    for storage_location in seeded:
-        with suppress(NotFoundError):
-            client.storage_locations.delete(id=storage_location.id)
+    return seeded
 
 
 @pytest.fixture(scope="session")
 def seeded_lists(
-    client: Albert, seeded_custom_fields: list[CustomField]
-) -> Iterator[list[ListItem]]:
+    client: Albert,
+    seeded_custom_fields: list[CustomField],
+) -> list[ListItem]:
     seeded = []
-    # Seed the lists
     for list_item in generate_list_item_seeds(seeded_custom_fields=seeded_custom_fields):
         try:
             created_list = client.lists.create(list_item=list_item)
@@ -182,22 +100,118 @@ def seeded_lists(
             if created_list is None:
                 raise e
         seeded.append(created_list)
+    return seeded
+
+
+@pytest.fixture(scope="session")
+def seeded_btdataset(client: Albert) -> BTDataset:
+    return client.btdatasets.get_by_id(id="DST1")
+
+
+@pytest.fixture(scope="session")
+def seeded_btinsight(client: Albert) -> BTInsight:
+    return client.btinsights.get_by_id(id="INS10")
+
+
+@pytest.fixture(scope="session")
+def seeded_btmodelsession(client: Albert) -> BTModelSession:
+    return client.btmodelsessions.get_by_id(id="MDS1")
+
+
+@pytest.fixture(scope="session")
+def seeded_btmodel(seeded_btmodelsession: BTModelSession) -> BTModel:
+    return seeded_btmodelsession.models.get_by_id(id="MDL1")
+
+
+### DYNAMIC RESOURCES -- CAN BE DELETED
+
+
+@pytest.fixture(scope="session")
+def seeded_cas(client: Albert) -> Iterator[list[Cas]]:
+    seeded = []
+    for cas in generate_cas_seeds():
+        created_cas = client.cas_numbers.create(cas=cas)
+        seeded.append(created_cas)
+
+    # Avoid race condition while it populated through DBs
+    time.sleep(1.5)
 
     yield seeded
-    # NOTE: There is NO delete method for lists. This is because the list Items cannot be deleted in the Albert API.
+
+    for cas in seeded:
+        with suppress(BadRequestError | NotFoundError):
+            client.cas_numbers.delete(cas_id=cas.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_locations(client: Albert) -> Iterator[list[Location]]:
+    seeded = []
+    for location in generate_location_seeds():
+        created_location = client.locations.create(location=location)
+        seeded.append(created_location)
+
+    yield seeded
+
+    for location in seeded:
+        with suppress(NotFoundError):
+            client.locations.delete(location_id=location.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_projects(client: Albert, seeded_locations: list[Location]) -> Iterator[list[Project]]:
+    seeded = []
+    for project in generate_project_seeds(seeded_locations=seeded_locations):
+        created_project = client.projects.create(project=project)
+        seeded.append(created_project)
+
+    yield seeded
+
+    for project in seeded:
+        with suppress(NotFoundError):
+            client.projects.delete(project_id=project.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_companies(client: Albert) -> Iterator[list[Company]]:
+    seeded = []
+    for company in generate_company_seeds():
+        created_company = client.companies.create(company=company)
+        seeded.append(created_company)
+
+    yield seeded
+
+    # ForbiddenError is raised when trying to delete a company that has InventoryItems associated with it (may be a bug. Teams discussion ongoing)
+    for company in seeded:
+        with suppress(NotFoundError, ForbiddenError, BadRequestError):
+            client.companies.delete(id=company.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_storage_locations(
+    client: Albert,
+    seeded_locations: list[Location],
+) -> Iterator[list[Location]]:
+    seeded = []
+    for storage_location in generate_storage_location_seeds(seeded_locations=seeded_locations):
+        created_location = client.storage_locations.create(storage_location=storage_location)
+        seeded.append(created_location)
+
+    yield seeded
+
+    for storage_location in seeded:
+        with suppress(NotFoundError):
+            client.storage_locations.delete(id=storage_location.id)
 
 
 @pytest.fixture(scope="session")
 def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
-    # Seed the tags
     seeded = []
     for tag in generate_tag_seeds():
         created_tag = client.tags.create(tag=tag)
         seeded.append(created_tag)
 
-    yield seeded  # Provide the seeded tags to the test
+    yield seeded
 
-    # Teardown - delete the seeded tags after the test
     for tag in seeded:
         with suppress(NotFoundError, BadRequestError):
             client.tags.delete(tag_id=tag.id)
@@ -205,15 +219,16 @@ def seeded_tags(client: Albert) -> Iterator[list[Tag]]:
 
 @pytest.fixture(scope="session")
 def seeded_units(client: Albert) -> Iterator[list[Unit]]:
-    # Seed the units
     seeded = []
     for unit in generate_unit_seeds():
         created_unit = client.units.create(unit=unit)
         seeded.append(created_unit)
-    time.sleep(1.5)  # avoid race condition while it populated through DBs
-    yield seeded  # Provide the seeded units to the test
 
-    # Teardown - delete the seeded units after the test
+    # Avoid race condition while it populated through search DBs
+    time.sleep(1.5)
+
+    yield seeded
+
     for unit in seeded:
         with suppress(NotFoundError, BadRequestError):
             client.units.delete(unit_id=unit.id)

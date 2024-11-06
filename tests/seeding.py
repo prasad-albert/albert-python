@@ -52,6 +52,7 @@ from albert.resources.workflows import (
     ParameterSetpoint,
     Workflow,
 )
+from tests.test_utils import random_name
 
 PRELOAD_BTINSIGHT_ID = "INS10"
 PRELOAD_BTDATASET_ID = "DST1"
@@ -184,14 +185,7 @@ def generate_company_seeds() -> list[Company]:
     """
 
     return [
-        # Basic company with name only
-        Company(name="TEST - Acme Corporation"),
-        # Company with a full name and additional private attribute (distance)
-        Company(name="TEST - Globex Corporation"),
-        # Another company
-        Company(name="TEST - Initech"),
-        # One more company with a distance attribute
-        Company(name="TEST - Umbrella Corp"),
+        Company(name=random_name()),
     ]
 
 
@@ -208,14 +202,14 @@ def generate_location_seeds() -> list[Location]:
     return [
         # Basic location with required fields (name, latitude, longitude, address)
         Location(
-            name="TEST - Warehouse A",
+            name=random_name("LOCATION"),
             latitude=40.7,
             longitude=-74.0,
             address="123 Warehouse St, New York, NY",
         ),
         # Location with full fields including optional country
         Location(
-            name="TEST - Headquarters",
+            name=random_name("LOCATION"),
             latitude=37.8,
             longitude=-122.4,
             address="123 Market St, San Francisco, CA",
@@ -223,14 +217,14 @@ def generate_location_seeds() -> list[Location]:
         ),
         # Location with required fields but without the country
         Location(
-            name="TEST - Remote Office",
+            name=random_name("LOCATION"),
             latitude=48.9,
             longitude=2.4,
             address="10 Office Lane, Paris",
         ),
         # Another location with all fields
         Location(
-            name="TEST - Test Site",
+            name=random_name("LOCATION"),
             latitude=51.5,
             longitude=-0.1,
             address="Test Facility, London",
@@ -257,26 +251,26 @@ def generate_storage_location_seeds(seeded_locations: list[Location]) -> list[St
     return [
         # Basic storage location with required fields
         StorageLocation(
-            name="TEST - Warehouse A",
+            name=random_name("STORAGE LOCATION"),
             location=BaseEntityLink(id=seeded_locations[0].id),
             address="123 Warehouse St, New York, NY",
         ),
         # Storage location with full fields including optional country
         StorageLocation(
-            name="TEST - Storage Room 1",
+            name=random_name("STORAGE LOCATION"),
             location=BaseEntityLink(id=seeded_locations[1].id),
             address="123 Storage St, San Francisco, CA",
             country="US",
         ),
         # Storage location with required fields but without the country
         StorageLocation(
-            name="TEST - Storage Room 2",
+            name=random_name("STORAGE LOCATION"),
             location=BaseEntityLink(id=seeded_locations[0].id),
             address="10 Storage Lane, Paris",
         ),
         # Another storage location with all fields
         StorageLocation(
-            name="TEST - Storage Room 3",
+            name=random_name("STORAGE LOCATION"),
             location=BaseEntityLink(id=seeded_locations[1].id),
             address="Test Storage Facility, London",
             country="GB",
@@ -302,23 +296,20 @@ def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
     return [
         # Project with basic metadata and public classification
         Project(
-            description="TEST - A basic development project.",
+            description=random_name("PROJECT"),
             locations=[BaseEntityLink(id=seeded_locations[0].id)],
             project_class=ProjectClass.PRIVATE,
-            # metadata=Metadata(
-            #     adpNumber="adp123",
-            # ),
         ),
         # Project with shared classification and advanced metadata
         Project(
-            description="TEST - A public research project focused on new materials.",
+            description=random_name("PROJECT"),
             locations=[BaseEntityLink(id=seeded_locations[1].id)],
             project_class=ProjectClass.PUBLIC,
             grid=GridDefault.WKS,
         ),
         # Project with production category and custom ACLs
         Project(
-            description="TEST - A private production project",
+            description=random_name("PROJECT"),
             locations=[
                 BaseEntityLink(id=seeded_locations[0].id),
                 BaseEntityLink(id=seeded_locations[1].id),
@@ -339,10 +330,10 @@ def generate_tag_seeds() -> list[Tag]:
     """
 
     return [
-        Tag(tag="TEST-TAG-inventory-tag-1"),
-        Tag(tag="TEST-TAG-inventory-tag-2"),
-        Tag(tag="TEST-TAG-company-tag-1"),
-        Tag(tag="TEST-TAG-company-tag-2"),
+        Tag(tag=random_name("TAG")),
+        Tag(tag=random_name("TAG")),
+        Tag(tag=random_name("TAG")),
+        Tag(tag=random_name("TAG")),
     ]
 
 
@@ -359,27 +350,37 @@ def generate_unit_seeds() -> list[Unit]:
     return [
         # Basic unit with length category
         Unit(
-            name="TEST - Meter",
+            name=random_name("LENGTH UNIT"),
             symbol="m",
             synonyms=["Metre"],
             category=UnitCategory.LENGTH,
             verified=True,
         ),
         # Unit with mass category
-        Unit(name="TEST - Kilogram", symbol="kg", category=UnitCategory.MASS, verified=True),
+        Unit(
+            name=random_name("MASS UNIT"),
+            symbol="kg",
+            category=UnitCategory.MASS,
+            verified=True,
+        ),
         # Unit with temperature category and synonyms
         Unit(
-            name="TEST - Celsius",
+            name=random_name("TEMPERATURE UNIT"),
             symbol="°C",
             synonyms=["Centigrade"],
             category=UnitCategory.TEMPERATURE,
             verified=False,
         ),
         # Unit with energy category
-        Unit(name="TEST - Joule", symbol="J", category=UnitCategory.ENERGY, verified=True),
+        Unit(
+            name=random_name("ENERGY UNIT"),
+            symbol="J",
+            category=UnitCategory.ENERGY,
+            verified=True,
+        ),
         # Unit with volume category
         Unit(
-            name="TEST - Liter",
+            name=random_name("VOLUME UNIT"),
             symbol="L",
             synonyms=["Litre"],
             category=UnitCategory.VOLUME,

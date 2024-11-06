@@ -1,18 +1,10 @@
-import pytest
-
 from albert import Albert
 from albert.resources.btinsight import BTInsight, BTInsightRegistry
-from tests.seeding import PRELOAD_BTINSIGHT_ID
 
 
-@pytest.fixture
-def insight(client: Albert) -> BTInsight:
-    # api-btinsight does not have working list/delete functionality,
-    # so we need to hard-code an existing resource to play with
-    return client.btinsights.get_by_id(id=PRELOAD_BTINSIGHT_ID)
+def test_update(client: Albert, seeded_btinsight: BTInsight):
+    insight = seeded_btinsight.model_copy()
 
-
-def test_update(client: Albert, insight: BTInsight):
     marker = "TEST"
     insight.output_key = marker
     insight.start_time = marker

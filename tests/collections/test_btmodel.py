@@ -1,25 +1,10 @@
-import pytest
-
 from albert import Albert
 from albert.resources.btmodel import BTModel, BTModelRegistry, BTModelSession
-from tests.seeding import PRELOAD_BTMODEL_ID, PRELOAD_BTMODELSESSION_ID
 
 
-@pytest.fixture
-def model_session(client: Albert) -> BTModelSession:
-    # api-btmodel does not have working list/delete functionality,
-    # so we need to hard-code an existing resource to play with
-    return client.btmodelsessions.get_by_id(id=PRELOAD_BTMODELSESSION_ID)
+def test_update_model_session(client: Albert, seeded_btmodelsession: BTModelSession):
+    model_session = seeded_btmodelsession.model_copy()
 
-
-@pytest.fixture
-def model(client: Albert) -> BTModel:
-    # api-btmodel does not have working list/delete functionality,
-    # so we need to hard-code an existing resource to play with
-    return client.btmodels(parent_id=PRELOAD_BTMODELSESSION_ID).get_by_id(id=PRELOAD_BTMODEL_ID)
-
-
-def test_update_model_session(client: Albert, model_session: BTModelSession):
     marker = "TEST"
     model_session.registry = BTModelRegistry(build_logs={"status": marker})
 
@@ -27,7 +12,9 @@ def test_update_model_session(client: Albert, model_session: BTModelSession):
     assert updated_model_session.registry == model_session.registry
 
 
-def test_update_model(model_session: BTModelSession, model: BTModel):
+def test_update_model(model_session: BTModelSession, seeded_btmodel: BTModel):
+    model = seeded_btmodel.model_copy()
+
     marker = "TEST"
     model.start_time = marker
     model.end_time = marker
