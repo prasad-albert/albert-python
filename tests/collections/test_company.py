@@ -5,7 +5,6 @@ import pytest
 from albert.albert import Albert
 from albert.resources.companies import Company
 from albert.utils.exceptions import AlbertException
-from tests.test_utils import random_name
 
 
 def _list_asserts(returned_list):
@@ -51,23 +50,23 @@ def test_company_get_by(client: Albert, seeded_companies: list[Company]):
     assert company_by_id.name == test_name
 
 
-def test_company_crud(client: Albert):
-    company_name = random_name()
+def test_company_crud(client: Albert, seeded_companies: list[Company]):
+    company = seeded_companies[0].model_copy()
+    company_name = "Some company name"
     company = Company(name=company_name)
+
     company = client.companies.create(company=company)
-    try:
-        assert isinstance(company, Company)
-        assert company.id is not None
-        assert company.name == company_name
+    assert isinstance(company, Company)
+    assert company.id is not None
+    assert company.name == company_name
 
-        new_company_name = random_name()
-        renamed_company = client.companies.rename(old_name=company_name, new_name=new_company_name)
-        assert isinstance(renamed_company, Company)
-        assert renamed_company.name == new_company_name
-        assert renamed_company.id == company.id
+    new_company_name = "A new company name"
+    renamed_company = client.companies.rename(old_name=company_name, new_name=new_company_name)
+    assert isinstance(renamed_company, Company)
+    assert renamed_company.name == new_company_name
+    assert renamed_company.id == company.id
 
-        assert not client.companies.company_exists(name=company_name)
-        with pytest.raises(AlbertException):
-            client.companies.rename(old_name=company_name, new_name="nope")
-    finally:
-        client.companies.delete(id=company.id)
+    client.companies.delete(id=company.id)
+    assert not client.companies.company_exists(name=company_name)
+    with pytest.raises(AlbertException):
+        client.companies.rename(old_name=company_name, new_name="nope")

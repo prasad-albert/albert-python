@@ -51,7 +51,6 @@ from albert.resources.workflows import (
     ParameterSetpoint,
     Workflow,
 )
-from tests.test_utils import random_name
 
 PRELOAD_BTINSIGHT_ID = "INS10"
 PRELOAD_BTDATASET_ID = "DST1"
@@ -121,7 +120,7 @@ def generate_list_item_seeds(seeded_custom_fields: list[CustomField]) -> list[Li
     return all_list_items
 
 
-def generate_cas_seeds() -> list[Cas]:
+def generate_cas_seeds(prefix: str) -> list[Cas]:
     """
     Generates a list of CAS seed objects for testing without IDs.
 
@@ -134,20 +133,20 @@ def generate_cas_seeds() -> list[Cas]:
     return [
         # CAS with basic fields
         Cas(
-            number="TEST-50-00-0",
+            number=f"{prefix} - 50-00-0",
             description="Formaldehyde",
             category=CasCategory.USER,
             smiles="C=O",
         ),
         Cas(
-            number="TEST-64-17-5",
+            number=f"{prefix} - 64-17-5",
             description="Ethanol",
             category=CasCategory.TSCA_PUBLIC,
             smiles="C2H5OH",
         ),
         # CAS with optional fields filled out
         Cas(
-            number="TEST-7732-18-5",
+            number=f"{prefix} - 7732-18-5",
             description="Water",
             notes="Common solvent",
             category=CasCategory.NOT_TSCA,
@@ -158,7 +157,7 @@ def generate_cas_seeds() -> list[Cas]:
         ),
         # CAS with external database reference
         Cas(
-            number="TEST-7440-57-5",
+            number=f"{prefix} - 7440-57-5",
             description="Gold",
             category=CasCategory.EXTERNAL,
             smiles="[Au]",
@@ -168,12 +167,14 @@ def generate_cas_seeds() -> list[Cas]:
         ),
         # CAS with unknown classification
         Cas(
-            number="TEST-1234-56-7", description="Unknown substance", category=CasCategory.UNKNOWN
+            number=f"{prefix} - 1234-56-7",
+            description="Unknown substance",
+            category=CasCategory.UNKNOWN,
         ),
     ]
 
 
-def generate_company_seeds() -> list[Company]:
+def generate_company_seeds(prefix: str) -> list[Company]:
     """
     Generates a list of Company seed objects for testing without IDs.
 
@@ -184,14 +185,18 @@ def generate_company_seeds() -> list[Company]:
     """
 
     return [
-        Company(name=random_name()),
-        Company(name=random_name()),
-        Company(name=random_name()),
-        Company(name=random_name()),
+        # Basic company with name only
+        Company(name=f"{prefix} - Acme Corporation"),
+        # Company with a full name and additional private attribute (distance)
+        Company(name=f"{prefix} - Globex Corporation"),
+        # Another company
+        Company(name=f"{prefix} - Initech"),
+        # One more company with a distance attribute
+        Company(name=f"{prefix} - Umbrella Corp"),
     ]
 
 
-def generate_location_seeds() -> list[Location]:
+def generate_location_seeds(prefix: str) -> list[Location]:
     """
     Generates a list of Location seed objects for testing without IDs.
 
@@ -204,14 +209,14 @@ def generate_location_seeds() -> list[Location]:
     return [
         # Basic location with required fields (name, latitude, longitude, address)
         Location(
-            name=random_name("LOCATION"),
+            name=f"{prefix} - Warehouse A",
             latitude=40.7,
             longitude=-74.0,
             address="123 Warehouse St, New York, NY",
         ),
         # Location with full fields including optional country
         Location(
-            name=random_name("LOCATION"),
+            name=f"{prefix} - Headquarters",
             latitude=37.8,
             longitude=-122.4,
             address="123 Market St, San Francisco, CA",
@@ -219,14 +224,14 @@ def generate_location_seeds() -> list[Location]:
         ),
         # Location with required fields but without the country
         Location(
-            name=random_name("LOCATION"),
+            name=f"{prefix} - Remote Office",
             latitude=48.9,
             longitude=2.4,
             address="10 Office Lane, Paris",
         ),
         # Another location with all fields
         Location(
-            name=random_name("LOCATION"),
+            name=f"{prefix} - Test Site",
             latitude=51.5,
             longitude=-0.1,
             address="Test Facility, London",
@@ -280,7 +285,7 @@ def generate_storage_location_seeds(seeded_locations: list[Location]) -> list[St
     ]
 
 
-def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
+def generate_project_seeds(prefix: str, seeded_locations: list[Location]) -> list[Project]:
     """
     Generates a list of Project seed objects for testing without IDs.
 
@@ -298,20 +303,20 @@ def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
     return [
         # Project with basic metadata and public classification
         Project(
-            description=random_name("PROJECT"),
+            description=f"{prefix} - A basic development project.",
             locations=[BaseEntityLink(id=seeded_locations[0].id)],
             project_class=ProjectClass.PRIVATE,
         ),
         # Project with shared classification and advanced metadata
         Project(
-            description=random_name("PROJECT"),
+            description=f"{prefix} - A public research project focused on new materials.",
             locations=[BaseEntityLink(id=seeded_locations[1].id)],
             project_class=ProjectClass.PUBLIC,
             grid=GridDefault.WKS,
         ),
         # Project with production category and custom ACLs
         Project(
-            description=random_name("PROJECT"),
+            description=f"{prefix} - A private production project",
             locations=[
                 BaseEntityLink(id=seeded_locations[0].id),
                 BaseEntityLink(id=seeded_locations[1].id),
@@ -321,7 +326,7 @@ def generate_project_seeds(seeded_locations: list[Location]) -> list[Project]:
     ]
 
 
-def generate_tag_seeds() -> list[Tag]:
+def generate_tag_seeds(prefix: str) -> list[Tag]:
     """
     Generates a list of Tag seed objects for testing without IDs.
 
@@ -332,14 +337,14 @@ def generate_tag_seeds() -> list[Tag]:
     """
 
     return [
-        Tag(tag=random_name("TAG")),
-        Tag(tag=random_name("TAG")),
-        Tag(tag=random_name("TAG")),
-        Tag(tag=random_name("TAG")),
+        Tag(tag=f"{prefix} - inventory-tag-1"),
+        Tag(tag=f"{prefix} - inventory-tag-2"),
+        Tag(tag=f"{prefix} - company-tag-1"),
+        Tag(tag=f"{prefix} - company-tag-2"),
     ]
 
 
-def generate_unit_seeds() -> list[Unit]:
+def generate_unit_seeds(prefix: str) -> list[Unit]:
     """
     Generates a list of Unit seed objects for testing without IDs.
 
@@ -352,7 +357,7 @@ def generate_unit_seeds() -> list[Unit]:
     return [
         # Basic unit with length category
         Unit(
-            name=random_name("LENGTH UNIT"),
+            name=f"{prefix} - Meter",
             symbol="m",
             synonyms=["Metre"],
             category=UnitCategory.LENGTH,
@@ -360,14 +365,14 @@ def generate_unit_seeds() -> list[Unit]:
         ),
         # Unit with mass category
         Unit(
-            name=random_name("MASS UNIT"),
+            name=f"{prefix} - Kilogram",
             symbol="kg",
             category=UnitCategory.MASS,
             verified=True,
         ),
         # Unit with temperature category and synonyms
         Unit(
-            name=random_name("TEMPERATURE UNIT"),
+            name=f"{prefix} - Celsius",
             symbol="°C",
             synonyms=["Centigrade"],
             category=UnitCategory.TEMPERATURE,
@@ -375,14 +380,14 @@ def generate_unit_seeds() -> list[Unit]:
         ),
         # Unit with energy category
         Unit(
-            name=random_name("ENERGY UNIT"),
+            name=f"{prefix} - Joule",
             symbol="J",
             category=UnitCategory.ENERGY,
             verified=True,
         ),
         # Unit with volume category
         Unit(
-            name=random_name("VOLUME UNIT"),
+            name=f"{prefix} - Liter",
             symbol="L",
             synonyms=["Litre"],
             category=UnitCategory.VOLUME,
@@ -391,7 +396,7 @@ def generate_unit_seeds() -> list[Unit]:
     ]
 
 
-def generate_data_column_seeds(seeded_units) -> list[DataColumn]:
+def generate_data_column_seeds(prefix: str, seeded_units: list[Unit]) -> list[DataColumn]:
     """
     Generates a list of DataColumn seed objects for testing without IDs.
 
@@ -404,35 +409,36 @@ def generate_data_column_seeds(seeded_units) -> list[DataColumn]:
     return [
         # Basic data column with required fields
         DataColumn(
-            name=random_name("DATA COLUMN"),
+            name=f"{prefix} - only unit 1",
             unit=BaseEntityLink(id=seeded_units[0].id),
         ),
         # Data column with full fields including optional calculation
         DataColumn(
-            name=random_name("DATA COLUMN"),
+            name=f"{prefix} - unit and calculation",
             unit=BaseEntityLink(id=seeded_units[1].id),
             calculation="Pressure = Force / Area",
         ),
         # Data column with required fields but without the calculation
         DataColumn(
-            name=random_name("DATA COLUMN"),
+            name=f"{prefix} - only name",
         ),
         # Another data column with all fields
         DataColumn(
-            name=random_name("DATA COLUMN"),
+            name=f"{prefix} - only calculation",
             calculation="Mass = Density * Volume",
         ),
     ]
 
 
 def generate_data_template_seeds(
+    prefix: str,
     user: User,
     seeded_data_columns: list[DataColumn],
     seeded_units: list[Unit],
 ) -> list[DataTemplate]:
     return [
         DataTemplate(
-            name=random_name("DATA TEMPLATE"),
+            name=f"{prefix} - Basic Data Template",
             description="A basic data template with no metadata.",
             data_column_values=[
                 DataColumnValue(
@@ -443,7 +449,7 @@ def generate_data_template_seeds(
             ],
         ),
         DataTemplate(
-            name=random_name("DATA TEMPLATE"),
+            name=f"{prefix} - ACL Data Template",
             description="A basic data template with no metadata.",
             data_column_values=[
                 DataColumnValue(
@@ -455,7 +461,7 @@ def generate_data_template_seeds(
             users_with_access=[user],
         ),
         DataTemplate(
-            name=random_name("DATA TEMPLATE"),
+            name=f"{prefix} - Data Template with Calculations",
             description="A data template with calculations.",
             data_column_values=[
                 DataColumnValue(
@@ -472,7 +478,7 @@ def generate_data_template_seeds(
     ]
 
 
-def generate_parameter_seeds() -> list[Parameter]:
+def generate_parameter_seeds(prefix: str) -> list[Parameter]:
     """
     Generates a list of Parameter seed objects for testing without IDs.
 
@@ -484,29 +490,32 @@ def generate_parameter_seeds() -> list[Parameter]:
 
     return [
         Parameter(
-            name=random_name("TEMPERATURE PARAMETER"),
+            name=f"{prefix} - Temperature",
             category=ParameterCategory.NORMAL,
         ),
         Parameter(
-            name=random_name("PRESSURE PARAMETER"),
+            name=f"{prefix} - Pressure",
             category=ParameterCategory.SPECIAL,
         ),
         Parameter(
-            name=random_name("VOLUME PARAMETER"),
+            name=f"{prefix} - Volume",
         ),
         Parameter(
-            name=random_name("MASS PARAMETER"),
+            name=f"{prefix} - Mass",
             category=ParameterCategory.NORMAL,
         ),
         Parameter(
-            name=random_name("LENGTH PARAMETER"),
+            name=f"{prefix} - Length",
             category=ParameterCategory.NORMAL,
         ),
     ]
 
 
 def generate_parameter_group_seeds(
-    seeded_parameters: list[Parameter], seeded_tags: list[Tag], seeded_units: list[Unit]
+    prefix: str,
+    seeded_parameters: list[Parameter],
+    seeded_tags: list[Tag],
+    seeded_units: list[Unit],
 ) -> list[ParameterGroup]:
     """
     Generates a list of ParameterGroup seed objects for testing without IDs.
@@ -525,7 +534,7 @@ def generate_parameter_group_seeds(
     return [
         # Basic ParameterGroup with required fields
         ParameterGroup(
-            name=random_name("PARAMETER GROUP"),
+            name=f"{prefix} - General Parameters",
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
@@ -537,7 +546,7 @@ def generate_parameter_group_seeds(
         ),
         # ParameterGroup with all fields filled out
         ParameterGroup(
-            name=random_name("BATCH PARAMETER GROUP"),
+            name=f"{prefix} - Batch Parameters",
             description="Parameters for batch processing",
             type=PGType.BATCH,
             security_class=SecurityClass.RESTRICTED,
@@ -557,7 +566,7 @@ def generate_parameter_group_seeds(
         ),
         # ParameterGroup with no tags or metadata
         ParameterGroup(
-            name=random_name("PROPERTY PARAMETER GROUP"),
+            name=f"{prefix} - Property Parameters",
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
@@ -576,6 +585,7 @@ def generate_parameter_group_seeds(
 
 
 def generate_inventory_seeds(
+    prefix: str,
     seeded_cas: list[Cas],
     seeded_tags: list[Tag],
     seeded_companies: list[Company],
@@ -584,16 +594,16 @@ def generate_inventory_seeds(
     """Generates a list of InventoryItem seed objects for testing."""
     return [
         InventoryItem(
-            name=random_name("SODIUM CHLORIDE"),
-            description="TEST - Common salt used in various applications.",
+            name=f"{prefix} - Sodium Chloride",
+            description="Common salt used in various applications.",
             category=InventoryCategory.RAW_MATERIALS,
             unit_category=InventoryUnitCategory.MASS,
             security_class=SecurityClass.SHARED,
             company=seeded_companies[0],
         ),
         InventoryItem(
-            name=random_name("ETHANOL"),
-            description="TEST - A volatile, flammable liquid used in chemical synthesis.",
+            name=f"{prefix} - Ethanol",
+            description="A volatile, flammable liquid used in chemical synthesis.",
             category=InventoryCategory.CONSUMABLES.value,
             unit_category=InventoryUnitCategory.VOLUME.value,
             tags=seeded_tags[0:1],
@@ -602,8 +612,8 @@ def generate_inventory_seeds(
             company=seeded_companies[1].name,  # ensure it knows to use the company object
         ),
         InventoryItem(
-            name=random_name("HYDROCHLORIC ACID"),
-            description="TEST - Strong acid used in various industrial processes.",
+            name=f"{prefix} - Hydrochloric Acid",
+            description="Strong acid used in various industrial processes.",
             category=InventoryCategory.RAW_MATERIALS,
             unit_category=InventoryUnitCategory.VOLUME,
             cas=[
@@ -683,42 +693,46 @@ def generate_lot_seeds(
 
 
 def generate_pricing_seeds(
-    seeded_inventory: list[InventoryItem], seeded_locations: list[Location]
+    prefix: str,
+    seeded_inventory: list[InventoryItem],
+    seeded_locations: list[Location],
 ) -> list[Pricing]:
     return [
         Pricing(
             inventory_item_id=seeded_inventory[0].id,
             company=seeded_inventory[0].company,
             location=seeded_locations[0],
-            description="TEST - Pricing seed 1",
+            description=f"{prefix} - Pricing seed 1",
             price=42.0,
         ),
         Pricing(
             inventory_item_id=seeded_inventory[0].id,
             company=seeded_inventory[0].company,
             location=seeded_locations[1],
-            description="TEST - Pricing seed 2",
+            description=f"{prefix} - Pricing seed 2",
             price=50.0,
         ),
         Pricing(
             inventory_item_id=seeded_inventory[1].id,
             company=seeded_inventory[2].company,
             location=seeded_locations[0],
-            description="TEST - Pricing seed 3",
+            description=f"{prefix} - Pricing seed 3",
             price=10.50,
         ),
         Pricing(
             inventory_item_id=seeded_inventory[2].id,
             company=seeded_inventory[2].company,
             location=seeded_locations[1],
-            description="TEST - Pricing seed 4",
+            description=f"{prefix} - Pricing seed 4",
             price=5375.97,
         ),
     ]
 
 
 def generate_workflow_seeds(
-    seeded_parameter_groups: list[ParameterGroup], seeded_parameters: list[Parameter]
+    prefix: str,
+    seeded_parameter_groups: list[ParameterGroup],
+    seeded_parameters: list[Parameter],
 ) -> list[Workflow]:
     def _get_param_from_id(seeded_parameters, param_id):
         for x in seeded_parameters:
@@ -727,7 +741,7 @@ def generate_workflow_seeds(
 
     return [
         Workflow(
-            name=random_name("WORKFLOW"),
+            name=f"{prefix} - Workflow 1",
             parameter_group_setpoints=[
                 ParameterGroupSetpoints(
                     parameter_group=seeded_parameter_groups[0],
@@ -742,7 +756,7 @@ def generate_workflow_seeds(
             ],
         ),
         Workflow(
-            name=random_name("WORKFLOW"),
+            name=f"{prefix} - Workflow 2",
             parameter_group_setpoints=[
                 ParameterGroupSetpoints(
                     parameter_group=seeded_parameter_groups[1],
@@ -770,7 +784,7 @@ def generate_workflow_seeds(
             ],
         ),
         Workflow(
-            name=random_name("WORKFLOW"),
+            name=f"{prefix} - Workflow 3",
             parameter_group_setpoints=[
                 ParameterGroupSetpoints(
                     parameter_group=seeded_parameter_groups[2],
@@ -801,6 +815,7 @@ def generate_workflow_seeds(
 
 
 def generate_task_seeds(
+    prefix: str,
     user: User,
     seeded_inventory,
     seeded_lots,
@@ -813,7 +828,7 @@ def generate_task_seeds(
     return [
         # Property Task 1
         PropertyTask(
-            name="TEST - Property Task 1",
+            name=f"{prefix} - Property Task 1",
             category=TaskCategory.PROPERTY,
             inventory_information=[
                 InventoryInformation(inventory_id=seeded_inventory[0].id, lot_id=seeded_lots[0].id)
@@ -833,7 +848,7 @@ def generate_task_seeds(
         ),
         # Property Task 2
         PropertyTask(
-            name="TEST - Property Task 2",
+            name=f"{prefix} - Property Task 2",
             category=TaskCategory.PROPERTY,
             inventory_information=[
                 InventoryInformation(
@@ -856,7 +871,7 @@ def generate_task_seeds(
         # Batch Task 1
         # Use the Formulations used in #tests/resources/test_sheets/py defined as seeded_products
         BatchTask(
-            name="TEST - Batch Task 1",
+            name=f"{prefix} - Batch Task 1",
             category=TaskCategory.BATCH,
             batch_size_unit=BatchSizeUnit.KILOGRAMS,
             inventory_information=[
@@ -876,7 +891,7 @@ def generate_task_seeds(
         ),
         # Batch Task 2
         BatchTask(
-            name="TEST - Batch Task 2",
+            name=f"{prefix} - Batch Task 2",
             category=TaskCategory.BATCH,
             batch_size_unit=BatchSizeUnit.GRAMS,
             inventory_information=[
