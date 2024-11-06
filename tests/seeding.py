@@ -133,20 +133,20 @@ def generate_cas_seeds(seed_prefix: str) -> list[Cas]:
     return [
         # CAS with basic fields
         Cas(
-            number=f"{seed_prefix} - 50-00-0",
+            number=f"{seed_prefix}-50-00-0",
             description="Formaldehyde",
             category=CasCategory.USER,
             smiles="C=O",
         ),
         Cas(
-            number=f"{seed_prefix} - 64-17-5",
+            number=f"{seed_prefix}-64-17-5",
             description="Ethanol",
             category=CasCategory.TSCA_PUBLIC,
             smiles="C2H5OH",
         ),
         # CAS with optional fields filled out
         Cas(
-            number=f"{seed_prefix} - 7732-18-5",
+            number=f"{seed_prefix}-7732-18-5",
             description="Water",
             notes="Common solvent",
             category=CasCategory.NOT_TSCA,
@@ -157,7 +157,7 @@ def generate_cas_seeds(seed_prefix: str) -> list[Cas]:
         ),
         # CAS with external database reference
         Cas(
-            number=f"{seed_prefix} - 7440-57-5",
+            number=f"{seed_prefix}-7440-57-5",
             description="Gold",
             category=CasCategory.EXTERNAL,
             smiles="[Au]",
@@ -167,7 +167,7 @@ def generate_cas_seeds(seed_prefix: str) -> list[Cas]:
         ),
         # CAS with unknown classification
         Cas(
-            number=f"{seed_prefix} - 1234-56-7",
+            number=f"{seed_prefix}-1234-56-7",
             description="Unknown substance",
             category=CasCategory.UNKNOWN,
         ),

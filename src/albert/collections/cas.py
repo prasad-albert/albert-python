@@ -183,7 +183,7 @@ class CasCollection(BaseCollection):
         found = self.list(number=number)
         if exact_match:
             for f in found:
-                if f.number.replace(" ", "") == number:
+                if f.number.strip() == number:
                     return f
         return next(found, None)
 
