@@ -7,6 +7,7 @@ from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, Sec
 from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter
 from albert.resources.serialization import SerializeAsEntityLink
+from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.units import Unit
 from albert.resources.users import User
 from albert.utils.exceptions import AlbertException
@@ -95,7 +96,7 @@ class ParameterValue(BaseResource):
         return self._sequence
 
 
-class ParameterGroup(BaseResource):
+class ParameterGroup(BaseTaggedEntity):
     id: str | None = Field(None, alias="albertId")
     name: str
     description: str | None = Field(default=None)
