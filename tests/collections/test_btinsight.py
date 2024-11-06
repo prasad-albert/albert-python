@@ -2,8 +2,8 @@ from albert import Albert
 from albert.resources.btinsight import BTInsight, BTInsightRegistry
 
 
-def test_update(client: Albert, seeded_btinsight: BTInsight):
-    insight = seeded_btinsight.model_copy()
+def test_update(client: Albert, static_btinsight: BTInsight):
+    insight = static_btinsight.model_copy()
 
     marker = "TEST"
     insight.output_key = marker

@@ -2,8 +2,8 @@ from albert import Albert
 from albert.resources.btdataset import BTDataset
 
 
-def test_update(client: Albert, seeded_btdataset: BTDataset):
-    dataset = seeded_btdataset.model_copy()
+def test_update(client: Albert, static_btdataset: BTDataset):
+    dataset = static_btdataset.model_copy()
 
     marker = "TEST"
     dataset.key = marker

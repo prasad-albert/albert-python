@@ -74,7 +74,7 @@ def seed_prefix() -> str:
 
 
 @pytest.fixture(scope="session")
-def sdk_user(client: Albert) -> User:
+def static_user(client: Albert) -> User:
     # Users cannot be deleted, so we just pull the SDK client user for testing
     # Do not write to/modify this resource since it is shared across all test runs
     claims = jwt.get_unverified_claims(client.session._access_token)
@@ -83,13 +83,13 @@ def sdk_user(client: Albert) -> User:
 
 
 @pytest.fixture(scope="session")
-def seeded_roles(client: Albert) -> list[Role]:
+def static_roles(client: Albert) -> list[Role]:
     # Roles are not deleted or created. We just use the existing roles.
     return list(client.roles.list())
 
 
 @pytest.fixture(scope="session")
-def seeded_custom_fields(client: Albert) -> list[CustomField]:
+def static_custom_fields(client: Albert) -> list[CustomField]:
     seeded = []
     for cf in generate_custom_fields():
         try:
@@ -104,12 +104,12 @@ def seeded_custom_fields(client: Albert) -> list[CustomField]:
 
 
 @pytest.fixture(scope="session")
-def seeded_lists(
+def static_lists(
     client: Albert,
-    seeded_custom_fields: list[CustomField],
+    static_custom_fields: list[CustomField],
 ) -> list[ListItem]:
     seeded = []
-    for list_item in generate_list_item_seeds(seeded_custom_fields=seeded_custom_fields):
+    for list_item in generate_list_item_seeds(seeded_custom_fields=static_custom_fields):
         try:
             created_list = client.lists.create(list_item=list_item)
         except BadRequestError as e:
@@ -124,26 +124,26 @@ def seeded_lists(
 
 
 @pytest.fixture(scope="session")
-def seeded_btdataset(client: Albert) -> BTDataset:
+def static_btdataset(client: Albert) -> BTDataset:
     return client.btdatasets.get_by_id(id="DST1")
 
 
 @pytest.fixture(scope="session")
-def seeded_btinsight(client: Albert) -> BTInsight:
+def static_btinsight(client: Albert) -> BTInsight:
     return client.btinsights.get_by_id(id="INS10")
 
 
 @pytest.fixture(scope="session")
-def seeded_btmodelsession(client: Albert) -> BTModelSession:
+def static_btmodelsession(client: Albert) -> BTModelSession:
     return client.btmodelsessions.get_by_id(id="MDS1")
 
 
 @pytest.fixture(scope="session")
-def seeded_btmodel(seeded_btmodelsession: BTModelSession) -> BTModel:
-    return seeded_btmodelsession.models.get_by_id(id="MDL1")
+def static_btmodel(static_btmodelsession: BTModelSession) -> BTModel:
+    return static_btmodelsession.models.get_by_id(id="MDL1")
 
 
-### DYNAMIC RESOURCES -- CAN BE DELETED
+### SEEDED RESOURCES -- CREATED ONCE PER SESSION, CAN BE DELETED
 
 
 @pytest.fixture(scope="session")
@@ -288,13 +288,13 @@ def seeded_data_columns(
 def seeded_data_templates(
     client: Albert,
     seed_prefix: str,
-    sdk_user: User,
+    static_user: User,
     seeded_data_columns: list[DataColumn],
     seeded_units: list[Unit],
 ) -> Iterator[list[DataTemplate]]:
     seeded = []
     for data_template in generate_data_template_seeds(
-        user=sdk_user,
+        user=static_user,
         seed_prefix=seed_prefix,
         seeded_data_columns=seeded_data_columns,
         seeded_units=seeded_units,
@@ -486,7 +486,7 @@ def seeded_products(
 def seeded_tasks(
     client: Albert,
     seed_prefix: str,
-    sdk_user: User,
+    static_user: User,
     seeded_inventory,
     seeded_lots,
     seeded_projects,
@@ -498,7 +498,7 @@ def seeded_tasks(
     seeded = []
     all_tasks = generate_task_seeds(
         seed_prefix=seed_prefix,
-        user=sdk_user,
+        user=static_user,
         seeded_inventory=seeded_inventory,
         seeded_lots=seeded_lots,
         seeded_projects=seeded_projects,

@@ -24,15 +24,15 @@ def test_simple_users_list(client: Albert):
     _list_asserts(simple_user_list)
 
 
-def test_advanced_users_list(client: Albert, sdk_user: User):
+def test_advanced_users_list(client: Albert, static_user: User):
     # Check something reasonable was found near the top
-    faux_name = sdk_user.name.split(" ")[0]
+    faux_name = static_user.name.split(" ")[0]
     adv_list = client.users.list(text=faux_name, status=Status.ACTIVE, search_fields=["name"])
     found = False
     for i, u in enumerate(adv_list):
         if i == 20:
             break
-        if sdk_user.name.lower() == u.name.lower():
+        if static_user.name.lower() == u.name.lower():
             found = True
             break
     assert found
@@ -47,8 +47,8 @@ def test_advanced_users_list(client: Albert, sdk_user: User):
     _list_asserts(short_list, limit=5)
 
 
-def test_user_get(client: Albert, sdk_user: User):
-    first_hit = next(client.users.list(text=sdk_user.name), None)
+def test_user_get(client: Albert, static_user: User):
+    first_hit = next(client.users.list(text=static_user.name), None)
     user_from_get = client.users.get_by_id(user_id=first_hit.id)
     assert user_from_get.id == first_hit.id
     assert isinstance(user_from_get, User)
