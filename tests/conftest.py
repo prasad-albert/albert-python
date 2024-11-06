@@ -3,10 +3,10 @@ from collections.abc import Iterator
 from contextlib import suppress
 
 import pytest
+from jose import jwt
 
 from albert import Albert
 from albert.collections.worksheets import WorksheetCollection
-from albert.resources.base import Status
 from albert.resources.btdataset import BTDataset
 from albert.resources.btinsight import BTInsight
 from albert.resources.btmodel import BTModel, BTModelSession
@@ -48,7 +48,6 @@ from tests.seeding import (
     generate_tag_seeds,
     generate_task_seeds,
     generate_unit_seeds,
-    generate_user_seeds,
     generate_workflow_seeds,
 )
 
@@ -66,6 +65,21 @@ def client() -> Albert:
 
 
 ### STATIC RESOURCES -- CANNOT BE DELETED
+
+
+@pytest.fixture(scope="session")
+def sdk_user(client: Albert) -> User:
+    # Users cannot be deleted, so we just pull the SDK client user for testing
+    # Do not write to/modify this resource since it is shared across all test runs
+    claims = jwt.get_unverified_claims(client.session._access_token)
+    user_id = claims["id"]
+    return client.users.get_by_id(user_id=user_id)
+
+
+@pytest.fixture(scope="session")
+def seeded_roles(client: Albert) -> list[Role]:
+    # Roles are not deleted or created. We just use the existing roles.
+    return list(client.roles.list())
 
 
 @pytest.fixture(scope="session")
@@ -236,75 +250,35 @@ def seeded_units(client: Albert) -> Iterator[list[Unit]]:
 
 @pytest.fixture(scope="session")
 def seeded_data_columns(client: Albert, seeded_units: list[Unit]) -> Iterator[list[DataColumn]]:
-    # Seed the data columns
     seeded = []
     for data_column in generate_data_column_seeds(seeded_units=seeded_units):
-        created_data_column = client.data_columns.get_by_name(name=data_column.name)
-        if created_data_column is None:
-            created_data_column = client.data_columns.create(data_column=data_column)
+        created_data_column = client.data_columns.create(data_column=data_column)
         seeded.append(created_data_column)
-    time.sleep(1.5)
-    yield seeded  # Provide the seeded data columns to the test
 
-    # tearDown - delete the seeded data columns after the test
+    # Avoid race condition while it populated through search DBs
+    time.sleep(1.5)
+
+    yield seeded
+
     for data_column in seeded:
         with suppress(NotFoundError):
             client.data_columns.delete(data_column_id=data_column.id)
 
 
 @pytest.fixture(scope="session")
-def seeded_roles(client: Albert) -> Iterator[list[Role]]:
-    # Roles are not deleted or created. We just use the existing roles.
-    existing = []
-    for role in client.roles.list():
-        existing.append(role)
-
-    yield existing  # Provide the seeded units to the test
-
-
-@pytest.fixture(scope="session")
-def seeded_users(client: Albert, seeded_roles, seeded_locations) -> Iterator[list[User]]:
-    seeded = []
-    # Here, seeded_roles and seeded_locations will already be lists from the respective fixtures
-
-    for user in generate_user_seeds(seeded_roles=seeded_roles, seeded_locations=seeded_locations):
-        matches = client.users.list(text=user.name)
-        found = False
-        for m in matches:
-            if m.name == user.name:
-                created_user = m
-                created_user.status = Status.ACTIVE.value
-                client.users.update(updated_object=created_user)
-                found = True
-                break
-        if not found:
-            created_user = client.users.create(user=user)
-        seeded.append(created_user)
-    time.sleep(1.5)  # avoid race condition while it populates through DBs
-    yield seeded  # Provide the seeded users to the test
-
-    # Teardown - archive/set inactive
-    for user in seeded:
-        user.status = Status.INACTIVE.value
-        client.users.update(updated_object=user)
-
-
-@pytest.fixture(scope="session")
 def seeded_data_templates(
     client: Albert,
+    sdk_user: User,
     seeded_data_columns: list[DataColumn],
-    seeded_users: list[User],
     seeded_units: list[Unit],
 ) -> Iterator[list[DataTemplate]]:
     seeded = []
     for data_template in generate_data_template_seeds(
+        user=sdk_user,
         seeded_data_columns=seeded_data_columns,
         seeded_units=seeded_units,
-        seeded_users=seeded_users,
     ):
-        dt = client.data_templates.get_by_name(name=data_template.name)
-        if dt is None:
-            dt = client.data_templates.create(data_template=data_template)
+        dt = client.data_templates.create(data_template=data_template)
         seeded.append(dt)
     yield seeded
     for data_template in seeded:
@@ -312,7 +286,6 @@ def seeded_data_templates(
             client.data_templates.delete(data_template_id=data_template.id)
 
 
-# Move to conftest.py in a bit
 @pytest.fixture(scope="session")
 def worksheet(client: Albert, seeded_projects: list[Project]) -> Worksheet:
     collection = WorksheetCollection(session=client.session)
@@ -341,7 +314,11 @@ def sheet(worksheet: Worksheet) -> Sheet:
 
 @pytest.fixture(scope="session")
 def seeded_inventory(
-    client: Albert, seeded_cas, seeded_tags, seeded_companies, seeded_locations
+    client: Albert,
+    seeded_cas,
+    seeded_tags,
+    seeded_companies,
+    seeded_locations,
 ) -> Iterator[list[InventoryItem]]:
     seeded = []
     for inventory in generate_inventory_seeds(
@@ -381,9 +358,12 @@ def seeded_parameter_groups(
     ):
         created_parameter_group = client.parameter_groups.create(parameter_group=parameter_group)
         seeded.append(created_parameter_group)
-        time.sleep(1.5)  # avoid race condition while it populates through DBs
+
+    # Avoid race condition while it populates through DBs
+    time.sleep(1.5)
 
     yield seeded
+
     for parameter_group in seeded:
         with suppress(NotFoundError):
             client.parameter_groups.delete(id=parameter_group.id)
@@ -399,7 +379,6 @@ def seeded_lots(client: Albert, seeded_inventory, seeded_storage_locations, seed
         seeded_locations=seeded_locations,
     )
     seeded = client.lots.create(lots=all_lots)
-    # seeded.append(created_lot)
     yield seeded
     for lot in seeded:
         with suppress(NotFoundError):
@@ -409,11 +388,7 @@ def seeded_lots(client: Albert, seeded_inventory, seeded_storage_locations, seed
 @pytest.fixture(scope="session")
 def seeded_pricings(client: Albert, seeded_inventory, seeded_locations):
     seeded = []
-    all_pricing = generate_pricing_seeds(
-        seeded_inventory=seeded_inventory,
-        seeded_locations=seeded_locations,
-    )
-    for p in all_pricing:
+    for p in generate_pricing_seeds(seeded_inventory, seeded_locations):
         seeded.append(client.pricings.create(pricing=p))
     yield seeded
     for p in seeded:
@@ -426,29 +401,31 @@ def seeded_workflows(
     client: Albert,
     seeded_parameter_groups: list[ParameterGroup],
     seeded_parameters: list[Parameter],
-) -> Iterator[Workflow]:
+) -> list[Workflow]:
     seeded = []
     all_workflows = generate_workflow_seeds(
-        seeded_parameter_groups=seeded_parameter_groups, seeded_parameters=seeded_parameters
+        seeded_parameter_groups=seeded_parameter_groups,
+        seeded_parameters=seeded_parameters,
     )
     for wf in all_workflows:
         seeded.append(client.workflows.create(workflow=wf))
-    yield seeded
-    # workflows cannot be deleted
+    return seeded
 
 
 @pytest.fixture(scope="session")
 def seeded_products(
-    client: Albert, sheet: Sheet, seeded_inventory: list[InventoryItem]
+    client: Albert,
+    sheet: Sheet,
+    seeded_inventory: list[InventoryItem],
 ) -> list[InventoryItem]:
-    formulations = []
+    products = []
 
     components = [
         Component(inventory_item=seeded_inventory[0], amount=66),
         Component(inventory_item=seeded_inventory[1], amount=34),
     ]
     for n in range(4):
-        formulations.append(
+        products.append(
             sheet.add_formulation(
                 formulation_name=f"TEST my cool formulation {str(n)}",
                 components=components,
@@ -462,22 +439,22 @@ def seeded_products(
 @pytest.fixture(scope="session")
 def seeded_tasks(
     client: Albert,
+    sdk_user: User,
     seeded_inventory,
     seeded_lots,
     seeded_projects,
     seeded_locations,
-    seeded_users,
     seeded_data_templates,
     seeded_workflows,
     seeded_products,
 ):
     seeded = []
     all_tasks = generate_task_seeds(
+        user=sdk_user,
         seeded_inventory=seeded_inventory,
         seeded_lots=seeded_lots,
         seeded_projects=seeded_projects,
         seeded_locations=seeded_locations,
-        seeded_users=seeded_users,
         seeded_data_templates=seeded_data_templates,
         seeded_workflows=seeded_workflows,
         seeded_products=seeded_products,

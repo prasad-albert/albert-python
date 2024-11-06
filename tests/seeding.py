@@ -31,7 +31,6 @@ from albert.resources.projects import (
     Project,
     ProjectClass,
 )
-from albert.resources.roles import Role
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
 from albert.resources.tasks import (
@@ -45,7 +44,7 @@ from albert.resources.tasks import (
     TaskPriority,
 )
 from albert.resources.units import Unit, UnitCategory
-from albert.resources.users import User, UserClass
+from albert.resources.users import User
 from albert.resources.workflows import (
     Interval,
     ParameterGroupSetpoints,
@@ -402,33 +401,35 @@ def generate_data_column_seeds(seeded_units) -> list[DataColumn]:
     return [
         # Basic data column with required fields
         DataColumn(
-            name="TEST - only unit 1",
+            name=random_name("DATA COLUMN"),
             unit=BaseEntityLink(id=seeded_units[0].id),
         ),
         # Data column with full fields including optional calculation
         DataColumn(
-            name="TEST - unit and calculation",
+            name=random_name("DATA COLUMN"),
             unit=BaseEntityLink(id=seeded_units[1].id),
             calculation="Pressure = Force / Area",
         ),
         # Data column with required fields but without the calculation
         DataColumn(
-            name="TEST - only name",
+            name=random_name("DATA COLUMN"),
         ),
         # Another data column with all fields
         DataColumn(
-            name="TEST - only calculation",
+            name=random_name("DATA COLUMN"),
             calculation="Mass = Density * Volume",
         ),
     ]
 
 
 def generate_data_template_seeds(
-    seeded_data_columns: list[DataColumn], seeded_units: list[Unit], seeded_users: list[User]
+    user: User,
+    seeded_data_columns: list[DataColumn],
+    seeded_units: list[Unit],
 ) -> list[DataTemplate]:
     return [
         DataTemplate(
-            name="TEST - Basic Data Template",
+            name=random_name("DATA TEMPLATE"),
             description="A basic data template with no metadata.",
             data_column_values=[
                 DataColumnValue(
@@ -439,7 +440,7 @@ def generate_data_template_seeds(
             ],
         ),
         DataTemplate(
-            name="TEST - ACL Data Template",
+            name=random_name("DATA TEMPLATE"),
             description="A basic data template with no metadata.",
             data_column_values=[
                 DataColumnValue(
@@ -448,10 +449,10 @@ def generate_data_template_seeds(
                     unit=seeded_units[0],
                 )
             ],
-            users_with_access=[seeded_users[0], seeded_users[1]],
+            users_with_access=[user],
         ),
         DataTemplate(
-            name="TEST - Data Template with Calculations",
+            name=random_name("DATA TEMPLATE"),
             description="A data template with calculations.",
             data_column_values=[
                 DataColumnValue(
@@ -468,51 +469,6 @@ def generate_data_template_seeds(
     ]
 
 
-def generate_user_seeds(seeded_locations: list[Location], seeded_roles: list[Role]) -> list[User]:
-    """
-    Generates a list of User seed objects for testing without IDs.
-
-    Parameters
-    ----------
-    seeded_locations : List[Location]
-        List of seeded Location objects.
-    seeded_roles : List[Role]
-        List of seeded Role objects.
-
-    Returns
-    -------
-    List[User]
-        A list of User objects with different permutations.
-    """
-
-    return [
-        # Basic standard user with metadata and one role
-        User(
-            name="TEST - Alice Smith",
-            location=seeded_locations[0],
-            email="testcase_alice.smith@example.com",
-            roles=[seeded_roles[0]],
-            user_class=UserClass.STANDARD,
-        ),
-        # Privileged user with no metadata
-        User(
-            name="TEST - Bob Johnson",
-            location=seeded_locations[1],
-            email="testcase_bob.johnson@example.com",
-            roles=[seeded_roles[0]],
-            user_class=UserClass.STANDARD,
-        ),
-        # Admin user with full metadata
-        User(
-            name="TEST - Charlie Brown",
-            location=seeded_locations[2],
-            email="testcase_charlie.brown@example.com",
-            roles=[seeded_roles[0]],
-            user_class=UserClass.STANDARD,
-        ),
-    ]
-
-
 def generate_parameter_seeds() -> list[Parameter]:
     """
     Generates a list of Parameter seed objects for testing without IDs.
@@ -524,20 +480,23 @@ def generate_parameter_seeds() -> list[Parameter]:
     """
 
     return [
-        Parameter(name="TEST - Temperature", category=ParameterCategory.NORMAL),
         Parameter(
-            name="TEST - Pressure",
-            category=ParameterCategory.SPECIAL,
-        ),
-        Parameter(
-            name="TEST - Volume",
-        ),
-        Parameter(
-            name="TEST - Mass",
+            name=random_name("TEMPERATURE PARAMETER"),
             category=ParameterCategory.NORMAL,
         ),
         Parameter(
-            name="TEST - Length",
+            name=random_name("PRESSURE PARAMETER"),
+            category=ParameterCategory.SPECIAL,
+        ),
+        Parameter(
+            name=random_name("VOLUME PARAMETER"),
+        ),
+        Parameter(
+            name=random_name("MASS PARAMETER"),
+            category=ParameterCategory.NORMAL,
+        ),
+        Parameter(
+            name=random_name("LENGTH PARAMETER"),
             category=ParameterCategory.NORMAL,
         ),
     ]
@@ -563,7 +522,7 @@ def generate_parameter_group_seeds(
     return [
         # Basic ParameterGroup with required fields
         ParameterGroup(
-            name="TEST - General Parameters",
+            name=random_name("PARAMETER GROUP"),
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
@@ -575,7 +534,7 @@ def generate_parameter_group_seeds(
         ),
         # ParameterGroup with all fields filled out
         ParameterGroup(
-            name="TEST - Batch Parameters",
+            name=random_name("BATCH PARAMETER GROUP"),
             description="Parameters for batch processing",
             type=PGType.BATCH,
             security_class=SecurityClass.RESTRICTED,
@@ -595,7 +554,7 @@ def generate_parameter_group_seeds(
         ),
         # ParameterGroup with no tags or metadata
         ParameterGroup(
-            name="TEST - Property Parameters",
+            name=random_name("PROPERTY PARAMETER GROUP"),
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
@@ -622,7 +581,7 @@ def generate_inventory_seeds(
     """Generates a list of InventoryItem seed objects for testing."""
     return [
         InventoryItem(
-            name="TEST - Sodium Chloride",
+            name=random_name("SODIUM CHLORIDE"),
             description="TEST - Common salt used in various applications.",
             category=InventoryCategory.RAW_MATERIALS,
             unit_category=InventoryUnitCategory.MASS,
@@ -630,7 +589,7 @@ def generate_inventory_seeds(
             company=seeded_companies[0],
         ),
         InventoryItem(
-            name="TEST - Ethanol",
+            name=random_name("ETHANOL"),
             description="TEST - A volatile, flammable liquid used in chemical synthesis.",
             category=InventoryCategory.CONSUMABLES.value,
             unit_category=InventoryUnitCategory.VOLUME.value,
@@ -640,7 +599,7 @@ def generate_inventory_seeds(
             company=seeded_companies[1].name,  # ensure it knows to use the company object
         ),
         InventoryItem(
-            name="TEST - Hydrochloric Acid",
+            name=random_name("HYDROCHLORIC ACID"),
             description="TEST - Strong acid used in various industrial processes.",
             category=InventoryCategory.RAW_MATERIALS,
             unit_category=InventoryUnitCategory.VOLUME,
@@ -686,12 +645,6 @@ def generate_lot_seeds(
             expiration_date="2025-12-31",
             manufacturer_lot_number="MLN12345",
             location=BaseEntityLink(id=seeded_locations[1].id),
-            # metadata=LotMetadata(
-            #     asset_tag="ASSET001",
-            #     serial_number="SN123",
-            #     quality_number="QN123",
-            #     distributor="Distributor A",
-            # ),
             notes="This is a test lot with default status.",
             external_barcode_id=str(uuid4()),
         ),
@@ -720,12 +673,6 @@ def generate_lot_seeds(
             expiration_date="2024-11-30",
             manufacturer_lot_number="MLN112233",
             location=BaseEntityLink(id=seeded_locations[1].id),
-            # metadata=LotMetadata(
-            #     asset_tag="ASSET789",
-            #     serial_number="SN789",
-            #     quality_number="QN789",
-            #     distributor="Distributor B",
-            # ),
             notes="This lot is quarantined due to quality issues.",
             external_barcode_id=str(uuid4()),
         ),
@@ -777,7 +724,7 @@ def generate_workflow_seeds(
 
     return [
         Workflow(
-            name="TEST - Workflow 1",
+            name=random_name("WORKFLOW"),
             parameter_group_setpoints=[
                 ParameterGroupSetpoints(
                     parameter_group=seeded_parameter_groups[0],
@@ -792,7 +739,7 @@ def generate_workflow_seeds(
             ],
         ),
         Workflow(
-            name="TEST - Workflow 2",
+            name=random_name("WORKFLOW"),
             parameter_group_setpoints=[
                 ParameterGroupSetpoints(
                     parameter_group=seeded_parameter_groups[1],
@@ -820,7 +767,7 @@ def generate_workflow_seeds(
             ],
         ),
         Workflow(
-            name="TEST - Workflow 3",
+            name=random_name("WORKFLOW"),
             parameter_group_setpoints=[
                 ParameterGroupSetpoints(
                     parameter_group=seeded_parameter_groups[2],
@@ -851,11 +798,11 @@ def generate_workflow_seeds(
 
 
 def generate_task_seeds(
+    user: User,
     seeded_inventory,
     seeded_lots,
     seeded_projects,
     seeded_locations,
-    seeded_users,
     seeded_data_templates,
     seeded_workflows,
     seeded_products,
@@ -878,7 +825,7 @@ def generate_task_seeds(
                     data_template=[seeded_data_templates[0]],
                 )
             ],
-            assigned_to=seeded_users[0],
+            assigned_to=user,
             due_date="2024-10-31",
         ),
         # Property Task 2
@@ -919,7 +866,7 @@ def generate_task_seeds(
             priority=TaskPriority.LOW,
             project=seeded_projects[2],
             parent_id=seeded_products[2].project_id,
-            assigned_to=seeded_users[1],
+            assigned_to=user,
             start_date="2024-10-01",
             due_date="2024-10-31",
             workflows=[seeded_workflows[1]],
@@ -939,7 +886,7 @@ def generate_task_seeds(
             priority=TaskPriority.MEDIUM,
             project=seeded_projects[2],
             parent_id=seeded_products[2].project_id,
-            assigned_to=seeded_users[0],
+            assigned_to=user,
             start_date="2024-10-01",
             due_date="2024-10-31",
         ),
