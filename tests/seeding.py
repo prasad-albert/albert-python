@@ -185,6 +185,9 @@ def generate_company_seeds() -> list[Company]:
 
     return [
         Company(name=random_name()),
+        Company(name=random_name()),
+        Company(name=random_name()),
+        Company(name=random_name()),
     ]
 
 
@@ -250,26 +253,26 @@ def generate_storage_location_seeds(seeded_locations: list[Location]) -> list[St
     return [
         # Basic storage location with required fields
         StorageLocation(
-            name=random_name("STORAGE LOCATION"),
+            name=seeded_locations[0].name,
             location=BaseEntityLink(id=seeded_locations[0].id),
             address="123 Warehouse St, New York, NY",
         ),
         # Storage location with full fields including optional country
         StorageLocation(
-            name=random_name("STORAGE LOCATION"),
+            name=seeded_locations[1].name,
             location=BaseEntityLink(id=seeded_locations[1].id),
             address="123 Storage St, San Francisco, CA",
             country="US",
         ),
         # Storage location with required fields but without the country
         StorageLocation(
-            name=random_name("STORAGE LOCATION"),
+            name=seeded_locations[0].name,
             location=BaseEntityLink(id=seeded_locations[0].id),
             address="10 Storage Lane, Paris",
         ),
         # Another storage location with all fields
         StorageLocation(
-            name=random_name("STORAGE LOCATION"),
+            name=seeded_locations[1].name,
             location=BaseEntityLink(id=seeded_locations[1].id),
             address="Test Storage Facility, London",
             country="GB",
