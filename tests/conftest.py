@@ -184,7 +184,9 @@ def seeded_projects(
     seeded_locations: list[Location],
 ) -> Iterator[list[Project]]:
     seeded = []
-    for project in generate_project_seeds(prefix=seed_prefix, seeded_locations=seeded_locations):
+    for project in generate_project_seeds(
+        seed_prefix=seed_prefix, seeded_locations=seeded_locations
+    ):
         created_project = client.projects.create(project=project)
         seeded.append(created_project)
 
@@ -266,7 +268,7 @@ def seeded_data_columns(
 ) -> Iterator[list[DataColumn]]:
     seeded = []
     for data_column in generate_data_column_seeds(
-        prefix=seed_prefix,
+        seed_prefix=seed_prefix,
         seeded_units=seeded_units,
     ):
         created_data_column = client.data_columns.create(data_column=data_column)
@@ -293,7 +295,7 @@ def seeded_data_templates(
     seeded = []
     for data_template in generate_data_template_seeds(
         user=sdk_user,
-        prefix=seed_prefix,
+        seed_prefix=seed_prefix,
         seeded_data_columns=seeded_data_columns,
         seeded_units=seeded_units,
     ):
@@ -347,7 +349,7 @@ def seeded_inventory(
 ) -> Iterator[list[InventoryItem]]:
     seeded = []
     for inventory in generate_inventory_seeds(
-        prefix=seed_prefix,
+        seed_prefix=seed_prefix,
         seeded_cas=seeded_cas,
         seeded_tags=seeded_tags,
         seeded_companies=seeded_companies,
@@ -384,7 +386,7 @@ def seeded_parameter_groups(
 ) -> Iterator[list[ParameterGroup]]:
     seeded = []
     for parameter_group in generate_parameter_group_seeds(
-        prefix=seed_prefix,
+        seed_prefix=seed_prefix,
         seeded_parameters=seeded_parameters,
         seeded_tags=seeded_tags,
         seeded_units=seeded_units,
@@ -443,7 +445,7 @@ def seeded_workflows(
 ) -> list[Workflow]:
     seeded = []
     all_workflows = generate_workflow_seeds(
-        prefix=seed_prefix,
+        seed_prefix=seed_prefix,
         seeded_parameter_groups=seeded_parameter_groups,
         seeded_parameters=seeded_parameters,
     )
@@ -495,7 +497,7 @@ def seeded_tasks(
 ):
     seeded = []
     all_tasks = generate_task_seeds(
-        prefix=seed_prefix,
+        seed_prefix=seed_prefix,
         user=sdk_user,
         seeded_inventory=seeded_inventory,
         seeded_lots=seeded_lots,

@@ -35,14 +35,15 @@ def test_crud_empty_column(seeded_sheet: Sheet):
     seeded_sheet.delete_column(column_id=new_col.column_id)
 
 
-def test_add_formulation(seeded_sheet: Sheet, seeded_inventory, seeded_products):
+def test_add_formulation(seed_prefix: str, seeded_sheet: Sheet, seeded_inventory, seeded_products):
     components_updated = [
         Component(inventory_item=seeded_inventory[0], amount=33),
         Component(inventory_item=seeded_inventory[1], amount=67),
     ]
 
     new_col = seeded_sheet.add_formulation(
-        formulation_name="TEST my cool formulation base", components=components_updated
+        formulation_name=f"{seed_prefix} - My cool formulation base",
+        components=components_updated,
     )
     assert isinstance(new_col, Column)
 

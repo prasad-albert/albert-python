@@ -180,6 +180,7 @@ def test_update_inventory_item_advanced_attributes(
             "cas": [CasAmount(id=seeded_cas[1].id, min=0.5, max=0.75)],
             "company": seeded_companies[1],
             "tags": [seeded_tags[0], seeded_tags[1]],
+            "alias": "Updated Alias Again",
         }
     )
 
