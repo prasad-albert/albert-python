@@ -66,7 +66,7 @@ def client() -> Albert:
 
 
 @pytest.fixture(scope="session")
-def seeding_prefix() -> str:
+def seed_prefix() -> str:
     return f"SDK Test {uuid.uuid4()}"
 
 
@@ -147,9 +147,9 @@ def seeded_btmodel(seeded_btmodelsession: BTModelSession) -> BTModel:
 
 
 @pytest.fixture(scope="session")
-def seeded_cas(client: Albert, seeding_prefix: str) -> Iterator[list[Cas]]:
+def seeded_cas(client: Albert, seed_prefix: str) -> Iterator[list[Cas]]:
     seeded = []
-    for cas in generate_cas_seeds(seeding_prefix):
+    for cas in generate_cas_seeds(seed_prefix):
         created_cas = client.cas_numbers.create(cas=cas)
         seeded.append(created_cas)
 
@@ -164,9 +164,9 @@ def seeded_cas(client: Albert, seeding_prefix: str) -> Iterator[list[Cas]]:
 
 
 @pytest.fixture(scope="session")
-def seeded_locations(client: Albert, seeding_prefix: str) -> Iterator[list[Location]]:
+def seeded_locations(client: Albert, seed_prefix: str) -> Iterator[list[Location]]:
     seeded = []
-    for location in generate_location_seeds(seeding_prefix):
+    for location in generate_location_seeds(seed_prefix):
         created_location = client.locations.create(location=location)
         seeded.append(created_location)
 
@@ -180,13 +180,11 @@ def seeded_locations(client: Albert, seeding_prefix: str) -> Iterator[list[Locat
 @pytest.fixture(scope="session")
 def seeded_projects(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     seeded_locations: list[Location],
 ) -> Iterator[list[Project]]:
     seeded = []
-    for project in generate_project_seeds(
-        prefix=seeding_prefix, seeded_locations=seeded_locations
-    ):
+    for project in generate_project_seeds(prefix=seed_prefix, seeded_locations=seeded_locations):
         created_project = client.projects.create(project=project)
         seeded.append(created_project)
 
@@ -198,9 +196,9 @@ def seeded_projects(
 
 
 @pytest.fixture(scope="session")
-def seeded_companies(client: Albert, seeding_prefix: str) -> Iterator[list[Company]]:
+def seeded_companies(client: Albert, seed_prefix: str) -> Iterator[list[Company]]:
     seeded = []
-    for company in generate_company_seeds(seeding_prefix):
+    for company in generate_company_seeds(seed_prefix):
         created_company = client.companies.create(company=company)
         seeded.append(created_company)
 
@@ -230,9 +228,9 @@ def seeded_storage_locations(
 
 
 @pytest.fixture(scope="session")
-def seeded_tags(client: Albert, seeding_prefix: str) -> Iterator[list[Tag]]:
+def seeded_tags(client: Albert, seed_prefix: str) -> Iterator[list[Tag]]:
     seeded = []
-    for tag in generate_tag_seeds(seeding_prefix):
+    for tag in generate_tag_seeds(seed_prefix):
         created_tag = client.tags.create(tag=tag)
         seeded.append(created_tag)
 
@@ -244,9 +242,9 @@ def seeded_tags(client: Albert, seeding_prefix: str) -> Iterator[list[Tag]]:
 
 
 @pytest.fixture(scope="session")
-def seeded_units(client: Albert, seeding_prefix: str) -> Iterator[list[Unit]]:
+def seeded_units(client: Albert, seed_prefix: str) -> Iterator[list[Unit]]:
     seeded = []
-    for unit in generate_unit_seeds(seeding_prefix):
+    for unit in generate_unit_seeds(seed_prefix):
         created_unit = client.units.create(unit=unit)
         seeded.append(created_unit)
 
@@ -263,12 +261,12 @@ def seeded_units(client: Albert, seeding_prefix: str) -> Iterator[list[Unit]]:
 @pytest.fixture(scope="session")
 def seeded_data_columns(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     seeded_units: list[Unit],
 ) -> Iterator[list[DataColumn]]:
     seeded = []
     for data_column in generate_data_column_seeds(
-        prefix=seeding_prefix,
+        prefix=seed_prefix,
         seeded_units=seeded_units,
     ):
         created_data_column = client.data_columns.create(data_column=data_column)
@@ -287,7 +285,7 @@ def seeded_data_columns(
 @pytest.fixture(scope="session")
 def seeded_data_templates(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     sdk_user: User,
     seeded_data_columns: list[DataColumn],
     seeded_units: list[Unit],
@@ -295,7 +293,7 @@ def seeded_data_templates(
     seeded = []
     for data_template in generate_data_template_seeds(
         user=sdk_user,
-        prefix=seeding_prefix,
+        prefix=seed_prefix,
         seeded_data_columns=seeded_data_columns,
         seeded_units=seeded_units,
     ):
@@ -341,7 +339,7 @@ def seeded_sheet(seeded_worksheet: Worksheet) -> Sheet:
 @pytest.fixture(scope="session")
 def seeded_inventory(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     seeded_cas,
     seeded_tags,
     seeded_companies,
@@ -349,7 +347,7 @@ def seeded_inventory(
 ) -> Iterator[list[InventoryItem]]:
     seeded = []
     for inventory in generate_inventory_seeds(
-        prefix=seeding_prefix,
+        prefix=seed_prefix,
         seeded_cas=seeded_cas,
         seeded_tags=seeded_tags,
         seeded_companies=seeded_companies,
@@ -365,9 +363,9 @@ def seeded_inventory(
 
 
 @pytest.fixture(scope="session")
-def seeded_parameters(client: Albert, seeding_prefix: str) -> Iterator[list[Parameter]]:
+def seeded_parameters(client: Albert, seed_prefix: str) -> Iterator[list[Parameter]]:
     seeded = []
-    for parameter in generate_parameter_seeds(seeding_prefix):
+    for parameter in generate_parameter_seeds(seed_prefix):
         created_parameter = client.parameters.create(parameter=parameter)
         seeded.append(created_parameter)
     yield seeded
@@ -379,14 +377,14 @@ def seeded_parameters(client: Albert, seeding_prefix: str) -> Iterator[list[Para
 @pytest.fixture(scope="session")
 def seeded_parameter_groups(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     seeded_parameters,
     seeded_tags,
     seeded_units,
 ) -> Iterator[list[ParameterGroup]]:
     seeded = []
     for parameter_group in generate_parameter_group_seeds(
-        prefix=seeding_prefix,
+        prefix=seed_prefix,
         seeded_parameters=seeded_parameters,
         seeded_tags=seeded_tags,
         seeded_units=seeded_units,
@@ -426,9 +424,9 @@ def seeded_lots(
 
 
 @pytest.fixture(scope="session")
-def seeded_pricings(client: Albert, seeding_prefix: str, seeded_inventory, seeded_locations):
+def seeded_pricings(client: Albert, seed_prefix: str, seeded_inventory, seeded_locations):
     seeded = []
-    for p in generate_pricing_seeds(seeding_prefix, seeded_inventory, seeded_locations):
+    for p in generate_pricing_seeds(seed_prefix, seeded_inventory, seeded_locations):
         seeded.append(client.pricings.create(pricing=p))
     yield seeded
     for p in seeded:
@@ -439,13 +437,13 @@ def seeded_pricings(client: Albert, seeding_prefix: str, seeded_inventory, seede
 @pytest.fixture(scope="session")
 def seeded_workflows(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     seeded_parameter_groups: list[ParameterGroup],
     seeded_parameters: list[Parameter],
 ) -> list[Workflow]:
     seeded = []
     all_workflows = generate_workflow_seeds(
-        prefix=seeding_prefix,
+        prefix=seed_prefix,
         seeded_parameter_groups=seeded_parameter_groups,
         seeded_parameters=seeded_parameters,
     )
@@ -457,7 +455,7 @@ def seeded_workflows(
 @pytest.fixture(scope="session")
 def seeded_products(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     seeded_sheet: Sheet,
     seeded_inventory: list[InventoryItem],
 ) -> list[InventoryItem]:
@@ -470,14 +468,14 @@ def seeded_products(
     for n in range(4):
         products.append(
             seeded_sheet.add_formulation(
-                formulation_name=f"{seeding_prefix} - My cool formulation {str(n)}",
+                formulation_name=f"{seed_prefix} - My cool formulation {str(n)}",
                 components=components,
             )
         )
     return list(
         client.inventory.list(
             category=InventoryCategory.FORMULAS,
-            name=f"{seeding_prefix} - My cool formulation",
+            name=f"{seed_prefix} - My cool formulation",
         )
     )
 
@@ -485,7 +483,7 @@ def seeded_products(
 @pytest.fixture(scope="session")
 def seeded_tasks(
     client: Albert,
-    seeding_prefix: str,
+    seed_prefix: str,
     sdk_user: User,
     seeded_inventory,
     seeded_lots,
@@ -497,7 +495,7 @@ def seeded_tasks(
 ):
     seeded = []
     all_tasks = generate_task_seeds(
-        prefix=seeding_prefix,
+        prefix=seed_prefix,
         user=sdk_user,
         seeded_inventory=seeded_inventory,
         seeded_lots=seeded_lots,
