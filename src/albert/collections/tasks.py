@@ -37,7 +37,7 @@ class TaskCollection(BaseCollection):
             id = f"TAS{id}"
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        return TaskAdapter.validate_python(**response.json())
+        return TaskAdapter.validate_python(response.json())
 
     def list(
         self,
