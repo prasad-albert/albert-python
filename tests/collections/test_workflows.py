@@ -1,5 +1,3 @@
-import copy
-
 from albert import Albert
 from albert.resources.workflows import Workflow
 
@@ -16,7 +14,7 @@ def test_get_by_id(client: Albert, seeded_workflows: list[Workflow]):
 
 
 def test_blocks_dupes(client: Albert, seeded_workflows: list[Workflow]):
-    wf = copy.deepcopy(seeded_workflows[0])
+    wf = seeded_workflows[0].model_copy()
     wf.id = None
     wf.status = None
 
