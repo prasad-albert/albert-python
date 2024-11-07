@@ -158,16 +158,20 @@ class DataColumnCollection(BaseCollection):
 
         return DataColumn(**response.json()[0])
 
-    def delete(self, *, data_column_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Delete a data column entity.
 
         Parameters
         ----------
-        data_column : DataColumn
-            The data column object to delete.
+        id : str
+            The ID of the data column object to delete.
+
+        Returns
+        -------
+        None
         """
-        self.session.delete(f"{self.base_path}/{data_column_id}")
+        self.session.delete(f"{self.base_path}/{id}")
         return None
 
     def update(self, *, updated_data_column: DataColumn) -> DataColumn:

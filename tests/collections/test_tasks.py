@@ -9,7 +9,7 @@ def test_task_list(client: Albert, seeded_tasks):
 
 
 def test_get_by_id(client: Albert, seeded_tasks):
-    task = client.tasks.get_by_id(task_id=seeded_tasks[0].id)
+    task = client.tasks.get_by_id(id=seeded_tasks[0].id)
     assert isinstance(task, BaseTask)
     assert task.id == seeded_tasks[0].id
     assert task.name == seeded_tasks[0].name

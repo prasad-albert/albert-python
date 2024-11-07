@@ -173,21 +173,21 @@ class TagCollection(BaseCollection):
         tag = Tag(**response.json())
         return tag
 
-    def get_by_id(self, *, tag_id: str) -> Tag | None:
+    def get_by_id(self, *, id: str) -> Tag:
         """
-        Retrieves a tag by its ID of None if not found.
+        Get a tag by its ID.
 
         Parameters
         ----------
-        tag_id : str
-            The ID of the tag to retrieve.
+        id : str
+            The ID of the tag to get.
 
         Returns
         -------
         Tag
-            The Tag object if found, None otherwise.
+            The Tag object.
         """
-        url = f"{self.base_path}/{tag_id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         tag = Tag(**response.json())
         return tag
@@ -211,20 +211,20 @@ class TagCollection(BaseCollection):
         found = self.list(name=tag, exact_match=exact_match)
         return next(found, None)
 
-    def delete(self, *, tag_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Deletes a tag by its ID.
 
         Parameters
         ----------
-        tag_id : str
+        id : str
             The ID of the tag to delete.
 
         Returns
         -------
         None
         """
-        url = f"{self.base_path}/{tag_id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
     def rename(self, *, old_name: str, new_name: str) -> Tag | None:
@@ -264,5 +264,5 @@ class TagCollection(BaseCollection):
             }
         ]
         self.session.patch(self.base_path, json=payload)
-        updated_tag = self.get_by_id(tag_id=tag_id)
+        updated_tag = self.get_by_id(id=tag_id)
         return updated_tag

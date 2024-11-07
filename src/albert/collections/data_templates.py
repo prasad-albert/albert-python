@@ -84,5 +84,5 @@ class DataTemplateCollection(BaseCollection):
     def update(self, *, data_template: DataTemplate) -> DataTemplate:
         raise NotImplementedError("Data templates cannot be updated yet.")
 
-    def delete(self, *, data_template_id: str) -> None:
-        self.session.delete(f"{self.base_path}/{data_template_id}")
+    def delete(self, *, id: str) -> None:
+        self.session.delete(f"{self.base_path}/{id}")

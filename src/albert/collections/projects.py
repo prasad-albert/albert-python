@@ -68,13 +68,13 @@ class ProjectCollection(BaseCollection):
 
         return Project(**response.json())
 
-    def get_by_id(self, *, project_id: str) -> Project:
+    def get_by_id(self, *, id: str) -> Project:
         """
         Retrieve a project by its ID.
 
         Parameters
         ----------
-        project_id : str
+        id : str
             The ID of the project to retrieve.
 
         Returns
@@ -82,7 +82,7 @@ class ProjectCollection(BaseCollection):
         Project
             The project object if found
         """
-        url = f"{self.base_path}/{project_id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
 
         return Project(**response.json())
@@ -91,7 +91,7 @@ class ProjectCollection(BaseCollection):
         """
         TO DO: This needs some more custom patch logic
         """
-        existing_project = self.get_by_id(project_id=updated_project.id)
+        existing_project = self.get_by_id(id=updated_project.id)
         patch_data = self._generate_patch_payload(
             existing=existing_project, updated=updated_project
         )
@@ -101,7 +101,7 @@ class ProjectCollection(BaseCollection):
 
         return updated_project
 
-    def delete(self, *, project_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Delete a project by its ID.
 
@@ -114,7 +114,7 @@ class ProjectCollection(BaseCollection):
         -------
         None
         """
-        url = f"{self.base_path}/{project_id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
     def _list_generator(

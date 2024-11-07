@@ -33,7 +33,7 @@ def test_list_projects(client: Albert):
 def test_get_by_id(client: Albert, seeded_projects: list[Project]):
     # Get the first seeded project by ID
     seeded_project = seeded_projects[0]
-    fetched_project = client.projects.get_by_id(project_id=seeded_project.id)
+    fetched_project = client.projects.get_by_id(id=seeded_project.id)
 
     assert isinstance(fetched_project, Project)
     assert fetched_project.id == seeded_project.id
@@ -53,7 +53,7 @@ def test_create_project(client: Albert, seeded_locations):
     assert created_project.description == "A basic development project."
 
     # Clean up
-    client.projects.delete(project_id=created_project.id)
+    client.projects.delete(id=created_project.id)
 
 
 def test_update_project(seeded_projects, client: Albert):
@@ -74,8 +74,8 @@ def test_delete_project(client: Albert, seeded_locations):
     assert isinstance(created_project, Project)
 
     # Now delete the project
-    client.projects.delete(project_id=created_project.id)
+    client.projects.delete(id=created_project.id)
 
     # Try to fetch the project, should return None or not found
     with pytest.raises(NotFoundError):
-        client.projects.get_by_id(project_id=created_project.id)
+        client.projects.get_by_id(id=created_project.id)

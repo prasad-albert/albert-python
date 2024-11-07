@@ -61,7 +61,7 @@ def test_get_tag_by(client: Albert, seeded_tags: list[Tag]):
     assert isinstance(tag, Tag)
     assert tag.tag.lower() == tag_test_str.lower()
 
-    by_id = client.tags.get_by_id(tag_id=tag.id)
+    by_id = client.tags.get_by_id(id=tag.id)
     assert isinstance(by_id, Tag)
     assert by_id.tag.lower() == tag_test_str.lower()
 

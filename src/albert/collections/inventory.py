@@ -144,13 +144,13 @@ class InventoryCollection(BaseCollection):
         )
         return InventoryItem(**response.json())
 
-    def get_by_id(self, *, inventory_id: str) -> InventoryItem:
+    def get_by_id(self, *, id: str) -> InventoryItem:
         """
         Retrieve an inventory item by its ID.
 
         Parameters
         ----------
-        inventory_id : str
+        id : str
             The ID of the inventory item.
 
         Returns
@@ -158,19 +158,19 @@ class InventoryCollection(BaseCollection):
         InventoryItem
             The retrieved inventory item.
         """
-        if not inventory_id.startswith("INV"):
-            inventory_id = "INV" + inventory_id
-        url = f"{self.base_path}/{inventory_id}"
+        if not id.startswith("INV"):
+            id = "INV" + id
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return InventoryItem(**response.json())
 
-    def get_by_ids(self, *, inventory_ids: list[str]) -> list[InventoryItem]:
+    def get_by_ids(self, *, ids: list[str]) -> list[InventoryItem]:
         """
         Retrieve an set of inventory items by their IDs.
 
         Parameters
         ----------
-        inventory_ids : str
+        ids : str
             The list of IDs of the inventory items.
 
         Returns
@@ -178,30 +178,30 @@ class InventoryCollection(BaseCollection):
         list[InventoryItem]
             The retrieved inventory items.
         """
-        inventory_ids = [x if x.startswith("INV") else f"INV{x}" for x in inventory_ids]
+        ids = [x if x.startswith("INV") else f"INV{x}" for x in ids]
         response = self.session.get(
             f"{self.base_path}/ids",
-            params={"id": inventory_ids},
+            params={"id": ids},
         )
         return [InventoryItem(**item) for item in response.json()["Items"]]
 
-    def delete(self, *, inventory_id: str | InventoryItem) -> bool:
+    def delete(self, *, id: str) -> None:
         """
         Delete an inventory item by its ID.
 
         Parameters
         ----------
-        inventory_id : str | InventoryItem
+        id : str
             The ID of the inventory item.
 
         Returns
         -------
         None
         """
-        if isinstance(inventory_id, InventoryItem):
-            inventory_id = inventory_id.id
-        inventory_id = inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
-        url = f"{self.base_path}/{inventory_id}"
+        if isinstance(id, InventoryItem):
+            id = id.id
+        id = id if id.startswith("INV") else "INV" + id
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
     def _list_generator(
@@ -272,7 +272,7 @@ class InventoryCollection(BaseCollection):
                     else "INV" + item["albertId"]
                 )
                 try:
-                    yield self.get_by_id(inventory_id=this_aid)
+                    yield self.get_by_id(id=this_aid)
                 except (NotFoundError, ForbiddenError):
                     # Sometimes InventoryItems are listed that the current user does not have full access to. Just skip those
                     continue
@@ -624,7 +624,7 @@ class InventoryCollection(BaseCollection):
             The updated inventory item retrieved from the server.
         """
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(inventory_id=updated_object.id)
+        current_object = self.get_by_id(id=updated_object.id)
 
         # Generate the PATCH payload
         patch_payload = self._generate_inventory_patch_payload(
@@ -637,5 +637,5 @@ class InventoryCollection(BaseCollection):
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
             self.session.patch(url, json=change_payload)
-        updated_inv = self.get_by_id(inventory_id=updated_object.id)
+        updated_inv = self.get_by_id(id=updated_object.id)
         return updated_inv

@@ -58,7 +58,7 @@ class LocationCollection(BaseCollection):
     ) -> Iterator[Location]:
         return self._list_generator(name=name, country=country, exact_match=exact_match)
 
-    def get_by_id(self, *, id: str) -> Location | None:
+    def get_by_id(self, *, id: str) -> Location:
         """
         Retrieves a location by its ID.
 
@@ -69,14 +69,12 @@ class LocationCollection(BaseCollection):
 
         Returns
         -------
-        Union[Location, None]
-            The Location object if found, None otherwise.
+        Location
+            The Location object.
         """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        loc = response.json()
-        found_company = Location(**loc)
-        return found_company
+        return Location(**response.json())
 
     def update(self, *, updated_object: Location) -> Location:
         # Fetch the current object state from the server or database
@@ -125,18 +123,18 @@ class LocationCollection(BaseCollection):
 
         return Location(**response.json())
 
-    def delete(self, *, location_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Deletes a Location entity.
 
         Parameters
         ----------
-        location_id : Str
+        id : Str
             The id of the Location object to delete.
 
         Returns
         -------
         None
         """
-        url = f"{self.base_path}/{location_id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)

@@ -26,8 +26,8 @@ class UnNumberCollection(BaseCollection):
         """
         raise NotImplementedError()
 
-    def get_by_id(self, *, un_number_id: str) -> UnNumber | None:
-        url = f"{self.base_path}/{un_number_id}"
+    def get_by_id(self, *, id: str) -> UnNumber:
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return UnNumber(**response.json())
 

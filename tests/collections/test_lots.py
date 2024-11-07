@@ -26,6 +26,6 @@ def test_simple_lot_list(
 
 
 def test_get_by_id(client: Albert, seeded_lots: list[Lot]):
-    got_lot = client.lots.get_by_id(lot_id=seeded_lots[0].id)
+    got_lot = client.lots.get_by_id(id=seeded_lots[0].id)
     assert got_lot.id == seeded_lots[0].id
     assert got_lot.external_barcode_id == seeded_lots[0].external_barcode_id

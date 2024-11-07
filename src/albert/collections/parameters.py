@@ -17,7 +17,6 @@ class ParameterCollection(BaseCollection):
     def get_by_id(self, *, id: str) -> Parameter:
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-
         return Parameter(**response.json())
 
     def create(self, *, parameter: Parameter) -> Parameter:

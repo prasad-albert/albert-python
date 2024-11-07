@@ -92,7 +92,7 @@ def test_location_exists(client: Albert, seeded_locations):
 def test_delete_location(client: Albert, seeded_locations: list[Location]):
     # Create a new location to delete
 
-    client.locations.delete(location_id=seeded_locations[2].id)
+    client.locations.delete(id=seeded_locations[2].id)
 
     # Ensure it no longer exists
     does_exist = client.locations.location_exists(location=seeded_locations[2])

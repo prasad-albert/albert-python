@@ -46,13 +46,13 @@ def test_advanced_inventory_list(
 
 
 def test_get_by_id(client: Albert, seeded_inventory):
-    get_by_id = client.inventory.get_by_id(inventory_id=seeded_inventory[1].id)
+    get_by_id = client.inventory.get_by_id(id=seeded_inventory[1].id)
     assert isinstance(get_by_id, InventoryItem)
     assert seeded_inventory[1].name == get_by_id.name
     assert seeded_inventory[1].id == get_by_id.id
 
     id_2 = seeded_inventory[0].id.replace("INV", "")
-    get_by_id = client.inventory.get_by_id(inventory_id=id_2)
+    get_by_id = client.inventory.get_by_id(id=id_2)
     assert isinstance(get_by_id, InventoryItem)
     assert seeded_inventory[0].name == get_by_id.name
     assert seeded_inventory[0].id == get_by_id.id
@@ -61,11 +61,11 @@ def test_get_by_id(client: Albert, seeded_inventory):
 def test_get_by_ids(client: Albert, seeded_inventory):
     inventory_ids = [x.id for x in seeded_inventory]
 
-    bulk_get = client.inventory.get_by_ids(inventory_ids=inventory_ids)
+    bulk_get = client.inventory.get_by_ids(ids=inventory_ids)
     assert {x.id for x in bulk_get} == set(inventory_ids)
 
     inventory_ids_bare = [x.replace("INV", "") for x in inventory_ids]
-    bulk_get_no_inv = client.inventory.get_by_ids(inventory_ids=inventory_ids_bare)
+    bulk_get_no_inv = client.inventory.get_by_ids(ids=inventory_ids_bare)
     assert {x.id for x in bulk_get_no_inv} == set(inventory_ids)
 
 
@@ -79,7 +79,7 @@ def test_inventory_update(client: Albert, seeded_inventory):
     assert updated.description == d
     assert updated.id == seeded_inventory[2].id
 
-    client.inventory.delete(inventory_id=test_inv_item)
+    client.inventory.delete(id=test_inv_item)
     assert not client.inventory.inventory_exists(inventory_item=test_inv_item)
 
 
@@ -149,7 +149,7 @@ def test_update_inventory_item_standard_attributes(
     assert updated_item.alias == "Updated Alias"
 
     # Optionally, re-fetch the item and verify the updates are persisted
-    fetched_item = client.inventory.get_by_id(inventory_id=updated_inventory_item.id)
+    fetched_item = client.inventory.get_by_id(id=updated_inventory_item.id)
     assert fetched_item.name == "Updated Inventory Name"
     assert fetched_item.description == "Updated Description"
     assert fetched_item.unit_category == InventoryUnitCategory.VOLUME.value
@@ -194,7 +194,7 @@ def test_update_inventory_item_advanced_attributes(
     assert seeded_tags[0].id in [x.id for x in returned_item.tags]
 
     # Get the updated item and verify the changes are persisted
-    fetched_item = client.inventory.get_by_id(inventory_id=updated_inventory_item.id)
+    fetched_item = client.inventory.get_by_id(id=updated_inventory_item.id)
     assert fetched_item.cas[0].id == seeded_cas[1].id
     assert fetched_item.cas[0].min == 0.5
     assert fetched_item.cas[0].max == 0.75

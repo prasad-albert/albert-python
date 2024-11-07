@@ -79,7 +79,7 @@ def static_user(client: Albert) -> User:
     # Do not write to/modify this resource since it is shared across all test runs
     claims = jwt.get_unverified_claims(client.session._access_token)
     user_id = claims["id"]
-    return client.users.get_by_id(user_id=user_id)
+    return client.users.get_by_id(id=user_id)
 
 
 @pytest.fixture(scope="session")
@@ -160,7 +160,7 @@ def seeded_cas(client: Albert, seed_prefix: str) -> Iterator[list[Cas]]:
 
     for cas in seeded:
         with suppress(BadRequestError | NotFoundError):
-            client.cas_numbers.delete(cas_id=cas.id)
+            client.cas_numbers.delete(id=cas.id)
 
 
 @pytest.fixture(scope="session")
@@ -174,7 +174,7 @@ def seeded_locations(client: Albert, seed_prefix: str) -> Iterator[list[Location
 
     for location in seeded:
         with suppress(NotFoundError):
-            client.locations.delete(location_id=location.id)
+            client.locations.delete(id=location.id)
 
 
 @pytest.fixture(scope="session")
@@ -194,7 +194,7 @@ def seeded_projects(
 
     for project in seeded:
         with suppress(NotFoundError):
-            client.projects.delete(project_id=project.id)
+            client.projects.delete(id=project.id)
 
 
 @pytest.fixture(scope="session")
@@ -240,7 +240,7 @@ def seeded_tags(client: Albert, seed_prefix: str) -> Iterator[list[Tag]]:
 
     for tag in seeded:
         with suppress(NotFoundError, BadRequestError):
-            client.tags.delete(tag_id=tag.id)
+            client.tags.delete(id=tag.id)
 
 
 @pytest.fixture(scope="session")
@@ -257,7 +257,7 @@ def seeded_units(client: Albert, seed_prefix: str) -> Iterator[list[Unit]]:
 
     for unit in seeded:
         with suppress(NotFoundError, BadRequestError):
-            client.units.delete(unit_id=unit.id)
+            client.units.delete(id=unit.id)
 
 
 @pytest.fixture(scope="session")
@@ -281,7 +281,7 @@ def seeded_data_columns(
 
     for data_column in seeded:
         with suppress(NotFoundError):
-            client.data_columns.delete(data_column_id=data_column.id)
+            client.data_columns.delete(id=data_column.id)
 
 
 @pytest.fixture(scope="session")
@@ -309,7 +309,7 @@ def seeded_data_templates(
 
     for data_template in seeded:
         with suppress(NotFoundError):
-            client.data_templates.delete(data_template_id=data_template.id)
+            client.data_templates.delete(id=data_template.id)
 
 
 @pytest.fixture(scope="session")
@@ -361,7 +361,7 @@ def seeded_inventory(
     for inventory in seeded:
         # If the inv has been used in a formulation, it cannot be deleted and will give a BadRequestError
         with suppress(NotFoundError, BadRequestError):
-            client.inventory.delete(inventory_id=inventory.id)
+            client.inventory.delete(id=inventory.id)
 
 
 @pytest.fixture(scope="session")
@@ -423,7 +423,7 @@ def seeded_lots(
     yield seeded
     for lot in seeded:
         with suppress(NotFoundError):
-            client.lots.delete(lot_id=lot.id)
+            client.lots.delete(id=lot.id)
 
 
 @pytest.fixture(scope="session")
@@ -434,7 +434,7 @@ def seeded_pricings(client: Albert, seed_prefix: str, seeded_inventory, seeded_l
     yield seeded
     for p in seeded:
         with suppress(NotFoundError):
-            client.pricings.delete(pricing_id=p.id)
+            client.pricings.delete(id=p.id)
 
 
 @pytest.fixture(scope="session")
@@ -513,4 +513,4 @@ def seeded_tasks(
     yield seeded
     for t in seeded:
         with suppress(NotFoundError, BadRequestError):
-            client.tasks.delete(task_id=t.id)
+            client.tasks.delete(id=t.id)
