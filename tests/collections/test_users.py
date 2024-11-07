@@ -49,6 +49,6 @@ def test_advanced_users_list(client: Albert, static_user: User):
 
 def test_user_get(client: Albert, static_user: User):
     first_hit = next(client.users.list(text=static_user.name), None)
-    user_from_get = client.users.get_by_id(user_id=first_hit.id)
+    user_from_get = client.users.get_by_id(id=first_hit.id)
     assert user_from_get.id == first_hit.id
     assert isinstance(user_from_get, User)

@@ -27,18 +27,17 @@ class TaskCollection(BaseCollection):
         task_data = response.json()[0]
         return TaskAdapter.validate_python(task_data)
 
-    def delete(self, *, task_id: str) -> None:
-        url = f"{self.base_path}/{task_id}"
+    def delete(self, *, id: str) -> None:
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def get_by_id(self, *, task_id: str) -> BaseTask:
+    def get_by_id(self, *, id: str) -> BaseTask:
         # each type of task has it's own sub-prefix. Sometimes the core "TAS" prefix is dropped on the object. This ensures both the TAS and sub prefix are present on the ID
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
-        url = f"{self.base_path}/{task_id}"
+        if not id.startswith("TAS"):
+            id = f"TAS{id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        task_data = response.json()
-        return TaskAdapter.validate_python(task_data)
+        return TaskAdapter.validate_python(response.json())
 
     def list(
         self,
@@ -62,11 +61,9 @@ class TaskCollection(BaseCollection):
         project_id: str = None,
     ) -> AlbertPaginator[BaseTask]:
         def deserialize(data: dict) -> BaseTask | None:
-            # task_class = self.category_to_class.get(data.get("category"), BaseTask)
-            # return task_class(**data)
             id = data["albertId"]
             try:
-                return self.get_by_id(task_id=id)
+                return self.get_by_id(id=id)
             except (ForbiddenError, InternalServerError, NotFoundError) as e:
                 logger.warning(f"Error fetching Data Template '{id}': {e}")
                 return None

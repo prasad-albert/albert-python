@@ -31,7 +31,7 @@ def test_simple_cas_list(client: Albert):
 
 def test_cas_not_found(client: Albert):
     with pytest.raises(AlbertAPIError):
-        client.cas_numbers.get_by_id(cas_id="foo bar")
+        client.cas_numbers.get_by_id(id="foo bar")
 
 
 def test_advanced_cas_list(client: Albert, seeded_cas: list[Cas]):

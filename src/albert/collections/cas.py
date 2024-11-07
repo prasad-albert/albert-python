@@ -145,13 +145,13 @@ class CasCollection(BaseCollection):
             cas = Cas(**response.json())
             return cas
 
-    def get_by_id(self, *, cas_id: str) -> Cas:
+    def get_by_id(self, *, id: str) -> Cas:
         """
         Retrieves a CAS by its ID.
 
         Parameters
         ----------
-        cas_id : str
+        id : str
             The ID of the CAS to retrieve.
 
         Returns
@@ -159,7 +159,7 @@ class CasCollection(BaseCollection):
         Cas
             The Cas object if found, None otherwise.
         """
-        url = f"{self.base_path}/{cas_id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         cas = Cas(**response.json())
         return cas
@@ -187,25 +187,25 @@ class CasCollection(BaseCollection):
                     return f
         return next(found, None)
 
-    def delete(self, *, cas_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Deletes a CAS by its ID.
 
         Parameters
         ----------
-        cas_id : str
+        id : str
             The ID of the CAS to delete.
 
         Returns
         -------
         None
         """
-        url = f"{self.base_path}/{cas_id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
     def update(self, *, updated_object: Cas) -> Cas:
         # Fetch the current object state from the server or database
-        existing_cas = self.get_by_id(cas_id=updated_object.id)
+        existing_cas = self.get_by_id(id=updated_object.id)
 
         # Generate the PATCH payload
         patch_payload = self._generate_patch_payload(existing=existing_cas, updated=updated_object)
@@ -213,5 +213,5 @@ class CasCollection(BaseCollection):
         url = f"{self.base_path}/{updated_object.id}"
         self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
 
-        updated_cas = self.get_by_id(cas_id=updated_object.id)
+        updated_cas = self.get_by_id(id=updated_object.id)
         return updated_cas

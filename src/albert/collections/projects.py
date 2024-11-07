@@ -48,7 +48,7 @@ class ProjectCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{ProjectCollection._api_version}/projects"
 
-    def create(self, *, project: Project) -> Project | None:
+    def create(self, *, project: Project) -> Project:
         """
         Create a new project.
 
@@ -65,16 +65,15 @@ class ProjectCollection(BaseCollection):
         response = self.session.post(
             self.base_path, json=project.model_dump(by_alias=True, exclude_unset=True)
         )
-
         return Project(**response.json())
 
-    def get_by_id(self, *, project_id: str) -> Project:
+    def get_by_id(self, *, id: str) -> Project:
         """
         Retrieve a project by its ID.
 
         Parameters
         ----------
-        project_id : str
+        id : str
             The ID of the project to retrieve.
 
         Returns
@@ -82,39 +81,37 @@ class ProjectCollection(BaseCollection):
         Project
             The project object if found
         """
-        url = f"{self.base_path}/{project_id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
 
         return Project(**response.json())
 
-    def update(self, *, updated_project: Project) -> Project:
+    def update(self, *, project: Project) -> Project:
         """
         TO DO: This needs some more custom patch logic
         """
-        existing_project = self.get_by_id(project_id=updated_project.id)
-        patch_data = self._generate_patch_payload(
-            existing=existing_project, updated=updated_project
-        )
-        url = f"{self.base_path}/{updated_project.id}"
+        existing_project = self.get_by_id(id=project.id)
+        patch_data = self._generate_patch_payload(existing=existing_project, updated=project)
+        url = f"{self.base_path}/{project.id}"
 
         self.session.patch(url, json=patch_data.model_dump(mode="json", by_alias=True))
 
-        return updated_project
+        return self.get_by_id(id=project.id)
 
-    def delete(self, *, project_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Delete a project by its ID.
 
         Parameters
         ----------
-        project_id : str
+        id : str
             The ID of the project to delete.
 
         Returns
         -------
         None
         """
-        url = f"{self.base_path}/{project_id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
     def _list_generator(

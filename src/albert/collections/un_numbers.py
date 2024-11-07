@@ -26,8 +26,8 @@ class UnNumberCollection(BaseCollection):
         """
         raise NotImplementedError()
 
-    def get_by_id(self, *, un_number_id: str) -> UnNumber | None:
-        url = f"{self.base_path}/{un_number_id}"
+    def get_by_id(self, *, id: str) -> UnNumber:
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return UnNumber(**response.json())
 
@@ -65,6 +65,6 @@ class UnNumberCollection(BaseCollection):
     ) -> Iterator[UnNumber]:
         return self._list_generator(name=name, exact_match=exact_match)
 
-    def get_by_name(self, *, name: str) -> UnNumber:
+    def get_by_name(self, *, name: str) -> UnNumber | None:
         found = self.list(exact_match=True, name=name)
         return next(found, None)

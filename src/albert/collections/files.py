@@ -24,7 +24,11 @@ class FileCollection(BaseCollection):
         self.base_path = f"/api/{FileCollection._api_version}/files"
 
     def get_by_name(
-        self, *, name: str, namespace: FileNamespace, generic: bool = False
+        self,
+        *,
+        name: str,
+        namespace: FileNamespace,
+        generic: bool = False,
     ) -> FileInfo:
         params = {
             "name": name,
@@ -32,7 +36,7 @@ class FileCollection(BaseCollection):
             "generic": json.dumps(generic),
         }
         response = self.session.get(f"{self.base_path}/info", params=params)
-        return FileInfo.model_validate(response.json())
+        return FileInfo(**response.json())
 
     def get_signed_download_url(
         self,
