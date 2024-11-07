@@ -369,7 +369,8 @@ def seeded_parameters(client: Albert, seed_prefix: str) -> Iterator[list[Paramet
     seeded = []
     for parameter in generate_parameter_seeds(seed_prefix):
         created_parameter = client.parameters.create(parameter=parameter)
-        seeded.append(created_parameter)
+        # Extra get_by_id is required to populate the category field on parameter
+        seeded.append(client.parameters.get_by_id(id=created_parameter.id))
     yield seeded
     for parameter in seeded:
         with suppress(NotFoundError):

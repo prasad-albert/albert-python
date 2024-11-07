@@ -491,22 +491,18 @@ def generate_parameter_seeds(seed_prefix: str) -> list[Parameter]:
     return [
         Parameter(
             name=f"{seed_prefix} - Temperature",
-            category=ParameterCategory.NORMAL,
         ),
         Parameter(
             name=f"{seed_prefix} - Pressure",
-            category=ParameterCategory.SPECIAL,
         ),
         Parameter(
             name=f"{seed_prefix} - Volume",
         ),
         Parameter(
             name=f"{seed_prefix} - Mass",
-            category=ParameterCategory.NORMAL,
         ),
         Parameter(
             name=f"{seed_prefix} - Length",
-            category=ParameterCategory.NORMAL,
         ),
     ]
 
@@ -538,7 +534,7 @@ def generate_parameter_group_seeds(
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
-                    id=seeded_parameters[0].id,
+                    parameter=seeded_parameters[0],
                     value="25.0",
                     unit=seeded_units[1],
                 )
@@ -552,12 +548,12 @@ def generate_parameter_group_seeds(
             security_class=SecurityClass.RESTRICTED,
             parameters=[
                 ParameterValue(
-                    id=seeded_parameters[1].id,
+                    parameter=seeded_parameters[1],
                     value="100.0",
                     unit=seeded_units[0],
                 ),
                 ParameterValue(
-                    id=seeded_parameters[2].id,
+                    parameter=seeded_parameters[2],
                     value="500.0",
                     unit=seeded_units[2],
                 ),
@@ -570,14 +566,16 @@ def generate_parameter_group_seeds(
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(
-                    id=seeded_parameters[3].id,
+                    parameter=seeded_parameters[3],
                     value="75.0",
                     unit=seeded_units[0],
+                    category=ParameterCategory.NORMAL,
                 ),
                 ParameterValue(
-                    id=seeded_parameters[4].id,
+                    parameter=seeded_parameters[4],
                     value="2.5",
                     unit=seeded_units[3],
+                    category=ParameterCategory.NORMAL,
                 ),
             ],
         ),
