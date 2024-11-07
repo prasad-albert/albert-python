@@ -65,6 +65,6 @@ class UnNumberCollection(BaseCollection):
     ) -> Iterator[UnNumber]:
         return self._list_generator(name=name, exact_match=exact_match)
 
-    def get_by_name(self, *, name: str) -> UnNumber:
+    def get_by_name(self, *, name: str) -> UnNumber | None:
         found = self.list(exact_match=True, name=name)
         return next(found, None)

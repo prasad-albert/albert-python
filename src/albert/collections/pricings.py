@@ -81,11 +81,11 @@ class PricingCollection(BaseCollection):
                 )
         return patch_payload
 
-    def update(self, *, updated_pricing: Pricing) -> Pricing:
-        current_pricing = self.get_by_id(id=updated_pricing.id)
-        patch_payload = self._pricing_patch_payload(
-            existing=current_pricing, updated=updated_pricing
+    def update(self, *, pricing: Pricing) -> Pricing:
+        current_pricing = self.get_by_id(id=pricing.id)
+        patch_payload = self._pricing_patch_payload(existing=current_pricing, updated=pricing)
+        self.session.patch(
+            url=f"{self.base_path}/{pricing.id}",
+            json=patch_payload.model_dump(mode="json", by_alias=True),
         )
-        url = f"{self.base_path}/{updated_pricing.id}"
-        self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
-        return updated_pricing
+        return self.get_by_id(id=pricing.id)

@@ -58,7 +58,7 @@ def test_create_project(client: Albert, seeded_locations):
 
 def test_update_project(seeded_projects, client: Albert):
     seeded_projects[1].grid = "PD"
-    updated = client.projects.update(updated_project=seeded_projects[1])
+    updated = client.projects.update(project=seeded_projects[1])
     assert updated.id == seeded_projects[1].id
 
 

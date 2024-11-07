@@ -48,5 +48,5 @@ def test_update(client: Albert, seeded_parameters: list[Parameter]):
     p = seeded_parameters[0].model_copy(deep=True)
     updated_name = f"TEST - {uuid.uuid4()}"
     p.name = updated_name
-    updated = client.parameters.update(updated_parameter=p)
+    updated = client.parameters.update(parameter=p)
     assert updated.name == updated_name

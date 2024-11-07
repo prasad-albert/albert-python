@@ -74,13 +74,13 @@ class ParameterCollection(BaseCollection):
     ) -> Iterator[Parameter]:
         return self._list_generator(order_by=order_by, names=names, exact_match=exact_match)
 
-    def update(self, *, updated_parameter) -> Parameter:
-        param_id = updated_parameter.id
+    def update(self, *, parameter: Parameter) -> Parameter:
         payload = self._generate_patch_payload(
-            existing=self.get_by_id(id=param_id), updated=updated_parameter
+            existing=self.get_by_id(id=parameter.id),
+            updated=parameter,
         )
         self.session.patch(
-            f"{self.base_path}/{param_id}",
+            f"{self.base_path}/{parameter.id}",
             json=payload.model_dump(mode="json", by_alias=True),
         )
-        return updated_parameter
+        return self.get_by_id(id=parameter.id)

@@ -5,6 +5,7 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.tags import Tag
 from albert.session import AlbertSession
 from albert.utils.exceptions import AlbertException
+from albert.utils.logging import logger
 
 
 class TagCollection(BaseCollection):
@@ -189,8 +190,7 @@ class TagCollection(BaseCollection):
         """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        tag = Tag(**response.json())
-        return tag
+        return Tag(**response.json())
 
     def get_by_tag(self, *, tag: str, exact_match: bool = True) -> Tag | None:
         """
@@ -227,7 +227,7 @@ class TagCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def rename(self, *, old_name: str, new_name: str) -> Tag | None:
+    def rename(self, *, old_name: str, new_name: str) -> Tag:
         """
         Renames an existing tag entity.
 
@@ -240,14 +240,13 @@ class TagCollection(BaseCollection):
 
         Returns
         -------
-        Optional[Tag]
-            The renamed Tag object if successful, None otherwise.
+        Tag
+            The renamed Tag.
         """
         found_tag = self.get_by_tag(tag=old_name, exact_match=True)
-
         if not found_tag:
             msg = f'Tag "{old_name}" not found.'
-            logging.error(msg)
+            logger.error(msg)
             raise AlbertException(msg)
         tag_id = found_tag.id
         payload = [
@@ -264,5 +263,4 @@ class TagCollection(BaseCollection):
             }
         ]
         self.session.patch(self.base_path, json=payload)
-        updated_tag = self.get_by_id(id=tag_id)
-        return updated_tag
+        return self.get_by_id(id=tag_id)

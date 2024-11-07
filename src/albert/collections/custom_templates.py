@@ -89,5 +89,4 @@ class CustomTemplatesCollection(BaseCollection):
         """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        template = CustomTemplate(**response.json())
-        return template
+        return CustomTemplate(**response.json())

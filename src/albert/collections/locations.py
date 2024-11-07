@@ -54,7 +54,11 @@ class LocationCollection(BaseCollection):
             params["startKey"] = start_key
 
     def list(
-        self, *, name: str | list[str] = None, country: str = None, exact_match: bool = False
+        self,
+        *,
+        name: str | list[str] = None,
+        country: str = None,
+        exact_match: bool = False,
     ) -> Iterator[Location]:
         return self._list_generator(name=name, country=country, exact_match=exact_match)
 
@@ -76,18 +80,18 @@ class LocationCollection(BaseCollection):
         response = self.session.get(url)
         return Location(**response.json())
 
-    def update(self, *, updated_object: Location) -> Location:
+    def update(self, *, location: Location) -> Location:
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(id=updated_object.id)
+        current_object = self.get_by_id(id=location.id)
         # Generate the PATCH payload
         patch_payload = self._generate_patch_payload(
             existing=current_object,
-            updated=updated_object,
+            updated=location,
             stringify_values=True,
         )
-        url = f"{self.base_path}/{updated_object.id}"
+        url = f"{self.base_path}/{location.id}"
         self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
-        return self.get_by_id(id=updated_object.id)
+        return self.get_by_id(id=location.id)
 
     def location_exists(self, *, location: Location):
         hits = self.list(name=location.name)

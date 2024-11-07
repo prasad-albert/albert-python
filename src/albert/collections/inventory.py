@@ -96,7 +96,10 @@ class InventoryCollection(BaseCollection):
             return None
 
     def create(
-        self, *, inventory_item: InventoryItem, avoid_duplicates: bool = True
+        self,
+        *,
+        inventory_item: InventoryItem,
+        avoid_duplicates: bool = True,
     ) -> InventoryItem:
         """
         Create a new inventory item.
@@ -609,13 +612,13 @@ class InventoryCollection(BaseCollection):
             #             )
         return payload
 
-    def update(self, *, updated_object: InventoryItem) -> InventoryItem:
+    def update(self, *, inventory_item: InventoryItem) -> InventoryItem:
         """
         Update an inventory item.
 
         Parameters
         ----------
-        updated_object : InventoryItem
+        inventory_item : InventoryItem
             The updated inventory item object.
 
         Returns
@@ -624,18 +627,18 @@ class InventoryCollection(BaseCollection):
             The updated inventory item retrieved from the server.
         """
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(id=updated_object.id)
+        current_object = self.get_by_id(id=inventory_item.id)
 
         # Generate the PATCH payload
         patch_payload = self._generate_inventory_patch_payload(
-            existing=current_object, updated=updated_object
+            existing=current_object, updated=inventory_item
         )
 
         # Complex patching is not working, so I'm going to do this in a loop :(
         # https://teams.microsoft.com/l/message/19:de4a48c366664ce1bafcdbea02298810@thread.tacv2/1724856117312?tenantId=98aab90e-764b-48f1-afaa-02e3c7300653&groupId=35a36a3d-fc25-4899-a1dd-ad9c7d77b5b3&parentMessageId=1724856117312&teamName=Product%20%2B%20Engineering&channelName=General%20-%20API&createdTime=1724856117312
-        url = f"{self.base_path}/{updated_object.id}"
+        url = f"{self.base_path}/{inventory_item.id}"
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
             self.session.patch(url, json=change_payload)
-        updated_inv = self.get_by_id(id=updated_object.id)
+        updated_inv = self.get_by_id(id=inventory_item.id)
         return updated_inv

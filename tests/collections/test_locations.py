@@ -71,7 +71,7 @@ def test_update_location(client: Albert, seeded_locations: list[Location]):
     )
 
     # Perform the update
-    updated_loc = client.locations.update(updated_object=updated_location)
+    updated_loc = client.locations.update(location=updated_location)
 
     assert isinstance(updated_loc, Location)
     assert updated_loc.name == updated_name

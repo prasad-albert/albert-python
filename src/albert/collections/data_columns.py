@@ -172,9 +172,8 @@ class DataColumnCollection(BaseCollection):
         None
         """
         self.session.delete(f"{self.base_path}/{id}")
-        return None
 
-    def update(self, *, updated_data_column: DataColumn) -> DataColumn:
+    def update(self, *, data_column: DataColumn) -> DataColumn:
         """
         Update a data column entity.
 
@@ -188,8 +187,12 @@ class DataColumnCollection(BaseCollection):
         DataColumn
             The updated data column object.
         """
-        patch = self._generate_patch_payload(
-            existing=self.get_by_id(updated_data_column.id), updated=updated_data_column
+        patch_payload = self._generate_patch_payload(
+            existing=self.get_by_id(data_column.id),
+            updated=data_column,
         )
-        self.session.patch(f"self.base_path/{updated_data_column.id}", json=patch)
-        return self.get_by_id(id=updated_data_column.id)
+        self.session.patch(
+            f"self.base_path/{data_column.id}",
+            json=patch_payload.model_dump(mode="json", by_alias=True),
+        )
+        return self.get_by_id(id=data_column.id)

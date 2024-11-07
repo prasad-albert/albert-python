@@ -37,8 +37,7 @@ class TaskCollection(BaseCollection):
             id = f"TAS{id}"
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        task_data = response.json()
-        return TaskAdapter.validate_python(task_data)
+        return TaskAdapter.validate_python(**response.json())
 
     def list(
         self,
@@ -62,8 +61,6 @@ class TaskCollection(BaseCollection):
         project_id: str = None,
     ) -> AlbertPaginator[BaseTask]:
         def deserialize(data: dict) -> BaseTask | None:
-            # task_class = self.category_to_class.get(data.get("category"), BaseTask)
-            # return task_class(**data)
             id = data["albertId"]
             try:
                 return self.get_by_id(id=id)

@@ -99,27 +99,27 @@ class UnitCollection(BaseCollection):
         this_unit = Unit(**response.json())
         return this_unit
 
-    def update(self, *, updated_unit: Unit) -> Unit:
+    def update(self, *, unit: Unit) -> Unit:
         """
         Updates a unit entity by its ID.
 
         Parameters
         ----------
-        updated_unit : Unit
+        unit : Unit
             The updated Unit object.
 
         Returns
         -------
         Unit
-            Returns the updated Unit
+            The updated Unit
         """
-        unit_id = updated_unit.id
+        unit_id = unit.id
         original_unit = self.get_by_id(id=unit_id)
-        payload = self._generate_patch_payload(existing=original_unit, updated=updated_unit)
+        payload = self._generate_patch_payload(existing=original_unit, updated=unit)
         url = f"{self.base_path}/{unit_id}"
         self.session.patch(url, json=payload.model_dump(mode="json", by_alias=True))
-        updated_unit = self.get_by_id(id=unit_id)
-        return updated_unit
+        unit = self.get_by_id(id=unit_id)
+        return unit
 
     def delete(self, *, id: str) -> None:
         """

@@ -74,7 +74,7 @@ def test_unit_crud(client: Albert):
     assert created_unit.id is not None
 
     created_unit.symbol = "y"
-    updated_unit = client.units.update(updated_unit=created_unit)
+    updated_unit = client.units.update(unit=created_unit)
     assert isinstance(updated_unit, Unit)
     assert updated_unit.id == created_unit.id
     assert updated_unit.symbol == "y"

@@ -77,9 +77,9 @@ class ParameterGroupCollection(BaseCollection):
                 return m
         return None
 
-    def update(self, *, updated: ParameterGroup) -> ParameterGroup:
-        existing = self.get_by_id(id=updated.id)
+    def update(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
+        existing = self.get_by_id(id=parameter_group.id)
         path = f"{self.base_path}/{existing.id}"
-        payload = self._generate_patch_payload(existing=existing, updated=updated)
+        payload = self._generate_patch_payload(existing=existing, updated=parameter_group)
         response = self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return ParameterGroup(**response.json())

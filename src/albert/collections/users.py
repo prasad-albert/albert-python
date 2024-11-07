@@ -87,8 +87,7 @@ class UserCollection(BaseCollection):
         """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        user = User(**response.json())
-        return user
+        return User(**response.json())
 
     def create(self, *, user: User) -> User:  # pragma: no cover
         """Create a new User
@@ -113,20 +112,20 @@ class UserCollection(BaseCollection):
                 return u
 
         response = self.session.post(
-            self.base_path, json=user.model_dump(by_alias=True, exclude_none=True)
+            self.base_path,
+            json=user.model_dump(by_alias=True, exclude_none=True),
         )
-        user = User(**response.json())
-        return user
+        return User(**response.json())
 
-    def update(self, *, updated_object: User) -> User:
+    def update(self, *, user: User) -> User:
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(id=updated_object.id)
+        current_object = self.get_by_id(id=user.id)
 
         # Generate the PATCH payload
-        payload = self._generate_patch_payload(existing=current_object, updated=updated_object)
+        payload = self._generate_patch_payload(existing=current_object, updated=user)
 
-        url = f"{self.base_path}/{updated_object.id}"
+        url = f"{self.base_path}/{user.id}"
         self.session.patch(url, json=payload.model_dump(mode="json", by_alias=True))
 
-        updated_user = self.get_by_id(id=updated_object.id)
+        updated_user = self.get_by_id(id=user.id)
         return updated_user

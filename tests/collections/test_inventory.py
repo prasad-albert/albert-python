@@ -75,7 +75,7 @@ def test_inventory_update(client: Albert, seeded_inventory):
     d = "testing SDK CRUD"
     test_inv_item.description = d
 
-    updated = client.inventory.update(updated_object=test_inv_item)
+    updated = client.inventory.update(inventory_item=test_inv_item)
     assert updated.description == d
     assert updated.id == seeded_inventory[2].id
 
@@ -139,7 +139,7 @@ def test_update_inventory_item_standard_attributes(
         }
     )
     # Perform the update
-    updated_item = client.inventory.update(updated_object=updated_inventory_item)
+    updated_item = client.inventory.update(inventory_item=updated_inventory_item)
 
     # Verify that all updatable attributes have been updated
     assert updated_item.name == "Updated Inventory Name"
@@ -184,7 +184,7 @@ def test_update_inventory_item_advanced_attributes(
         }
     )
 
-    returned_item = client.inventory.update(updated_object=updated_inventory_item)
+    returned_item = client.inventory.update(inventory_item=updated_inventory_item)
     assert returned_item.cas[0].id == seeded_cas[1].id
     assert returned_item.cas[0].min == 0.5
     assert returned_item.cas[0].max == 0.75
@@ -212,7 +212,7 @@ def test_update_inventory_item_advanced_attributes(
     fetched_item.company = seeded_companies[0]
     fetched_item.tags = [seeded_tags[0]]
 
-    returned_item = client.inventory.update(updated_object=fetched_item)
+    returned_item = client.inventory.update(inventory_item=fetched_item)
 
     for c in returned_item.cas:
         if c.id == seeded_cas[1].id:
@@ -228,9 +228,9 @@ def test_update_inventory_item_advanced_attributes(
 
     # remove an existing Cas
     fetched_item.cas = [CasAmount(id=seeded_cas[0].id, min=0.4, max=0.9)]
-    returned_item = client.inventory.update(updated_object=fetched_item)
+    returned_item = client.inventory.update(inventory_item=fetched_item)
     assert len(returned_item.cas) == 1
     # You can't unset a company
     with pytest.raises(BadRequestError):
         fetched_item.company = None
-        client.inventory.update(updated_object=fetched_item)
+        client.inventory.update(inventory_item=fetched_item)

@@ -27,7 +27,6 @@ class LotCollection(BaseCollection):
     def get_by_id(self, *, id: str) -> Lot:
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-
         return Lot(**response.json())
 
     def delete(self, *, id: str) -> None:
