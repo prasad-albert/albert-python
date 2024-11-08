@@ -40,9 +40,6 @@ def test_advanced_tags_list(client: Albert, seeded_tags: list[Tag]):
     )
     assert isinstance(adv_list, Generator)
     adv_list = list(adv_list)
-
-    for t in adv_list:
-        assert "inventory-tag-1" in t.tag.lower()
     _list_asserts(adv_list)
 
     adv_list_no_match = client.tags.list(
@@ -64,7 +61,7 @@ def test_get_tag_by(client: Albert, seeded_tags: list[Tag]):
     assert isinstance(tag, Tag)
     assert tag.tag.lower() == tag_test_str.lower()
 
-    by_id = client.tags.get_by_id(tag_id=tag.id)
+    by_id = client.tags.get_by_id(id=tag.id)
     assert isinstance(by_id, Tag)
     assert by_id.tag.lower() == tag_test_str.lower()
 

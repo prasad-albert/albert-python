@@ -1,13 +1,17 @@
 import logging
-from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.inventory import InventoryCategory, InventoryItem
+from albert.resources.locations import Location
+from albert.resources.storage_locations import StorageLocation
+from albert.resources.users import User
 from albert.session import AlbertSession
-from albert.utils.exceptions import ForbiddenError, NotFoundError
+from albert.utils.exceptions import ForbiddenError, InternalServerError, NotFoundError
+from albert.utils.logging import logger
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class InventoryCollection(BaseCollection):
@@ -83,7 +87,7 @@ class InventoryCollection(BaseCollection):
         Union[InventoryItem, None]
             The matching inventory item or None if not found.
         """
-        hits = self.list(name=inventory_item.name, company=[inventory_item.company])
+        hits = self.list(text=inventory_item.name, company=[inventory_item.company])
         inv_company = (
             inventory_item.company.name
             if isinstance(inventory_item.company, Company)
@@ -96,7 +100,10 @@ class InventoryCollection(BaseCollection):
             return None
 
     def create(
-        self, *, inventory_item: InventoryItem, avoid_duplicates: bool = True
+        self,
+        *,
+        inventory_item: InventoryItem,
+        avoid_duplicates: bool = True,
     ) -> InventoryItem:
         """
         Create a new inventory item.
@@ -144,13 +151,13 @@ class InventoryCollection(BaseCollection):
         )
         return InventoryItem(**response.json())
 
-    def get_by_id(self, *, inventory_id: str) -> InventoryItem:
+    def get_by_id(self, *, id: str) -> InventoryItem:
         """
         Retrieve an inventory item by its ID.
 
         Parameters
         ----------
-        inventory_id : str
+        id : str
             The ID of the inventory item.
 
         Returns
@@ -158,19 +165,19 @@ class InventoryCollection(BaseCollection):
         InventoryItem
             The retrieved inventory item.
         """
-        if not inventory_id.startswith("INV"):
-            inventory_id = "INV" + inventory_id
-        url = f"{self.base_path}/{inventory_id}"
+        if not id.startswith("INV"):
+            id = "INV" + id
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return InventoryItem(**response.json())
 
-    def get_by_ids(self, *, inventory_ids: list[str]) -> list[InventoryItem]:
+    def get_by_ids(self, *, ids: list[str]) -> list[InventoryItem]:
         """
         Retrieve an set of inventory items by their IDs.
 
         Parameters
         ----------
-        inventory_ids : str
+        ids : str
             The list of IDs of the inventory items.
 
         Returns
@@ -178,137 +185,62 @@ class InventoryCollection(BaseCollection):
         list[InventoryItem]
             The retrieved inventory items.
         """
-        inventory_ids = [x if x.startswith("INV") else f"INV{x}" for x in inventory_ids]
+        ids = [x if x.startswith("INV") else f"INV{x}" for x in ids]
         response = self.session.get(
             f"{self.base_path}/ids",
-            params={"id": inventory_ids},
+            params={"id": ids},
         )
         return [InventoryItem(**item) for item in response.json()["Items"]]
 
-    def delete(self, *, inventory_id: str | InventoryItem) -> bool:
+    def delete(self, *, id: str) -> None:
         """
         Delete an inventory item by its ID.
 
         Parameters
         ----------
-        inventory_id : str | InventoryItem
+        id : str
             The ID of the inventory item.
 
         Returns
         -------
         None
         """
-        if isinstance(inventory_id, InventoryItem):
-            inventory_id = inventory_id.id
-        inventory_id = inventory_id if inventory_id.startswith("INV") else "INV" + inventory_id
-        url = f"{self.base_path}/{inventory_id}"
+        if isinstance(id, InventoryItem):
+            id = id.id
+        id = id if id.startswith("INV") else "INV" + id
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
-
-    def _list_generator(
-        self,
-        *,
-        limit: int = 25,
-        offset: int | None = None,
-        name: str | None = None,
-        cas: list[Cas] | None = None,
-        company: list[Company] | None = None,
-        category: list[InventoryCategory] | None = None,
-        order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Generator[InventoryItem, None, None]:
-        """
-        Generator for listing inventory items with optional filters.
-
-        Parameters
-        ----------
-        limit : int, optional
-            The maximum number of items to retrieve per request (default is 50).
-        start_key : Optional[str], optional
-            The start key for pagination.
-        name : Optional[str], optional
-            The name filter for the inventory items.
-        cas : Optional[List[Cas]], optional
-            The CAS filter for the inventory items.
-        company : Optional[List[Company]], optional
-            The company filter for the inventory items.
-        category : Optional[List[InventoryCategory]], optional
-            The category filter for the inventory items.
-        order_by : OrderBy, optional
-            The order in which to retrieve items (default is OrderBy.DESCENDING).
-
-        Yields
-        ------
-        InventoryItem
-            The next inventory item in the generator.
-        """
-        # Note there are other parameters we could add supprt for
-
-        params = {
-            "sortBy": "createdAt",
-            "order": order_by.value,
-            "limit": str(limit),
-        }
-        if offset:  # pragma: no cover
-            params["offset"] = offset
-        if name:
-            params["text"] = name
-        if category:
-            params["category"] = [c.value for c in category]
-        if cas:
-            params["cas"] = [c.number for c in cas]
-        if company:
-            params["manufacturer"] = [c.name for c in company if isinstance(c, Company)]
-        while True:
-            response = self.session.get(self.base_path + "/search", params=params)
-            response_data = response.json()
-
-            raw_inventory = response_data.get("Items", [])
-            start_offset = response_data.get("offset")
-            params["offset"] = int(start_offset) + int(limit)
-            for item in raw_inventory:
-                # Unfortunetly, list only returns partial objects, so I need to do a GET on each.
-                this_aid = (
-                    item["albertId"]
-                    if item["albertId"].startswith("INV")
-                    else "INV" + item["albertId"]
-                )
-                try:
-                    yield self.get_by_id(inventory_id=this_aid)
-                except (NotFoundError, ForbiddenError):
-                    # Sometimes InventoryItems are listed that the current user does not have full access to. Just skip those
-                    continue
-            if not raw_inventory or raw_inventory == [] or len(raw_inventory) < limit:
-                break
 
     def list(
         self,
         *,
-        name: str | None = None,
+        text: str | None = None,
         cas: list[Cas] | Cas | None = None,
         category: list[InventoryCategory] | InventoryCategory | None = None,
         company: list[Company] | Company | None = None,
-        order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Iterator[InventoryItem]:
+        order: OrderBy = OrderBy.DESCENDING,
+        sort_by: str | None = "createdAt",
+        location: list[Location] | None = None,
+        storage_location: list[StorageLocation] | None = None,
+        project_id: str | None = None,
+        sheet_id: str | None = None,
+        created_by: list[User] = None,
+        lot_owner: list[User] = None,
+        limit: int = 25,
+        tags: list[str] = None,
+    ) -> AlbertPaginator[InventoryItem]:
         """
         List inventory items with optional filters.
-
-        Parameters
-        ----------
-        name : Optional[str], optional
-            The name filter for the inventory items.
-        cas : Optional[List[Cas]], optional
-            The CAS filter for the inventory items.
-        category : Optional[List[InventoryCategory]], optional
-            The category filter for the inventory items.
-        company : Optional[List[Company]], optional
-            The company filter for the inventory items.
-        order_by : OrderBy, optional
-            The order in which to retrieve items (default is OrderBy.DESCENDING).
-
-        Returns
-        -------
-        Optional[Genneraroe[InventoryItem]]
-            A generator of inventory items that match the filters, or None if no items match.
         """
+
+        def deserialize(data: dict) -> InventoryItem | None:
+            id = data["albertId"]
+            try:
+                return self.get_by_id(id=id)
+            except (ForbiddenError, InternalServerError, NotFoundError) as e:
+                logger.warning(f"Error fetching Inventory Item '{id}': {e}")
+                return None
+
         # Note there are other parameters we could add supprt for
 
         # helpers incase the user fails to provide a list for any of these.
@@ -318,8 +250,42 @@ class InventoryCollection(BaseCollection):
             category = [category]
         if isinstance(company, Company):
             company = [company]
-        return self._list_generator(
-            name=name, cas=cas, category=category, order_by=order_by, company=company
+        if isinstance(lot_owner, User):
+            lot_owner = [lot_owner]
+        if isinstance(created_by, User):
+            created_by = [created_by]
+        if isinstance(location, Location):
+            location = [location]
+        if isinstance(storage_location, StorageLocation):
+            storage_location = [storage_location]
+        if project_id is not None and project_id.startswith("PRO"):
+            project_id = project_id[3:]  # this search doesnt use the prefix
+
+        params = {
+            "limit": limit,
+            "text": text,
+            "order": order.value,
+            "sortBy": sort_by,
+            "category": [c.value for c in category] if category is not None else None,
+            "tags": tags,
+            "manufacturer": [c.name for c in company] if company is not None else None,
+            "cas": [c.number for c in cas] if cas is not None else None,
+            "location": [c.name for c in location] if location is not None else None,
+            "storageLocation": [c.name for c in storage_location]
+            if storage_location is not None
+            else None,
+            "lotOwner": [c.name for c in lot_owner] if lot_owner is not None else None,
+            "createdBy": [c.name for c in created_by] if created_by is not None else None,
+            "sheetId": sheet_id,
+            "projectId": project_id,
+        }
+
+        return AlbertPaginator(
+            mode=PaginationMode.OFFSET,
+            path=f"{self.base_path}/search",
+            params=params,
+            session=self.session,
+            deserialize=deserialize,
         )
 
     def _generate_inventory_patch_payload(
@@ -609,13 +575,13 @@ class InventoryCollection(BaseCollection):
             #             )
         return payload
 
-    def update(self, *, updated_object: InventoryItem) -> InventoryItem:
+    def update(self, *, inventory_item: InventoryItem) -> InventoryItem:
         """
         Update an inventory item.
 
         Parameters
         ----------
-        updated_object : InventoryItem
+        inventory_item : InventoryItem
             The updated inventory item object.
 
         Returns
@@ -624,18 +590,18 @@ class InventoryCollection(BaseCollection):
             The updated inventory item retrieved from the server.
         """
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(inventory_id=updated_object.id)
+        current_object = self.get_by_id(id=inventory_item.id)
 
         # Generate the PATCH payload
         patch_payload = self._generate_inventory_patch_payload(
-            existing=current_object, updated=updated_object
+            existing=current_object, updated=inventory_item
         )
 
         # Complex patching is not working, so I'm going to do this in a loop :(
         # https://teams.microsoft.com/l/message/19:de4a48c366664ce1bafcdbea02298810@thread.tacv2/1724856117312?tenantId=98aab90e-764b-48f1-afaa-02e3c7300653&groupId=35a36a3d-fc25-4899-a1dd-ad9c7d77b5b3&parentMessageId=1724856117312&teamName=Product%20%2B%20Engineering&channelName=General%20-%20API&createdTime=1724856117312
-        url = f"{self.base_path}/{updated_object.id}"
+        url = f"{self.base_path}/{inventory_item.id}"
         for change in patch_payload["data"]:
             change_payload = {"data": [change]}
             self.session.patch(url, json=change_payload)
-        updated_inv = self.get_by_id(inventory_id=updated_object.id)
+        updated_inv = self.get_by_id(id=inventory_item.id)
         return updated_inv

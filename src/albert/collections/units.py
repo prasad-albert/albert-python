@@ -80,61 +80,61 @@ class UnitCollection(BaseCollection):
         this_unit = Unit(**response.json())
         return this_unit
 
-    def get_by_id(self, *, unit_id: str) -> Unit:
+    def get_by_id(self, *, id: str) -> Unit:
         """
         Retrieves a unit by its ID.
 
         Parameters
         ----------
-        unit_id : str
+        id : str
             The ID of the unit to retrieve.
 
         Returns
         -------
         Unit
-            The Unit object if found, None otherwise.
+            The Unit object if found.
         """
-        url = f"{self.base_path}/{unit_id}"
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         this_unit = Unit(**response.json())
         return this_unit
 
-    def update(self, *, updated_unit: Unit) -> Unit:
+    def update(self, *, unit: Unit) -> Unit:
         """
         Updates a unit entity by its ID.
 
         Parameters
         ----------
-        updated_unit : Unit
+        unit : Unit
             The updated Unit object.
 
         Returns
         -------
         Unit
-            Returns the updated Unit
+            The updated Unit
         """
-        unit_id = updated_unit.id
-        original_unit = self.get_by_id(unit_id=unit_id)
-        payload = self._generate_patch_payload(existing=original_unit, updated=updated_unit)
+        unit_id = unit.id
+        original_unit = self.get_by_id(id=unit_id)
+        payload = self._generate_patch_payload(existing=original_unit, updated=unit)
         url = f"{self.base_path}/{unit_id}"
         self.session.patch(url, json=payload.model_dump(mode="json", by_alias=True))
-        updated_unit = self.get_by_id(unit_id=unit_id)
-        return updated_unit
+        unit = self.get_by_id(id=unit_id)
+        return unit
 
-    def delete(self, *, unit_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Deletes a unit by its ID.
 
         Parameters
         ----------
-        unit_id : str
+        id : str
             The ID of the unit to delete.
 
         Returns
         -------
         None
         """
-        url = f"{self.base_path}/{unit_id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
     def list(

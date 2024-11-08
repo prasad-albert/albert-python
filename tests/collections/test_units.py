@@ -48,7 +48,7 @@ def test_get_unit_by(client: Albert, seeded_units: list[Unit]):
     unit = client.units.get_by_name(name=test_unit.name)
     assert isinstance(unit, Unit)
 
-    by_id = client.units.get_by_id(unit_id=unit.id)
+    by_id = client.units.get_by_id(id=unit.id)
     assert isinstance(by_id, Unit)
     assert by_id.name.lower() == test_unit.name.lower()
 
@@ -74,12 +74,12 @@ def test_unit_crud(client: Albert):
     assert created_unit.id is not None
 
     created_unit.symbol = "y"
-    updated_unit = client.units.update(updated_unit=created_unit)
+    updated_unit = client.units.update(unit=created_unit)
     assert isinstance(updated_unit, Unit)
     assert updated_unit.id == created_unit.id
     assert updated_unit.symbol == "y"
 
-    client.units.delete(unit_id=updated_unit.id)
+    client.units.delete(id=updated_unit.id)
     assert not client.units.unit_exists(name=updated_unit.name)
 
 

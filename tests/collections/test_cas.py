@@ -31,7 +31,7 @@ def test_simple_cas_list(client: Albert):
 
 def test_cas_not_found(client: Albert):
     with pytest.raises(AlbertAPIError):
-        client.cas_numbers.get_by_id(cas_id="foo bar")
+        client.cas_numbers.get_by_id(id="foo bar")
 
 
 def test_advanced_cas_list(client: Albert, seeded_cas: list[Cas]):
@@ -56,13 +56,13 @@ def test_cas_exists(client: Albert, seeded_cas: list[Cas]):
     assert client.cas_numbers.cas_exists(number=cas_number)
 
     # Check if CAS does not exist for a non-existent CAS number
-    assert not client.cas_numbers.cas_exists(number="999-99-9xxxx")
+    assert not client.cas_numbers.cas_exists(number=f"{uuid.uuid4()}")
 
 
-def test_update_cas(client: Albert, seeded_cas: list[Cas]):
+def test_update_cas(client: Albert, seed_prefix: str, seeded_cas: list[Cas]):
     # Update the description of a seeded CAS entry
     cas_to_update = seeded_cas[0]
-    updated_description = f"TEST - {uuid.uuid4()}"
+    updated_description = f"{seed_prefix} - A new description"
     cas_to_update.description = updated_description
 
     updated_cas = client.cas_numbers.update(updated_object=cas_to_update)

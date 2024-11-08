@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 from pydantic import Field, PrivateAttr
 
@@ -27,10 +28,18 @@ class Parameter(BaseResource):
         The rank of the returned parameter. Read-only.
     """
 
-    id: str | None = Field(alias="albertId", default=None)
     name: str
+    id: str | None = Field(alias="albertId", default=None)
+
     _category: ParameterCategory | None = PrivateAttr(default=None)
     _rank: int | None = PrivateAttr(default=None)
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        if "category" in data:
+            self._category = ParameterCategory(data["category"])
+        if "rank" in data:
+            self._rank = int(data["rank"])
 
     @property
     def category(self) -> ParameterCategory:
