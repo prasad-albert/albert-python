@@ -1,5 +1,4 @@
 import logging
-from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
