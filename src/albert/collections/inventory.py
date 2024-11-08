@@ -9,6 +9,8 @@ from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.users import User
 from albert.session import AlbertSession
+from albert.utils.exceptions import ForbiddenError, InternalServerError, NotFoundError
+from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -85,7 +87,7 @@ class InventoryCollection(BaseCollection):
         Union[InventoryItem, None]
             The matching inventory item or None if not found.
         """
-        hits = self.list(name=inventory_item.name, company=[inventory_item.company])
+        hits = self.list(text=inventory_item.name, company=[inventory_item.company])
         inv_company = (
             inventory_item.company.name
             if isinstance(inventory_item.company, Company)
@@ -217,7 +219,7 @@ class InventoryCollection(BaseCollection):
         category: list[InventoryCategory] | InventoryCategory | None = None,
         company: list[Company] | Company | None = None,
         order: OrderBy = OrderBy.DESCENDING,
-        order_by: str | None = None,
+        sort_by: str | None = "createdAt",
         location: list[Location] | None = None,
         storage_location: list[StorageLocation] | None = None,
         project_id: str | None = None,
@@ -229,25 +231,16 @@ class InventoryCollection(BaseCollection):
     ) -> AlbertPaginator[InventoryItem]:
         """
         List inventory items with optional filters.
-
-        Parameters
-        ----------
-        name : Optional[str], optional
-            The name filter for the inventory items.
-        cas : Optional[List[Cas]], optional
-            The CAS filter for the inventory items.
-        category : Optional[List[InventoryCategory]], optional
-            The category filter for the inventory items.
-        company : Optional[List[Company]], optional
-            The company filter for the inventory items.
-        order_by : OrderBy, optional
-            The order in which to retrieve items (default is OrderBy.DESCENDING).
-
-        Returns
-        -------
-        Optional[Genneraroe[InventoryItem]]
-            A generator of inventory items that match the filters, or None if no items match.
         """
+
+        def deserialize(data: dict) -> InventoryItem | None:
+            id = data["albertId"]
+            try:
+                return self.get_by_id(id=id)
+            except (ForbiddenError, InternalServerError, NotFoundError) as e:
+                logger.warning(f"Error fetching Inventory Item '{id}': {e}")
+                return None
+
         # Note there are other parameters we could add supprt for
 
         # helpers incase the user fails to provide a list for any of these.
@@ -272,7 +265,7 @@ class InventoryCollection(BaseCollection):
             "limit": limit,
             "text": text,
             "order": order.value,
-            "order_by": order_by,
+            "sortBy": sort_by,
             "category": [c.value for c in category] if category is not None else None,
             "tags": tags,
             "manufacturer": [c.name for c in company] if company is not None else None,
@@ -292,7 +285,7 @@ class InventoryCollection(BaseCollection):
             path=f"{self.base_path}/search",
             params=params,
             session=self.session,
-            deserialize=lambda data: InventoryItem(**data),
+            deserialize=deserialize,
         )
 
     def _generate_inventory_patch_payload(
