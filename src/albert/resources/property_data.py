@@ -4,13 +4,23 @@ from typing import Any, Literal
 from pydantic import Field, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
+from albert.resources.data_columns import DataColumn
 from albert.resources.data_templates import DataTemplate
 from albert.resources.lots import Lot
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
 from albert.resources.workflows import Workflow
+from albert.utils.logging import logger
+from albert.utils.patches import PatchDatum
 
 ########################## Supporting GET Classes ##########################
+
+
+class PropertyDataStatus(str, Enum):
+    """The status of a resource"""
+
+    SUCCESS = "Success"
+    FAILURE = "Failed"
 
 
 class DataEntity(str, Enum):
@@ -48,16 +58,16 @@ class TaskData(BaseAlbertModel):
     data: DataInterval
 
 
-class DataColumn(BaseAlbertModel):
+class CustomInventoryDataColumn(BaseAlbertModel):
     data_column_id: str = Field(alias="id")
     data_column_name: str = Field(alias="name")
     property_data: PropertyValue = Field(alias="PropertyData")
-    unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
+    unit: SerializeAsEntityLink[Unit] | None | dict = Field(alias="Unit", default_factory=dict)
 
 
 class CustomData(BaseAlbertModel):
-    lot: SerializeAsEntityLink[Lot] | None = Field(alias="Lot", default=None)
-    data_columns: list[DataColumn] = Field(alias="DataColumns")
+    lot: SerializeAsEntityLink[Lot] | None | dict = Field(alias="Lot", default_factory=dict)
+    data_column: CustomInventoryDataColumn = Field(alias="DataColumn")
 
 
 class InventoryInformation(BaseAlbertModel):
@@ -70,7 +80,7 @@ class InventoryInformation(BaseAlbertModel):
 
 class InventoryPropertyData(BaseResource):
     inventory_id: str = Field(alias="inventoryId")
-    inventory_name: str = Field(alias="inventoryName")
+    inventory_name: str | None = Field(alias="inventoryName", default=None)
     task_property_data: list[TaskData] = Field(alias="Task")
     custom_property_data: list[CustomData] = Field(alias="NoTask")
 
@@ -114,6 +124,25 @@ class TaskTrialData(BaseAlbertModel):
     data_columns: list[TaskDataColumn] = Field(alias="DataColumns")
 
 
+class InventoryDataColumn(BaseAlbertModel):
+    data_column: DataColumn | None = Field(exclude=True, default=None)
+    data_column_id: str | None = Field(alias="id", default=None)
+    value: str | None = Field(default=None)
+
+    @model_validator(mode="after")
+    def set_missing_data_column_id(self) -> "InventoryDataColumn":
+        if self.data_column_id is None and self.data_column is not None:
+            self.data_column_id = self.data_column.id
+        elif (
+            self.data_column_id is not None
+            and self.data_column is not None
+            and self.data_column.id != self.data_column_id
+        ):
+            logger.warning("data_column and data_column_id do not match. Using data_column_id")
+            self.data_column = None
+        return self
+
+
 ########################## Task Property POST Classes ##########################
 
 
@@ -145,3 +174,15 @@ class TaskPropertyDatumCreate(BaseResource):
     )  # Capital T on this one
     trial_number: int = Field(alias="visibleTrialNo")
     data_columns: list[TaskDatumColumn] = Field(alias="DataColumns")
+
+
+########################## Inventory Custom Property POST Class ##########################
+class PropertyDataPatchDatum(PatchDatum):
+    property_column_id: str = Field(alias="id")
+
+
+class InventoryPropertyDataCreate(BaseResource):
+    entity: Literal[DataEntity.INVENTORY] = Field(default=DataEntity.INVENTORY)
+    inventory_id: str = Field(alias="parentId")
+    data_columns: list[InventoryDataColumn] = Field(alias="DataColumn", max_length=1)
+    status: PropertyDataStatus | None = Field(default=None)

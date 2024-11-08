@@ -18,6 +18,7 @@ from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
 from albert.collections.pricings import PricingCollection
 from albert.collections.projects import ProjectCollection
+from albert.collections.property_data import PropertyDataCollection
 from albert.collections.reports import ReportCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.storage_locations import StorageLocationsCollection
@@ -156,6 +157,10 @@ class Albert:
     @property
     def parameters(self) -> ParameterCollection:
         return ParameterCollection(session=self.session)
+
+    @property
+    def property_data(self) -> PropertyDataCollection:
+        return PropertyDataCollection(session=self.session)
 
     @property
     def storage_locations(self) -> StorageLocationsCollection:
