@@ -478,7 +478,7 @@ def seeded_products(
     return list(
         client.inventory.list(
             category=InventoryCategory.FORMULAS,
-            name=f"{seed_prefix} - My cool formulation",
+            text=f"{seed_prefix} - My cool formulation",
         )
     )
 

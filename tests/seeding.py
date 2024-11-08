@@ -73,7 +73,7 @@ def generate_custom_fields() -> list[CustomField]:
         # Create a string-type field for the service
         seeds.append(
             CustomField(
-                name=f"test_{service}_string_field",
+                name=f"test_{service.value}_string_field",
                 field_type=FieldType.STRING,
                 display_name=f"TEST {service.value.capitalize()} String Field",
                 service=service,
@@ -83,7 +83,7 @@ def generate_custom_fields() -> list[CustomField]:
         # Create a list-type field for the service
         seeds.append(
             CustomField(
-                name=f"test_{service}_list_field",
+                name=f"test_{service.value}_list_field",
                 field_type=FieldType.LIST,
                 display_name=f"TEST {service.value.capitalize()} List Field",
                 service=service,

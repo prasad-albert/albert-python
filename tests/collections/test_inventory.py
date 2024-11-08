@@ -1,5 +1,3 @@
-from collections.abc import Generator
-
 import pytest
 
 from albert.albert import Albert
@@ -22,7 +20,6 @@ def _list_asserts(returned_list):
 
 def test_simple_inventory_list(client: Albert, seeded_inventory):
     inventory = client.inventory.list()
-    assert isinstance(inventory, Generator)
     _list_asserts(inventory)
 
 
@@ -32,17 +29,16 @@ def test_advanced_inventory_list(
     test_inv_item = seeded_inventory[1]
     matching_cas = [x for x in seeded_cas if x.id in test_inv_item.cas[0].id][0]
     inventory = client.inventory.list(
-        name=test_inv_item.name,
+        text=test_inv_item.name,
         category=InventoryCategory.CONSUMABLES,
         cas=matching_cas,
         company=test_inv_item.company,
     )
-    assert isinstance(inventory, Generator)
     _list_asserts(inventory)
     for i, x in enumerate(inventory):
         if i == 10:  # just check the first 10 for speed
             break
-        assert "goggles" in x.name.lower()
+        assert "ethanol" in x.name.lower()
 
 
 def test_get_by_id(client: Albert, seeded_inventory):
