@@ -1,13 +1,16 @@
 import logging
-from collections.abc import Generator, Iterator
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.inventory import InventoryCategory, InventoryItem
+from albert.resources.locations import Location
+from albert.resources.storage_locations import StorageLocation
+from albert.resources.users import User
 from albert.session import AlbertSession
-from albert.utils.exceptions import ForbiddenError, NotFoundError
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class InventoryCollection(BaseCollection):
@@ -207,90 +210,24 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def _list_generator(
-        self,
-        *,
-        limit: int = 25,
-        offset: int | None = None,
-        name: str | None = None,
-        cas: list[Cas] | None = None,
-        company: list[Company] | None = None,
-        category: list[InventoryCategory] | None = None,
-        order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Generator[InventoryItem, None, None]:
-        """
-        Generator for listing inventory items with optional filters.
-
-        Parameters
-        ----------
-        limit : int, optional
-            The maximum number of items to retrieve per request (default is 50).
-        start_key : Optional[str], optional
-            The start key for pagination.
-        name : Optional[str], optional
-            The name filter for the inventory items.
-        cas : Optional[List[Cas]], optional
-            The CAS filter for the inventory items.
-        company : Optional[List[Company]], optional
-            The company filter for the inventory items.
-        category : Optional[List[InventoryCategory]], optional
-            The category filter for the inventory items.
-        order_by : OrderBy, optional
-            The order in which to retrieve items (default is OrderBy.DESCENDING).
-
-        Yields
-        ------
-        InventoryItem
-            The next inventory item in the generator.
-        """
-        # Note there are other parameters we could add supprt for
-
-        params = {
-            "sortBy": "createdAt",
-            "order": order_by.value,
-            "limit": str(limit),
-        }
-        if offset:  # pragma: no cover
-            params["offset"] = offset
-        if name:
-            params["text"] = name
-        if category:
-            params["category"] = [c.value for c in category]
-        if cas:
-            params["cas"] = [c.number for c in cas]
-        if company:
-            params["manufacturer"] = [c.name for c in company if isinstance(c, Company)]
-        while True:
-            response = self.session.get(self.base_path + "/search", params=params)
-            response_data = response.json()
-
-            raw_inventory = response_data.get("Items", [])
-            start_offset = response_data.get("offset")
-            params["offset"] = int(start_offset) + int(limit)
-            for item in raw_inventory:
-                # Unfortunetly, list only returns partial objects, so I need to do a GET on each.
-                this_aid = (
-                    item["albertId"]
-                    if item["albertId"].startswith("INV")
-                    else "INV" + item["albertId"]
-                )
-                try:
-                    yield self.get_by_id(id=this_aid)
-                except (NotFoundError, ForbiddenError):
-                    # Sometimes InventoryItems are listed that the current user does not have full access to. Just skip those
-                    continue
-            if not raw_inventory or raw_inventory == [] or len(raw_inventory) < limit:
-                break
-
     def list(
         self,
         *,
-        name: str | None = None,
+        text: str | None = None,
         cas: list[Cas] | Cas | None = None,
         category: list[InventoryCategory] | InventoryCategory | None = None,
         company: list[Company] | Company | None = None,
-        order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Iterator[InventoryItem]:
+        order: OrderBy = OrderBy.DESCENDING,
+        order_by: str | None = None,
+        location: list[Location] | None = None,
+        storage_location: list[StorageLocation] | None = None,
+        project_id: str | None = None,
+        sheet_id: str | None = None,
+        created_by: list[User] = None,
+        lot_owner: list[User] = None,
+        limit: int = 25,
+        tags: list[str] = None,
+    ) -> AlbertPaginator[InventoryItem]:
         """
         List inventory items with optional filters.
 
@@ -321,8 +258,42 @@ class InventoryCollection(BaseCollection):
             category = [category]
         if isinstance(company, Company):
             company = [company]
-        return self._list_generator(
-            name=name, cas=cas, category=category, order_by=order_by, company=company
+        if isinstance(lot_owner, User):
+            lot_owner = [lot_owner]
+        if isinstance(created_by, User):
+            created_by = [created_by]
+        if isinstance(location, Location):
+            location = [location]
+        if isinstance(storage_location, StorageLocation):
+            storage_location = [storage_location]
+        if project_id is not None and project_id.startswith("PRO"):
+            project_id = project_id[3:]  # this search doesnt use the prefix
+
+        params = {
+            "limit": limit,
+            "text": text,
+            "order": order.value,
+            "order_by": order_by,
+            "category": [c.value for c in category] if category is not None else None,
+            "tags": tags,
+            "manufacturer": [c.name for c in company] if company is not None else None,
+            "cas": [c.number for c in cas] if cas is not None else None,
+            "location": [c.name for c in location] if location is not None else None,
+            "storageLocation": [c.name for c in storage_location]
+            if storage_location is not None
+            else None,
+            "lotOwner": [c.name for c in lot_owner] if lot_owner is not None else None,
+            "createdBy": [c.name for c in created_by] if created_by is not None else None,
+            "sheetId": sheet_id,
+            "projectId": project_id,
+        }
+
+        return AlbertPaginator(
+            mode=PaginationMode.OFFSET,
+            path=f"{self.base_path}/search",
+            params=params,
+            session=self.session,
+            deserialize=lambda data: InventoryItem(**data),
         )
 
     def _generate_inventory_patch_payload(

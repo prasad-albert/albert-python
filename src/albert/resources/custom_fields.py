@@ -103,7 +103,7 @@ class CustomField(BaseResource):
     min: int | None = Field(default=None)
     max: int | None = Field(default=None)
     entity_categories: list[EntityCategory] | None = Field(default=None, alias="entityCategory")
-    ui_components: list[UIComponent] | None = Field(default=None, alias="ui_Components")
+    ui_components: list[UIComponent] | None = Field(default=None, alias="ui_components")
 
     @model_validator(mode="after")
     def confirm_field_compatability(self) -> "CustomField":
