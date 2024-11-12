@@ -4,8 +4,8 @@ from typing import Any
 
 from pydantic import Field, PrivateAttr
 
+from albert.exceptions import AlbertException
 from albert.session import AlbertSession
-from albert.utils.exceptions import AlbertException
 from albert.utils.types import BaseAlbertModel
 
 

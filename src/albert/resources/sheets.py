@@ -5,9 +5,9 @@ from typing import ForwardRef, Union
 import pandas as pd
 from pydantic import Field, PrivateAttr, model_validator
 
+from albert.exceptions import AlbertException
 from albert.resources.base import BaseResource, BaseSessionResource
 from albert.resources.inventory import InventoryItem
-from albert.utils.exceptions import AlbertException
 
 # Define forward references
 Row = ForwardRef("Row")

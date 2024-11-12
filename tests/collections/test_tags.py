@@ -5,8 +5,8 @@ import pytest
 
 from albert.albert import Albert
 from albert.collections.base import OrderBy
+from albert.exceptions import AlbertException
 from albert.resources.tags import Tag
-from albert.utils.exceptions import AlbertException
 
 
 def _list_asserts(returned_list, limit=100):

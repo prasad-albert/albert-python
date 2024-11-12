@@ -3,8 +3,8 @@ from collections.abc import Generator
 import pytest
 
 from albert.albert import Albert
+from albert.exceptions import BadRequestError
 from albert.resources.parameter_groups import ParameterGroup
-from albert.utils.exceptions import BadRequestError
 
 
 def _list_asserts(returned_list):

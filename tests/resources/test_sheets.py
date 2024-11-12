@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from albert.exceptions import AlbertException
 from albert.resources.sheets import (
     Cell,
     CellColor,
@@ -11,7 +12,6 @@ from albert.resources.sheets import (
     Row,
     Sheet,
 )
-from albert.utils.exceptions import AlbertException
 
 
 def test_get_test_sheet(seeded_sheet: Sheet):

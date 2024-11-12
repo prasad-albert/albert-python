@@ -1,5 +1,6 @@
 import pytest
 
+from albert.exceptions import AlbertException
 from albert.resources.cas import Cas
 from albert.resources.inventory import (
     CasAmount,
@@ -7,7 +8,6 @@ from albert.resources.inventory import (
     InventoryItem,
     InventoryMinimum,
 )
-from albert.utils.exceptions import AlbertException
 
 
 def test_cas_amount_attributes():

@@ -1,7 +1,7 @@
 from albert.collections.base import BaseCollection, OrderBy
+from albert.exceptions import ForbiddenError, InternalServerError
 from albert.resources.data_templates import DataTemplate
 from albert.session import AlbertSession
-from albert.utils.exceptions import ForbiddenError, InternalServerError
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 

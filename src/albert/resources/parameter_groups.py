@@ -3,13 +3,13 @@ from typing import Any
 
 from pydantic import Field, PrivateAttr
 
+from albert.exceptions import AlbertException
 from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, SecurityClass
 from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
 from albert.resources.users import User
-from albert.utils.exceptions import AlbertException
 
 
 class PGType(str, Enum):

@@ -5,8 +5,8 @@ import pytest
 
 from albert.albert import Albert
 from albert.collections.base import OrderBy
+from albert.exceptions import AlbertHTTPError
 from albert.resources.cas import Cas
-from albert.utils.exceptions import AlbertAPIError
 
 
 def _list_asserts(returned_list):
@@ -30,7 +30,7 @@ def test_simple_cas_list(client: Albert):
 
 
 def test_cas_not_found(client: Albert):
-    with pytest.raises(AlbertAPIError):
+    with pytest.raises(AlbertHTTPError):
         client.cas_numbers.get_by_id(id="foo bar")
 
 

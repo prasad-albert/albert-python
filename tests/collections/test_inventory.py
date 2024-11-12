@@ -2,11 +2,11 @@ import pytest
 
 from albert.albert import Albert
 from albert.collections.inventory import InventoryCategory
+from albert.exceptions import BadRequestError
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.inventory import CasAmount, InventoryItem, InventoryUnitCategory
 from albert.resources.tags import Tag
-from albert.utils.exceptions import BadRequestError
 
 
 def _list_asserts(returned_list):

@@ -8,6 +8,7 @@ from jose import jwt
 
 from albert import Albert
 from albert.collections.worksheets import WorksheetCollection
+from albert.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from albert.resources.btdataset import BTDataset
 from albert.resources.btinsight import BTInsight
 from albert.resources.btmodel import BTModel, BTModelSession
@@ -30,7 +31,6 @@ from albert.resources.users import User
 from albert.resources.workflows import Workflow
 from albert.resources.worksheets import Worksheet
 from albert.utils.client_credentials import ClientCredentials
-from albert.utils.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,

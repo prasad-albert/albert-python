@@ -2,8 +2,8 @@ from collections.abc import Callable, Iterable, Iterator
 from enum import Enum
 from typing import Any, TypeVar
 
+from albert.exceptions import AlbertException
 from albert.session import AlbertSession
-from albert.utils.exceptions import AlbertException
 
 ItemType = TypeVar("ItemType")
 
