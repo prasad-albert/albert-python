@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
@@ -155,7 +155,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     id: str | None = Field(None, alias="albertId")
     description: str | None = None
     category: InventoryCategory
-    unit_category: InventoryUnitCategory = Field(default=None, alias="unitCategory")
+    unit_category: InventoryUnitCategory | None = Field(default=None, alias="unitCategory")
     security_class: SecurityClass | None = Field(default=None, alias="class")
     company: SerializeAsEntityLink[Company] | None = Field(default=None, alias="Company")
     minimum: list[InventoryMinimum] | None = Field(default=None)  # To do
@@ -178,90 +178,34 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     un_number: UnNumber | None = Field(default=None, alias="unNumber", exclude=True, frozen=True)
     acls: list[ACL] | None = Field(default=None, alias="ACL", exclude=True, frozen=True)
 
-    # Must happen before the model is created so unit_category is set
-    @model_validator(mode="before")
+    @field_validator("company", mode="before")
     @classmethod
-    def set_unit_category(cls, values: dict[str, Any]) -> dict[str, Any]:
-        """
-        Set the unit category based on the inventory category.
+    def validate_company_string(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            value = Company(name=value)
+        return value
 
-        Parameters
-        ----------
-        values : Dict[str, Any]
-            A dictionary of field values.
-
-        Returns
-        -------
-        Dict[str, Any]
-            Updated field values with unit category set.
-        """
-        category = values.get("category")
-        unit_category = values.get("unit_category")
-        if unit_category is None:
-            if category in (
-                InventoryCategory.RAW_MATERIALS,
-                InventoryCategory.RAW_MATERIALS.value,
-                InventoryCategory.FORMULAS,
-                InventoryCategory.FORMULAS.value,
-            ):
-                values["unit_category"] = InventoryUnitCategory.MASS.value
-            elif category in (
-                InventoryCategory.EQUIPMENT,
-                InventoryCategory.EQUIPMENT.value,
-                InventoryCategory.CONSUMABLES,
-                InventoryCategory.CONSUMABLES.value,
-            ):
-                values["unit_category"] = InventoryUnitCategory.UNITS.value
-        return values
-
-    @model_validator(mode="before")  # must happen before to keep type consistency
+    @field_validator("un_number", mode="before")
     @classmethod
-    def convert_company(cls, data: dict[str, Any]) -> dict[str, Any]:
-        """
-        Convert the company field to a Company object if it is a string.
-
-        Parameters
-        ----------
-        data : Dict[str, Any]
-            A dictionary of field values.
-
-        Returns
-        -------
-        Dict[str, Any]
-            Updated field values with company converted.
-        """
-        company = data.get("company", data.get("Company"))
-        if company:
-            if isinstance(company, Company):
-                data["company"] = company
-            elif isinstance(company, str):
-                data["company"] = Company(name=company)
-            else:
-                pass
-                # We do not expect this else to be hit because comapanies should only be Company or str
-        return data
+    def validate_un_number(cls, value: Any) -> Any:
+        if value == "N/A":
+            value = None
+        return value
 
     @model_validator(mode="after")
-    def ensure_formula_fields(self: "InventoryItem") -> "InventoryItem":
-        """
-        Ensure required fields are present for formulas.
+    def set_unit_category(self) -> "InventoryItem":
+        """Set unit category from category if not defined."""
+        if self.unit_category is None:
+            if self.category in [InventoryCategory.RAW_MATERIALS, InventoryCategory.FORMULAS]:
+                object.__setattr__(self, "unit_category", InventoryUnitCategory.MASS)
+            elif self.category in [InventoryCategory.EQUIPMENT, InventoryCategory.CONSUMABLES]:
+                object.__setattr__(self, "unit_category", InventoryUnitCategory.UNITS)
+        return self
 
-        Parameters
-        ----------
-        data : Dict[str, Any]
-            A dictionary of field values.
-
-        Returns
-        -------
-        Dict[str, Any]
-            Updated field values with required fields ensured.
-
-        Raises
-        ------
-        AttributeError
-            If a required project_id is missing for formulas.
-        """
+    @model_validator(mode="after")
+    def validate_formula_fields(self) -> "InventoryItem":
+        """Ensure required fields are present for formulas."""
         if self.category == InventoryCategory.FORMULAS and not self.project_id and not self.id:
             # Some legacy on platform formulas don't have a project_id so check if its already on platform
-            raise AlbertException("A project_id must be supplied for all formulas.")
+            raise ValueError("A project_id must be supplied for all formulas.")
         return self
