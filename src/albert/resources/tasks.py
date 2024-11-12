@@ -3,11 +3,12 @@ from typing import Annotated, Literal
 
 from pydantic import Field, TypeAdapter
 
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseTaggedEntity, SecurityClass
+from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass
 from albert.resources.data_templates import DataTemplate
 from albert.resources.locations import Location
 from albert.resources.projects import Project
 from albert.resources.serialization import SerializeAsEntityLink
+from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.users import User
 from albert.resources.workflows import Workflow
 
@@ -89,15 +90,12 @@ class Block(BaseAlbertModel):
     )
 
     def model_dump(self, *args, **kwargs):
-        # Use default serialization with customized field output. Workflow and DataTemplate are both lists of length one, which is annoying to
+        # Use default serialization with customized field output.
+        # Workflow and DataTemplate are both lists of length one, which is annoying to
         data = super().model_dump(*args, **kwargs)
         data["Workflow"] = [data["Workflow"]] if "Workflow" in data else None
         data["Datatemplate"] = [data["Datatemplate"]] if "Datatemplate" in data else None
         return data
-
-    def model_json(self, *args, **kwargs):
-        # Use `model_dump` for JSON serialization
-        return super().model_json(*args, **kwargs)
 
 
 class QCTarget(BaseAlbertModel):
@@ -126,7 +124,7 @@ class BaseTask(BaseTaggedEntity):
     metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
         alias="Metadata", default=None
     )
-    sources: list[TaskSource] | None = Field(default=[], alias="Sources")
+    sources: list[TaskSource] | None = Field(default_factory=list, alias="Sources")
     inventory_information: list[InventoryInformation] = Field(alias="Inventories", default=None)
     location: SerializeAsEntityLink[Location] = Field(alias="Location")
     priority: TaskPriority | None = Field(default=None)

@@ -8,14 +8,10 @@ from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
 from albert.exceptions import AlbertException
 from albert.resources.acls import ACL
-from albert.resources.base import (
-    BaseEntityLink,
-    BaseTaggedEntity,
-    EntityLinkConvertible,
-    SecurityClass,
-)
+from albert.resources.base import BaseEntityLink, EntityLinkConvertible, SecurityClass
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
+from albert.resources.tagged_base import BaseTaggedEntity
 from albert.utils.types import BaseAlbertModel
 
 
@@ -58,7 +54,7 @@ class CasAmount(BaseAlbertModel):
     max: float
     id: str | None = Field(default=None)
 
-    # Excluded, read-only fields
+    # Read-only fields
     cas: Cas = Field(default=None, exclude=True)
     cas_smiles: str | None = Field(default=None, alias="casSmiles", exclude=True, frozen=True)
     number: str | None = Field(default=None, exclude=True, frozen=True)
@@ -170,6 +166,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     )
     project_id: str | None = Field(default=None, alias="parentId")
 
+    # Read-only fields
     task_config: list[dict] | None = Field(
         default=None,
         alias="TaskConfig",
@@ -177,9 +174,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
         frozen=True,
     )
     formula_id: str | None = Field(default=None, alias="formulaId", exclude=True, frozen=True)
-    # Read only: comes from attachments
     symbols: list[dict] | None = Field(default=None, alias="Symbols", exclude=True, frozen=True)
-    # Read only: Comes from attachments
     un_number: UnNumber | None = Field(default=None, alias="unNumber", exclude=True, frozen=True)
     acls: list[ACL] | None = Field(default=None, alias="ACL", exclude=True, frozen=True)
 

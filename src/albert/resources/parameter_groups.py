@@ -57,27 +57,19 @@ class ParameterValue(BaseResource):
     added: AuditFields | None = Field(alias="Added", default=None)
 
     # Read-only fields
-    name = Field(default=None, exclude=True, frozen=True)
-    sequence: int | None = Field(default=None, exclude=True, frozen=True)
+    name: str | None = Field(default=None, exclude=True, frozen=True)
+    sequence: str | None = Field(default=None, exclude=True, frozen=True)
 
     @model_validator(mode="after")
     def set_parameter_fields(self) -> "ParameterValue":
-        if self.parameter is not None:
-            # Parameter object was passed
-            if self.id is not None:
-                raise AlbertException(
-                    "Please provide either an id or an parameter object, not both."
-                )
-            if self.parameter.id is None:
-                raise AlbertException(
-                    "You must first create the parameter before creating a parameter value. "
-                    "Your parameter object must have an id."
-                )
-            self.id = self.parameter.id
-            self.category = self.parameter.category
-            self.name = self.parameter.name
-        elif self.id is None:
+        if self.parameter is None and self.id is None:
             raise AlbertException("Please provide either an id or an parameter object.")
+
+        if self.parameter is not None:
+            object.__setattr__(self, "id", self.parameter.id)
+            object.__setattr__(self, "category", self.parameter.category)
+            object.__setattr__(self, "name", self.parameter.name)
+
         return self
 
 

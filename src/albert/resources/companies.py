@@ -20,4 +20,6 @@ class Company(BaseResource, EntityLinkConvertible):
 
     name: str
     id: str | None = Field(default=None, alias="albertId")
+
+    # Read-only fields
     distance: float | None = Field(default=None, exclude=True, frozen=True)

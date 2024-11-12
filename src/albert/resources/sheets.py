@@ -152,8 +152,6 @@ class Design(BaseSessionResource):
     state: DesignState | None = Field({})
     id: str = Field(alias="albertId")
     design_type: DesignType = Field(alias="designType")
-
-    # Read-only fields
     _grid: pd.DataFrame | None = PrivateAttr(default=None)
     _rows: list["Row"] | None = PrivateAttr(default=None)
     _columns: list["Column"] | None = PrivateAttr(default=None)
@@ -209,7 +207,7 @@ class Design(BaseSessionResource):
                     colId=v["colId"],
                     name=v.get("name", None),
                     type=v["type"],
-                    session=self._session,
+                    session=self.session,
                     sheet=self.sheet,
                 )
             )
@@ -226,7 +224,7 @@ class Design(BaseSessionResource):
                     name=v.get("name", None),
                     rowId=v["rowId"],
                     type=v["type"],
-                    session=self._session,
+                    session=self.session,
                     design=self,
                     sheet=self.sheet,
                     manufacturer=v.get("manufacturer", None),
@@ -237,7 +235,7 @@ class Design(BaseSessionResource):
 
     def _get_grid(self):
         endpoint = f"/api/v3/worksheet/{self.id}/{self.design_type}/grid"
-        response = self._session.get(endpoint)
+        response = self.session.get(endpoint)
 
         resp_json = response.json()
         self._columns = self._get_columns(grid_response=resp_json)
@@ -294,9 +292,9 @@ class Sheet(BaseSessionResource):  # noqa:F811
 
     @model_validator(mode="after")
     def set_session(self):
-        if self._session is not None:
+        if self.session is not None:
             for d in self.designs:
-                d._session = self._session
+                d.session = self.session
         return self
 
     @property
@@ -380,7 +378,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
 
         payload = [{"attribute": "name", "operation": "update", "newValue": new_name}]
 
-        self._session.patch(endpoint, json=payload)
+        self.session.patch(endpoint, json=payload)
 
         self.name = new_name
         return self
@@ -398,7 +396,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 ],
                 "name": item["name"],
                 "type": item["type"],
-                "session": self._session,
+                "session": self.session,
                 "sheet": self,
             }
             new_dicts.append(this_dict)
@@ -503,7 +501,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 }
             )
 
-        response = self._session.post(endpoint, json=payload)
+        response = self.session.post(endpoint, json=payload)
 
         self.grid = None
         new_dicts = self._reformat_formulation_addition_payload(response_json=response.json())
@@ -531,14 +529,14 @@ class Sheet(BaseSessionResource):  # noqa:F811
             }
         ]
 
-        response = self._session.post(endpoint, json=payload)
+        response = self.session.post(endpoint, json=payload)
 
         self.grid = None
         row_dict = response.json()[0]
         return Row(
             rowId=row_dict["rowId"],
             type=row_dict["type"],
-            session=self._session,
+            session=self.session,
             design=self._get_design(design=design),
             name=row_dict["name"],
             sheet=self,
@@ -562,7 +560,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
             "position": position["position"],
         }
 
-        response = self._session.post(endpoint, json=payload)
+        response = self.session.post(endpoint, json=payload)
 
         self.grid = None
         row_dict = response.json()
@@ -570,7 +568,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
             rowId=row_dict["rowId"],
             inventory_id=inventory_id,
             type=row_dict["type"],
-            session=self._session,
+            session=self.session,
             design=self.product_design,
             sheet=self,
             name=row_dict["name"],
@@ -728,7 +726,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 continue
 
             this_url = f"/api/v3/worksheet/{design_id}/values"
-            response = self._session.patch(
+            response = self.session.patch(
                 this_url,
                 json=payload,
             )
@@ -757,18 +755,18 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 "position": position["position"],
             }
         ]
-        response = self._session.post(endpoint, json=payload)
+        response = self.session.post(endpoint, json=payload)
 
         data = response.json()
         data[0]["sheet"] = self
-        data[0]["session"] = self._session
+        data[0]["session"] = self.session
         self.grid = None  # reset the known grid. We could probably make this nicer later.
         return Column(**data[0])
 
     def delete_column(self, *, column_id: str) -> None:
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [{"colId": column_id}]
-        self._session.delete(endpoint, json=payload)
+        self.session.delete(endpoint, json=payload)
 
         if self._grid is not None:  # if I have a grid loaded into memory, adjust it.
             self.grid = None
@@ -776,7 +774,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
     def delete_row(self, *, row_id: str, design_id: str) -> None:
         endpoint = f"/api/v3/worksheet/design/{design_id}/rows"
         payload = [{"rowId": row_id}]
-        self._session.delete(endpoint, json=payload)
+        self.session.delete(endpoint, json=payload)
 
         if self._grid is not None:  # if I have a grid loaded into memory, adjust it.
             self.grid = None
@@ -808,7 +806,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 colId=first_item.column_id,
                 type=first_item.type,
                 sheet=self,
-                session=self._session,
+                session=self.session,
             )
 
 
@@ -858,7 +856,7 @@ class Column(BaseSessionResource):  # noqa:F811
             ]
         }
 
-        self._session.patch(
+        self.session.patch(
             url=f"/api/v3/worksheet/sheet/{self.sheet.id}/columns",
             json=payload,
         )

@@ -1,8 +1,9 @@
 from pydantic import Field, model_validator
 
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseTaggedEntity, SecurityClass
+from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass
 from albert.resources.data_columns import DataColumn
 from albert.resources.serialization import EntityLinkConvertible, SerializeAsEntityLink
+from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.units import Unit
 from albert.resources.users import User
 
