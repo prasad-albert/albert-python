@@ -1,6 +1,4 @@
-from typing import Any
-
-from pydantic import Field, PrivateAttr
+from pydantic import Field
 
 from albert.resources.base import BaseResource
 from albert.resources.serialization import EntityLinkConvertible
@@ -21,14 +19,5 @@ class Company(BaseResource, EntityLinkConvertible):
     """
 
     name: str
-    id: str | None = Field(None, alias="albertId")
-    _distance: float | None = PrivateAttr()
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if "distance" in data:
-            self._distance = float(data["distance"])
-
-    @property
-    def distance(self) -> float:
-        return self._distance
+    id: str | None = Field(default=None, alias="albertId")
+    distance: float | None = Field(default=None, exclude=True, frozen=True)

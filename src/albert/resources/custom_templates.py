@@ -4,13 +4,12 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from albert.resources.acls import ACL
-from albert.resources.base import BaseEntityLink, BaseResource
+from albert.resources.base import BaseEntityLink, BaseResource, BaseTaggedEntity
 from albert.resources.inventory import InventoryCategory
 from albert.resources.locations import Location
 from albert.resources.projects import Project
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.sheets import DesignType, Sheet
-from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.users import User
 
 
@@ -66,9 +65,8 @@ class SamConfig(BaseResource):
 class Workflow(BaseResource):
     id: str
     name: str
-    sam_config: list[SamConfig] | None = Field(
-        default=None, alias="SamConfig"
-    )  # Some workflows may have SamConfig
+    # Some workflows may have SamConfig
+    sam_config: list[SamConfig] | None = Field(default=None, alias="SamConfig")
 
 
 class Block(
@@ -106,7 +104,7 @@ class BatchData(BaseTaggedEntity):
 class PropertyData(BaseTaggedEntity):
     category: Literal[TemplateCategory.PROPERTY] = TemplateCategory.PROPERTY
     name: str | None = Field(default=None)
-    blocks: list[Block] = Field(default=[], alias="Blocks")  # Needs to be it's own class
+    blocks: list[Block] = Field(default_factory=[], alias="Blocks")  # Needs to be it's own class
     priority: Priority  # enum?!
     location: SerializeAsEntityLink[Location] | None = Field(alias="Location", default=None)
     assigned_to: SerializeAsEntityLink[User] | None = Field(alias="AssignedTo", default=None)
@@ -118,8 +116,8 @@ class PropertyData(BaseTaggedEntity):
 class SheetData(BaseTaggedEntity):
     category: Literal[TemplateCategory.SHEET] = TemplateCategory.SHEET
     designs: list[DesignLink] = Field(default=None, alias="Designs")
-    formula_info: list = Field(default=[], alias="FormulaInfo")
-    task_rows: list[BaseEntityLink] = Field(default=[], alias="TaskRows")
+    formula_info: list = Field(default_factory=[], alias="FormulaInfo")
+    task_rows: list[BaseEntityLink] = Field(default_factory=[], alias="TaskRows")
 
 
 class NotebookData(BaseTaggedEntity):
@@ -186,8 +184,8 @@ class CustomTemplate(BaseTaggedEntity):
         default=None, alias="Metadata"
     )
     data: CustomTemplateData | None = Field(default=None, alias="Data")
-    team: list[TeamACL] | None = Field(default=[])
-    acl: TemplateACL | None = Field(default=[], alias="ACL")
+    team: list[TeamACL] | None = Field(default_factory=[])
+    acl: TemplateACL | None = Field(default_factory=[], alias="ACL")
 
     @model_validator(mode="before")  # Must happen before construction so the data are captured
     @classmethod

@@ -1,17 +1,21 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, PrivateAttr, model_validator
+from pydantic import Field, model_validator
 
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
 from albert.exceptions import AlbertException
 from albert.resources.acls import ACL
-from albert.resources.base import BaseEntityLink, EntityLinkConvertible, SecurityClass
+from albert.resources.base import (
+    BaseEntityLink,
+    BaseTaggedEntity,
+    EntityLinkConvertible,
+    SecurityClass,
+)
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
-from albert.resources.tagged_base import BaseTaggedEntity
 from albert.utils.types import BaseAlbertModel
 
 
@@ -166,31 +170,21 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     )
     project_id: str | None = Field(default=None, alias="parentId")
 
-    _task_config: list[dict] | None = PrivateAttr(default=None)
-    _formula_id: str | None = PrivateAttr(default=None)
-    _symbols: list[dict] | None = PrivateAttr(default=None)  # read only: comes from attachments
-    _un_number: UnNumber | None = PrivateAttr(default=None)  # Read only: Comes from attachments
-    _acls: list[ACL] | None = PrivateAttr(default=None)  # read only
+    task_config: list[dict] | None = Field(
+        default=None,
+        alias="TaskConfig",
+        exclude=True,
+        frozen=True,
+    )
+    formula_id: str | None = Field(default=None, alias="formulaId", exclude=True, frozen=True)
+    # Read only: comes from attachments
+    symbols: list[dict] | None = Field(default=None, alias="Symbols", exclude=True, frozen=True)
+    # Read only: Comes from attachments
+    un_number: UnNumber | None = Field(default=None, alias="unNumber", exclude=True, frozen=True)
+    acls: list[ACL] | None = Field(default=None, alias="ACL", exclude=True, frozen=True)
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        # handle aliases on private attributes
-        if "ACL" in data:
-            self._acls = data["ACL"]
-        if "unNumber" in data:  # pragma: no cover (We need them to seed UnNumbers for us)
-            self._un_number = data["unNumber"]
-        if "Symbols" in data:
-            self._symbols = data["Symbols"]
-        if "TaskConfig" in data:
-            self._task_config = data["TaskConfig"]
-        if "Minimum" in data:
-            self._minimum = data["Minimum"]
-        if "formulaId" in data:
-            self._formula_id = data["formulaId"]
-
-    @model_validator(
-        mode="before"
-    )  # Must happen before the model is created so unit_category is set
+    # Must happen before the model is created so unit_category is set
+    @model_validator(mode="before")
     @classmethod
     def set_unit_category(cls, values: dict[str, Any]) -> dict[str, Any]:
         """
@@ -253,7 +247,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
         return data
 
     @model_validator(mode="after")
-    def ensure_formula_fields(self: "InventoryMinimum") -> "InventoryItem":
+    def ensure_formula_fields(self: "InventoryItem") -> "InventoryItem":
         """
         Ensure required fields are present for formulas.
 
@@ -272,11 +266,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
         AttributeError
             If a required project_id is missing for formulas.
         """
-        if self.category == "Formulas" and not self.project_id and not self.id:
+        if self.category == InventoryCategory.FORMULAS and not self.project_id and not self.id:
             # Some legacy on platform formulas don't have a project_id so check if its already on platform
             raise AlbertException("A project_id must be supplied for all formulas.")
         return self
-
-    @property
-    def formula_id(self) -> str | None:
-        return self._formula_id

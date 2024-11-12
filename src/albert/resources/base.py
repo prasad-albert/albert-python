@@ -1,10 +1,13 @@
+import logging
 from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field, PrivateAttr, model_validator
 
 from albert.exceptions import AlbertException
+from albert.resources.serialization import SerializeAsEntityLink
+from albert.resources.tags import Tag
 from albert.session import AlbertSession
 from albert.utils.types import BaseAlbertModel
 
@@ -29,9 +32,9 @@ class SecurityClass(str, Enum):
 class AuditFields(BaseAlbertModel):
     """The audit fields for a resource"""
 
-    by: str = Field(None)
-    by_name: str | None = Field(None, alias="byName")
-    at: datetime | None = Field(None)
+    by: str = Field(default=None)
+    by_name: str | None = Field(default=None, alias="byName")
+    at: datetime | None = Field(default=None)
 
 
 class BaseResource(BaseAlbertModel):
@@ -39,44 +42,66 @@ class BaseResource(BaseAlbertModel):
 
     Attributes
     ----------
+    status: Status | None
+        The status of the resource, optional.
     created: AuditFields | None
         Audit fields for the creation of the resource, optional.
     updated: AuditFields | None
         Audit fields for the update of the resource, optional.
-    status: Status | None
-        The status of the resource, optional.
     """
 
-    _created: AuditFields | None = PrivateAttr(default=None)
-    _updated: AuditFields | None = PrivateAttr(default=None)
     status: Status | None = Field(default=None)
-
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if "Created" in data:
-            self._created = AuditFields(**data["Created"])
-        if "Updated" in data:
-            self._updated = AuditFields(**data["Updated"])
-
-    @property
-    def created(self) -> AuditFields | None:
-        return self._created
-
-    @property
-    def updated(self) -> AuditFields | None:
-        return self._updated
+    created: AuditFields | None = Field(
+        default=None,
+        alias="Created",
+        exclude=True,
+        frozen=True,
+    )
+    updated: AuditFields | None = PrivateAttr(
+        default=None,
+        alias="UPdated",
+        exclude=True,
+        frozen=True,
+    )
 
 
 class BaseSessionResource(BaseResource):
-    session: AlbertSession | None = Field(
-        default=None,
-        exclude=True,
-        description=(
-            "Albert session for accessing the Albert API. "
-            "The session is included as an optional field to allow for resources of this type "
-            "to be created independently from calls to the API."
-        ),
-    )
+    _session: AlbertSession | None = PrivateAttr(default=None)
+
+
+class BaseTaggedEntity(BaseResource):
+    """
+    BaseTaggedEntity is a Pydantic model that includes functionality for handling tags as either Tag objects or strings.
+
+    Attributes
+    ----------
+    tags : List[Tag | str] | None
+        A list of Tag objects or strings representing tags.
+    """
+
+    tags: list[SerializeAsEntityLink[Tag]] | None = Field(None, alias="Tags")
+
+    @model_validator(mode="before")  # must happen before to keep type validation
+    @classmethod
+    def convert_tags(cls, data: dict[str, Any]) -> dict[str, Any]:
+        tags = data.get("tags")
+        if not tags:
+            tags = data.get("Tags")
+        if tags:
+            new_tags = []
+            for t in tags:
+                if isinstance(t, Tag):
+                    new_tags.append(t)
+                elif isinstance(t, str):
+                    new_tags.append(Tag.from_string(t))
+                elif isinstance(t, dict):
+                    new_tags.append(Tag(**t))
+                else:
+                    # We do not expect this else to be hit because tags should only be Tag or str
+                    logging.warning(f"Unexpected value for Tag. {t} of type {type(t)}")
+                    continue
+            data["tags"] = new_tags
+        return data
 
 
 class BaseEntityLink(BaseAlbertModel):

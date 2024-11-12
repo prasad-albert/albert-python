@@ -3,12 +3,11 @@ from typing import Annotated, Literal
 
 from pydantic import Field, TypeAdapter
 
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass
+from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseTaggedEntity, SecurityClass
 from albert.resources.data_templates import DataTemplate
 from albert.resources.locations import Location
 from albert.resources.projects import Project
 from albert.resources.serialization import SerializeAsEntityLink
-from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.users import User
 from albert.resources.workflows import Workflow
 
