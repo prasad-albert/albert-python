@@ -6,7 +6,6 @@ from pydantic import Field, field_validator, model_validator
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
-from albert.exceptions import AlbertException
 from albert.resources.acls import ACL
 from albert.resources.base import BaseEntityLink, EntityLinkConvertible, SecurityClass
 from albert.resources.locations import Location
@@ -55,7 +54,7 @@ class CasAmount(BaseAlbertModel):
     id: str | None = Field(default=None)
 
     # Read-only fields
-    cas: Cas = Field(default=None, exclude=True)
+    cas: Cas | None = Field(default=None, exclude=True)
     cas_smiles: str | None = Field(default=None, alias="casSmiles", exclude=True, frozen=True)
     number: str | None = Field(default=None, exclude=True, frozen=True)
 
@@ -93,11 +92,11 @@ class InventoryMinimum(BaseAlbertModel):
         Ensure that either an id or a location is provided.
         """
         if self.id is None and self.location is None:
-            raise AlbertException(
+            raise ValueError(
                 "Either an id or a location must be provided for an InventoryMinimum."
             )
         if self.id and self.location and self.location.id != self.id:
-            raise AlbertException(
+            raise ValueError(
                 "Only an id or a location can be provided for an InventoryMinimum, not both."
             )
 
