@@ -2,9 +2,9 @@ import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
+from albert.exceptions import AlbertException
 from albert.resources.companies import Company
 from albert.session import AlbertSession
-from albert.utils.exceptions import AlbertException
 from albert.utils.logging import logger
 
 

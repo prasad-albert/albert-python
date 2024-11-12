@@ -1,11 +1,11 @@
 from pydantic import Field, model_validator
 
+from albert.exceptions import AlbertException
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter
 from albert.resources.serialization import EntityLinkConvertible, SerializeAsEntityLink
 from albert.resources.units import Unit
-from albert.utils.exceptions import AlbertException
 
 
 class Interval(BaseAlbertModel):

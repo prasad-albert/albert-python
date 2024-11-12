@@ -3,9 +3,9 @@ from collections.abc import Generator
 import pytest
 
 from albert.albert import Albert
+from albert.exceptions import NotFoundError
 from albert.resources.base import BaseEntityLink
 from albert.resources.projects import Project
-from albert.utils.exceptions import NotFoundError
 
 
 def _list_asserts(returned_list, limit=50):

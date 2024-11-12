@@ -6,12 +6,12 @@ from pydantic import Field, PrivateAttr, model_validator
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
+from albert.exceptions import AlbertException
 from albert.resources.acls import ACL
 from albert.resources.base import BaseEntityLink, EntityLinkConvertible, SecurityClass
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
-from albert.utils.exceptions import AlbertException
 from albert.utils.types import BaseAlbertModel
 
 

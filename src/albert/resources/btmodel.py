@@ -3,8 +3,8 @@ from typing import Any
 
 from pydantic import Field
 
+from albert.exceptions import AlbertException
 from albert.resources.base import BaseResource, BaseSessionResource
-from albert.utils.exceptions import AlbertException
 from albert.utils.types import BaseAlbertModel
 
 

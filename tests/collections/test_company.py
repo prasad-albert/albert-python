@@ -3,8 +3,8 @@ from collections.abc import Generator
 import pytest
 
 from albert.albert import Albert
+from albert.exceptions import AlbertException
 from albert.resources.companies import Company
-from albert.utils.exceptions import AlbertException
 
 
 def _list_asserts(returned_list):
