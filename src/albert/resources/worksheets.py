@@ -26,9 +26,9 @@ class Worksheet(BaseSessionResource):
 
     @model_validator(mode="after")
     def add_session_to_sheets(self):
-        if self._session is not None:
+        if self.session is not None:
             for s in self.sheets:
-                s._session = self._session
+                s._session = self.session
                 for d in s.designs:
-                    d._session = self._session
+                    d._session = self.session
         return self

@@ -66,6 +66,14 @@ class BaseResource(BaseAlbertModel):
 class BaseSessionResource(BaseResource):
     _session: AlbertSession | None = PrivateAttr(default=None)
 
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._session = data.get("session")
+
+    @property
+    def session(self) -> AlbertSession | None:
+        return self._session
+
 
 class BaseEntityLink(BaseAlbertModel):
     id: str
