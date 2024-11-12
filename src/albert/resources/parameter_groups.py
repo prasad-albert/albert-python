@@ -2,7 +2,6 @@ from enum import Enum
 
 from pydantic import Field, model_validator
 
-from albert.exceptions import AlbertException
 from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, SecurityClass
 from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter, ParameterCategory
@@ -63,7 +62,7 @@ class ParameterValue(BaseResource):
     @model_validator(mode="after")
     def set_parameter_fields(self) -> "ParameterValue":
         if self.parameter is None and self.id is None:
-            raise AlbertException("Please provide either an id or an parameter object.")
+            raise ValueError("Please provide either an id or an parameter object.")
 
         if self.parameter is not None:
             object.__setattr__(self, "id", self.parameter.id)
