@@ -1,9 +1,7 @@
 from enum import Enum
-from typing import Any
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field, model_validator
 
-from albert.exceptions import AlbertException
 from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, SecurityClass
 from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter, ParameterCategory
@@ -57,40 +55,21 @@ class ParameterValue(BaseResource):
     unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
     added: AuditFields | None = Field(alias="Added", default=None)
 
-    _name = PrivateAttr(default=None)
-    _sequence: int | None = PrivateAttr(default=None)
+    # Read-only fields
+    name: str | None = Field(default=None, exclude=True, frozen=True)
+    sequence: str | None = Field(default=None, exclude=True, frozen=True)
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        self._sequence = data.get("sequence")
-        if parameter := data.get("parameter"):
-            # Parameter object was passed
-            if self.id is not None:
-                raise AlbertException(
-                    "Please provide either an id or an parameter object, not both."
-                )
-            parameter = Parameter(**parameter) if isinstance(parameter, dict) else parameter
-            if parameter.id is None:
-                raise AlbertException(
-                    "You must first create the parameter before creating a parameter value. "
-                    "Your parameter object must have an id."
-                )
-            self.id = parameter.id
-            self.category = parameter.category
-            self._name = parameter.name
-        else:
-            # No parameter object
-            if self.id is None and "parameter" not in data:
-                raise AlbertException("Please provide either an id or an parameter object.")
-            self._name = data.get("name")
+    @model_validator(mode="after")
+    def set_parameter_fields(self) -> "ParameterValue":
+        if self.parameter is None and self.id is None:
+            raise ValueError("Please provide either an id or an parameter object.")
 
-    @property
-    def name(self) -> str:
-        return self._name
+        if self.parameter is not None:
+            object.__setattr__(self, "id", self.parameter.id)
+            object.__setattr__(self, "category", self.parameter.category)
+            object.__setattr__(self, "name", self.parameter.name)
 
-    @property
-    def sequence(self) -> int:
-        return self._sequence
+        return self
 
 
 class ParameterGroup(BaseResource):
@@ -103,13 +82,6 @@ class ParameterGroup(BaseResource):
     metadata: PGMetadata | None = Field(alias="Metadata", default=None)
     parameters: list[ParameterValue] = Field(alias="Parameters")
 
-    _verified: bool = PrivateAttr(default=False)
-    _documents: list[BaseEntityLink] = PrivateAttr(default_factory=list)
-
-    @property
-    def verified(self) -> bool:
-        return self._verified
-
-    @property
-    def documents(self) -> list[BaseEntityLink]:
-        return self._documents
+    # Read-only fields
+    verified: bool = Field(default=False, exclude=True, frozen=True)
+    documents: list[BaseEntityLink] = Field(default_factory=list, exclude=True, frozen=True)
