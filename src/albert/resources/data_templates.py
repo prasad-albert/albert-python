@@ -42,12 +42,12 @@ class DataColumnValue(BaseAlbertModel):
 
 class DataTemplate(BaseTaggedEntity, EntityLinkConvertible):
     name: str
+    id: str = Field(None, alias="albertId")
     description: str | None = None
     security_class: SecurityClass | None = None
-    metadata: dict[str, str | BaseEntityLink | list[BaseEntityLink]] | None = Field(
-        default=None, alias="Metadata"
-    )
     verified: bool = False
     users_with_access: list[SerializeAsEntityLink[User]] | None = Field(alias="ACL", default=None)
     data_column_values: list[DataColumnValue] | None = Field(alias="DataColumns", default=None)
-    id: str = Field(None, alias="albertId")
+    metadata: dict[str, str | BaseEntityLink | list[BaseEntityLink]] | None = Field(
+        default=None, alias="Metadata"
+    )

@@ -1,6 +1,5 @@
 from pydantic import Field, model_validator
 
-from albert.exceptions import AlbertException
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter
@@ -54,13 +53,13 @@ class ParameterSetpoint(BaseAlbertModel):
     def check_parameter_setpoint_validity(self):
         if self.parameter:
             if self.parameter_id is not None and self.parameter_id != self.parameter.id:
-                raise AlbertException("Provided parameter_id does not match the parameter's id.")
+                raise ValueError("Provided parameter_id does not match the parameter's id.")
             if self.parameter_id is None:
                 self.parameter_id = self.parameter.id
         elif self.parameter is None and self.parameter_id is None:
-            raise AlbertException("Either parameter or parameter_id must be provided.")
+            raise ValueError("Either parameter or parameter_id must be provided.")
         if self.value is not None and self.intervals is not None:
-            raise AlbertException("Cannot provide both value and intervals.")
+            raise ValueError("Cannot provide both value and intervals.")
         return self
 
 
@@ -90,7 +89,7 @@ class ParameterGroupSetpoints(BaseAlbertModel):
         if self.parameter_group is not None:
             if self.parameter_group_id is not None:
                 if self.parameter_group.id != self.parameter_group_id:
-                    raise AlbertException(
+                    raise ValueError(
                         "Provided parameter_group_id does not match the parameter_group's id."
                     )
             else:

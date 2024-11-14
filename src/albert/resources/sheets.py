@@ -294,7 +294,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
     def set_session(self):
         if self.session is not None:
             for d in self.designs:
-                d.session = self.session
+                d._session = self.session
         return self
 
     @property
