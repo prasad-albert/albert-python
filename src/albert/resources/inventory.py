@@ -161,7 +161,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     minimum: list[InventoryMinimum] | None = Field(default=None)  # To do
     alias: str | None = Field(default=None)
     cas: list[CasAmount] | None = Field(default=None, alias="Cas")
-    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
+    metadata: dict[str, int | str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
         alias="Metadata", default=None
     )
     project_id: str | None = Field(default=None, alias="parentId")
@@ -280,3 +280,29 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     @property
     def formula_id(self) -> str | None:
         return self._formula_id
+
+
+class InventorySpecValue(BaseAlbertModel):
+    min: str | None = Field(default=None)
+    max: str | None = Field(default=None)
+    reference: str | None = Field(default=None)
+    comparison_operator: str | None = Field(default=None, alias="comparisonOperator")
+
+
+class InventorySpec(BaseAlbertModel):
+    id: str = Field(..., alias="albertId")
+    name: str
+    data_column_id: str = Field(..., alias="datacolumnId")
+    data_column_name: str | None = Field(default=None, alias="datacolumnName")
+    data_template_id: str | None = Field(default=None, alias="datatemplateId")
+    data_template_name: str | None = Field(default=None, alias="datatemplateName")
+    unit_id: str | None = Field(default=None, alias="unitId")
+    unit_name: str | None = Field(default=None, alias="unitName")
+    workflow_id: str | None = Field(default=None, alias="workflowId")
+    workflow_name: str | None = Field(default=None, alias="workflowName")
+    value: InventorySpecValue | None = Field(default=None, alias="Value")
+
+
+class InventorySpecList(BaseAlbertModel):
+    parent_id: str = Field(..., alias="parentId")
+    specs: list[InventorySpec] = Field(..., alias="Specs")
