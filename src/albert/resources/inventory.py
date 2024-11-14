@@ -201,6 +201,14 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
                 object.__setattr__(self, "unit_category", InventoryUnitCategory.UNITS)
         return self
 
+    @model_validator(mode="after")
+    def validate_formula_fields(self) -> "InventoryItem":
+        """Ensure required fields are present for formulas."""
+        if self.category == InventoryCategory.FORMULAS and not self.project_id and not self.id:
+            # Some legacy on platform formulas don't have a project_id so check if its already on platform
+            raise ValueError("A project_id must be supplied for all formulas.")
+        return self
+
 
 class InventorySpecValue(BaseAlbertModel):
     min: str | None = Field(default=None)
