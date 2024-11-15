@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from albert.resources.acls import ACL
-from albert.resources.base import BaseEntityLink, BaseResource
+from albert.resources.base import BaseEntityLink, BaseResource, MetadataItem
 from albert.resources.inventory import InventoryCategory
 from albert.resources.locations import Location
 from albert.resources.projects import Project
@@ -180,9 +180,7 @@ class CustomTemplate(BaseTaggedEntity):
     name: str
     id: str = Field(alias="albertId")
     category: TemplateCategory = Field(default=TemplateCategory.GENERAL)
-    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
-        default=None, alias="Metadata"
-    )
+    metadata: dict[str, MetadataItem] | None = Field(default=None, alias="Metadata")
     data: CustomTemplateData | None = Field(default=None, alias="Data")
     team: list[TeamACL] | None = Field(default_factory=list)
     acl: TemplateACL | None = Field(default_factory=list, alias="ACL")

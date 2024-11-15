@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import Field, NonNegativeFloat, field_serializer, field_validator
 
 from albert.collections.inventory import InventoryCategory
-from albert.resources.base import BaseEntityLink, BaseResource
+from albert.resources.base import BaseResource, MetadataItem
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.storage_locations import StorageLocation
@@ -78,9 +78,7 @@ class Lot(BaseResource):
     owner: list[SerializeAsEntityLink[User]] | None = Field(default=None)
     lot_number: str | None = Field(None, alias="lotNumber")
     external_barcode_id: str | None = Field(None, alias="externalBarcodeId")
-    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
-        alias="Metadata", default=None
-    )
+    metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
     # because quarantined is an allowed Lot status, we need to extend the normal status
     status: LotStatus | None = Field(default=None)
 
