@@ -5,7 +5,6 @@ from pydantic import Field, field_validator, model_validator
 
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
-from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
 from albert.resources.base import EntityLinkConvertible, MetadataItem, SecurityClass
 from albert.resources.locations import Location
@@ -165,14 +164,11 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
 
     # Read-only fields
     task_config: list[dict] | None = Field(
-        default=None,
-        alias="TaskConfig",
-        exclude=True,
-        frozen=True,
+        default=None, alias="TaskConfig", exclude=True, frozen=True
     )
     formula_id: str | None = Field(default=None, alias="formulaId", exclude=True, frozen=True)
     symbols: list[dict] | None = Field(default=None, alias="Symbols", exclude=True, frozen=True)
-    un_number: UnNumber | None = Field(default=None, alias="unNumber", exclude=True, frozen=True)
+    un_number: str | None = Field(default=None, alias="unNumber", exclude=True, frozen=True)
     acls: list[ACL] | None = Field(default=None, alias="ACL", exclude=True, frozen=True)
 
     @field_validator("company", mode="before")
