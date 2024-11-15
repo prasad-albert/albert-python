@@ -1,6 +1,6 @@
 from pydantic import Field, model_validator
 
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, SecurityClass
+from albert.resources.base import BaseAlbertModel, MetadataItem, SecurityClass
 from albert.resources.data_columns import DataColumn
 from albert.resources.serialization import EntityLinkConvertible, SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
@@ -48,6 +48,4 @@ class DataTemplate(BaseTaggedEntity, EntityLinkConvertible):
     verified: bool = False
     users_with_access: list[SerializeAsEntityLink[User]] | None = Field(alias="ACL", default=None)
     data_column_values: list[DataColumnValue] | None = Field(alias="DataColumns", default=None)
-    metadata: dict[str, str | BaseEntityLink | list[BaseEntityLink]] | None = Field(
-        default=None, alias="Metadata"
-    )
+    metadata: dict[str, MetadataItem] | None = Field(default=None, alias="Metadata")

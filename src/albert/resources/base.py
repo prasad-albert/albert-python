@@ -87,3 +87,6 @@ class EntityLinkConvertible:
         return AlbertException(
             "`id` is required to create an entity link. Ensure the linked object is registered."
         )
+
+
+MetadataItem = float | int | str | BaseEntityLink | list[BaseEntityLink]

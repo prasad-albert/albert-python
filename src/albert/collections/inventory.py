@@ -1,11 +1,13 @@
 import logging
 
+from pydantic import TypeAdapter
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.exceptions import ForbiddenError, InternalServerError, NotFoundError
-from albert.resources.inventory import InventoryCategory, InventoryItem
+from albert.resources.inventory import InventoryCategory, InventoryItem, InventorySpecList
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.users import User
@@ -191,6 +193,11 @@ class InventoryCollection(BaseCollection):
             params={"id": ids},
         )
         return [InventoryItem(**item) for item in response.json()["Items"]]
+
+    def get_specs(self, *, ids: list[str]) -> list[InventorySpecList]:
+        url = f"{self.base_path}/specs"
+        response = self.session.get(url, params={"id": ids})
+        return TypeAdapter(list[InventorySpecList]).validate_python(response.json())
 
     def delete(self, *, id: str) -> None:
         """
@@ -573,6 +580,7 @@ class InventoryCollection(BaseCollection):
             #                     "oldValue": tag_id,
             #                 }
             #             )
+
         return payload
 
     def update(self, *, inventory_item: InventoryItem) -> InventoryItem:

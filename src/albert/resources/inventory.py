@@ -7,7 +7,7 @@ from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.collections.un_numbers import UnNumber
 from albert.resources.acls import ACL
-from albert.resources.base import BaseEntityLink, EntityLinkConvertible, SecurityClass
+from albert.resources.base import EntityLinkConvertible, MetadataItem, SecurityClass
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
@@ -160,9 +160,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     minimum: list[InventoryMinimum] | None = Field(default=None)  # To do
     alias: str | None = Field(default=None)
     cas: list[CasAmount] | None = Field(default=None, alias="Cas")
-    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
-        alias="Metadata", default=None
-    )
+    metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
     project_id: str | None = Field(default=None, alias="parentId")
 
     # Read-only fields
@@ -208,3 +206,29 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
             # Some legacy on platform formulas don't have a project_id so check if its already on platform
             raise ValueError("A project_id must be supplied for all formulas.")
         return self
+
+
+class InventorySpecValue(BaseAlbertModel):
+    min: str | None = Field(default=None)
+    max: str | None = Field(default=None)
+    reference: str | None = Field(default=None)
+    comparison_operator: str | None = Field(default=None, alias="comparisonOperator")
+
+
+class InventorySpec(BaseAlbertModel):
+    id: str = Field(..., alias="albertId")
+    name: str
+    data_column_id: str = Field(..., alias="datacolumnId")
+    data_column_name: str | None = Field(default=None, alias="datacolumnName")
+    data_template_id: str | None = Field(default=None, alias="datatemplateId")
+    data_template_name: str | None = Field(default=None, alias="datatemplateName")
+    unit_id: str | None = Field(default=None, alias="unitId")
+    unit_name: str | None = Field(default=None, alias="unitName")
+    workflow_id: str | None = Field(default=None, alias="workflowId")
+    workflow_name: str | None = Field(default=None, alias="workflowName")
+    value: InventorySpecValue | None = Field(default=None, alias="Value")
+
+
+class InventorySpecList(BaseAlbertModel):
+    parent_id: str = Field(..., alias="parentId")
+    specs: list[InventorySpec] = Field(..., alias="Specs")
