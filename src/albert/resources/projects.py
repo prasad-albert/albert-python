@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import Any
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field
 
 from albert.resources.acls import ACL
-from albert.resources.base import BaseEntityLink, BaseResource, EntityLinkConvertible
+from albert.resources.base import BaseResource, EntityLinkConvertible, MetadataItem
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 
@@ -91,16 +90,7 @@ class Project(BaseResource, EntityLinkConvertible):
     old_api_params: dict | None = None
     task_config: list[TaskConfig] | None = Field(default_factory=list)
     grid: GridDefault | None = None
-    metadata: dict[str, str | list[BaseEntityLink] | BaseEntityLink] | None = Field(
-        alias="Metadata", default=None
-    )
-    _state: State | None = PrivateAttr(default=None)
+    metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
 
-    def __init__(self, **data: Any):
-        super().__init__(**data)
-        if "state" in data:
-            self._state = data["state"]
-
-    @property
-    def state(self):
-        return self._state
+    # Read-only fields
+    state: State | None = Field(default=None, exclude=True, frozen=True)
