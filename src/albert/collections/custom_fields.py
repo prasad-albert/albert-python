@@ -66,7 +66,7 @@ class CustomFieldCollection(BaseCollection):
     def create(self, *, custom_field: CustomField) -> CustomField:
         response = self.session.post(
             self.base_path,
-            json=custom_field.model_dump(by_alias=True, exclude_none=True),
+            json=custom_field.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return CustomField(**response.json())
 

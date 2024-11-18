@@ -63,7 +63,7 @@ class ProjectCollection(BaseCollection):
             The created project object if successful, None otherwise.
         """
         response = self.session.post(
-            self.base_path, json=project.model_dump(by_alias=True, exclude_unset=True)
+            self.base_path, json=project.model_dump(by_alias=True, exclude_unset=True, mode="json")
         )
         return Project(**response.json())
 

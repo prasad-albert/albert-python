@@ -53,7 +53,8 @@ class PropertyDataCollection(BaseCollection):
                 inventory_id=inventory_id, data_columns=[p]
             )
             response = self.session.post(
-                self.base_path, json=create_object.model_dump(exclude_none=True, by_alias=True)
+                self.base_path,
+                json=create_object.model_dump(exclude_none=True, by_alias=True, mode="json"),
             )
             response_json = response.json()
             logger.info(response_json.get("message", None))
@@ -92,7 +93,7 @@ class PropertyDataCollection(BaseCollection):
 
         self.session.patch(
             url=f"{self.base_path}/{inventory_id}",
-            json=[x.model_dump(exclude_none=True, by_alias=True) for x in payload],
+            json=[x.model_dump(exclude_none=True, by_alias=True, mode="json") for x in payload],
         )
         return self.get_properties_on_inventory(inventory_id=inventory_id)
 
@@ -156,7 +157,10 @@ class PropertyDataCollection(BaseCollection):
                 task_id = f"TAS{task_id}"
             self.session.patch(
                 url=f"{self.base_path}/{task_id}",
-                json=[x.model_dump(exclude_none=True, by_alias=True) for x in patch_payload],
+                json=[
+                    x.model_dump(exclude_none=True, by_alias=True, mode="json")
+                    for x in patch_payload
+                ],
             )
         return self.get_all_task_properties(task_id=task_id)
 
@@ -178,7 +182,8 @@ class PropertyDataCollection(BaseCollection):
             url = f"{url}&lotId={lot_id}"
 
         response = self.session.post(
-            url=url, json=[x.model_dump(exclude_none=True, by_alias=True) for x in properties]
+            url=url,
+            json=[x.model_dump(exclude_none=True, by_alias=True, mode="json") for x in properties],
         )
         registered_properties = [
             TaskPropertyCreate(**x) for x in response.json() if "DataTemplate" in x

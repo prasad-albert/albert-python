@@ -205,7 +205,7 @@ class CompanyCollection(BaseCollection):
             logging.warning(f"Company {company.name} already exists with id {hit.id}.")
             return hit
 
-        payload = company.model_dump(by_alias=True, exclude_unset=True)
+        payload = company.model_dump(by_alias=True, exclude_unset=True, mode="json")
         response = self.session.post(self.base_path, json=payload)
         this_company = Company(**response.json())
         return this_company

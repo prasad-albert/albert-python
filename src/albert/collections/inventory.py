@@ -149,7 +149,7 @@ class InventoryCollection(BaseCollection):
                 return existing
         response = self.session.post(
             self.base_path,
-            json=inventory_item.model_dump(by_alias=True, exclude_none=True),
+            json=inventory_item.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return InventoryItem(**response.json())
 

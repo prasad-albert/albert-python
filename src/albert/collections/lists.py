@@ -139,7 +139,8 @@ class ListsCollection(BaseCollection):
             The created list entity.
         """
         response = self.session.post(
-            self.base_path, json=list_item.model_dump(by_alias=True, exclude_none=True)
+            self.base_path,
+            json=list_item.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return ListItem(**response.json())
 

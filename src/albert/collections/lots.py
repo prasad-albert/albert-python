@@ -15,7 +15,7 @@ class LotCollection(BaseCollection):
 
     def create(self, *, lots: list[Lot]) -> list[Lot]:
         # TODO: Once thi endpoint is fixed, go back to passing the whole list at once
-        payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
+        payload = [lot.model_dump(by_alias=True, exclude_none=True, mode="json") for lot in lots]
         all_lots = []
         for lot in payload:
             response = self.session.post(self.base_path, json=[lot])
