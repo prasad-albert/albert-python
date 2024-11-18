@@ -4,13 +4,11 @@ from typing import Any, Literal
 from pydantic import Field, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
-from albert.resources.data_columns import DataColumn
 from albert.resources.data_templates import DataTemplate
 from albert.resources.lots import Lot
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
 from albert.resources.workflows import Workflow
-from albert.utils.logging import logger
 from albert.utils.patches import PatchDatum
 
 ########################## Supporting GET Classes ##########################
@@ -29,15 +27,27 @@ class DataEntity(str, Enum):
     INVENTORY = "inventory"
 
 
-class PropertyValue(BaseAlbertModel):
+class PropertyData(BaseAlbertModel):
     id: str | None = Field(default=None)
     value: str | None = Field(default=None)
+
+
+class PropertyValue(BaseAlbertModel):
+    id: str | None = Field(default=None)
+    name: str | None = Field(default=None)
+    sequence: str | None = Field(default=None)
+    calculation: str | None = Field(default=None)
     numeric_value: float | None = Field(default=None, alias="valueNumeric")
     string_value: str | None = Field(default=None, alias="valueString")
+    unit: SerializeAsEntityLink[Unit] | dict = Field(default_factory=dict, alias="Unit")
+    property_data: PropertyData | None = Field(default=None, alias="PropertyData")
+    data_column_unique_id: str | None = Field(default=None, alias="dataColumnUniqueId")
+    hidden: bool | None = Field(default=False)
 
 
 class Trial(BaseAlbertModel):
     trial_number: int = Field(alias="trialNo")
+    visible_trial_number: int = Field(default=1, alias="visibleTrialNo")
     void: bool = Field(default=False)
     data_columns: list[PropertyValue] = Field(alias="DataColumns")
 
@@ -46,6 +56,7 @@ class DataInterval(BaseAlbertModel):
     interval_combination: str = Field(alias="intervalCombination")
     void: bool = Field(default=False)
     trials: list[Trial] = Field(alias="Trials")
+    name: str | None = Field(default=None)
 
 
 class TaskData(BaseAlbertModel):
@@ -78,6 +89,15 @@ class InventoryInformation(BaseAlbertModel):
 ################# Returned from GET /api/v3/propertydata ##################
 
 
+class CheckPropertyData(BaseResource):
+    block_id: str | None = Field(default=None, alias="blockId")
+    interval_id: str | None = Field(default=None, alias="intervalId")
+    inventory_id: str | None = Field(default=None, alias="inventoryId")
+    lot_id: str | None = Field(default=None, alias="lotId")
+    data_exists: bool | None = Field(default=None, alias="dataExists")
+    message: str | None = Field(default=None)
+
+
 class InventoryPropertyData(BaseResource):
     inventory_id: str = Field(alias="inventoryId")
     inventory_name: str | None = Field(alias="inventoryName", default=None)
@@ -87,14 +107,21 @@ class InventoryPropertyData(BaseResource):
 
 class TaskPropertyData(BaseResource):
     entity: Literal[DataEntity.TASK] = DataEntity.TASK
-    parent_id: str | None = Field(None, alias="parentId")
+    parent_id: str = Field(..., alias="parentId")
     task_id: str | None = Field(None, alias="id")
     inventory: InventoryInformation | None = Field(alias="Inventory", default=None)
     category: DataEntity | None = Field(None)
-    initial_workflow: SerializeAsEntityLink[Workflow] = Field(alias="InitialWorkflow")
-    finial_workflow: SerializeAsEntityLink[Workflow] = Field(alias="FinalWorkflow")
-    data_template: SerializeAsEntityLink[DataTemplate] = Field(alias="Datatemplate")
-    data: DataInterval = Field(alias="Data", frozen=True)
+    initial_workflow: SerializeAsEntityLink[Workflow] | None = Field(
+        alias="InitialWorkflow", default=None
+    )
+    finial_workflow: SerializeAsEntityLink[Workflow] | None = Field(
+        alias="FinalWorkflow", default=None
+    )
+    data_template: SerializeAsEntityLink[DataTemplate] | None = Field(
+        alias="DataTemplate", default=None
+    )
+    data: list[DataInterval] = Field(alias="Data", frozen=True, exclude=True)
+    block_id: str | None = Field(alias="blockId", default=None)
 
 
 ########################## Supporting POST Classes ##########################
@@ -104,12 +131,12 @@ class TaskPropertyValue(BaseAlbertModel):
     value: str | None = Field(default=None)
 
 
-class TaskDatumColumn(BaseAlbertModel):
+class TaskDataColumn(BaseAlbertModel):
     data_column_id: str = Field(alias="id")
-    column_id: str = Field(alias="columnId")
+    column_sequence: str | None = Field(default=None, alias="columnId")
 
 
-class TaskDataColumn(TaskDatumColumn):
+class TaskDataColumnValue(TaskDataColumn):
     value: TaskPropertyValue = Field(alias="Value")
 
     @model_validator(mode="before")
@@ -121,59 +148,38 @@ class TaskDataColumn(TaskDatumColumn):
 
 class TaskTrialData(BaseAlbertModel):
     trial_number: int | None = Field(alias="trialNo", default=None)
-    data_columns: list[TaskDataColumn] = Field(alias="DataColumns")
+    data_columns: list[TaskDataColumnValue] = Field(alias="DataColumns")
 
 
 class InventoryDataColumn(BaseAlbertModel):
-    data_column: DataColumn | None = Field(exclude=True, default=None)
     data_column_id: str | None = Field(alias="id", default=None)
     value: str | None = Field(default=None)
-
-    @model_validator(mode="after")
-    def set_missing_data_column_id(self) -> "InventoryDataColumn":
-        if self.data_column_id is None and self.data_column is not None:
-            self.data_column_id = self.data_column.id
-        elif (
-            self.data_column_id is not None
-            and self.data_column is not None
-            and self.data_column.id != self.data_column_id
-        ):
-            logger.warning("data_column and data_column_id do not match. Using data_column_id")
-            self.data_column = None
-        return self
 
 
 ########################## Task Property POST Classes ##########################
 
 
-class TaskPropertyDataCreate(BaseResource):
+class TaskPropertyCreate(BaseResource):
     entity: Literal[DataEntity.TASK] = Field(default=DataEntity.TASK)
     interval_combination: str = Field(
         alias="intervalCombination",
-        examples=["default", "ROW4XROW2", "ROW2XROW2"],
+        examples=["default", "ROW4XROW2", "ROW2"],
         default="default",
     )
-    unique_id: str | None = Field(alias="uniqueId", default=None)
-    data_template: SerializeAsEntityLink[DataTemplate] = Field(
-        alias="DataTemplate"
-    )  # Capital T on this one
-    data: list[TaskTrialData] = Field(alias="Data")
-
-
-class TaskPropertyDatumCreate(BaseResource):
-    entity: Literal[DataEntity.TASK] = Field(default=DataEntity.TASK)
+    data_column: TaskDataColumn = Field(..., alias="DataColumns")
     value: str | None = Field(default=None)
-    interval_combination: str = Field(
-        alias="intervalCombination",
-        examples=["default", "ROW4XROW2", "ROW2XROW2"],
-        default="default",
-    )
-    unique_id: str | None = Field(alias="uniqueId", default=None)
-    data_template: SerializeAsEntityLink[DataTemplate] = Field(
-        alias="DataTemplate"
-    )  # Capital T on this one
-    trial_number: int = Field(alias="visibleTrialNo")
-    data_columns: list[TaskDatumColumn] = Field(alias="DataColumns")
+    visible_trial_number: int | None = Field(alias="visibleTrialNo", default=None)
+    trial_number: int = Field(alias="trialNo", default=None)
+    data_template: SerializeAsEntityLink[DataTemplate] = Field(..., alias="DataTemplate")
+
+    @model_validator(mode="after")
+    def set_visible_trial_number(self) -> "TaskPropertyCreate":
+        if self.visible_trial_number is None:
+            if self.trial_number is not None:
+                self.visible_trial_number = self.trial_number
+            else:
+                self.visible_trial_number = "1"
+        return self
 
 
 ########################## Inventory Custom Property POST Class ##########################

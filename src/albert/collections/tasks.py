@@ -35,7 +35,7 @@ class TaskCollection(BaseCollection):
         # each type of task has it's own sub-prefix. Sometimes the core "TAS" prefix is dropped on the object. This ensures both the TAS and sub prefix are present on the ID
         if not id.startswith("TAS"):
             id = f"TAS{id}"
-        url = f"{self.base_path}/{id}"
+        url = f"{self.base_path}/multi/{id}"
         response = self.session.get(url)
         return TaskAdapter.validate_python(response.json())
 
