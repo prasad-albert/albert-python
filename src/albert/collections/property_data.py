@@ -36,7 +36,7 @@ class PropertyDataCollection(BaseCollection):
     def _get_task_from_id(self, *, id: str) -> PropertyTask:
         return TaskCollection(session=self.session).get_by_id(id=id)
 
-    def get_properties_on_inventory(self, *, inventory_item_id: str):
+    def get_properties_on_inventory(self, *, inventory_item_id: str) -> InventoryPropertyData:
         """Returns all the properties of an inventory item."""
         response = self.session.get(
             url=f"{self.base_path}?entity=inventory&id[]={inventory_item_id}"
@@ -46,7 +46,7 @@ class PropertyDataCollection(BaseCollection):
 
     def add_properies_to_inventory(
         self, *, inventory_item_id: str, properties: list[InventoryDataColumn]
-    ):
+    ) -> list[InventoryPropertyDataCreate]:
         returned = []
         for p in properties:
             # Can only add one at a time.
@@ -63,7 +63,7 @@ class PropertyDataCollection(BaseCollection):
 
     def update_property_on_inventory(
         self, *, inventory_item_id: str, property_data: InventoryDataColumn
-    ):
+    ) -> InventoryPropertyData:
         existing_properties = self.get_properties_on_inventory(inventory_item_id=inventory_item_id)
         existing_value = None
         for p in existing_properties.custom_property_data:
@@ -99,7 +99,7 @@ class PropertyDataCollection(BaseCollection):
 
     def get_task_block_properties(
         self, *, inventory_id: str, task_id: str, block_id: str, lot_id: str | None = None
-    ):
+    ) -> TaskPropertyData:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
         url = f"{self.base_path}?entity=task&blockId={block_id}&id={task_id}&inventoryId={inventory_id}"
@@ -110,7 +110,7 @@ class PropertyDataCollection(BaseCollection):
         response_json = response.json()
         return TaskPropertyData(**response_json[0])
 
-    def check_for_task_data(self, *, task_id: str):
+    def check_for_task_data(self, *, task_id: str) -> list[CheckPropertyData]:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
         task_info = self._get_task_from_id(id=task_id)
@@ -122,7 +122,9 @@ class PropertyDataCollection(BaseCollection):
         )
         return [CheckPropertyData(**x) for x in response.json()]
 
-    def check_block_interval_for_data(self, *, block_id: str, task_id: str, interval_id: str):
+    def check_block_interval_for_data(
+        self, *, block_id: str, task_id: str, interval_id: str
+    ) -> CheckPropertyData:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
         response = self.session.get(
@@ -130,7 +132,7 @@ class PropertyDataCollection(BaseCollection):
         )
         return CheckPropertyData(response.json())
 
-    def get_all_task_properties(self, *, task_id: str):
+    def get_all_task_properties(self, *, task_id: str) -> list[TaskPropertyData]:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
         all_info = []
@@ -159,7 +161,7 @@ class PropertyDataCollection(BaseCollection):
             )
         return self.get_all_task_properties(task_id=task_id)
 
-    def post_task_properties(
+    def add_properies_to_task(
         self,
         *,
         invenotry_id: str,
@@ -188,7 +190,10 @@ class PropertyDataCollection(BaseCollection):
         patches = self._form_calculated_task_property_patches(
             existing_data_rows=existing_data_rows, properties=registered_properties
         )
-        return self.update_property_on_task(task_id=task_id, patch_payload=patches)
+        if len(patches) > 0:
+            return self.update_property_on_task(task_id=task_id, patch_payload=patches)
+        else:
+            return self.get_all_task_properties(task_id=task_id)
 
     ################### Methods to support calculated value patches ##################
 
