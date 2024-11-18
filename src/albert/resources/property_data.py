@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.data_templates import DataTemplate
