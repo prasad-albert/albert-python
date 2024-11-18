@@ -23,7 +23,7 @@ class Pricing(BaseResource):
     ----------
     id : str | None
         The Albert ID of the pricing. Set when the pricing is retrieved from Albert.
-    inventory_item_id : str
+    inventory_id : str
         The Albert ID of the inventory item.
     company : Company
         The company that the pricing belongs to.
@@ -48,7 +48,7 @@ class Pricing(BaseResource):
     """
 
     id: str | None = Field(default=None, alias="albertId")
-    inventory_item_id: str = Field(default=None, alias="parentId")
+    inventory_id: str = Field(default=None, alias="parentId")
     company: SerializeAsEntityLink[Company] = Field(alias="Company")
     location: SerializeAsEntityLink[Location] = Field(alias="Location")
     description: str | None = Field(default=None)

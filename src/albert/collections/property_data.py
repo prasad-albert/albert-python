@@ -11,6 +11,7 @@ from albert.resources.property_data import (
     PropertyValue,
     TaskPropertyCreate,
     TaskPropertyData,
+    Trial,
 )
 from albert.resources.tasks import PropertyTask
 from albert.session import AlbertSession
@@ -36,22 +37,20 @@ class PropertyDataCollection(BaseCollection):
     def _get_task_from_id(self, *, id: str) -> PropertyTask:
         return TaskCollection(session=self.session).get_by_id(id=id)
 
-    def get_properties_on_inventory(self, *, inventory_item_id: str) -> InventoryPropertyData:
+    def get_properties_on_inventory(self, *, inventory_id: str) -> InventoryPropertyData:
         """Returns all the properties of an inventory item."""
-        response = self.session.get(
-            url=f"{self.base_path}?entity=inventory&id[]={inventory_item_id}"
-        )
+        response = self.session.get(url=f"{self.base_path}?entity=inventory&id[]={inventory_id}")
         response_json = response.json()
         return InventoryPropertyData(**response_json[0])
 
-    def add_properies_to_inventory(
-        self, *, inventory_item_id: str, properties: list[InventoryDataColumn]
+    def add_properties_to_inventory(
+        self, *, inventory_id: str, properties: list[InventoryDataColumn]
     ) -> list[InventoryPropertyDataCreate]:
         returned = []
         for p in properties:
             # Can only add one at a time.
             create_object = InventoryPropertyDataCreate(
-                inventory_id=inventory_item_id, data_columns=[p]
+                inventory_id=inventory_id, data_columns=[p]
             )
             response = self.session.post(
                 self.base_path, json=create_object.model_dump(exclude_none=True, by_alias=True)
@@ -62,9 +61,9 @@ class PropertyDataCollection(BaseCollection):
         return returned
 
     def update_property_on_inventory(
-        self, *, inventory_item_id: str, property_data: InventoryDataColumn
+        self, *, inventory_id: str, property_data: InventoryDataColumn
     ) -> InventoryPropertyData:
-        existing_properties = self.get_properties_on_inventory(inventory_item_id=inventory_item_id)
+        existing_properties = self.get_properties_on_inventory(inventory_id=inventory_id)
         existing_value = None
         for p in existing_properties.custom_property_data:
             if p.data_column.data_column_id == property_data.data_column_id:
@@ -92,10 +91,10 @@ class PropertyDataCollection(BaseCollection):
             ]
 
         self.session.patch(
-            url=f"{self.base_path}/{inventory_item_id}",
+            url=f"{self.base_path}/{inventory_id}",
             json=[x.model_dump(exclude_none=True, by_alias=True) for x in payload],
         )
-        return self.get_properties_on_inventory(inventory_item_id=inventory_item_id)
+        return self.get_properties_on_inventory(inventory_id=inventory_id)
 
     def get_task_block_properties(
         self, *, inventory_id: str, task_id: str, block_id: str, lot_id: str | None = None
@@ -164,7 +163,7 @@ class PropertyDataCollection(BaseCollection):
     def add_properies_to_task(
         self,
         *,
-        invenotry_id: str,
+        inventory_id: str,
         task_id: str,
         block_id: str,
         lot_id: str | None = None,
@@ -172,9 +171,9 @@ class PropertyDataCollection(BaseCollection):
     ):
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
-        if not invenotry_id.startswith("INV"):
-            invenotry_id = f"INV{invenotry_id}"
-        url = f"{self.base_path}/{task_id}?blockId={block_id}&inventoryId={invenotry_id}&autoCalculate=true&history=true"
+        if not inventory_id.startswith("INV"):
+            inventory_id = f"INV{inventory_id}"
+        url = f"{self.base_path}/{task_id}?blockId={block_id}&inventoryId={inventory_id}&autoCalculate=true&history=true"
         if lot_id is not None:
             url = f"{url}&lotId={lot_id}"
 
@@ -185,7 +184,7 @@ class PropertyDataCollection(BaseCollection):
             TaskPropertyCreate(**x) for x in response.json() if "DataTemplate" in x
         ]
         existing_data_rows = self.get_task_block_properties(
-            inventory_id=invenotry_id, task_id=task_id, block_id=block_id, lot_id=lot_id
+            inventory_id=inventory_id, task_id=task_id, block_id=block_id, lot_id=lot_id
         )
         patches = self._form_calculated_task_property_patches(
             existing_data_rows=existing_data_rows, properties=registered_properties
@@ -215,7 +214,7 @@ class PropertyDataCollection(BaseCollection):
                 continue  # we don't need to worry about it hence we skip
             on_platform_row = self._get_on_platform_row(
                 existing_data_rows=existing_data_rows,
-                trail_number=posted_prop.trial_number,
+                trial_number=posted_prop.trial_number,
                 interval_combination=posted_prop.interval_combination,
             )
 
@@ -225,12 +224,12 @@ class PropertyDataCollection(BaseCollection):
         return patches
 
     def _get_on_platform_row(
-        self, *, existing_data_rows: TaskPropertyData, interval_combination: str, trail_number: int
+        self, *, existing_data_rows: TaskPropertyData, interval_combination: str, trial_number: int
     ):
         for interval in existing_data_rows.data:
             if interval.interval_combination == interval_combination:
                 for trial in interval.trials:
-                    if trial.trial_number == trail_number:
+                    if trial.trial_number == trial_number:
                         return trial
         return None
 
@@ -264,7 +263,7 @@ class PropertyDataCollection(BaseCollection):
             )
             return None
 
-    def _generate_data_patch_payload(self, *, trial) -> list[PropertyDataPatchDatum]:
+    def _generate_data_patch_payload(self, *, trial: Trial) -> list[PropertyDataPatchDatum]:
         column_values = {
             col.sequence: col.property_data.value
             for col in trial.data_columns

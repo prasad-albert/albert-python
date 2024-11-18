@@ -697,28 +697,28 @@ def generate_pricing_seeds(
 ) -> list[Pricing]:
     return [
         Pricing(
-            inventory_item_id=seeded_inventory[0].id,
+            inventory_id=seeded_inventory[0].id,
             company=seeded_inventory[0].company,
             location=seeded_locations[0],
             description=f"{seed_prefix} - Pricing seed 1",
             price=42.0,
         ),
         Pricing(
-            inventory_item_id=seeded_inventory[0].id,
+            inventory_id=seeded_inventory[0].id,
             company=seeded_inventory[0].company,
             location=seeded_locations[1],
             description=f"{seed_prefix} - Pricing seed 2",
             price=50.0,
         ),
         Pricing(
-            inventory_item_id=seeded_inventory[1].id,
+            inventory_id=seeded_inventory[1].id,
             company=seeded_inventory[2].company,
             location=seeded_locations[0],
             description=f"{seed_prefix} - Pricing seed 3",
             price=10.50,
         ),
         Pricing(
-            inventory_item_id=seeded_inventory[2].id,
+            inventory_id=seeded_inventory[2].id,
             company=seeded_inventory[2].company,
             location=seeded_locations[1],
             description=f"{seed_prefix} - Pricing seed 4",

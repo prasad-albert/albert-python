@@ -22,7 +22,7 @@ class PricingCollection(BaseCollection):
         "expiration_date",
         "lead_time",
         "lead_time_unit",
-        "inventory_item_id",
+        "inventory_id",
     }
 
     def __init__(self, *, session: AlbertSession):

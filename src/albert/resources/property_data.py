@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Any, Literal
+from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.data_templates import DataTemplate
@@ -139,11 +139,14 @@ class TaskDataColumn(BaseAlbertModel):
 class TaskDataColumnValue(TaskDataColumn):
     value: TaskPropertyValue = Field(alias="Value")
 
-    @model_validator(mode="before")
-    def set_string_value(values: dict[str, Any]) -> dict[str, Any]:
-        if "value" in values and isinstance(values["value"], str):
-            values["value"] = TaskPropertyValue(value=values["value"])
-        return values
+    @field_validator("value", mode="before")
+    def set_string_value(cls, v):
+        """
+        Converts a string to TaskPropertyValue if the input is a string.
+        """
+        if isinstance(v, str):
+            return TaskPropertyValue(value=v)
+        return v
 
 
 class TaskTrialData(BaseAlbertModel):
@@ -183,6 +186,8 @@ class TaskPropertyCreate(BaseResource):
 
 
 ########################## Inventory Custom Property POST Class ##########################
+
+
 class PropertyDataPatchDatum(PatchDatum):
     property_column_id: str = Field(alias="id")
 

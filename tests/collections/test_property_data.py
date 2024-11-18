@@ -41,7 +41,7 @@ def test_add_to_task(client: Albert, seeded_tasks: list[BaseTask]):
     r = client.property_data.add_properies_to_task(
         task_id=prop_task.id,
         properties=payload,
-        invenotry_id=full_data[0].inventory.inventory_id,
+        inventory_id=full_data[0].inventory.inventory_id,
         lot_id=full_data[0].inventory.lot_id,
         block_id=full_data[0].block_id,
     )
@@ -57,8 +57,8 @@ def test_add_to_inv(client: Albert, seeded_inventory, seeded_data_columns):
             value="55.5",
         )
     ]
-    r = client.property_data.add_properies_to_inventory(
-        inventory_item_id=seeded_inventory[2].id, properties=data_columns
+    r = client.property_data.add_properties_to_inventory(
+        inventory_id=seeded_inventory[2].id, properties=data_columns
     )
     assert isinstance(r[0], InventoryPropertyDataCreate)
     assert r[0].inventory_id == seeded_inventory[2].id
