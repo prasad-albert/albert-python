@@ -20,7 +20,7 @@ class TaskCollection(BaseCollection):
 
     def create(self, *, task: BaseTask) -> BaseTask:
         payload = [task.model_dump(mode="json", by_alias=True, exclude_none=True)]
-        url = f"{self.base_path}/multi?category={task.category.value}"
+        url = f"{self.base_path}/multi?category={task.category if isinstance(task.category, str) else task.category.value}"
         if task.parent_id is not None:
             url = f"{url}&parentId={task.parent_id}"
         response = self.session.post(url=url, json=payload)
