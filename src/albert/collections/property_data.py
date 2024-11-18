@@ -2,7 +2,6 @@ import re
 
 from albert.collections.base import BaseCollection
 from albert.collections.tasks import TaskCollection
-from albert.resources.inventory import InventoryItem
 from albert.resources.property_data import (
     CheckPropertyData,
     InventoryDataColumn,
@@ -37,21 +36,22 @@ class PropertyDataCollection(BaseCollection):
     def _get_task_from_id(self, *, id: str) -> PropertyTask:
         return TaskCollection(session=self.session).get_by_id(id=id)
 
-    def get_properties_on_inventory(self, *, inventory_item: InventoryItem):
+    def get_properties_on_inventory(self, *, inventory_item_id: str):
+        """Returns all the properties of an inventory item."""
         response = self.session.get(
-            url=f"{self.base_path}?entity=inventory&id[]={inventory_item.id}"
+            url=f"{self.base_path}?entity=inventory&id[]={inventory_item_id}"
         )
         response_json = response.json()
         return InventoryPropertyData(**response_json[0])
 
     def add_properies_to_inventory(
-        self, *, inventory_item: InventoryItem, properties: list[InventoryDataColumn]
+        self, *, inventory_item_id: str, properties: list[InventoryDataColumn]
     ):
         returned = []
         for p in properties:
             # Can only add one at a time.
             create_object = InventoryPropertyDataCreate(
-                inventory_id=inventory_item.id, data_columns=[p]
+                inventory_id=inventory_item_id, data_columns=[p]
             )
             response = self.session.post(
                 self.base_path, json=create_object.model_dump(exclude_none=True, by_alias=True)
@@ -62,9 +62,9 @@ class PropertyDataCollection(BaseCollection):
         return returned
 
     def update_property_on_inventory(
-        self, *, inventory_item: InventoryItem, property_data: InventoryDataColumn
+        self, *, inventory_item_id: str, property_data: InventoryDataColumn
     ):
-        existing_properties = self.get_properties_on_inventory(inventory_item=inventory_item)
+        existing_properties = self.get_properties_on_inventory(inventory_item_id=inventory_item_id)
         existing_value = None
         for p in existing_properties.custom_property_data:
             if p.data_column.data_column_id == property_data.data_column_id:
@@ -92,10 +92,10 @@ class PropertyDataCollection(BaseCollection):
             ]
 
         self.session.patch(
-            url=f"{self.base_path}/{inventory_item.id}",
+            url=f"{self.base_path}/{inventory_item_id}",
             json=[x.model_dump(exclude_none=True, by_alias=True) for x in payload],
         )
-        return self.get_properties_on_inventory(inventory_item=inventory_item)
+        return self.get_properties_on_inventory(inventory_item_id=inventory_item_id)
 
     def get_task_block_properties(
         self, *, inventory_id: str, task_id: str, block_id: str, lot_id: str | None = None
@@ -190,7 +190,7 @@ class PropertyDataCollection(BaseCollection):
         )
         return self.update_property_on_task(task_id=task_id, patch_payload=patches)
 
-        # For each Patch, update
+    ################### Methods to support calculated value patches ##################
 
     def _form_calculated_task_property_patches(
         self, *, existing_data_rows: TaskPropertyData, properties: list[TaskPropertyCreate]
@@ -246,16 +246,6 @@ class PropertyDataCollection(BaseCollection):
         return used_columns
 
     def _evaluate_calculation(self, *, calculation: str, column_values: dict) -> float | None:
-        """
-        Evaluates a calculation string using the provided column values.
-
-        Args:
-            calculation (str): The calculation string (e.g., "=COL2-COL3").
-            column_values (dict): A dictionary mapping column names to their numeric values.
-
-        Returns:
-            Any: The result of the evaluation or None if evaluation fails.
-        """
         calculation = calculation.lstrip("=")  # Remove '=' at the start of the calculation
         try:
             # Replace column names with their numeric values in the calculation string

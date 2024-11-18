@@ -34,7 +34,7 @@ class Pricing(BaseResource):
     pack_size : str | None
         The pack size of the pricing. Optional. Used to calculate the cost per unit.
     price : float
-        The price of the pricing IN CURRENCY/ KG! Must do the conversion!
+        The price of the pricing IN CURRENCY/ KG or CURRENCY/L! Must do the conversion! Depends on InventoryItem's unit of measure.
     currency : str
         The currency of the pricing. Defaults to `USD`.
     fob : str | None
