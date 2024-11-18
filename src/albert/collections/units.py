@@ -75,7 +75,7 @@ class UnitCollection(BaseCollection):
             )
             return hit
         response = self.session.post(
-            self.base_path, json=unit.model_dump(by_alias=True, exclude_unset=True)
+            self.base_path, json=unit.model_dump(by_alias=True, exclude_unset=True, mode="json")
         )
         this_unit = Unit(**response.json())
         return this_unit

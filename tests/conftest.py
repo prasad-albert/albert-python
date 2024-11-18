@@ -280,7 +280,9 @@ def seeded_data_columns(
     yield seeded
 
     for data_column in seeded:
-        with suppress(NotFoundError):
+        with suppress(
+            NotFoundError, BadRequestError
+        ):  # used on deleted InventoryItem properties are blocking. Instead of making static to accomidate the unexpected behavior, doing this instead
             client.data_columns.delete(id=data_column.id)
 
 

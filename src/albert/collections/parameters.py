@@ -27,7 +27,8 @@ class ParameterCollection(BaseCollection):
             )
             return match
         response = self.session.post(
-            self.base_path, json=parameter.model_dump(by_alias=True, exclude_none=True)
+            self.base_path,
+            json=parameter.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return Parameter(**response.json())
 

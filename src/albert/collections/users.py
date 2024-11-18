@@ -113,7 +113,7 @@ class UserCollection(BaseCollection):
 
         response = self.session.post(
             self.base_path,
-            json=user.model_dump(by_alias=True, exclude_none=True),
+            json=user.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return User(**response.json())
 

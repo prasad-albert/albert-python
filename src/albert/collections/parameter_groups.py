@@ -66,7 +66,8 @@ class ParameterGroupCollection(BaseCollection):
 
     def create(self, *, parameter_group: ParameterGroup) -> ParameterGroup:
         response = self.session.post(
-            self.base_path, json=parameter_group.model_dump(by_alias=True, exclude_none=True)
+            self.base_path,
+            json=parameter_group.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return ParameterGroup(**response.json())
 

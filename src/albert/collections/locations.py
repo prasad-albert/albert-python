@@ -122,7 +122,7 @@ class LocationCollection(BaseCollection):
             )
             return exists
 
-        payload = location.model_dump(by_alias=True, exclude_unset=True)
+        payload = location.model_dump(by_alias=True, exclude_unset=True, mode="json")
         response = self.session.post(self.base_path, json=payload)
 
         return Location(**response.json())

@@ -78,8 +78,12 @@ class InventoryInformation(BaseAlbertModel):
 
     inventory_id: str = Field(alias="id")
     lot_id: str | None = Field(alias="lotId", default=None)
+    inv_lot_unique_id: str | None = Field(alias="invLotUniqueId", default=None)
     batch_size: float | None = Field(alias="batchSize", default=None)
     selected_lot: bool | None = Field(alias="selectedLot", exclude=True, frozen=True, default=None)
+    barcode_id: str | None = Field(alias="barcodeId", default=None)
+    quantity_used: float | None = Field(alias="quantityUsed", default=None)
+    selected_lot: bool | None = Field(alias="selectedLot", default=None)
 
 
 class Block(BaseAlbertModel):
@@ -87,6 +91,9 @@ class Block(BaseAlbertModel):
     workflow: list[SerializeAsEntityLink[Workflow]] = Field(alias="Workflow", min_length=1)
     data_template: list[SerializeAsEntityLink[DataTemplate]] | DataTemplateAndTargets = Field(
         alias="Datatemplate", min_length=1, max_length=1
+    )
+    parameter_quantity_used: dict | None = Field(
+        alias="parameterQuantityUsed", default=None, exclude=True
     )
 
     def model_dump(self, *args, **kwargs):
@@ -131,6 +138,9 @@ class BaseTask(BaseTaggedEntity):
     notes: str | None = Field(default=None)
     start_date: str | None = Field(alias="startDate", default=None)
     due_date: str | None = Field(alias="dueDate", default=None)
+    claimed_date: str | None = Field(alias="claimedDate", default=None)
+    completed_date: str | None = Field(alias="completedDate", default=None)
+    closed_date: str | None = Field(alias="closedDate", default=None)
     result: str | None = Field(default=None)
     state: TaskState | None = Field(default=None)
     project: SerializeAsEntityLink[Project] | list[SerializeAsEntityLink[Project]] | None = Field(

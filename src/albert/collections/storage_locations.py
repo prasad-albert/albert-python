@@ -77,7 +77,7 @@ class StorageLocationsCollection(BaseCollection):
 
         path = self.base_path
         response = self.session.post(
-            path, json=storage_location.model_dump(by_alias=True, exclude_none=True)
+            path, json=storage_location.model_dump(by_alias=True, exclude_none=True, mode="json")
         )
         return StorageLocation(**response.json())
 

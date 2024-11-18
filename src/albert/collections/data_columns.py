@@ -153,7 +153,7 @@ class DataColumnCollection(BaseCollection):
         DataColumn
             The created data column object.
         """
-        payload = [data_column.model_dump(by_alias=True, exclude_unset=True)]
+        payload = [data_column.model_dump(by_alias=True, exclude_unset=True, mode="json")]
         response = self.session.post(self.base_path, json=payload)
 
         return DataColumn(**response.json()[0])

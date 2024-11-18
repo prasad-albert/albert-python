@@ -22,7 +22,7 @@ class PricingCollection(BaseCollection):
         "expiration_date",
         "lead_time",
         "lead_time_unit",
-        "inventory_item_id",
+        "inventory_id",
     }
 
     def __init__(self, *, session: AlbertSession):
@@ -30,7 +30,7 @@ class PricingCollection(BaseCollection):
         self.base_path = f"/api/{PricingCollection._api_version}/pricings"
 
     def create(self, *, pricing: Pricing) -> Pricing:
-        payload = pricing.model_dump(by_alias=True, exclude_none=True)
+        payload = pricing.model_dump(by_alias=True, exclude_none=True, mode="json")
         response = self.session.post(self.base_path, json=payload)
         return Pricing(**response.json())
 

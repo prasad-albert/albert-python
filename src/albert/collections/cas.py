@@ -140,7 +140,7 @@ class CasCollection(BaseCollection):
         if hit:
             return hit
         else:
-            payload = cas.model_dump(by_alias=True, exclude_unset=True)
+            payload = cas.model_dump(by_alias=True, exclude_unset=True, mode="json")
             response = self.session.post(self.base_path, json=payload)
             cas = Cas(**response.json())
             return cas
