@@ -910,13 +910,15 @@ def generate_task_seeds(
     ]
 
 
-def generate_note_seeds(seeded_tasks: list[BaseTask], seeded_inventory: list[InventoryItem]):
+def generate_note_seeds(
+    seeded_tasks: list[BaseTask], seeded_inventory: list[InventoryItem], seed_prefix: str
+):
     task_note = Note(
         parent_id=seeded_tasks[0].id,
-        note="TEST- This is a note for a task",
+        note=f"{seed_prefix} This is a note for a task",
     )
     inv_note = Note(
         parent_id=seeded_inventory[0].id,
-        note="TEST- This is a note for an inventory item",
+        note=f"{seed_prefix} This is a note for an inventory item",
     )
     return [task_note, inv_note]

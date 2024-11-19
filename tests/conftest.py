@@ -525,9 +525,12 @@ def seeded_notes(
     client: Albert,
     seeded_tasks: list[BaseTask],
     seeded_inventory: list[InventoryItem],
+    seed_prefix: str,
 ):
     seeded = []
-    for note in generate_note_seeds(seeded_tasks=seeded_tasks, seeded_inventory=seeded_inventory):
+    for note in generate_note_seeds(
+        seeded_tasks=seeded_tasks, seeded_inventory=seeded_inventory, seed_prefix=seed_prefix
+    ):
         seeded.append(client.notes.create(note=note))
     yield seeded
     for note in seeded:
