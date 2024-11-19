@@ -26,6 +26,7 @@ from albert.resources.projects import Project
 from albert.resources.roles import Role
 from albert.resources.sheets import Component, Sheet
 from albert.resources.tags import Tag
+from albert.resources.tasks import BaseTask
 from albert.resources.units import Unit
 from albert.resources.users import User
 from albert.resources.workflows import Workflow
@@ -41,6 +42,7 @@ from tests.seeding import (
     generate_list_item_seeds,
     generate_location_seeds,
     generate_lot_seeds,
+    generate_note_seeds,
     generate_parameter_group_seeds,
     generate_parameter_seeds,
     generate_pricing_seeds,
@@ -516,3 +518,18 @@ def seeded_tasks(
     for t in seeded:
         with suppress(NotFoundError, BadRequestError):
             client.tasks.delete(id=t.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_notes(
+    client: Albert,
+    seeded_tasks: list[BaseTask],
+    seeded_inventory: list[InventoryItem],
+):
+    seeded = []
+    for note in generate_note_seeds(seeded_tasks=seeded_tasks, seeded_inventory=seeded_inventory):
+        seeded.append(client.notes.create(note=note))
+    yield seeded
+    for note in seeded:
+        with suppress(NotFoundError):
+            client.notes.delete(id=note.id)
