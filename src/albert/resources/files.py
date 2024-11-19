@@ -15,6 +15,11 @@ class FileNamespace(str, Enum):
     SDS = "sds"
 
 
+class FileCategory(str, Enum):
+    SDS = "SDS"
+    OTHER = "Other"
+
+
 class FileInfo(BaseAlbertModel):
     name: str
     size: int

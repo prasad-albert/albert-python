@@ -4,7 +4,7 @@ from typing import IO
 import requests
 
 from albert.collections.base import BaseCollection
-from albert.resources.files import FileInfo, FileNamespace
+from albert.resources.files import FileCategory, FileInfo, FileNamespace
 from albert.session import AlbertSession
 
 
@@ -45,12 +45,14 @@ class FileCollection(BaseCollection):
         namespace: FileNamespace,
         version_id: str | None = None,
         generic: bool = False,
+        category: FileCategory | None = None,
     ) -> str:
         params = {
             "name": name,
             "namespace": namespace,
             "versionId": version_id,
             "generic": json.dumps(generic),
+            "category": category,
         }
         response = self.session.get(
             f"{self.base_path}/sign",
@@ -65,6 +67,7 @@ class FileCollection(BaseCollection):
         namespace: FileNamespace,
         content_type: str,
         generic: bool = False,
+        category: FileCategory | None = None,
     ) -> str:
         params = {"generic": json.dumps(generic)}
         body = {
@@ -73,9 +76,11 @@ class FileCollection(BaseCollection):
                     "name": name,
                     "namespace": namespace,
                     "contentType": content_type,
+                    "category": category,
                 },
             ],
         }
+        body["files"][0] = {k: v for k, v in body["files"][0].items() if v is not None}
         response = self.session.post(f"{self.base_path}/sign", json=body, params=params)
         return response.json()[0]["URL"]
 
@@ -86,11 +91,13 @@ class FileCollection(BaseCollection):
         namespace: FileNamespace,
         content_type: str,
         generic: bool = False,
+        category: FileCategory | None = None,
     ) -> None:
         upload_url = self.get_signed_upload_url(
             name=name,
             namespace=namespace,
             content_type=content_type,
             generic=generic,
+            category=category,
         )
         requests.put(upload_url, data=data, headers={"Content-Type": content_type})

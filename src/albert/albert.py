@@ -1,5 +1,6 @@
 import os
 
+from albert.collections.attachments import AttachmentCollection
 from albert.collections.btdataset import BTDatasetCollection
 from albert.collections.btinsight import BTInsightCollection
 from albert.collections.btmodel import BTModelCollection, BTModelSessionCollection
@@ -78,6 +79,10 @@ class Albert:
     @property
     def projects(self) -> ProjectCollection:
         return ProjectCollection(session=self.session)
+
+    @property
+    def attachments(self) -> AttachmentCollection:
+        return AttachmentCollection(session=self.session)
 
     @property
     def tags(self) -> TagCollection:

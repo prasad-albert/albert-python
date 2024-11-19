@@ -17,6 +17,7 @@ from albert.resources.companies import Company
 from albert.resources.custom_fields import CustomField
 from albert.resources.data_columns import DataColumn
 from albert.resources.data_templates import DataTemplate
+from albert.resources.files import FileCategory, FileInfo, FileNamespace
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
@@ -73,6 +74,41 @@ def seed_prefix() -> str:
 
 
 ### STATIC RESOURCES -- CANNOT BE DELETED
+
+
+@pytest.fixture(scope="session")
+def static_image_file(client: Albert) -> FileInfo:
+    try:
+        r = client.files.get_by_name(name="dontpanic.jpg", namespace=FileNamespace.RESULT.value)
+    except:
+        with open("tests/data/dontpanic.jpg", "rb") as file:
+            image_data = file.read()
+        client.files.sign_and_upload_file(
+            data=image_data,
+            name="dontpanic.jpg",
+            namespace=FileNamespace.RESULT.value,
+            content_type="image/jpeg",
+        )
+        r = client.files.get_by_name(name="dontpanic.jpg", namespace=FileNamespace.RESULT.value)
+    return r
+
+
+@pytest.fixture(scope="session")
+def static_sds_file(client: Albert) -> FileInfo:
+    try:
+        r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT.value)
+    except:
+        with open("tests/data/SDS_HCL.pdf", "rb") as file:
+            image_data = file.read()
+        client.files.sign_and_upload_file(
+            data=image_data,
+            name="SDS_HCL.pdf",
+            namespace=FileNamespace.RESULT.value,
+            content_type="application/pdf",
+            category=FileCategory.SDS.value,
+        )
+        r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT.value)
+    return r
 
 
 @pytest.fixture(scope="session")
