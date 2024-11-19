@@ -222,6 +222,7 @@ class InventorySpec(BaseAlbertModel):
     unit_name: str | None = Field(default=None, alias="unitName")
     workflow_id: str | None = Field(default=None, alias="workflowId")
     workflow_name: str | None = Field(default=None, alias="workflowName")
+    spec_config: str | None = Field(default=None, alias="specConfig")
     value: InventorySpecValue | None = Field(default=None, alias="Value")
 
 
