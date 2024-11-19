@@ -1,11 +1,11 @@
 from albert.collections.base import BaseCollection, OrderBy
+from albert.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.resources.tasks import (
     BaseTask,
     TaskAdapter,
     TaskCategory,
 )
 from albert.session import AlbertSession
-from albert.utils.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
@@ -20,25 +20,24 @@ class TaskCollection(BaseCollection):
 
     def create(self, *, task: BaseTask) -> BaseTask:
         payload = [task.model_dump(mode="json", by_alias=True, exclude_none=True)]
-        url = f"{self.base_path}/multi?category={task.category}"
+        url = f"{self.base_path}/multi?category={task.category.value}"
         if task.parent_id is not None:
             url = f"{url}&parentId={task.parent_id}"
         response = self.session.post(url=url, json=payload)
         task_data = response.json()[0]
         return TaskAdapter.validate_python(task_data)
 
-    def delete(self, *, task_id: str) -> None:
-        url = f"{self.base_path}/{task_id}"
+    def delete(self, *, id: str) -> None:
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def get_by_id(self, *, task_id: str) -> BaseTask:
+    def get_by_id(self, *, id: str) -> BaseTask:
         # each type of task has it's own sub-prefix. Sometimes the core "TAS" prefix is dropped on the object. This ensures both the TAS and sub prefix are present on the ID
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
-        url = f"{self.base_path}/{task_id}"
+        if not id.startswith("TAS"):
+            id = f"TAS{id}"
+        url = f"{self.base_path}/multi/{id}"
         response = self.session.get(url)
-        task_data = response.json()
-        return TaskAdapter.validate_python(task_data)
+        return TaskAdapter.validate_python(response.json())
 
     def list(
         self,
@@ -62,11 +61,9 @@ class TaskCollection(BaseCollection):
         project_id: str = None,
     ) -> AlbertPaginator[BaseTask]:
         def deserialize(data: dict) -> BaseTask | None:
-            # task_class = self.category_to_class.get(data.get("category"), BaseTask)
-            # return task_class(**data)
             id = data["albertId"]
             try:
-                return self.get_by_id(task_id=id)
+                return self.get_by_id(id=id)
             except (ForbiddenError, InternalServerError, NotFoundError) as e:
                 logger.warning(f"Error fetching Data Template '{id}': {e}")
                 return None

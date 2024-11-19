@@ -17,7 +17,6 @@ class ParameterCollection(BaseCollection):
     def get_by_id(self, *, id: str) -> Parameter:
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-
         return Parameter(**response.json())
 
     def create(self, *, parameter: Parameter) -> Parameter:
@@ -28,7 +27,8 @@ class ParameterCollection(BaseCollection):
             )
             return match
         response = self.session.post(
-            self.base_path, json=parameter.model_dump(by_alias=True, exclude_none=True)
+            self.base_path,
+            json=parameter.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return Parameter(**response.json())
 
@@ -75,13 +75,13 @@ class ParameterCollection(BaseCollection):
     ) -> Iterator[Parameter]:
         return self._list_generator(order_by=order_by, names=names, exact_match=exact_match)
 
-    def update(self, *, updated_parameter) -> Parameter:
-        param_id = updated_parameter.id
+    def update(self, *, parameter: Parameter) -> Parameter:
         payload = self._generate_patch_payload(
-            existing=self.get_by_id(id=param_id), updated=updated_parameter
+            existing=self.get_by_id(id=parameter.id),
+            updated=parameter,
         )
         self.session.patch(
-            f"{self.base_path}/{param_id}",
+            f"{self.base_path}/{parameter.id}",
             json=payload.model_dump(mode="json", by_alias=True),
         )
-        return updated_parameter
+        return self.get_by_id(id=parameter.id)

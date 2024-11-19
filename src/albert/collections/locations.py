@@ -54,11 +54,15 @@ class LocationCollection(BaseCollection):
             params["startKey"] = start_key
 
     def list(
-        self, *, name: str | list[str] = None, country: str = None, exact_match: bool = False
+        self,
+        *,
+        name: str | list[str] = None,
+        country: str = None,
+        exact_match: bool = False,
     ) -> Iterator[Location]:
         return self._list_generator(name=name, country=country, exact_match=exact_match)
 
-    def get_by_id(self, *, id: str) -> Location | None:
+    def get_by_id(self, *, id: str) -> Location:
         """
         Retrieves a location by its ID.
 
@@ -69,27 +73,25 @@ class LocationCollection(BaseCollection):
 
         Returns
         -------
-        Union[Location, None]
-            The Location object if found, None otherwise.
+        Location
+            The Location object.
         """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        loc = response.json()
-        found_company = Location(**loc)
-        return found_company
+        return Location(**response.json())
 
-    def update(self, *, updated_object: Location) -> Location:
+    def update(self, *, location: Location) -> Location:
         # Fetch the current object state from the server or database
-        current_object = self.get_by_id(id=updated_object.id)
+        current_object = self.get_by_id(id=location.id)
         # Generate the PATCH payload
         patch_payload = self._generate_patch_payload(
             existing=current_object,
-            updated=updated_object,
+            updated=location,
             stringify_values=True,
         )
-        url = f"{self.base_path}/{updated_object.id}"
+        url = f"{self.base_path}/{location.id}"
         self.session.patch(url, json=patch_payload.model_dump(mode="json", by_alias=True))
-        return self.get_by_id(id=updated_object.id)
+        return self.get_by_id(id=location.id)
 
     def location_exists(self, *, location: Location):
         hits = self.list(name=location.name)
@@ -120,23 +122,23 @@ class LocationCollection(BaseCollection):
             )
             return exists
 
-        payload = location.model_dump(by_alias=True, exclude_unset=True)
+        payload = location.model_dump(by_alias=True, exclude_unset=True, mode="json")
         response = self.session.post(self.base_path, json=payload)
 
         return Location(**response.json())
 
-    def delete(self, *, location_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Deletes a Location entity.
 
         Parameters
         ----------
-        location_id : Str
+        id : Str
             The id of the Location object to delete.
 
         Returns
         -------
         None
         """
-        url = f"{self.base_path}/{location_id}"
+        url = f"{self.base_path}/{id}"
         self.session.delete(url)

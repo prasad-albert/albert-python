@@ -139,11 +139,12 @@ class ListsCollection(BaseCollection):
             The created list entity.
         """
         response = self.session.post(
-            self.base_path, json=list_item.model_dump(by_alias=True, exclude_none=True)
+            self.base_path,
+            json=list_item.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return ListItem(**response.json())
 
-    def get_matching_item(self, *, name: str, list_type):
+    def get_matching_item(self, *, name: str, list_type) -> ListItem | None:
         for list_item in self.list(names=[name], list_type=list_type):
             if list_item.name.lower() == name.lower():
                 return list_item

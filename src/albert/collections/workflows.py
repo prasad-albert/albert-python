@@ -1,7 +1,7 @@
 from albert.collections.base import BaseCollection
+from albert.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.resources.workflows import Workflow
 from albert.session import AlbertSession
-from albert.utils.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
@@ -21,7 +21,7 @@ class WorkflowCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{WorkflowCollection._api_version}/workflows"
 
-    def list(self):
+    def list(self) -> AlbertPaginator[Workflow]:
         def deserialize(data: dict) -> Workflow | None:
             id = data["albertId"]
             try:
@@ -39,12 +39,13 @@ class WorkflowCollection(BaseCollection):
             deserialize=deserialize,
         )
 
-    def get_by_id(self, *, id):
+    def get_by_id(self, *, id: str) -> Workflow:
         response = self.session.get(f"{self.base_path}/{id}")
         return Workflow(**response.json())
 
-    def create(self, *, workflow: Workflow):
+    def create(self, *, workflow: Workflow) -> Workflow:
         response = self.session.post(
-            self.base_path, json=workflow.model_dump(mode="json", by_alias=True, exclude_none=True)
+            self.base_path,
+            json=workflow.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         return Workflow(**response.json())

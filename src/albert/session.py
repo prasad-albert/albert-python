@@ -5,8 +5,8 @@ import requests
 from jose import jwt
 
 import albert
+from albert.exceptions import handle_http_error
 from albert.utils.client_credentials import ClientCredentials
-from albert.utils.exceptions import handle_api_error
 
 
 def get_token_refresh_time(token: str, *, buffer: timedelta | None) -> datetime:
@@ -91,7 +91,7 @@ class AlbertSession(requests.Session):
     def _request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
         full_url = urljoin(self.base_url, path) if not path.startswith("http") else path
         response = super().request(method, full_url, *args, **kwargs)
-        handle_api_error(response)
+        handle_http_error(response)
         return response
 
     def request(self, method: str, path: str, *args, **kwargs) -> requests.Response:

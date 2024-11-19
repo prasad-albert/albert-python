@@ -153,24 +153,27 @@ class DataColumnCollection(BaseCollection):
         DataColumn
             The created data column object.
         """
-        payload = [data_column.model_dump(by_alias=True, exclude_unset=True)]
+        payload = [data_column.model_dump(by_alias=True, exclude_unset=True, mode="json")]
         response = self.session.post(self.base_path, json=payload)
 
         return DataColumn(**response.json()[0])
 
-    def delete(self, *, data_column_id: str) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Delete a data column entity.
 
         Parameters
         ----------
-        data_column : DataColumn
-            The data column object to delete.
-        """
-        self.session.delete(f"{self.base_path}/{data_column_id}")
-        return None
+        id : str
+            The ID of the data column object to delete.
 
-    def update(self, *, updated_data_column: DataColumn) -> DataColumn:
+        Returns
+        -------
+        None
+        """
+        self.session.delete(f"{self.base_path}/{id}")
+
+    def update(self, *, data_column: DataColumn) -> DataColumn:
         """
         Update a data column entity.
 
@@ -184,8 +187,12 @@ class DataColumnCollection(BaseCollection):
         DataColumn
             The updated data column object.
         """
-        patch = self._generate_patch_payload(
-            existing=self.get_by_id(updated_data_column.id), updated=updated_data_column
+        patch_payload = self._generate_patch_payload(
+            existing=self.get_by_id(data_column.id),
+            updated=data_column,
         )
-        self.session.patch(f"self.base_path/{updated_data_column.id}", json=patch)
-        return self.get_by_id(id=updated_data_column.id)
+        self.session.patch(
+            f"self.base_path/{data_column.id}",
+            json=patch_payload.model_dump(mode="json", by_alias=True),
+        )
+        return self.get_by_id(id=data_column.id)

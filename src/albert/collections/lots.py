@@ -15,7 +15,7 @@ class LotCollection(BaseCollection):
 
     def create(self, *, lots: list[Lot]) -> list[Lot]:
         # TODO: Once thi endpoint is fixed, go back to passing the whole list at once
-        payload = [lot.model_dump(by_alias=True, exclude_none=True) for lot in lots]
+        payload = [lot.model_dump(by_alias=True, exclude_none=True, mode="json") for lot in lots]
         all_lots = []
         for lot in payload:
             response = self.session.post(self.base_path, json=[lot])
@@ -24,21 +24,13 @@ class LotCollection(BaseCollection):
         # return [Lot(**lot) for lot in response.json().get("CreatedLots", [])]
         return all_lots
 
-    def get_by_id(self, *, lot_id: str) -> Lot:
-        url = f"{self.base_path}/{lot_id}"
+    def get_by_id(self, *, id: str) -> Lot:
+        url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-
         return Lot(**response.json())
 
-    # def update(self, *, lot_id: str, patch_data: Dict[str, Any]) -> bool:
-    #     """TODO: Follow pattern for other Update methods. This will need a custom Patch creation method."""
-    #     url = f"{self.base_path}/{lot_id}"
-    #     response = self.session.patch(url, json=patch_data)
-    #
-    #     return lot_id
-
-    def delete(self, *, lot_id: str) -> None:
-        url = f"{self.base_path}?id={lot_id}"
+    def delete(self, *, id: str) -> None:
+        url = f"{self.base_path}?id={id}"
         self.session.delete(url)
 
     def _list_generator(

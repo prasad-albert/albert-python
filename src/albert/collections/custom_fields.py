@@ -53,20 +53,20 @@ class CustomFieldCollection(BaseCollection):
             deserialize=lambda data: CustomField(**data),
         )
 
-    def get_by_id(self, *, id: str):
+    def get_by_id(self, *, id: str) -> CustomField:
         response = self.session.get(f"{self.base_path}/{id}")
         return CustomField(**response.json())
 
-    def get_by_name(self, *, name: str):
+    def get_by_name(self, *, name: str) -> CustomField | None:
         for custom_field in self.list(name=name):
             if custom_field.name.lower() == name.lower():
                 return custom_field
         return None
 
-    def create(self, *, custom_field: CustomField, avoid_duplicates: bool = True):
-        # post new customfield
+    def create(self, *, custom_field: CustomField) -> CustomField:
         response = self.session.post(
-            self.base_path, json=custom_field.model_dump(by_alias=True, exclude_none=True)
+            self.base_path,
+            json=custom_field.model_dump(by_alias=True, exclude_none=True, mode="json"),
         )
         return CustomField(**response.json())
 

@@ -77,7 +77,7 @@ class StorageLocationsCollection(BaseCollection):
 
         path = self.base_path
         response = self.session.post(
-            path, json=storage_location.model_dump(by_alias=True, exclude_none=True)
+            path, json=storage_location.model_dump(by_alias=True, exclude_none=True, mode="json")
         )
         return StorageLocation(**response.json())
 
@@ -88,7 +88,8 @@ class StorageLocationsCollection(BaseCollection):
     def update(self, *, storage_location: StorageLocation) -> StorageLocation:
         path = f"{self.base_path}/{storage_location.id}"
         payload = self._generate_patch_payload(
-            existing=self.get_by_id(id=storage_location.id), updated=storage_location
+            existing=self.get_by_id(id=storage_location.id),
+            updated=storage_location,
         )
         self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=storage_location.id)

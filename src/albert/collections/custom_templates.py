@@ -2,9 +2,9 @@ import builtins
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
+from albert.exceptions import ForbiddenError
 from albert.resources.custom_templates import CustomTemplate
 from albert.session import AlbertSession
-from albert.utils.exceptions import ForbiddenError
 
 
 class CustomTemplatesCollection(BaseCollection):
@@ -89,5 +89,4 @@ class CustomTemplatesCollection(BaseCollection):
         """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
-        template = CustomTemplate(**response.json())
-        return template
+        return CustomTemplate(**response.json())
