@@ -14,6 +14,7 @@ from albert.collections.inventory import InventoryCollection
 from albert.collections.lists import ListsCollection
 from albert.collections.locations import LocationCollection
 from albert.collections.lots import LotCollection
+from albert.collections.notes import NotesCollection
 from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
 from albert.collections.pricings import PricingCollection
@@ -125,6 +126,10 @@ class Albert:
     @property
     def lists(self) -> ListsCollection:
         return ListsCollection(session=self.session)
+
+    @property
+    def notes(self) -> NotesCollection:
+        return NotesCollection(session=self.session)
 
     @property
     def custom_fields(self) -> CustomFieldCollection:

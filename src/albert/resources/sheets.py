@@ -234,7 +234,7 @@ class Design(BaseSessionResource):
         return rows
 
     def _get_grid(self):
-        endpoint = f"/api/v3/worksheet/{self.id}/{self.design_type}/grid"
+        endpoint = f"/api/v3/worksheet/{self.id}/{self.design_type.value}/grid"
         response = self.session.get(endpoint)
 
         resp_json = response.json()

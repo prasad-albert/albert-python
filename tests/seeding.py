@@ -23,6 +23,7 @@ from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
 )
+from albert.resources.notes import Note
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.pricings import Pricing
@@ -907,3 +908,17 @@ def generate_task_seeds(
             due_date="2024-10-31",
         ),
     ]
+
+
+def generate_note_seeds(
+    seeded_tasks: list[BaseTask], seeded_inventory: list[InventoryItem], seed_prefix: str
+):
+    task_note = Note(
+        parent_id=seeded_tasks[0].id,
+        note=f"{seed_prefix} This is a note for a task",
+    )
+    inv_note = Note(
+        parent_id=seeded_inventory[0].id,
+        note=f"{seed_prefix} This is a note for an inventory item",
+    )
+    return [task_note, inv_note]
