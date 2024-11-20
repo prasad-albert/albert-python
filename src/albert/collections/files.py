@@ -9,7 +9,7 @@ from albert.resources.files import (
     FileInfo,
     FileNamespace,
     SignURLPOST,
-    SignURLPOSTFiles,
+    SignURLPOSTFile,
 )
 from albert.session import AlbertSession
 
@@ -79,7 +79,7 @@ class FileCollection(BaseCollection):
 
         post_body = SignURLPOST(
             files=[
-                SignURLPOSTFiles(
+                SignURLPOSTFile(
                     name=name,
                     namespace=namespace,
                     content_type=content_type,

@@ -45,7 +45,7 @@ class AttachmentCollection(BaseCollection):
     def upload_and_attach_file_as_note(
         self, parent_id: str, file_data: IO, note_text: str = "", file_name: str = ""
     ) -> Note:
-        file_type = mimetypes.guess_type(file_name)
+        file_type = mimetypes.guess_type(file_name)[0]
         file_collection = self._get_file_collection()
         note_collection = self._get_note_collection()
 

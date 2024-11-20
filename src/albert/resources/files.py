@@ -20,7 +20,7 @@ class FileCategory(str, Enum):
     OTHER = "Other"
 
 
-class SignURLPOSTFiles(BaseAlbertModel):
+class SignURLPOSTFile(BaseAlbertModel):
     name: str
     namespace: FileNamespace
     content_type: str = Field(..., alias="contentType")
@@ -30,7 +30,7 @@ class SignURLPOSTFiles(BaseAlbertModel):
 
 
 class SignURLPOST(BaseAlbertModel):
-    files: list[SignURLPOSTFiles]
+    files: list[SignURLPOSTFile]
 
 
 class FileInfo(BaseAlbertModel):

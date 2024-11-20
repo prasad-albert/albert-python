@@ -70,7 +70,6 @@ class StorageLocationsCollection(BaseCollection):
     def create(self, *, storage_location: StorageLocation) -> StorageLocation:
         matching = self.list(name=storage_location.name, exact_match=True)
         for m in matching:
-            print(m.name, storage_location.name)
             if m.name.lower() == storage_location.name.lower():
                 logging.warning(
                     f"Storage location with name {storage_location.name} already exists, returning existing."
