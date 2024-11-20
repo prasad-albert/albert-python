@@ -62,7 +62,7 @@ class DataTemplateCollection(BaseCollection):
             An iterator of DataTemplate objects.
         """
 
-        def deserialize(items: list[dict]) -> DataTemplate:
+        def deserialize(items: list[dict]) -> list[DataTemplate]:
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 
         params = {
