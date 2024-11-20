@@ -830,7 +830,10 @@ def generate_task_seeds(
             name=f"{seed_prefix} - Property Task 1",
             category=TaskCategory.PROPERTY,
             inventory_information=[
-                InventoryInformation(inventory_id=seeded_inventory[0].id, lot_id=seeded_lots[0].id)
+                InventoryInformation(
+                    inventory_id=seeded_inventory[0].id,
+                    lot_id=seeded_lots[0].id,
+                )
             ],
             parent_id=seeded_inventory[0].id,
             location=seeded_locations[0],
@@ -852,9 +855,9 @@ def generate_task_seeds(
             inventory_information=[
                 InventoryInformation(
                     inventory_id=seeded_inventory[1].id,
-                    lot_id=[l for l in seeded_lots if l.inventory_id == seeded_inventory[1].id][
-                        0
-                    ].id,
+                    lot_id=(
+                        [l for l in seeded_lots if l.inventory_id == seeded_inventory[1].id][0].id
+                    ),
                 )
             ],
             priority=TaskPriority.HIGH,
