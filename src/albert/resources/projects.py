@@ -105,6 +105,6 @@ class Project(BaseResource, EntityLinkConvertible):
     @field_validator("status", mode="before")
     def validate_status(cls, value):
         """Somehow, some statuses are capitalized in the API response. This ensures they are always lowercase."""
-        if not isinstance(value, str):
-            raise ValueError("status must be a string")
-        return value.lower()
+        if isinstance(value, str):
+            return value.lower()
+        return value
