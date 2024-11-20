@@ -1,8 +1,7 @@
-from collections.abc import Generator, Iterator
-
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.cas import Cas
 from albert.session import AlbertSession
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class CasCollection(BaseCollection):
@@ -21,7 +20,7 @@ class CasCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{CasCollection._api_version}/cas"
 
-    def _list_generator(
+    def list(
         self,
         *,
         limit: int = 50,
@@ -29,7 +28,7 @@ class CasCollection(BaseCollection):
         number: str | None = None,
         id: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Generator[Cas, None, None]:
+    ) -> AlbertPaginator[Cas]:
         """
         Lists CAS entities with optional filters.
 
@@ -51,55 +50,21 @@ class CasCollection(BaseCollection):
         Generator
             A Generator of Cas objects.
         """
-        params = {"limit": limit, "orderBy": order_by.value}
-        if start_key:  # pragma: no cover
-            params["startKey"] = start_key
-        if number:
-            params["number"] = number
-        if id:
-            params["albertId"] = id
-        while True:
-            response = self.session.get(self.base_path, params=params)
-            cas_data = response.json().get("Items", [])
-            if not cas_data or cas_data == []:
-                break
-            for x in cas_data:
-                this_cas = Cas(**x)
-                yield this_cas
-            start_key = response.json().get("lastKey")
-            if not start_key:  # start key is tested here but not on init
-                break
-            params["startKey"] = start_key
-
-    def list(
-        self,
-        *,
-        number: str | None = None,
-        id: str | None = None,
-        order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Iterator[Cas]:
-        """
-        Lists CAS entities with optional filters.
-
-        Parameters
-        ----------
-        limit : int, optional
-            The maximum number of CAS entities to return, by default 50.
-        start_key : Optional[str], optional
-            The primary key of the first item that this operation will evaluate.
-        number : Optional[str], optional
-            Fetches list of CAS by CAS number.
-        id : Optional[str], optional
-            Fetches list of CAS using the CAS Albert ID.
-        order_by : OrderBy, optional
-            The order by which to sort the results, by default OrderBy.DESCENDING.
-
-        Returns
-        -------
-        Generator
-            A generator of Cas objects.
-        """
-        return self._list_generator(number=number, order_by=order_by, id=id)
+        params = {
+            "limit": limit,
+            "orderBy": order_by.value,
+            "startKey": start_key,
+            "number": number,
+            "albertId": id,
+        }
+        params = {k: v for k, v in params.items() if v is not None}
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [Cas(**item) for item in items],
+        )
 
     def cas_exists(self, *, number: str, exact_match: bool = True) -> bool:
         """
