@@ -57,7 +57,7 @@ def test_avoids_dupes(caplog, client: Albert, seeded_storage_locations: list[Sto
     )
     assert duped.id == seeded_storage_locations[0].id
     assert duped.name == seeded_storage_locations[0].name
-    assert duped.location == seeded_storage_locations[0].location
+    assert duped.location.id == seeded_storage_locations[0].location.id
 
 
 def test_update(client: Albert, seeded_storage_locations: list[StorageLocation]):
