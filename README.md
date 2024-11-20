@@ -28,7 +28,7 @@ Resource Collections act as managers for Resource Models. They provide methods f
 To use the SDK, you need to initialize the Albert client with your base URL and either a bearer token (which will expire) or client credientals, which will enable automatic token refresh.
 
 ```python
-from albert.albert import Albert, ClientCredentials
+from albert import Albert, ClientCredentials
 
 # Initialize the client using a JWT token
 client = Albert(
