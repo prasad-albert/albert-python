@@ -1,8 +1,7 @@
-from collections.abc import Generator, Iterator
-
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.parameter_groups import ParameterGroup, PGType
 from albert.session import AlbertSession
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class ParameterGroupCollection(BaseCollection):
@@ -19,45 +18,38 @@ class ParameterGroupCollection(BaseCollection):
         response = self.session.get(path)
         return ParameterGroup(**response.json())
 
-    def _list_generator(
-        self,
-        *,
-        text: str | None = None,
-        offset: int | None = None,
-        types: list[PGType] | None = None,
-        order_by: OrderBy = OrderBy.DESCENDING,
-        limit: int = 25,
-    ) -> Generator[ParameterGroup, None, None]:
-        params = {"limit": limit, "order": order_by.value}
-        if text:
-            params["text"] = text
-        if offset:  # pragma: no cover
-            params["offset"] = offset
-        if types:
-            params["types"] = types if isinstance(types, list) else [types]
-        while True:
-            response = self.session.get(self.base_path + "/search", params=params)
-            pg_data = response.json().get("Items", [])
-            if not pg_data or pg_data == []:
-                break
-            for pg in pg_data:
-                yield self.get_by_id(id=pg["albertId"])
-            offset = response.json().get("offset")
-            if not offset:  # pragma: no cover
-                break
-            params["offset"] = int(offset) + int(limit)
+    def get_by_ids(self, *, ids: list[str]) -> ParameterGroup:
+        path = f"{self.base_path}/ids"
+        response = self.session.get(path, params={"id": ids})
+        return [ParameterGroup(**item) for item in response.json()["Items"]]
 
     def list(
         self,
         *,
-        text: str | None = None,
-        types: list[PGType] | None = None,
+        limit: int = 25,
+        offset: int | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Iterator[ParameterGroup]:
-        return self._list_generator(
-            text=text,
-            types=types,
-            order_by=order_by,
+        text: str | None = None,
+        types: PGType | list[PGType] | None = None,
+    ) -> AlbertPaginator[ParameterGroup]:
+        def deserialize(items: list[dict]) -> list[ParameterGroup]:
+            return self.get_by_ids(ids=[x["albertId"] for x in items])
+
+        params = {
+            "limit": limit,
+            "offset": offset,
+            "order": order_by.value,
+            "text": text,
+            "types": [types] if isinstance(types, PGType) else types,
+        }
+        params = {k: v for k, v in params.items() if v is not None}
+
+        return AlbertPaginator(
+            mode=PaginationMode.OFFSET,
+            path=f"{self.base_path}/search",
+            session=self.session,
+            deserialize=deserialize,
+            params=params,
         )
 
     def delete(self, *, id: str) -> None:

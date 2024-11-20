@@ -6,13 +6,11 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
-from albert.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.resources.inventory import InventoryCategory, InventoryItem, InventorySpecList
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.users import User
 from albert.session import AlbertSession
-from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -240,13 +238,8 @@ class InventoryCollection(BaseCollection):
         List inventory items with optional filters.
         """
 
-        def deserialize(data: dict) -> InventoryItem | None:
-            id = data["albertId"]
-            try:
-                return self.get_by_id(id=id)
-            except (ForbiddenError, InternalServerError, NotFoundError) as e:
-                logger.warning(f"Error fetching Inventory Item '{id}': {e}")
-                return None
+        def deserialize(items: list[dict]) -> list[InventoryItem]:
+            return self.get_by_ids(ids=[x["albertId"] for x in items])
 
         # Note there are other parameters we could add supprt for
 

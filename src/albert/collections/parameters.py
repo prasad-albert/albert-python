@@ -1,9 +1,10 @@
+import json
 import logging
-from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.parameters import Parameter
 from albert.session import AlbertSession
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class ParameterCollection(BaseCollection):
@@ -36,44 +37,28 @@ class ParameterCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def _list_generator(
-        self,
-        *,
-        limit: int = 50,
-        order_by: OrderBy = OrderBy.DESCENDING,
-        names: str | list[str] = None,
-        exact_match: bool = True,
-        start_key: str | None = None,
-    ) -> Generator[Parameter, None, None]:
-        params = {"limit": limit, "orderBy": order_by}
-        if names:
-            if isinstance(names, str):
-                names = [names]
-            params["name"] = names
-            params["exactMatch"] = str(exact_match).lower()
-        if start_key:  # pragma: no cover
-            params["startkey"] = start_key
-        while True:
-            response = self.session.get(self.base_path, params=params)
-            params_data = response.json().get("Items", [])
-            if not params_data or params_data == []:
-                break
-            for p in params_data:
-                this_param = Parameter(**p)
-                yield this_param
-            start_key = response.json().get("lastKey")
-            if not start_key:
-                break
-            params["startKey"] = start_key
-
     def list(
         self,
         *,
+        limit: int = 50,
+        ids: list[str] | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
         names: str | list[str] = None,
-        exact_match=False,
-    ) -> Iterator[Parameter]:
-        return self._list_generator(order_by=order_by, names=names, exact_match=exact_match)
+        exact_match: bool = False,
+        start_key: str | None = None,
+    ) -> AlbertPaginator[Parameter]:
+        params = {"limit": limit, "orderBy": order_by, "parameters": ids, "startKey": start_key}
+        if names:
+            params["name"] = [names] if isinstance(names, str) else names
+            params["exactMatch"] = json.dumps(exact_match)
+        params = {k: v for k, v in params.items() if v is not None}
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [Parameter(**item) for item in items],
+        )
 
     def update(self, *, parameter: Parameter) -> Parameter:
         payload = self._generate_patch_payload(

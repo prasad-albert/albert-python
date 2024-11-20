@@ -1,12 +1,10 @@
 from albert.collections.base import BaseCollection, OrderBy
-from albert.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.resources.tasks import (
     BaseTask,
     TaskAdapter,
     TaskCategory,
 )
 from albert.session import AlbertSession
-from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -32,12 +30,19 @@ class TaskCollection(BaseCollection):
         self.session.delete(url)
 
     def get_by_id(self, *, id: str) -> BaseTask:
-        # each type of task has it's own sub-prefix. Sometimes the core "TAS" prefix is dropped on the object. This ensures both the TAS and sub prefix are present on the ID
+        # each type of task has it's own sub-prefix.
+        # Sometimes the core "TAS" prefix is dropped on the object.
+        # This ensures both the TAS and sub prefix are present on the ID
         if not id.startswith("TAS"):
             id = f"TAS{id}"
         url = f"{self.base_path}/multi/{id}"
         response = self.session.get(url)
         return TaskAdapter.validate_python(response.json())
+
+    def get_by_ids(self, *, ids: list[str]) -> BaseTask:
+        ids = [f"TAS{x}" if not x.startswith("TAS") else x for x in ids]
+        response = self.session.get(self.base_path, params={"id": ids})
+        return [TaskAdapter.validate_python(x) for x in response.json()["Items"]]
 
     def list(
         self,
@@ -60,13 +65,8 @@ class TaskCollection(BaseCollection):
         created_by: list[str] = None,
         project_id: str = None,
     ) -> AlbertPaginator[BaseTask]:
-        def deserialize(data: dict) -> BaseTask | None:
-            id = data["albertId"]
-            try:
-                return self.get_by_id(id=id)
-            except (ForbiddenError, InternalServerError, NotFoundError) as e:
-                logger.warning(f"Error fetching Data Template '{id}': {e}")
-                return None
+        def deserialize(items: list[dict]) -> list[BaseTask]:
+            return self.get_by_ids(ids=[x["albertId"] for x in items])
 
         params = {
             "text": text,

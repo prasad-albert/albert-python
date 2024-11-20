@@ -131,7 +131,7 @@ class BaseTask(BaseTaggedEntity):
     metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
     sources: list[TaskSource] | None = Field(default_factory=list, alias="Sources")
     inventory_information: list[InventoryInformation] = Field(alias="Inventories", default=None)
-    location: SerializeAsEntityLink[Location] = Field(alias="Location")
+    location: SerializeAsEntityLink[Location] | None = Field(default=None, alias="Location")
     priority: TaskPriority | None = Field(default=None)
     security_class: SecurityClass | None = Field(alias="class", default=None)
     pass_fail: bool | None = Field(alias="passOrFail", default=None)

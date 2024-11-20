@@ -125,13 +125,15 @@ class BTInsightCollection(BaseCollection):
             An iterable of elements returned by the BTInsight search query.
         """
 
-        def deserialize(data: dict) -> BTInsight | None:
-            id = data["albertId"]
-            try:
-                return self.get_by_id(id=id)
-            except (ForbiddenError, InternalServerError) as e:
-                logger.warning(f"Error fetching insight '{id}': {e}")
-                return None
+        def deserialize(items: list[dict]) -> list[BTInsight]:
+            results = []
+            for item in items:
+                id = item["albertId"]
+                try:
+                    results.append(self.get_by_id(id=id))
+                except (ForbiddenError, InternalServerError) as e:
+                    logger.warning(f"Error fetching insight '{id}': {e}")
+                return results
 
         params = {
             "limit": limit,

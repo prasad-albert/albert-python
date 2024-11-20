@@ -10,6 +10,7 @@ class FieldType(str, Enum):
 
     LIST = "list"
     STRING = "string"
+    NUMBER = "number"
 
 
 class ServiceType(str, Enum):

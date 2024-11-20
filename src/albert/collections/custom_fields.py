@@ -31,6 +31,16 @@ class CustomFieldCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{CustomFieldCollection._api_version}/customfields"
 
+    def get_by_id(self, *, id: str) -> CustomField:
+        response = self.session.get(f"{self.base_path}/{id}")
+        return CustomField(**response.json())
+
+    def get_by_name(self, *, name: str) -> CustomField | None:
+        for custom_field in self.list(name=name):
+            if custom_field.name.lower() == name.lower():
+                return custom_field
+        return None
+
     def list(
         self,
         *,
@@ -50,18 +60,8 @@ class CustomFieldCollection(BaseCollection):
             path=self.base_path,
             params=params,
             session=self.session,
-            deserialize=lambda data: CustomField(**data),
+            deserialize=lambda items: [CustomField(**item) for item in items],
         )
-
-    def get_by_id(self, *, id: str) -> CustomField:
-        response = self.session.get(f"{self.base_path}/{id}")
-        return CustomField(**response.json())
-
-    def get_by_name(self, *, name: str) -> CustomField | None:
-        for custom_field in self.list(name=name):
-            if custom_field.name.lower() == name.lower():
-                return custom_field
-        return None
 
     def create(self, *, custom_field: CustomField) -> CustomField:
         response = self.session.post(

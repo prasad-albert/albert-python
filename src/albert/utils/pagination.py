@@ -30,7 +30,7 @@ class AlbertPaginator(Iterable[ItemType]):
         path: str,
         mode: PaginationMode,
         session: AlbertSession,
-        deserialize: Callable[[dict], ItemType | None],
+        deserialize: Callable[[list[dict]], list[ItemType]],
         params: dict[str, str] | None = None,
     ):
         self.path = path
@@ -69,11 +69,7 @@ class AlbertPaginator(Iterable[ItemType]):
             if item_count == 0:
                 return
 
-            for item in items:
-                item_deser = self.deserialize(item)
-                if item_deser is None:
-                    continue
-                yield item_deser
+            yield from self.deserialize(items)
 
             # Return if under limit
             if "limit" in self.params and item_count < self.params["limit"]:
