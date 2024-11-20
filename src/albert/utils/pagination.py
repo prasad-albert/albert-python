@@ -37,13 +37,15 @@ class AlbertPaginator(Iterator[ItemType]):
         self.mode = mode
         self.session = session
         self.deserialize = deserialize
-        self._iterator = self._create_iterator(params)
 
-    def _create_iterator(self, params: dict[str, Any | None]) -> Iterator[ItemType]:
         params = params or {}
-        params = {k: v for k, v in params.items() if v is not None}
+        self.params = {k: v for k, v in params.items() if v is not None}
+
+        self._iterator = self._create_iterator()
+
+    def _create_iterator(self) -> Iterator[ItemType]:
         while True:
-            response = self.session.get(self.path, params=params)
+            response = self.session.get(self.path, params=self.params)
             data = response.json()
 
             items = data.get("Items", [])
@@ -56,25 +58,25 @@ class AlbertPaginator(Iterator[ItemType]):
             yield from self.deserialize(items)
 
             # Return if under limit
-            if "limit" in params and item_count < params["limit"]:
+            if "limit" in self.params and item_count < self.params["limit"]:
                 return
 
-            keep_going = self._update_params(params, data, item_count)
+            keep_going = self._update_params(data, item_count)
             if not keep_going:
                 return
 
-    def _update_params(self, params: dict[str, Any], data: dict[str, Any], count: int) -> bool:
+    def _update_params(self, data: dict[str, Any], count: int) -> bool:
         match self.mode:
             case PaginationMode.OFFSET:
                 offset = data.get("offset")
                 if not offset:
                     return False
-                params["offset"] = int(offset) + count
+                self.params["offset"] = int(offset) + count
             case PaginationMode.KEY:
                 last_key = data.get("lastKey")
                 if not last_key:
                     return False
-                params["startKey"] = last_key
+                self.params["startKey"] = last_key
             case mode:
                 raise AlbertException(f"Unknown pagination mode {mode}.")
         return True
