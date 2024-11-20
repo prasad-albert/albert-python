@@ -4,7 +4,13 @@ from typing import IO
 import requests
 
 from albert.collections.base import BaseCollection
-from albert.resources.files import FileCategory, FileInfo, FileNamespace
+from albert.resources.files import (
+    FileCategory,
+    FileInfo,
+    FileNamespace,
+    SignURLPOST,
+    SignURLPOSTFiles,
+)
 from albert.session import AlbertSession
 
 
@@ -70,18 +76,23 @@ class FileCollection(BaseCollection):
         category: FileCategory | None = None,
     ) -> str:
         params = {"generic": json.dumps(generic)}
-        body = {
-            "files": [
-                {
-                    "name": name,
-                    "namespace": namespace,
-                    "contentType": content_type,
-                    "category": category,
-                },
-            ],
-        }
-        body["files"][0] = {k: v for k, v in body["files"][0].items() if v is not None}
-        response = self.session.post(f"{self.base_path}/sign", json=body, params=params)
+
+        post_body = SignURLPOST(
+            files=[
+                SignURLPOSTFiles(
+                    name=name,
+                    namespace=namespace,
+                    content_type=content_type,
+                    category=category,
+                )
+            ]
+        )
+
+        response = self.session.post(
+            f"{self.base_path}/sign",
+            json=post_body.model_dump(by_alias=True, exclude_unset=True, mode="json"),
+            params=params,
+        )
         return response.json()[0]["URL"]
 
     def sign_and_upload_file(

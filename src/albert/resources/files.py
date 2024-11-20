@@ -20,6 +20,19 @@ class FileCategory(str, Enum):
     OTHER = "Other"
 
 
+class SignURLPOSTFiles(BaseAlbertModel):
+    name: str
+    namespace: FileNamespace
+    content_type: str = Field(..., alias="contentType")
+    metadata: list[dict[str, str]] | None = Field(default=None)
+    category: FileCategory | None = Field(default=None)
+    url: str | None = Field(default=None)
+
+
+class SignURLPOST(BaseAlbertModel):
+    files: list[SignURLPOSTFiles]
+
+
 class FileInfo(BaseAlbertModel):
     name: str
     size: int

@@ -22,5 +22,8 @@ def test_load_file_to_inventories(
     assert attachment.id in attachment_ids
     client.attachments.delete(id=attachment.id)
     second_updated_note = client.notes.get_by_id(id=seeded_notes[0].id)
-    second_attachment_ids = [x.id for x in second_updated_note.attachments]
-    assert attachment.id not in second_attachment_ids
+    if second_updated_note.attachments is not None:
+        second_attachment_ids = [x.id for x in second_updated_note.attachments]
+        assert attachment.id not in second_attachment_ids
+    else:
+        assert True  # It being None is also fine/ prooves the delete

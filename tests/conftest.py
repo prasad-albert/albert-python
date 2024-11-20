@@ -79,35 +79,33 @@ def seed_prefix() -> str:
 @pytest.fixture(scope="session")
 def static_image_file(client: Albert) -> FileInfo:
     try:
-        r = client.files.get_by_name(name="dontpanic.jpg", namespace=FileNamespace.RESULT.value)
+        r = client.files.get_by_name(name="dontpanic.jpg", namespace=FileNamespace.RESULT)
     except:
         with open("tests/data/dontpanic.jpg", "rb") as file:
-            image_data = file.read()
-        client.files.sign_and_upload_file(
-            data=image_data,
-            name="dontpanic.jpg",
-            namespace=FileNamespace.RESULT.value,
-            content_type="image/jpeg",
-        )
-        r = client.files.get_by_name(name="dontpanic.jpg", namespace=FileNamespace.RESULT.value)
+            client.files.sign_and_upload_file(
+                data=file,
+                name="dontpanic.jpg",
+                namespace=FileNamespace.RESULT,
+                content_type="image/jpeg",
+            )
+        r = client.files.get_by_name(name="dontpanic.jpg", namespace=FileNamespace.RESULT)
     return r
 
 
 @pytest.fixture(scope="session")
 def static_sds_file(client: Albert) -> FileInfo:
     try:
-        r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT.value)
+        r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT)
     except:
         with open("tests/data/SDS_HCL.pdf", "rb") as file:
-            image_data = file.read()
-        client.files.sign_and_upload_file(
-            data=image_data,
-            name="SDS_HCL.pdf",
-            namespace=FileNamespace.RESULT.value,
-            content_type="application/pdf",
-            category=FileCategory.SDS.value,
-        )
-        r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT.value)
+            client.files.sign_and_upload_file(
+                data=file,
+                name="SDS_HCL.pdf",
+                namespace=FileNamespace.RESULT,
+                content_type="application/pdf",
+                category=FileCategory.SDS,
+            )
+        r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT)
     return r
 
 
