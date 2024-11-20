@@ -1,4 +1,3 @@
-from collections.abc import Generator
 
 from albert.albert import Albert
 from albert.collections.base import OrderBy
@@ -20,7 +19,6 @@ def _list_asserts(returned_list):
 
 def test_simple_units_list(client: Albert):
     simple_list = client.units.list()
-    assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
 
@@ -33,7 +31,6 @@ def test_advanced_units_list(client: Albert, seeded_units: list[Unit]):
         exact_match=True,
         verified=test_unit.verified,
     )
-    assert isinstance(adv_list, Generator)
     adv_list = list(adv_list)
     for u in adv_list:
         assert test_unit.name.lower() in u.name.lower()

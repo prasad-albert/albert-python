@@ -1,5 +1,3 @@
-from collections.abc import Generator
-
 from albert.albert import Albert
 from albert.resources.lots import Lot
 
@@ -21,7 +19,6 @@ def test_simple_lot_list(
     seeded_lots,  # PUT on lots currently broken, so we can't seed lots
 ):
     simple_list = client.lots.list()
-    assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
 

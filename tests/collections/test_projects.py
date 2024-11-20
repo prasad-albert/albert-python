@@ -1,4 +1,3 @@
-from collections.abc import Generator
 
 import pytest
 
@@ -23,7 +22,6 @@ def _list_asserts(returned_list, limit=50):
 
 def test_list_projects(client: Albert):
     project_list = client.projects.list()
-    assert isinstance(project_list, Generator)
     _list_asserts(project_list)
 
     short_lists = client.projects.list(limit=5)

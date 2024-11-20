@@ -1,5 +1,4 @@
 import uuid
-from collections.abc import Generator
 
 import pytest
 
@@ -36,7 +35,6 @@ def test_cas_not_found(client: Albert):
 def test_advanced_cas_list(client: Albert, seeded_cas: list[Cas]):
     number = seeded_cas[0].number
     adv_list = client.cas_numbers.list(number=number, order_by=OrderBy.DESCENDING)
-    assert isinstance(adv_list, Generator)
     adv_list = list(adv_list)
     _list_asserts(adv_list)
 

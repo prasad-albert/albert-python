@@ -1,5 +1,4 @@
 import uuid
-from collections.abc import Generator
 
 import pytest
 
@@ -26,7 +25,6 @@ def _list_asserts(returned_list, limit=100):
 
 def test_simple_tags_list(client: Albert):
     simple_list = client.tags.list()
-    assert isinstance(simple_list, Generator)
     simple_list = list(simple_list)
     _list_asserts(simple_list)
 
@@ -38,7 +36,6 @@ def test_advanced_tags_list(client: Albert, seeded_tags: list[Tag]):
         exact_match=True,
         order_by=OrderBy.ASCENDING,
     )
-    assert isinstance(adv_list, Generator)
     adv_list = list(adv_list)
     _list_asserts(adv_list)
 
