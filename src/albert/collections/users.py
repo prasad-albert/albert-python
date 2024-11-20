@@ -1,10 +1,13 @@
 import logging
-from collections.abc import Generator, Iterator
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
+from albert.exceptions import InternalServerError
 from albert.resources.base import Status
 from albert.resources.users import User
 from albert.session import AlbertSession
+from albert.utils.logging import logger
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class UserCollection(BaseCollection):
@@ -23,54 +26,6 @@ class UserCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{UserCollection._api_version}/users"
 
-    def _list_generator(
-        self,
-        *,
-        text: str | None = None,
-        offset: int | None = None,
-        limit: int = 50,
-        status=None,
-        search_fields=None,
-    ) -> Generator[User, None, None]:
-        params = {"limit": limit}
-        if status:
-            params["status"] = status
-        if text:
-            params["text"] = text.lower()
-        if offset:  # pragma: no cover
-            params["offset"] = offset
-        if search_fields:
-            params["searchFields"] = search_fields
-        while True:
-            response = self.session.get(self.base_path + "/search", params=params)
-            user_data = response.json().get("Items", [])
-            if not user_data or user_data == []:
-                break
-            for u in user_data:
-                # do a full get
-                yield self.get_by_id(id=u["albertId"])
-            offset = response.json().get("offset")
-            if not offset or len(user_data) < limit:
-                break
-            params["offset"] = int(offset) + int(limit)
-
-    def list(
-        self, *, text: str | None = None, status: Status = None, search_fields=None
-    ) -> Iterator[User]:
-        """Lists Users based on criteria
-
-        Parameters
-        ----------
-        text : Optional[str], optional
-            text to search against, by default None
-
-        Returns
-        -------
-        Generator
-            Generator of matching Users or None
-        """
-        return self._list_generator(text=text, status=status, search_fields=search_fields)
-
     def get_by_id(self, *, id: str) -> User:
         """
         Retrieves a User by its ID.
@@ -88,6 +43,52 @@ class UserCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return User(**response.json())
+
+    def list(
+        self,
+        *,
+        limit: int = 50,
+        offset: int | None = None,
+        text: str | None = None,
+        status: Status | None = None,
+        search_fields: str | None = None,
+    ) -> AlbertPaginator[User]:
+        """Lists Users based on criteria
+
+        Parameters
+        ----------
+        text : Optional[str], optional
+            text to search against, by default None
+
+        Returns
+        -------
+        Generator
+            Generator of matching Users or None
+        """
+
+        def deserialize(items: list[dict]) -> Iterator[User]:
+            for item in items:
+                id = item["albertId"]
+                try:
+                    yield self.get_by_id(id=id)
+                except InternalServerError as e:
+                    logger.warning(f"Error fetching user '{id}': {e}")
+
+        params = {
+            "limit": limit,
+            "offset": offset,
+            "status": status,
+            "text": text,
+            "searchFields": search_fields,
+        }
+
+        return AlbertPaginator(
+            mode=PaginationMode.OFFSET,
+            path=f"{self.base_path}/search",
+            session=self.session,
+            params=params,
+            deserialize=deserialize,
+        )
 
     def create(self, *, user: User) -> User:  # pragma: no cover
         """Create a new User

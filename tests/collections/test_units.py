@@ -39,7 +39,7 @@ def test_advanced_units_list(client: Albert, seeded_units: list[Unit]):
         assert test_unit.name.lower() in u.name.lower()
     _list_asserts(adv_list)
 
-    adv_short_list = client.units._list_generator(limit=2)
+    adv_short_list = client.units.list(limit=2)
     _list_asserts(adv_short_list)
 
 

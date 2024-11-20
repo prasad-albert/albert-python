@@ -70,7 +70,6 @@ class DataTemplateCollection(BaseCollection):
             "text": name,
             "userId": user_id,
         }
-        params = {k: v for k, v in params.items() if v is not None}
 
         return AlbertPaginator(
             mode=PaginationMode.OFFSET,

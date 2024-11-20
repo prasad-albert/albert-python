@@ -95,7 +95,6 @@ class DataColumnCollection(BaseCollection):
             "default": json.dumps(default) if default is not None else None,
             "dataColumns": [ids] if isinstance(ids, str) else ids,
         }
-        params = {k: v for k, v in params.items() if v is not None}
         return AlbertPaginator(
             mode=PaginationMode.KEY,
             path=self.base_path,

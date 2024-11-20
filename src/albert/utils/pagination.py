@@ -30,7 +30,7 @@ class AlbertPaginator(Iterable[ItemType]):
         path: str,
         mode: PaginationMode,
         session: AlbertSession,
-        deserialize: Callable[[list[dict]], list[ItemType]],
+        deserialize: Callable[[list[dict]], Iterable[ItemType]],
         params: dict[str, str] | None = None,
     ):
         self.path = path
@@ -61,6 +61,8 @@ class AlbertPaginator(Iterable[ItemType]):
         while True:
             response = self.session.get(self.path, params=self.params)
             response_data = response.json()
+
+            print(response_data)
 
             items = response_data.get("Items", [])
             item_count = len(items)

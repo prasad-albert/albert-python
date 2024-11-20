@@ -1,8 +1,7 @@
-from collections.abc import Generator, Iterator
-
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.projects import Project
 from albert.session import AlbertSession
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class ProjectCollection(BaseCollection):
@@ -114,15 +113,15 @@ class ProjectCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def _list_generator(
+    def list(
         self,
         *,
         limit: int = 50,
-        start_key: str = None,
+        start_key: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Generator[Project, None, None]:
+    ) -> AlbertPaginator[Project]:
         """
-        Generator for listing projects with optional filters.
+        List projects with optional filters.
 
         Parameters
         ----------
@@ -137,45 +136,16 @@ class ProjectCollection(BaseCollection):
         exact_match : bool, optional
             Whether to match names exactly (default is False).
 
-        Yields
-        ------
-        Project
-            The next project in the generator.
-        """
-        params = {
-            "limit": str(limit),
-            "orderBy": order_by.value,
-        }
-        if start_key:  # pragma: no cover
-            params["startKey"] = start_key
-        while True:
-            response = self.session.get(self.base_path, params=params)
-
-            raw_projects = response.json().get("Items", [])
-            if not raw_projects or raw_projects == []:  # pragma: no cover
-                break
-            for x in raw_projects:
-                yield Project(**x)
-            start_key = response.json().get("lastKey")
-            if not start_key or len(raw_projects) < limit:
-                break
-            params["startKey"] = start_key
-
-    def list(
-        self,
-        *,
-        order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> Iterator[Project]:
-        """
-        List projects with optional filters.
-
-        Parameters
-        ----------
-        order_by : OrderBy, optional
-            The order in which to retrieve items (default is OrderBy.DESCENDING).
         Returns
-        -------
-        Generator
-            A generator yielding projects that match the filters.
+        ------
+        AlbertPaginator[Project]
+            An iterable of Project resources.
         """
-        return self._list_generator(order_by=order_by)
+        params = {"limit": limit, "orderBy": order_by.value, "startKey": start_key}
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [Project(**item) for item in items],
+        )

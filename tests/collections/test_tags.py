@@ -49,7 +49,7 @@ def test_advanced_tags_list(client: Albert, seeded_tags: list[Tag]):
     )
     assert next(adv_list_no_match, None) == None
 
-    tag_short_list = client.tags._list_generator(limit=3)
+    tag_short_list = client.tags.list(limit=3)
     _list_asserts(tag_short_list, limit=5)
 
 

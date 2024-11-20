@@ -43,7 +43,7 @@ def test_advanced_users_list(client: Albert, static_user: User):
     assert isinstance(adv_list_no_match, Generator)
     assert next(adv_list_no_match, None) is None
 
-    short_list = client.users._list_generator(limit=3)
+    short_list = client.users.list(limit=3)
     _list_asserts(short_list, limit=5)
 
 

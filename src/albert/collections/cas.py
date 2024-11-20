@@ -57,7 +57,6 @@ class CasCollection(BaseCollection):
             "number": number,
             "albertId": id,
         }
-        params = {k: v for k, v in params.items() if v is not None}
         return AlbertPaginator(
             mode=PaginationMode.KEY,
             path=self.base_path,

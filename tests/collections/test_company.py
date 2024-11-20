@@ -35,7 +35,7 @@ def test_advanced_company_list(client: Albert, seeded_companies: list[Company]):
         assert name.lower() in c.name.lower()
     _list_asserts(adv_list)
 
-    list_small_batch = client.companies._list_generator(limit=2)
+    list_small_batch = client.companies.list(limit=2)
     _list_asserts(list_small_batch)
 
 

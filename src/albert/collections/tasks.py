@@ -47,9 +47,10 @@ class TaskCollection(BaseCollection):
     def list(
         self,
         *,
+        limit: int = 100,
+        offset: int = 0,
         text: str = None,
         order: OrderBy = OrderBy.DESCENDING,
-        offset: int = 0,
         sort_by: str = None,
         tags: list[str] = None,
         task_id: list[str] = None,
@@ -69,9 +70,10 @@ class TaskCollection(BaseCollection):
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 
         params = {
-            "text": text,
-            "order": OrderBy(order).value if order else None,
+            "limit": limit,
             "offset": offset,
+            "order": OrderBy(order).value if order else None,
+            "text": text,
             "sortBy": sort_by,
             "tags": tags,
             "taskId": task_id,
@@ -87,7 +89,7 @@ class TaskCollection(BaseCollection):
             "createdBy": created_by,
             "projectId": project_id,
         }
-        params = {k: v for k, v in params.items() if v is not None}
+
         return AlbertPaginator(
             mode=PaginationMode.OFFSET,
             path=f"{self.base_path}/search",

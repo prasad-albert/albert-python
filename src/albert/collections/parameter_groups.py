@@ -42,14 +42,13 @@ class ParameterGroupCollection(BaseCollection):
             "text": text,
             "types": [types] if isinstance(types, PGType) else types,
         }
-        params = {k: v for k, v in params.items() if v is not None}
 
         return AlbertPaginator(
             mode=PaginationMode.OFFSET,
             path=f"{self.base_path}/search",
             session=self.session,
-            deserialize=deserialize,
             params=params,
+            deserialize=deserialize,
         )
 
     def delete(self, *, id: str) -> None:

@@ -1,11 +1,11 @@
 import logging
-from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
 from albert.exceptions import AlbertException
 from albert.resources.companies import Company
 from albert.session import AlbertSession
 from albert.utils.logging import logger
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class CompanyCollection(BaseCollection):
@@ -53,14 +53,14 @@ class CompanyCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{CompanyCollection._api_version}/companies"
 
-    def _list_generator(
+    def list(
         self,
         *,
         limit: int = 50,
         name: str | list[str] = None,
         exact_match: bool = True,
         start_key: str | None = None,
-    ) -> Generator[Company, None, None]:
+    ) -> AlbertPaginator[Company]:
         """
         Lists company entities with optional filters.
 
@@ -78,51 +78,17 @@ class CompanyCollection(BaseCollection):
         Generator
             A generator that yields Company.
         """
-        params = {"limit": limit, "dupDetection": "false"}
+        params = {"limit": limit, "dupDetection": "false", "startKey": start_key}
         if name:
             params["name"] = name if isinstance(name, list) else [name]
             params["exactMatch"] = str(exact_match).lower()
-        if start_key:  # pragma: no cover
-            params["startKey"] = start_key
-        while True:
-            response = self.session.get(self.base_path, params=params)
-
-            company_data = response.json().get("Items", [])
-            if not company_data or company_data == []:
-                break
-
-            for company in company_data:
-                this_company = Company(**company)
-                yield this_company
-            start_key = response.json().get("lastKey")
-            if not start_key or len(company_data) < limit:
-                break
-            params["startKey"] = start_key
-
-    def list(
-        self,
-        *,
-        name: str | list[str] = None,
-        exact_match: bool = False,
-    ) -> Iterator[Company]:
-        """
-        Lists company entities with optional filters.
-
-        Parameters
-        ----------
-        limit : int, optional
-            The maximum number of companies to return, by default 50.
-        name : Union[str, None], optional
-            The name of the company to filter by, by default None.
-        exact_match : bool, optional
-            Whether to match the name exactly, by default True.
-
-        Returns
-        -------
-        Iterator[Company]
-            A generator that yields Company.
-        """
-        return self._list_generator(name=name, exact_match=exact_match)
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [Company(**item) for item in items],
+        )
 
     def company_exists(self, *, name: str, exact_match: bool = True) -> bool:
         """

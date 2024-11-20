@@ -1,9 +1,10 @@
+import json
 import logging
-from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
 from albert.resources.locations import Location
 from albert.session import AlbertSession
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class LocationCollection(BaseCollection):
@@ -22,45 +23,26 @@ class LocationCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{LocationCollection._api_version}/locations"
 
-    def _list_generator(
-        self,
-        *,
-        limit: int = 50,
-        name: list[str] | str = None,
-        country: str = None,
-        start_key: str = None,
-        exact_match: bool = False,
-    ) -> Generator[Location, None, None]:
-        params = {"limit": limit}
-        if name:
-            params["name"] = name if isinstance(name, list) else [name]
-            params["exactMatch"] = str(exact_match).lower()
-        if start_key:  # pragma: no cover
-            params["startKey"] = start_key
-        if country:
-            params["country"] = country
-
-        while True:
-            response = self.session.get(self.base_path, params=params)
-            loc_data = response.json().get("Items", [])
-            if not loc_data or loc_data == []:
-                break
-            for l in loc_data:
-                this_loc = Location(**l)
-                yield this_loc
-            start_key = response.json().get("lastKey")
-            if not start_key:
-                break
-            params["startKey"] = start_key
-
     def list(
         self,
         *,
-        name: str | list[str] = None,
-        country: str = None,
+        limit: int = 50,
+        name: str | list[str] | None = None,
+        country: str | None = None,
+        start_key: str | None = None,
         exact_match: bool = False,
-    ) -> Iterator[Location]:
-        return self._list_generator(name=name, country=country, exact_match=exact_match)
+    ) -> AlbertPaginator[Location]:
+        params = {"limit": limit, "startKey": start_key, "country": country}
+        if name:
+            params["name"] = [name] if isinstance(name, str) else name
+            params["exactMatch"] = json.dumps(exact_match)
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [Location(**item) for item in items],
+        )
 
     def get_by_id(self, *, id: str) -> Location:
         """

@@ -1,8 +1,9 @@
-from collections.abc import Generator, Iterator
+import json
 
 from albert.collections.base import BaseCollection
 from albert.resources.lots import Lot
 from albert.session import AlbertSession
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class LotCollection(BaseCollection):
@@ -33,7 +34,7 @@ class LotCollection(BaseCollection):
         url = f"{self.base_path}?id={id}"
         self.session.delete(url)
 
-    def _list_generator(
+    def list(
         self,
         *,
         limit: int = 100,
@@ -46,7 +47,7 @@ class LotCollection(BaseCollection):
         location_id: str | None = None,
         exact_match: bool = False,
         begins_with: bool = False,
-    ) -> Generator[Lot, None, None]:
+    ) -> AlbertPaginator[Lot]:
         """
         Lists Lot entities with optional filters.
 
@@ -73,10 +74,10 @@ class LotCollection(BaseCollection):
         begins_with : bool, optional
             Determines if barcodeId begins with a certain value, by default False.
 
-        Yields
+        Returns
         -------
-        Generator
-            A generator of Lot objects.
+        AlbertPaginator[Lot]
+            An iterable of Lot objects.
         """
         params = {
             "limit": limit,
@@ -87,70 +88,13 @@ class LotCollection(BaseCollection):
             "parentIdCategory": parent_id_category,
             "inventoryOnHand": inventory_on_hand,
             "locationId": location_id,
-            "exactMatch": "true" if exact_match else "false",
-            "beginsWith": "true" if begins_with else "false",
+            "exactMatch": json.dumps(exact_match),
+            "beginsWith": json.dumps(begins_with),
         }
-
-        params = {k: v for k, v in params.items() if v is not None}
-
-        while True:
-            response = self.session.get(self.base_path, params=params)
-            lots_data = response.json().get("Items", [])
-            if not lots_data:
-                break
-            for lot in lots_data:
-                yield Lot(**lot)
-            start_key = response.json().get("lastKey")
-            if not start_key:
-                break
-            params["startKey"] = start_key
-
-    def list(
-        self,
-        *,
-        parent_id: str | None = None,
-        inventory_id: str | None = None,
-        barcode_id: str | None = None,
-        parent_id_category: str | None = None,
-        inventory_on_hand: str | None = None,
-        location_id: str | None = None,
-        exact_match: bool = False,
-        begins_with: bool = False,
-    ) -> Iterator[Lot]:
-        """
-        Lists Lot entities with optional filters.
-
-        Parameters
-        ----------
-        parent_id : Optional[str], optional
-            Fetches list of lots for a parentId (inventory).
-        inventory_id : Optional[str], optional
-            Fetches list of lots for an inventory.
-        barcode_id : Optional[str], optional
-            Fetches list of lots for a barcodeId.
-        parent_id_category : Optional[str], optional
-            Fetches list of lots for a parentIdCategory (e.g., RawMaterials, Consumables).
-        inventory_on_hand : Optional[str], optional
-            Fetches records based on inventoryOnHand (lteZero, gtZero, eqZero).
-        location_id : Optional[str], optional
-            Fetches list of lots for a locationId.
-        exact_match : bool, optional
-            Determines if barcodeId field should be an exact match, by default False.
-        begins_with : bool, optional
-            Determines if barcodeId begins with a certain value, by default False.
-
-        Returns
-        -------
-        Generator
-            A generator of Lot objects.
-        """
-        return self._list_generator(
-            parent_id=parent_id,
-            inventory_id=inventory_id,
-            barcode_id=barcode_id,
-            parent_id_category=parent_id_category,
-            inventory_on_hand=inventory_on_hand,
-            location_id=location_id,
-            exact_match=exact_match,
-            begins_with=begins_with,
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [Lot(**item) for item in items],
         )

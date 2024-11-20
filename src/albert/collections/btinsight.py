@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.exceptions import ForbiddenError, InternalServerError
 from albert.resources.btinsight import BTInsight, BTInsightCategory, BTInsightState
@@ -125,15 +127,13 @@ class BTInsightCollection(BaseCollection):
             An iterable of elements returned by the BTInsight search query.
         """
 
-        def deserialize(items: list[dict]) -> list[BTInsight]:
-            results = []
+        def deserialize(items: list[dict]) -> Iterator[BTInsight]:
             for item in items:
                 id = item["albertId"]
                 try:
-                    results.append(self.get_by_id(id=id))
+                    yield self.get_by_id(id=id)
                 except (ForbiddenError, InternalServerError) as e:
                     logger.warning(f"Error fetching insight '{id}': {e}")
-                return results
 
         params = {
             "limit": limit,

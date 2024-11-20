@@ -23,7 +23,7 @@ def test_simple_list(client: Albert):
 def test_adv_list(client: Albert):
     adv_list = client.locations.list(country="US")
     _list_asserts(adv_list)
-    short_list = client.locations._list_generator(limit=2)
+    short_list = client.locations.list(limit=2)
     _list_asserts(short_list)
 
 

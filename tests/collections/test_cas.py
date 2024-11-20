@@ -25,7 +25,6 @@ def _list_asserts(returned_list):
 
 def test_simple_cas_list(client: Albert):
     simple_list = client.cas_numbers.list()
-    assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
 
@@ -46,7 +45,7 @@ def test_advanced_cas_list(client: Albert, seeded_cas: list[Cas]):
     adv_list2 = client.cas_numbers.list(id=seeded_cas[0].id)
     _list_asserts(adv_list2)
 
-    small_page = client.cas_numbers._list_generator(limit=2)
+    small_page = client.cas_numbers.list(limit=2)
     _list_asserts(small_page)
 
 

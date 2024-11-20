@@ -26,7 +26,7 @@ def test_list_projects(client: Albert):
     assert isinstance(project_list, Generator)
     _list_asserts(project_list)
 
-    short_lists = client.projects._list_generator(limit=5)
+    short_lists = client.projects.list(limit=5)
     _list_asserts(short_lists, limit=7)
 
 
