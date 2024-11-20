@@ -220,6 +220,7 @@ class InventoryCollection(BaseCollection):
     def list(
         self,
         *,
+        limit: int = 100,
         text: str | None = None,
         cas: list[Cas] | Cas | None = None,
         category: list[InventoryCategory] | InventoryCategory | None = None,
@@ -232,7 +233,6 @@ class InventoryCollection(BaseCollection):
         sheet_id: str | None = None,
         created_by: list[User] = None,
         lot_owner: list[User] = None,
-        limit: int = 25,
         tags: list[str] = None,
     ) -> Iterator[InventoryItem]:
         """
@@ -272,9 +272,9 @@ class InventoryCollection(BaseCollection):
             "manufacturer": [c.name for c in company] if company is not None else None,
             "cas": [c.number for c in cas] if cas is not None else None,
             "location": [c.name for c in location] if location is not None else None,
-            "storageLocation": [c.name for c in storage_location]
-            if storage_location is not None
-            else None,
+            "storageLocation": (
+                [c.name for c in storage_location] if storage_location is not None else None
+            ),
             "lotOwner": [c.name for c in lot_owner] if lot_owner is not None else None,
             "createdBy": [c.name for c in created_by] if created_by is not None else None,
             "sheetId": sheet_id,
