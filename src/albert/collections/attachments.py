@@ -1,5 +1,4 @@
 import mimetypes
-from pathlib import Path
 from typing import IO
 
 from albert.collections.base import BaseCollection
