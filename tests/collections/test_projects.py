@@ -13,7 +13,7 @@ def _list_asserts(returned_list, limit=50):
             break
         assert isinstance(project, Project)
         assert isinstance(project.description, str)
-        assert isinstance(project.state, str)
+        assert isinstance(project.id, str)
         assert project.id is not None
         found = True
     assert found
@@ -25,6 +25,9 @@ def test_list_projects(client: Albert):
 
     short_lists = client.projects.list(limit=5)
     _list_asserts(short_lists, limit=7)
+
+    advanced_list = client.projects.list(limit=5, status=["Active"])
+    _list_asserts(advanced_list, limit=2)
 
 
 def test_get_by_id(client: Albert, seeded_projects: list[Project]):

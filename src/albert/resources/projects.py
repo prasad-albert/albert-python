@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from albert.resources.acls import ACL
 from albert.resources.base import BaseResource, EntityLinkConvertible, MetadataItem
@@ -15,6 +15,12 @@ class ProjectClass(str, Enum):
     PUBLIC = "public"
     CONFIDENTIAL = "confidential"
     PRIVATE = "private"
+
+
+class ProjectStatus(str, Enum):
+    NOT_STARTED = "not started"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
 
 
 class State(str, Enum):
@@ -91,6 +97,14 @@ class Project(BaseResource, EntityLinkConvertible):
     task_config: list[TaskConfig] | None = Field(default_factory=list)
     grid: GridDefault | None = None
     metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
+    status: ProjectStatus | None = Field(default=None)
 
     # Read-only fields
     state: State | None = Field(default=None, exclude=True, frozen=True)
+
+    @field_validator("status", mode="before")
+    def validate_status(cls, value):
+        """Somehow, some statuses are capitalized in the API response. This ensures they are always lowercase."""
+        if not isinstance(value, str):
+            raise ValueError("status must be a string")
+        return value.lower()
