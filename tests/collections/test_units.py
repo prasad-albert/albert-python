@@ -1,4 +1,3 @@
-
 from albert.albert import Albert
 from albert.collections.base import OrderBy
 from albert.resources.units import Unit, UnitCategory
