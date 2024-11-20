@@ -1,12 +1,10 @@
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.resources.tasks import (
-    BaseTask,
-    TaskAdapter,
-    TaskCategory,
-)
+from albert.exceptions import AlbertHTTPError
+from albert.resources.tasks import BaseTask, TaskAdapter, TaskCategory
 from albert.session import AlbertSession
+from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -41,35 +39,35 @@ class TaskCollection(BaseCollection):
         response = self.session.get(url)
         return TaskAdapter.validate_python(response.json())
 
-    def get_by_ids(self, *, ids: list[str]) -> BaseTask:
-        ids = [f"TAS{x}" if not x.startswith("TAS") else x for x in ids]
-        response = self.session.get(self.base_path, params={"id": ids})
-        return [TaskAdapter.validate_python(x) for x in response.json()["Items"]]
-
     def list(
         self,
         *,
         limit: int = 100,
         offset: int = 0,
-        text: str = None,
         order: OrderBy = OrderBy.DESCENDING,
-        sort_by: str = None,
-        tags: list[str] = None,
-        task_id: list[str] = None,
-        linked_task: list[str] = None,
-        category: TaskCategory = None,
-        albert_id: list[str] = None,
-        data_template: list[str] = None,
-        assigned_to: list[str] = None,
-        location: list[str] = None,
-        priority: list[str] = None,
-        status: list[str] = None,
-        parameter_group: list[str] = None,
-        created_by: list[str] = None,
-        project_id: str = None,
+        text: str | None = None,
+        sort_by: str | None = None,
+        tags: list[str] | None = None,
+        task_id: list[str] | None = None,
+        linked_task: list[str] | None = None,
+        category: TaskCategory | None = None,
+        albert_id: list[str] | None = None,
+        data_template: list[str] | None = None,
+        assigned_to: list[str] | None = None,
+        location: list[str] | None = None,
+        priority: list[str] | None = None,
+        status: list[str] | None = None,
+        parameter_group: list[str] | None = None,
+        created_by: list[str] | None = None,
+        project_id: str | None = None,
     ) -> Iterator[BaseTask]:
-        def deserialize(items: list[dict]) -> list[BaseTask]:
-            return self.get_by_ids(ids=[x["albertId"] for x in items])
+        def deserialize(items: list[dict]) -> Iterator[BaseTask]:
+            for item in items:
+                id = item["albertId"]
+                try:
+                    yield self.get_by_id(id=id)
+                except AlbertHTTPError as e:
+                    logger.warning(f"Error fetching task '{id}': {e}")
 
         params = {
             "limit": limit,

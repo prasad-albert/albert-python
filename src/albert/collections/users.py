@@ -2,7 +2,7 @@ import logging
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
-from albert.exceptions import InternalServerError
+from albert.exceptions import AlbertHTTPError
 from albert.resources.base import Status
 from albert.resources.users import User
 from albert.session import AlbertSession
@@ -71,7 +71,7 @@ class UserCollection(BaseCollection):
                 id = item["albertId"]
                 try:
                     yield self.get_by_id(id=id)
-                except InternalServerError as e:
+                except AlbertHTTPError as e:
                     logger.warning(f"Error fetching user '{id}': {e}")
 
         params = {

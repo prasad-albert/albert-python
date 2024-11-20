@@ -3,7 +3,7 @@ import logging
 from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
-from albert.exceptions import ForbiddenError
+from albert.exceptions import AlbertHTTPError
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.session import AlbertSession
@@ -38,7 +38,7 @@ class StorageLocationsCollection(BaseCollection):
                 id = x["albertId"]
                 try:
                     yield self.get_by_id(id=id)
-                except ForbiddenError as e:
+                except AlbertHTTPError as e:
                     logger.warning(f"Error fetching storage location {id}: {e}")
 
         params = {

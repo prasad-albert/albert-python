@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
-from albert.exceptions import ForbiddenError
+from albert.exceptions import AlbertHTTPError
 from albert.resources.custom_templates import CustomTemplate
 from albert.session import AlbertSession
 from albert.utils.logging import logger
@@ -53,7 +53,7 @@ class CustomTemplatesCollection(BaseCollection):
                 id = item["albertId"]
                 try:
                     yield self.get_by_id(id=id)
-                except ForbiddenError as e:
+                except AlbertHTTPError as e:
                     logger.warning(f"Error fetching custom template {id}: {e}")
 
         params = {"limit": limit, "offset": offset, "text": text}

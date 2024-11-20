@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.exceptions import ForbiddenError, InternalServerError
+from albert.exceptions import AlbertHTTPError
 from albert.resources.btinsight import BTInsight, BTInsightCategory, BTInsightState
 from albert.session import AlbertSession
 from albert.utils.logging import logger
@@ -132,7 +132,7 @@ class BTInsightCollection(BaseCollection):
                 id = item["albertId"]
                 try:
                     yield self.get_by_id(id=id)
-                except (ForbiddenError, InternalServerError) as e:
+                except AlbertHTTPError as e:
                     logger.warning(f"Error fetching insight '{id}': {e}")
 
         params = {
