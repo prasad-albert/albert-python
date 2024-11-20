@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.tasks import (
     BaseTask,
@@ -65,7 +67,7 @@ class TaskCollection(BaseCollection):
         parameter_group: list[str] = None,
         created_by: list[str] = None,
         project_id: str = None,
-    ) -> AlbertPaginator[BaseTask]:
+    ) -> Iterator[BaseTask]:
         def deserialize(items: list[dict]) -> list[BaseTask]:
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 

@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.projects import Project
 from albert.session import AlbertSession
@@ -119,7 +121,7 @@ class ProjectCollection(BaseCollection):
         limit: int = 50,
         start_key: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> AlbertPaginator[Project]:
+    ) -> Iterator[Project]:
         """
         List projects with optional filters.
 
@@ -138,8 +140,8 @@ class ProjectCollection(BaseCollection):
 
         Returns
         ------
-        AlbertPaginator[Project]
-            An iterable of Project resources.
+        Iterator[Project]
+            An iterator of Project resources.
         """
         params = {"limit": limit, "orderBy": order_by.value, "startKey": start_key}
         return AlbertPaginator(

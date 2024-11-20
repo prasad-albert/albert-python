@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
 from albert.exceptions import AlbertException
@@ -60,7 +61,7 @@ class CompanyCollection(BaseCollection):
         name: str | list[str] = None,
         exact_match: bool = True,
         start_key: str | None = None,
-    ) -> AlbertPaginator[Company]:
+    ) -> Iterator[Company]:
         """
         Lists company entities with optional filters.
 
@@ -73,10 +74,10 @@ class CompanyCollection(BaseCollection):
         exact_match : bool, optional
             Whether to match the name exactly, by default True.
 
-        Yields
+        Returns
         -------
-        Generator
-            A generator that yields Company.
+        Iterator
+            An iterator of Company objects.
         """
         params = {"limit": limit, "dupDetection": "false", "startKey": start_key}
         if name:

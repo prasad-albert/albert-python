@@ -13,7 +13,7 @@ class PaginationMode(str, Enum):
     KEY = "key"
 
 
-class AlbertPaginator(Iterable[ItemType]):
+class AlbertPaginator(Iterator[ItemType]):
     """Helper class for pagination through Albert endpoints.
 
     Two pagination modes are possible:
@@ -30,41 +30,23 @@ class AlbertPaginator(Iterable[ItemType]):
         path: str,
         mode: PaginationMode,
         session: AlbertSession,
-        deserialize: Callable[[list[dict]], Iterable[ItemType]],
+        deserialize: Callable[[Iterable[dict]], Iterable[ItemType]],
         params: dict[str, str] | None = None,
     ):
         self.path = path
         self.mode = mode
         self.session = session
         self.deserialize = deserialize
+        self._iterator = self._create_iterator(params)
 
+    def _create_iterator(self, params: dict[str, Any | None]) -> Iterator[ItemType]:
         params = params or {}
-        self.params = {k: v for k, v in params.items() if v is not None}
-
-    def _update_params(self, data: dict[str, Any], item_count: int) -> bool:
-        match self.mode:
-            case PaginationMode.OFFSET:
-                offset = data.get("offset")
-                if not offset:
-                    return False
-                self.params["offset"] = int(offset) + item_count
-            case PaginationMode.KEY:
-                last_key = data.get("lastKey")
-                if not last_key:
-                    return False
-                self.params["startKey"] = last_key
-            case mode:
-                raise AlbertException(f"Unknown pagination mode {mode}.")
-        return True
-
-    def __iter__(self) -> Iterator[ItemType]:
+        params = {k: v for k, v in params.items() if v is not None}
         while True:
-            response = self.session.get(self.path, params=self.params)
-            response_data = response.json()
+            response = self.session.get(self.path, params=params)
+            data = response.json()
 
-            print(response_data)
-
-            items = response_data.get("Items", [])
+            items = data.get("Items", [])
             item_count = len(items)
 
             # Return if no items
@@ -74,9 +56,31 @@ class AlbertPaginator(Iterable[ItemType]):
             yield from self.deserialize(items)
 
             # Return if under limit
-            if "limit" in self.params and item_count < self.params["limit"]:
+            if "limit" in params and item_count < params["limit"]:
                 return
 
-            keep_going = self._update_params(response_data, item_count)
+            keep_going = self._update_params(params, data, item_count)
             if not keep_going:
                 return
+
+    def _update_params(self, params: dict[str, Any], data: dict[str, Any], count: int) -> bool:
+        match self.mode:
+            case PaginationMode.OFFSET:
+                offset = data.get("offset")
+                if not offset:
+                    return False
+                params["offset"] = int(offset) + count
+            case PaginationMode.KEY:
+                last_key = data.get("lastKey")
+                if not last_key:
+                    return False
+                params["startKey"] = last_key
+            case mode:
+                raise AlbertException(f"Unknown pagination mode {mode}.")
+        return True
+
+    def __iter__(self) -> Iterator[ItemType]:
+        return self
+
+    def __next__(self) -> ItemType:
+        return next(self._iterator)

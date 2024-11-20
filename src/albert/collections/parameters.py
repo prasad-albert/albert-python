@@ -1,5 +1,6 @@
 import json
 import logging
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.parameters import Parameter
@@ -46,12 +47,12 @@ class ParameterCollection(BaseCollection):
         names: str | list[str] = None,
         exact_match: bool = False,
         start_key: str | None = None,
-    ) -> AlbertPaginator[Parameter]:
+    ) -> Iterator[Parameter]:
         params = {"limit": limit, "orderBy": order_by, "parameters": ids, "startKey": start_key}
         if names:
             params["name"] = [names] if isinstance(names, str) else names
             params["exactMatch"] = json.dumps(exact_match)
-        params = {k: v for k, v in params.items() if v is not None}
+
         return AlbertPaginator(
             mode=PaginationMode.KEY,
             path=self.base_path,

@@ -1,4 +1,5 @@
 import json
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.data_columns import DataColumn
@@ -64,7 +65,7 @@ class DataColumnCollection(BaseCollection):
         exact_match: bool | None = None,
         default: bool | None = None,
         start_key: str | None = None,
-    ) -> AlbertPaginator[DataColumn]:
+    ) -> Iterator[DataColumn]:
         """
         Lists data column entities with optional filters.
 
@@ -83,8 +84,8 @@ class DataColumnCollection(BaseCollection):
 
         Returns
         -------
-        AlbertPaginator
-            An iterable of DataColumns.
+        Iterator[DataColumn]
+            An iterator of DataColumns.
         """
         params = {
             "limit": limit,

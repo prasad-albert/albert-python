@@ -47,7 +47,7 @@ class CustomTemplatesCollection(BaseCollection):
         limit: int = 50,
         offset: int = 0,
         text: str | None = None,
-    ) -> AlbertPaginator[CustomTemplate]:
+    ) -> Iterator[CustomTemplate]:
         def deserialize(items: list[dict]) -> Iterator[CustomTemplate]:
             for item in items:
                 id = item["albertId"]

@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.data_templates import DataTemplate
 from albert.session import AlbertSession
@@ -41,7 +43,7 @@ class DataTemplateCollection(BaseCollection):
         order_by: OrderBy = OrderBy.DESCENDING,
         name: str | None = None,
         user_id: str | None = None,
-    ) -> AlbertPaginator[DataTemplate]:
+    ) -> Iterator[DataTemplate]:
         """
         Lists data template entities with optional filters.
 
@@ -56,7 +58,7 @@ class DataTemplateCollection(BaseCollection):
 
         Returns
         -------
-        Iterator
+        Iterator[DataTemplate]
             An iterator of DataTemplate objects.
         """
 

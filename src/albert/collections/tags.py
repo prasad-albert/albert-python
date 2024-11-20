@@ -1,5 +1,6 @@
 import json
 import logging
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.exceptions import AlbertException
@@ -63,7 +64,7 @@ class TagCollection(BaseCollection):
         name: str | list[str] | None = None,
         exact_match: bool = True,
         start_key: str | None = None,
-    ) -> AlbertPaginator[Tag]:
+    ) -> Iterator[Tag]:
         """
         Lists Tag entities with optional filters.
 
@@ -82,8 +83,8 @@ class TagCollection(BaseCollection):
 
         Returns
         -------
-        AlbertPaginator[Tag]
-            An iterable of Tag objects.
+        Iterator[Tag]
+            An iterator of Tag objects.
         """
         params = {"limit": limit, "orderBy": order_by.value, "startKey": start_key}
         if name:

@@ -1,4 +1,5 @@
 import json
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
 from albert.resources.custom_fields import CustomField, ServiceType
@@ -48,7 +49,7 @@ class CustomFieldCollection(BaseCollection):
         service: ServiceType | None = None,
         lookup_column: bool | None = None,
         lookup_row: bool | None = None,
-    ) -> AlbertPaginator[CustomField]:
+    ) -> Iterator[CustomField]:
         params = {
             "name": name,
             "service": service if service else None,

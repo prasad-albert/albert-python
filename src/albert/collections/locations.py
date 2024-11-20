@@ -1,5 +1,6 @@
 import json
 import logging
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
 from albert.resources.locations import Location
@@ -31,7 +32,7 @@ class LocationCollection(BaseCollection):
         country: str | None = None,
         start_key: str | None = None,
         exact_match: bool = False,
-    ) -> AlbertPaginator[Location]:
+    ) -> Iterator[Location]:
         params = {"limit": limit, "startKey": start_key, "country": country}
         if name:
             params["name"] = [name] if isinstance(name, str) else name

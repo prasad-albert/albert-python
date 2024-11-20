@@ -1,5 +1,6 @@
 import json
 import logging
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.units import Unit, UnitCategory
@@ -147,7 +148,7 @@ class UnitCollection(BaseCollection):
         exact_match: bool = False,
         start_key: str | None = None,
         verified: bool | None = None,
-    ) -> AlbertPaginator[Unit]:
+    ) -> Iterator[Unit]:
         """
         Lists unit entities with optional filters.
 
@@ -168,8 +169,8 @@ class UnitCollection(BaseCollection):
 
         Returns
         -------
-        AlbertPaginator[Unit]
-            An iterable of Unit objects.
+        Iterator[Unit]
+            An iterator of Unit objects.
         """
         params = {
             "limit": limit,

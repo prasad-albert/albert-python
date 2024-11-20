@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Iterator
 
 from pydantic import TypeAdapter
 
@@ -233,7 +234,7 @@ class InventoryCollection(BaseCollection):
         lot_owner: list[User] = None,
         limit: int = 25,
         tags: list[str] = None,
-    ) -> AlbertPaginator[InventoryItem]:
+    ) -> Iterator[InventoryItem]:
         """
         List inventory items with optional filters.
         """

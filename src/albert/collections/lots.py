@@ -1,4 +1,5 @@
 import json
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
 from albert.resources.lots import Lot
@@ -47,7 +48,7 @@ class LotCollection(BaseCollection):
         location_id: str | None = None,
         exact_match: bool = False,
         begins_with: bool = False,
-    ) -> AlbertPaginator[Lot]:
+    ) -> Iterator[Lot]:
         """
         Lists Lot entities with optional filters.
 
@@ -76,8 +77,8 @@ class LotCollection(BaseCollection):
 
         Returns
         -------
-        AlbertPaginator[Lot]
-            An iterable of Lot objects.
+        Iterator[Lot]
+            An iterator of Lot objects.
         """
         params = {
             "limit": limit,

@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.parameter_groups import ParameterGroup, PGType
 from albert.session import AlbertSession
@@ -31,7 +33,7 @@ class ParameterGroupCollection(BaseCollection):
         order_by: OrderBy = OrderBy.DESCENDING,
         text: str | None = None,
         types: PGType | list[PGType] | None = None,
-    ) -> AlbertPaginator[ParameterGroup]:
+    ) -> Iterator[ParameterGroup]:
         def deserialize(items: list[dict]) -> list[ParameterGroup]:
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 

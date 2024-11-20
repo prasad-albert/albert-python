@@ -52,7 +52,7 @@ class UserCollection(BaseCollection):
         text: str | None = None,
         status: Status | None = None,
         search_fields: str | None = None,
-    ) -> AlbertPaginator[User]:
+    ) -> Iterator[User]:
         """Lists Users based on criteria
 
         Parameters

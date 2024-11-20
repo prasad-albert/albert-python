@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.cas import Cas
 from albert.session import AlbertSession
@@ -28,7 +30,7 @@ class CasCollection(BaseCollection):
         number: str | None = None,
         id: str | None = None,
         order_by: OrderBy = OrderBy.DESCENDING,
-    ) -> AlbertPaginator[Cas]:
+    ) -> Iterator[Cas]:
         """
         Lists CAS entities with optional filters.
 
@@ -45,10 +47,10 @@ class CasCollection(BaseCollection):
         order_by : OrderBy, optional
             The order by which to sort the results, by default OrderBy.DESCENDING.
 
-        Yields
+        Returns
         -------
-        Generator
-            A Generator of Cas objects.
+        Iterator[Cas]
+            An iterator of Cas objects.
         """
         params = {
             "limit": limit,

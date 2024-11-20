@@ -1,4 +1,5 @@
 import json
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection
 from albert.resources.un_numbers import UnNumber
@@ -43,7 +44,7 @@ class UnNumberCollection(BaseCollection):
         start_key: str | None = None,
         name: str | None = None,
         exact_match: bool = False,
-    ) -> AlbertPaginator[UnNumber, None, None]:
+    ) -> Iterator[UnNumber, None, None]:
         params = {"limit": limit, "startKey": start_key}
         if name:
             params["name"] = name

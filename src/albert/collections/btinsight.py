@@ -99,7 +99,7 @@ class BTInsightCollection(BaseCollection):
         name: str | list[str] | None = None,
         state: BTInsightState | list[BTInsightState] | None = None,
         category: BTInsightCategory | list[BTInsightCategory] | None = None,
-    ) -> AlbertPaginator[BTInsight]:
+    ) -> Iterator[BTInsight]:
         """List items in the BTInsight collection.
 
         Parameters
@@ -123,8 +123,8 @@ class BTInsightCollection(BaseCollection):
 
         Returns
         -------
-        AlbertPaginator[BTInsight]
-            An iterable of elements returned by the BTInsight search query.
+        Iterator[BTInsight]
+            An iterator of elements returned by the BTInsight search query.
         """
 
         def deserialize(items: list[dict]) -> Iterator[BTInsight]:

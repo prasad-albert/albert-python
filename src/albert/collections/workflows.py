@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection
 from albert.resources.workflows import Workflow
 from albert.session import AlbertSession
@@ -34,7 +36,7 @@ class WorkflowCollection(BaseCollection):
         response = self.session.get(f"{self.base_path}/ids", params={"id": ids})
         return [Workflow(**item) for item in response.json()["Items"]]
 
-    def list(self, limit: int = 50) -> AlbertPaginator[Workflow]:
+    def list(self, limit: int = 50) -> Iterator[Workflow]:
         def deserialize(items: list[dict]) -> list[Workflow]:
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 

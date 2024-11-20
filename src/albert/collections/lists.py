@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection
 from albert.resources.lists import ListItem, ListItemCategory
 from albert.session import AlbertSession
@@ -27,7 +29,7 @@ class ListsCollection(BaseCollection):
         category: ListItemCategory | None = None,
         list_type: str | None = None,
         start_key: str | None = None,
-    ) -> AlbertPaginator[ListItem]:
+    ) -> Iterator[ListItem]:
         """
         Generates a list of list entities with optional filters.
 
@@ -44,8 +46,8 @@ class ListsCollection(BaseCollection):
 
         Returns
         ------
-        AlbertPaginator[ListItem]
-            An iterable of ListItems.
+        Iterator[ListItem]
+            An iterator of ListItems.
         """
         params = {
             "limit": limit,
