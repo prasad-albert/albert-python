@@ -1,11 +1,13 @@
+import json
 import logging
-from collections.abc import Generator, Iterator
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.exceptions import AlbertException
 from albert.resources.tags import Tag
 from albert.session import AlbertSession
 from albert.utils.logging import logger
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class TagCollection(BaseCollection):
@@ -54,17 +56,17 @@ class TagCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{TagCollection._api_version}/tags"
 
-    def _list_generator(
+    def list(
         self,
         *,
         limit: int = 50,
         order_by: OrderBy = OrderBy.DESCENDING,
-        name: str | list[str] = None,
+        name: str | list[str] | None = None,
         exact_match: bool = True,
         start_key: str | None = None,
-    ) -> Generator[Tag, None, None]:
+    ) -> Iterator[Tag]:
         """
-        Lists tag entities with optional filters.
+        Lists Tag entities with optional filters.
 
         Parameters
         ----------
@@ -81,54 +83,20 @@ class TagCollection(BaseCollection):
 
         Returns
         -------
-        Generator
-            A generator of Tag objects.
+        Iterator[Tag]
+            An iterator of Tag objects.
         """
-        params = {"limit": limit, "orderBy": order_by.value}
+        params = {"limit": limit, "orderBy": order_by.value, "startKey": start_key}
         if name:
-            params["name"] = name if isinstance(name, list) else [name]
-            params["exactMatch"] = str(exact_match).lower()
-        if start_key:  # pragma: no cover
-            params["startKey"] = start_key
-
-        while True:
-            response = self.session.get(self.base_path, params=params)
-            tags_data = response.json().get("Items", [])
-            if not tags_data or tags_data == []:
-                break
-            for t in tags_data:
-                this_tag = Tag(**t)
-                yield this_tag
-            start_key = response.json().get("lastKey")
-            if not start_key:
-                break
-            params["startKey"] = start_key
-
-    def list(
-        self,
-        *,
-        order_by: OrderBy = OrderBy.DESCENDING,
-        name: str | list[str] = None,
-        exact_match: bool = True,
-    ) -> Iterator[Tag]:
-        """
-        Lists tag entities with optional filters.
-
-        Parameters
-        ----------
-        order_by : OrderBy, optional
-            The order by which to sort the results, by default OrderBy.DESCENDING.
-        name : Union[str, None], optional
-            The name of the tag to filter by, by default None.
-        exact_match : bool, optional
-            Whether to match the name exactly, by default True.
-
-        Returns
-        -------
-        Generator
-            A generator of Tag objects.
-        """
-        return self._list_generator(order_by=order_by, name=name, exact_match=exact_match)
+            params["name"] = [name] if isinstance(name, str) else name
+            params["exactMatch"] = json.dumps(exact_match)
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [Tag(**item) for item in items],
+        )
 
     def tag_exists(self, *, tag: str, exact_match: bool = True) -> bool:
         """

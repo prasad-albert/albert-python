@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Iterator
 
 from pydantic import TypeAdapter
 
@@ -6,13 +7,11 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
-from albert.exceptions import ForbiddenError, InternalServerError, NotFoundError
 from albert.resources.inventory import InventoryCategory, InventoryItem, InventorySpecList
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.users import User
 from albert.session import AlbertSession
-from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -221,6 +220,7 @@ class InventoryCollection(BaseCollection):
     def list(
         self,
         *,
+        limit: int = 100,
         text: str | None = None,
         cas: list[Cas] | Cas | None = None,
         category: list[InventoryCategory] | InventoryCategory | None = None,
@@ -233,20 +233,14 @@ class InventoryCollection(BaseCollection):
         sheet_id: str | None = None,
         created_by: list[User] = None,
         lot_owner: list[User] = None,
-        limit: int = 25,
         tags: list[str] = None,
-    ) -> AlbertPaginator[InventoryItem]:
+    ) -> Iterator[InventoryItem]:
         """
         List inventory items with optional filters.
         """
 
-        def deserialize(data: dict) -> InventoryItem | None:
-            id = data["albertId"]
-            try:
-                return self.get_by_id(id=id)
-            except (ForbiddenError, InternalServerError, NotFoundError) as e:
-                logger.warning(f"Error fetching Inventory Item '{id}': {e}")
-                return None
+        def deserialize(items: list[dict]) -> list[InventoryItem]:
+            return self.get_by_ids(ids=[x["albertId"] for x in items])
 
         # Note there are other parameters we could add supprt for
 
@@ -278,9 +272,9 @@ class InventoryCollection(BaseCollection):
             "manufacturer": [c.name for c in company] if company is not None else None,
             "cas": [c.number for c in cas] if cas is not None else None,
             "location": [c.name for c in location] if location is not None else None,
-            "storageLocation": [c.name for c in storage_location]
-            if storage_location is not None
-            else None,
+            "storageLocation": (
+                [c.name for c in storage_location] if storage_location is not None else None
+            ),
             "lotOwner": [c.name for c in lot_owner] if lot_owner is not None else None,
             "createdBy": [c.name for c in created_by] if created_by is not None else None,
             "sheetId": sheet_id,

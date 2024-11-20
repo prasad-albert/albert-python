@@ -1,5 +1,3 @@
-from collections.abc import Generator
-
 import pytest
 
 from albert.albert import Albert
@@ -22,20 +20,18 @@ def _list_asserts(returned_list):
 
 def test_simple_company_list(client: Albert):
     simple_list = client.companies.list()
-    assert isinstance(simple_list, Generator)
     _list_asserts(simple_list)
 
 
 def test_advanced_company_list(client: Albert, seeded_companies: list[Company]):
     name = seeded_companies[1].name
     adv_list = client.companies.list(name=name, exact_match=True)
-    assert isinstance(adv_list, Generator)
     adv_list = list(adv_list)
     for c in adv_list:
         assert name.lower() in c.name.lower()
     _list_asserts(adv_list)
 
-    list_small_batch = client.companies._list_generator(limit=2)
+    list_small_batch = client.companies.list(limit=2)
     _list_asserts(list_small_batch)
 
 

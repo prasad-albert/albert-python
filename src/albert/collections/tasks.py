@@ -1,10 +1,8 @@
+from collections.abc import Iterator
+
 from albert.collections.base import BaseCollection, OrderBy
-from albert.exceptions import ForbiddenError, InternalServerError, NotFoundError
-from albert.resources.tasks import (
-    BaseTask,
-    TaskAdapter,
-    TaskCategory,
-)
+from albert.exceptions import AlbertHTTPError
+from albert.resources.tasks import BaseTask, TaskAdapter, TaskCategory
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
@@ -32,7 +30,9 @@ class TaskCollection(BaseCollection):
         self.session.delete(url)
 
     def get_by_id(self, *, id: str) -> BaseTask:
-        # each type of task has it's own sub-prefix. Sometimes the core "TAS" prefix is dropped on the object. This ensures both the TAS and sub prefix are present on the ID
+        # each type of task has it's own sub-prefix.
+        # Sometimes the core "TAS" prefix is dropped on the object.
+        # This ensures both the TAS and sub prefix are present on the ID
         if not id.startswith("TAS"):
             id = f"TAS{id}"
         url = f"{self.base_path}/multi/{id}"
@@ -42,36 +42,38 @@ class TaskCollection(BaseCollection):
     def list(
         self,
         *,
-        text: str = None,
-        order: OrderBy = OrderBy.DESCENDING,
+        limit: int = 100,
         offset: int = 0,
-        sort_by: str = None,
-        tags: list[str] = None,
-        task_id: list[str] = None,
-        linked_task: list[str] = None,
-        category: TaskCategory = None,
-        albert_id: list[str] = None,
-        data_template: list[str] = None,
-        assigned_to: list[str] = None,
-        location: list[str] = None,
-        priority: list[str] = None,
-        status: list[str] = None,
-        parameter_group: list[str] = None,
-        created_by: list[str] = None,
-        project_id: str = None,
-    ) -> AlbertPaginator[BaseTask]:
-        def deserialize(data: dict) -> BaseTask | None:
-            id = data["albertId"]
-            try:
-                return self.get_by_id(id=id)
-            except (ForbiddenError, InternalServerError, NotFoundError) as e:
-                logger.warning(f"Error fetching Data Template '{id}': {e}")
-                return None
+        order: OrderBy = OrderBy.DESCENDING,
+        text: str | None = None,
+        sort_by: str | None = None,
+        tags: list[str] | None = None,
+        task_id: list[str] | None = None,
+        linked_task: list[str] | None = None,
+        category: TaskCategory | None = None,
+        albert_id: list[str] | None = None,
+        data_template: list[str] | None = None,
+        assigned_to: list[str] | None = None,
+        location: list[str] | None = None,
+        priority: list[str] | None = None,
+        status: list[str] | None = None,
+        parameter_group: list[str] | None = None,
+        created_by: list[str] | None = None,
+        project_id: str | None = None,
+    ) -> Iterator[BaseTask]:
+        def deserialize(items: list[dict]) -> Iterator[BaseTask]:
+            for item in items:
+                id = item["albertId"]
+                try:
+                    yield self.get_by_id(id=id)
+                except AlbertHTTPError as e:
+                    logger.warning(f"Error fetching task '{id}': {e}")
 
         params = {
-            "text": text,
-            "order": OrderBy(order).value if order else None,
+            "limit": limit,
             "offset": offset,
+            "order": OrderBy(order).value if order else None,
+            "text": text,
             "sortBy": sort_by,
             "tags": tags,
             "taskId": task_id,
@@ -87,7 +89,7 @@ class TaskCollection(BaseCollection):
             "createdBy": created_by,
             "projectId": project_id,
         }
-        params = {k: v for k, v in params.items() if v is not None}
+
         return AlbertPaginator(
             mode=PaginationMode.OFFSET,
             path=f"{self.base_path}/search",

@@ -1,5 +1,4 @@
 import uuid
-from collections.abc import Generator
 
 from albert.albert import Albert
 from albert.resources.parameters import Parameter
@@ -17,13 +16,11 @@ def _list_asserts(returned_list):
 
 def test_basics(client: Albert, seeded_parameters: list[Parameter]):
     list_response = client.parameters.list()
-    assert isinstance(list_response, Generator)
     _list_asserts(list_response)
 
 
 def test_advanced_list(client: Albert, seeded_parameters: list[Parameter]):
     list_response = client.parameters.list(names=[seeded_parameters[0].name])
-    assert isinstance(list_response, Generator)
     _list_asserts(list_response)
 
 

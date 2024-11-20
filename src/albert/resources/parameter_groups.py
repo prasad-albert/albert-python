@@ -1,6 +1,7 @@
 from enum import Enum
+from typing import Any
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, SecurityClass
 from albert.resources.inventory import InventoryItem
@@ -9,6 +10,7 @@ from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.units import Unit
 from albert.resources.users import User
+from albert.utils.types import BaseAlbertModel
 
 
 class PGType(str, Enum):
@@ -25,7 +27,7 @@ class PGMetadata(BaseResource):
     standards: list[BaseEntityLink] = Field(alias="Standards")
 
 
-class ParameterValue(BaseResource):
+class ParameterValue(BaseAlbertModel):
     """The value of a parameter in a parameter group.
 
     Attributes
@@ -52,13 +54,20 @@ class ParameterValue(BaseResource):
     id: str | None = Field(default=None)
     category: ParameterCategory | None = Field(default=None)
     short_name: str | None = Field(alias="shortName", default=None)
-    value: str | None | SerializeAsEntityLink[InventoryItem] = Field(default=None)
+    value: str | SerializeAsEntityLink[InventoryItem] | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
     added: AuditFields | None = Field(alias="Added", default=None)
 
     # Read-only fields
     name: str | None = Field(default=None, exclude=True, frozen=True)
     sequence: str | None = Field(default=None, exclude=True, frozen=True)
+
+    @field_validator("value", mode="before")
+    @classmethod
+    def validate_empty_value_dict(cls, value: Any) -> Any:
+        if isinstance(value, dict) and not value:
+            return None
+        return value
 
     @model_validator(mode="after")
     def set_parameter_fields(self) -> "ParameterValue":
@@ -81,7 +90,7 @@ class ParameterGroup(BaseTaggedEntity):
     security_class: SecurityClass = Field(default=SecurityClass.RESTRICTED, alias="class")
     acl: list[SerializeAsEntityLink[User]] | None = Field(default=None, alias="ACL")
     metadata: PGMetadata | None = Field(alias="Metadata", default=None)
-    parameters: list[ParameterValue] = Field(alias="Parameters")
+    parameters: list[ParameterValue] = Field(default_factory=list, alias="Parameters")
 
     # Read-only fields
     verified: bool = Field(default=False, exclude=True, frozen=True)

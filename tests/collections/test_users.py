@@ -1,5 +1,3 @@
-from collections.abc import Generator
-
 from albert import Albert
 from albert.resources.base import Status
 from albert.resources.users import User
@@ -20,7 +18,6 @@ def _list_asserts(returned_list, limit=30):
 
 def test_simple_users_list(client: Albert):
     simple_user_list = client.users.list()
-    assert isinstance(simple_user_list, Generator)
     _list_asserts(simple_user_list)
 
 
@@ -40,10 +37,9 @@ def test_advanced_users_list(client: Albert, static_user: User):
     adv_list_no_match = client.users.list(
         text="h78frg279fbg92ubue9b80fhXBGYF&*0hnvioh", search_fields=["name"]
     )
-    assert isinstance(adv_list_no_match, Generator)
     assert next(adv_list_no_match, None) is None
 
-    short_list = client.users._list_generator(limit=3)
+    short_list = client.users.list(limit=3)
     _list_asserts(short_list, limit=5)
 
 

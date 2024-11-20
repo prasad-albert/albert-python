@@ -1,8 +1,10 @@
-from collections.abc import Generator, Iterator
+import json
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.data_columns import DataColumn
 from albert.session import AlbertSession
+from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class DataColumnCollection(BaseCollection):
@@ -15,92 +17,6 @@ class DataColumnCollection(BaseCollection):
         """Initialize the DataColumnCollection with the provided session."""
         super().__init__(session=session)
         self.base_path = f"/api/{DataColumnCollection._api_version}/datacolumns"
-
-    def _list_generator(
-        self,
-        *,
-        limit: int = 50,
-        order_by: OrderBy = OrderBy.DESCENDING,
-        name: str | list[str] = None,
-        exact_match: bool | None = None,
-        start_key: str | None = None,
-        default: bool | None = None,
-    ) -> Generator[DataColumn, None, None]:
-        """
-        Lists tag entities with optional filters.
-
-        Parameters
-        ----------
-        limit : int, optional
-            The maximum number of tags to return, by default 50.
-        order_by : OrderBy, optional
-            The order by which to sort the results, by default OrderBy.DESCENDING.
-        name : Union[str, None], optional
-            The name of the tag to filter by, by default None.
-        exact_match : bool, optional
-            Whether to match the name exactly, by default True.
-        start_key : Optional[str], optional
-            The starting point for the next set of results, by default None.
-
-        Returns
-        -------
-        Generator
-            A generator of Tag objects.
-        """
-        params = {
-            "limit": limit,
-            "orderBy": order_by.value,
-            "startKey": start_key,
-            "default": default if default is None else str(default).lower(),
-            "exactMatch": exact_match if exact_match is None else str(exact_match).lower(),
-        }
-        if name:
-            params["name"] = name if isinstance(name, list) else [name]
-
-        params = {k: v for k, v in params.items() if v is not None}
-        while True:
-            response = self.session.get(self.base_path, params=params)
-            dc_data = response.json().get("Items", [])
-            if not dc_data or dc_data == []:
-                break
-            for dc in dc_data:
-                this_dc = DataColumn(**dc)
-                yield this_dc
-            start_key = response.json().get("lastKey")
-            if not start_key:
-                break
-            params["startKey"] = start_key
-
-    def list(
-        self,
-        *,
-        order_by: OrderBy = OrderBy.DESCENDING,
-        name: str | list[str] = None,
-        exact_match: bool | None = None,
-        default: bool | None = None,
-    ) -> Iterator[DataColumn]:
-        """
-        Lists tag entities with optional filters.
-
-        Parameters
-        ----------
-        order_by : OrderBy, optional
-            The order by which to sort the results, by default OrderBy.DESCENDING.
-        name : Union[str, None], optional
-            The name of the tag to filter by, by default None.
-        exact_match : bool, optional
-            Whether to match the name exactly, by default True.
-        default : bool, optional
-            Whether to return only default columns, by default None.
-
-        Returns
-        -------
-        Generator
-            A generator of Tag objects.
-        """
-        return self._list_generator(
-            order_by=order_by, name=name, exact_match=exact_match, default=default
-        )
 
     def get_by_name(self, *, name) -> DataColumn | None:
         """
@@ -138,6 +54,55 @@ class DataColumnCollection(BaseCollection):
         response = self.session.get(f"{self.base_path}/{id}")
         dc = DataColumn(**response.json())
         return dc
+
+    def list(
+        self,
+        *,
+        limit: int = 100,
+        order_by: OrderBy = OrderBy.DESCENDING,
+        ids: str | list[str] | None = None,
+        name: str | list[str] | None = None,
+        exact_match: bool | None = None,
+        default: bool | None = None,
+        start_key: str | None = None,
+    ) -> Iterator[DataColumn]:
+        """
+        Lists data column entities with optional filters.
+
+        Parameters
+        ----------
+        order_by : OrderBy, optional
+            The order by which to sort the results, by default OrderBy.DESCENDING.
+        ids: str | list[str] | None, optional
+            Data column IDs to filter the search by, default None.
+        name : Union[str, None], optional
+            The name of the tag to filter by, by default None.
+        exact_match : bool, optional
+            Whether to match the name exactly, by default True.
+        default : bool, optional
+            Whether to return only default columns, by default None.
+
+        Returns
+        -------
+        Iterator[DataColumn]
+            An iterator of DataColumns.
+        """
+        params = {
+            "limit": limit,
+            "orderBy": order_by.value,
+            "startKey": start_key,
+            "name": [name] if isinstance(name, str) else name,
+            "exactMatch": json.dumps(exact_match) if exact_match is not None else None,
+            "default": json.dumps(default) if default is not None else None,
+            "dataColumns": [ids] if isinstance(ids, str) else ids,
+        }
+        return AlbertPaginator(
+            mode=PaginationMode.KEY,
+            path=self.base_path,
+            session=self.session,
+            params=params,
+            deserialize=lambda items: [DataColumn(**item) for item in items],
+        )
 
     def create(self, *, data_column: DataColumn) -> DataColumn:
         """

@@ -94,5 +94,5 @@ class NotesCollection(BaseCollection):
             path=self.base_path,
             mode=PaginationMode.KEY,
             params=params,
-            deserialize=lambda data: Note(**data),
+            deserialize=lambda items: [Note(**item) for item in items],
         )

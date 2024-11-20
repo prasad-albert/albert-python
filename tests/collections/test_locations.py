@@ -1,5 +1,4 @@
 import uuid
-from collections.abc import Generator
 
 from albert.albert import Albert
 from albert.resources.locations import Location
@@ -16,14 +15,13 @@ def _list_asserts(returned_list):
 
 def test_simple_list(client: Albert):
     simple_loc_list = client.locations.list()
-    assert isinstance(simple_loc_list, Generator)
     _list_asserts(simple_loc_list)
 
 
 def test_adv_list(client: Albert):
     adv_list = client.locations.list(country="US")
     _list_asserts(adv_list)
-    short_list = client.locations._list_generator(limit=2)
+    short_list = client.locations.list(limit=2)
     _list_asserts(short_list)
 
 

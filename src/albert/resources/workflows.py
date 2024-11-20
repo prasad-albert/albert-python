@@ -82,7 +82,7 @@ class ParameterGroupSetpoints(BaseAlbertModel):
     parameter_group: ParameterGroup = Field(exclude=True, default=None)
     parameter_group_id: str = Field(alias="id", default=None)
     parameter_group_name: str = Field(alias="name", default=None, frozen=True, exclude=True)
-    parameter_setpoints: list[ParameterSetpoint] = Field(alias="Parameters")
+    parameter_setpoints: list[ParameterSetpoint] = Field(default_factory=list, alias="Parameters")
 
     @model_validator(mode="after")
     def validate_pg_setpoint(self):
