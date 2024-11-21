@@ -41,12 +41,12 @@ client = Albert(
 
 client = Albert(
     client_credentials=ClientCredentials.from_env(
-        client_id_env="ALBERT_CLIENT_ID_SDK",
-        client_secret_env="ALBERT_CLIENT_SECRET_SDK",
+        client_id_env="ALBERT_CLIENT_ID",
+        client_secret_env="ALBERT_CLIENT_SECRET",
     )
 )
 
-#  By default, if environment variables `ALBERT_CLIENT_ID_SDK` and `ALBERT_CLIENT_SECRET_SDK` are set you can simply do:
+#  By default, if environment variables `ALBERT_CLIENT_ID` and `ALBERT_CLIENT_SECRET` are set you can simply do:
 
 client = Albert()
 
