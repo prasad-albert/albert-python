@@ -177,7 +177,7 @@ for s in stages:
         category=stage_gate_field.category,
         list_type=stage_gate_field.name,
     )
-    client.lists.create(item)
+    client.lists.create(list_item=item)
 
 # Now, let's say I want to add some Projects with this metadata.
 
