@@ -106,9 +106,9 @@ class PropertyDataCollection(BaseCollection):
 
         params = {
             "entity": "task",
-            "blockid": block_id,
+            "blockId": block_id,
             "id": task_id,
-            "inventoruyId": inventory_id,
+            "inventoryId": inventory_id,
             "lotId": lot_id,
         }
         params = {k: v for k, v in params.items() if v is not None}
