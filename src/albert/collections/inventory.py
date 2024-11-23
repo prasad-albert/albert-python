@@ -199,11 +199,11 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_path}/specs"
         ids = [x if x.startswith("INV") else f"INV{x}" for x in ids]
         batches = [ids[i : i + 250] for i in range(0, len(ids), 250)]
-        ta = TypeAdapter(list[InventorySpecList])
+        ta = TypeAdapter(InventorySpecList)
         return [
-            item
+            ta.validate_python(item)
             for batch in batches
-            for item in ta.validate_python(self.session.get(url, params={"id": batch}).json())
+            for item in self.session.get(url, params={"id": batch}).json()
         ]
 
     def delete(self, *, id: str) -> None:
