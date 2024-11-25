@@ -138,7 +138,6 @@ stage_gate_field = CustomField(
     display_name="Stage Gate",
     field_type=FieldType.LIST,
     service=ServiceType.PROJECTS,
-    multiselect=False,
     min=1,
     max=1,
     category=FieldCategory.BUSINESS_DEFINED # These are going to be defined by the business, not by any user
@@ -186,13 +185,12 @@ p = Project(
     locations=[next(client.locations.list(name="My Location"))],
     metadata = {
        
-        stage_gate_field.name: client.lists.get_matching_item(list_type=stage_gate_field.name, name = stages[0]).to_entity_link(),
+        stage_gate_field.name: [client.lists.get_matching_item(list_type=stage_gate_field.name, name = stages[0]).to_entity_link()],
         justification_field.name: "To show an example of using custom fields."
     }
 
- # Note: If more than one list item was allowed for this custom field, the value of this key/value pair would be a list
 
-# Also note that the values of list metadata fields are BaseEntityLink/list[BaseEntityLink]
+# Also note that the values of list metadata fields are list[BaseEntityLink]
 )
 
 ```
