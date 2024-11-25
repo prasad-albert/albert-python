@@ -3,8 +3,8 @@ import uuid
 from collections.abc import Iterator
 from contextlib import suppress
 
+import jwt
 import pytest
-from jose import jwt
 
 from albert import Albert
 from albert.collections.worksheets import WorksheetCollection
@@ -113,7 +113,7 @@ def static_sds_file(client: Albert) -> FileInfo:
 def static_user(client: Albert) -> User:
     # Users cannot be deleted, so we just pull the SDK client user for testing
     # Do not write to/modify this resource since it is shared across all test runs
-    claims = jwt.get_unverified_claims(client.session._access_token)
+    claims = jwt.decode(client.session._access_token, options={"verify_signature": False})
     user_id = claims["id"]
     return client.users.get_by_id(id=user_id)
 
