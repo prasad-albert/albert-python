@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin
 
+import jwt
 import requests
-from jose import jwt
 
 import albert
 from albert.exceptions import handle_http_error
@@ -10,7 +10,7 @@ from albert.utils.client_credentials import ClientCredentials
 
 
 def get_token_refresh_time(token: str, *, buffer: timedelta | None) -> datetime:
-    claims = jwt.get_unverified_claims(token)
+    claims = jwt.decode(token, options={"verify_signature": False})
     try:
         exp_time = datetime.fromtimestamp(claims["exp"], tz=timezone.utc)
     except ValueError:
