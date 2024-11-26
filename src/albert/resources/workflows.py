@@ -19,8 +19,8 @@ class Interval(BaseAlbertModel):
 
     """
 
-    value: str = Field(default=None)
-    unit: SerializeAsEntityLink[Unit] = Field(default=None, alias="Unit")
+    value: str | None = Field(default=None)
+    unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
 
 
 class ParameterSetpoint(BaseAlbertModel):
@@ -43,11 +43,11 @@ class ParameterSetpoint(BaseAlbertModel):
 
     """
 
-    parameter: Parameter = Field(exclude=True, default=None)
-    value: str | dict[str, str] = Field(default=None)
-    unit: SerializeAsEntityLink[Unit] = Field(default=None, alias="Unit")
-    parameter_id: str = Field(alias="id", default=None)
-    intervals: list[Interval] = Field(default=None, alias="Intervals")
+    parameter: Parameter | None = Field(exclude=True, default=None)
+    value: str | dict[str, str] | None = Field(default=None)
+    unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
+    parameter_id: str | None = Field(alias="id", default=None)
+    intervals: list[Interval] | None = Field(default=None, alias="Intervals")
 
     @model_validator(mode="after")
     def check_parameter_setpoint_validity(self):
@@ -79,9 +79,9 @@ class ParameterGroupSetpoints(BaseAlbertModel):
         The setpoints to apply to the parameter group.
     """
 
-    parameter_group: ParameterGroup = Field(exclude=True, default=None)
-    parameter_group_id: str = Field(alias="id", default=None)
-    parameter_group_name: str = Field(alias="name", default=None, frozen=True, exclude=True)
+    parameter_group: ParameterGroup | None = Field(exclude=True, default=None)
+    parameter_group_id: str | None = Field(alias="id", default=None)
+    parameter_group_name: str | None = Field(alias="name", default=None, frozen=True, exclude=True)
     parameter_setpoints: list[ParameterSetpoint] = Field(default_factory=list, alias="Parameters")
 
     @model_validator(mode="after")
