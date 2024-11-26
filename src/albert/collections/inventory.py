@@ -7,7 +7,12 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
-from albert.resources.inventory import InventoryCategory, InventoryItem, InventorySpecList
+from albert.resources.inventory import (
+    InventoryCategory,
+    InventoryItem,
+    InventorySpec,
+    InventorySpecList,
+)
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.users import User
@@ -205,6 +210,31 @@ class InventoryCollection(BaseCollection):
             for batch in batches
             for item in self.session.get(url, params={"id": batch}).json()
         ]
+
+    def add_specs(self, *, inventory_id: str, specs: list[InventorySpec]) -> InventorySpecList:
+        """Adds an Inventory Spec (an inventory property that was not directly measured via a task, but is a generic property of that inentory item).
+
+        Parameters
+        ----------
+        inventory_id : str
+            The Albert ID of the inventory item to add the specs to
+        specs : list[InventorySpec]
+            List of InventorySpec objects to add to the inventory item, which described the value and, optionally, the conditions associated with the value (via workflow).
+
+        Returns
+        -------
+        InventorySpecList
+            The Spec attached to the Inventory Item.
+        """
+        if isinstance(specs, InventorySpec):
+            specs = [specs]
+        if not inventory_id.startswith("INV"):
+            inventory_id = "INV" + inventory_id
+        url = f"{self.base_path}/{inventory_id}/specs"
+        response = self.session.put(
+            url, json=[x.model_dump(exclude_unset=True, by_alias=True, mode="json") for x in specs]
+        )
+        return InventorySpecList(**response.json())
 
     def delete(self, *, id: str) -> None:
         """
@@ -458,130 +488,6 @@ class InventoryCollection(BaseCollection):
                             "newValue": new_value.id,
                         }
                     )
-
-            # # First handle the case where we're just adding
-            # if (old_value is None or old_value == []) and new_value is not None:
-            #     # company can never start as none so it's not covered in this case
-            #     if attribute == "cas":
-            #         for c in new_value:
-            #             payload["data"].append(
-            #                 {
-            #                     "operation": "add",
-            #                     "attribute": "casId",
-            #                     "newValue": c.id,  # This will be a CasAmount Object,
-            #                     "entityId": c.id,
-            #                     "max": c.max,
-            #                     "min": c.min,
-            #                 }
-            #             )
-            #     elif attribute == "tags":
-            #         for t in new_value:
-            #             payload["data"].append(
-            #                 {
-            #                     "operation": "add",
-            #                     "attribute": "tagId",
-            #                     "newValue": t.id,  # This will be a CasAmount Object,
-            #                     "entityId": t.id,
-            #                 }
-            #             )
-
-            # elif old_value is not None and new_value != old_value:
-            #     elif attribute == "company":
-            #         if new_value is not None and new_value.id != old_value.id:
-            #             # Update existing attribute
-            #             payload["data"].append(
-            #                 {
-            #                     "operation": "update",
-            #                     "attribute": "companyId",
-            #                     "oldValue": old_value.id,
-            #                     "newValue": new_value.id,
-            #                 }
-            #             )
-            #     elif new_value is None:  # pragma: no cover you cant remove a company
-            #         payload["data"].append(
-            #             {
-            #                 "operation": "delete",
-            #                 "attribute": "companyId",
-            #                 "entityId": old_value.id,
-            #                 "oldValue": old_value.id,
-            #             }
-            #         )
-            # elif attribute == "cas":
-            #     old_cas_map = {x.id: x for x in old_value}
-            #     if new_value is not None:
-            #         for c in new_value:
-            #             if c.id in old_cas_map:
-            #                 this_old_cas = old_cas_map[c.id]
-            #                 if this_old_cas.max == c.max and this_old_cas.min == c.min:
-            #                     continue
-            #                 if this_old_cas.max != c.max:
-            #                     payload["data"].append(
-            #                         {
-            #                             "operation": "update",
-            #                             "attribute": "max",
-            #                             "entityId": c.id,
-            #                             "oldValue": str(this_old_cas.max),
-            #                             "newValue": str(c.max),
-            #                         }
-            #                     )
-            #                 if this_old_cas.min != c.min:
-            #                     payload["data"].append(
-            #                         {
-            #                             "operation": "update",
-            #                             "attribute": "min",
-            #                             "entityId": c.id,
-            #                             "oldValue": str(this_old_cas.min),
-            #                             "newValue": str(c.min),
-            #                         }
-            #                     )
-            #             else:
-            #                 payload["data"].append(
-            #                     {
-            #                         "operation": "add",
-            #                         "attribute": "casId",
-            #                         "newValue": c.id,  # This will be a CasAmount Object,
-            #                         "max": c.max,
-            #                         "min": c.min,
-            #                     }
-            #                 )
-            #     for cas_id in old_cas_map:
-            #         if new_value is None or cas_id not in [x.id for x in new_value]:
-            #             payload["data"].append(
-            #                 {
-            #                     "operation": "delete",
-            #                     "attribute": "casId",
-            #                     "entityId": cas_id,
-            #                     "oldValue": cas_id,
-            #                 }
-            #             )
-            # elif attribute == "tags":
-            #     if new_value is not None and isinstance(old_value, list):
-            #         old_tag_map = {x.id: x for x in old_value}
-            #         old_keys = old_tag_map.keys()
-            #         new_keys = [x.id for x in new_value]
-            #     else:
-            #         new_keys = []
-            #         new_value = []
-            #     for c in new_value:
-            #         if c.id in old_keys:
-            #             continue
-            #         else:
-            #             payload["data"].append(
-            #                 {
-            #                     "operation": "add",
-            #                     "attribute": "tagId",
-            #                     "newValue": c.id,
-            #                 }
-            #             )
-            #     for tag_id in old_keys:
-            #         if tag_id not in new_keys:
-            #             payload["data"].append(
-            #                 {
-            #                     "operation": "delete",
-            #                     "attribute": "tagId",
-            #                     "oldValue": tag_id,
-            #                 }
-            #             )
 
         return payload
 

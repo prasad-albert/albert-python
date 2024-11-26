@@ -1,4 +1,4 @@
-from pydantic import Field, model_validator
+from pydantic import AliasChoices, Field, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.parameter_groups import ParameterGroup
@@ -114,4 +114,9 @@ class Workflow(BaseResource, EntityLinkConvertible):
 
     name: str
     parameter_group_setpoints: list[ParameterGroupSetpoints] = Field(alias="ParameterGroups")
-    id: str | None = Field(alias="albertId", default=None)
+    id: str | None = Field(
+        alias="albertId",
+        default=None,
+        validation_alias=AliasChoices("albertId", "existingAlbertId"),
+        exclude=True,
+    )

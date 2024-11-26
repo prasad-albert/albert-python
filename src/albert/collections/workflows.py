@@ -21,12 +21,15 @@ class WorkflowCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{WorkflowCollection._api_version}/workflows"
 
-    def create(self, *, workflow: Workflow) -> Workflow:
+    def create(self, *, workflows: list[Workflow]) -> Workflow:
+        if isinstance(workflows, Workflow):
+            # in case the user forgets this should be a list
+            workflows = [workflows]
         response = self.session.post(
-            self.base_path,
-            json=workflow.model_dump(mode="json", by_alias=True, exclude_none=True),
+            url=f"{self.base_path}/bulk",
+            json=[x.model_dump(mode="json", by_alias=True, exclude_none=True) for x in workflows],
         )
-        return Workflow(**response.json())
+        return [Workflow(**x) for x in response.json()]
 
     def get_by_id(self, *, id: str) -> Workflow:
         response = self.session.get(f"{self.base_path}/{id}")

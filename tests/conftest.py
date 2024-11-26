@@ -482,15 +482,13 @@ def seeded_workflows(
     seeded_parameter_groups: list[ParameterGroup],
     seeded_parameters: list[Parameter],
 ) -> list[Workflow]:
-    seeded = []
     all_workflows = generate_workflow_seeds(
         seed_prefix=seed_prefix,
         seeded_parameter_groups=seeded_parameter_groups,
         seeded_parameters=seeded_parameters,
     )
-    for wf in all_workflows:
-        seeded.append(client.workflows.create(workflow=wf))
-    return seeded
+
+    return client.workflows.create(workflows=all_workflows)
 
 
 @pytest.fixture(scope="session")
