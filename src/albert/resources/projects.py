@@ -17,12 +17,6 @@ class ProjectClass(str, Enum):
     PRIVATE = "private"
 
 
-class ProjectStatus(str, Enum):
-    NOT_STARTED = "not started"
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-
-
 class State(str, Enum):
     """The current state of a project"""
 
@@ -97,7 +91,7 @@ class Project(BaseResource, EntityLinkConvertible):
     task_config: list[TaskConfig] | None = Field(default_factory=list)
     grid: GridDefault | None = None
     metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
-    status: ProjectStatus | None = Field(default=None)
+    status: str | None = Field(default=None)
 
     # Read-only fields
     state: State | None = Field(default=None, exclude=True, frozen=True)
