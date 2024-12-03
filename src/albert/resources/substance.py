@@ -447,15 +447,6 @@ class RespiratorySkinSensInfo(BaseAlbertModel):
     species: str | None = None
 
 
-class UnknownSubstance(BaseAlbertModel):
-    """
-    UnknownSubstance is a Pydantic model representing an unknown substance.
-    """
-
-    type: Literal["UnknownSubstance"] = "UnknownSubstance"
-    cas_id: str = Field(..., alias="casID")
-
-
 class Substance(BaseAlbertModel):
     """
     Substance is a Pydantic model representing information about a chemical substance.
@@ -813,12 +804,24 @@ class Substance(BaseAlbertModel):
     )
 
 
+class UnknownSubstance(BaseAlbertModel):
+    """
+    UnknownSubstance is a Pydantic model representing an unknown substance.
+    """
+
+    type: Literal["UnknownSubstance"] = "UnknownSubstance"
+    cas_id: str = Field(..., alias="casID")
+    is_cas: bool = Field(..., alias="isCas")
+
+
 def substance_discriminator(value: dict[str, Any]) -> Literal["Substance", "UnknownSubstance"]:
-    if "classification" in value and value["classification"] is not None:
-        value["type"] = "Substance"
-        return "Substance"
-    value["type"] = "UnknownSubstance"
-    return "UnknownSubstance"
+    # Note that when the substance is unknown, the API returns a different structure
+    # and it contains a field called "isCas" which is False
+    if "isCas" in value and value["isCas"] is False:
+        value["type"] = "UnknownSubstance"
+        return "UnknownSubstance"
+    value["type"] = "Substance"
+    return "Substance"
 
 
 SubstanceTypes = Annotated[

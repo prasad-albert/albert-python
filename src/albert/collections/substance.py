@@ -1,7 +1,6 @@
 from albert.collections.base import BaseCollection
-from albert.resources.substance import Substance, SubstanceResponse, SubstanceTypes
+from albert.resources.substance import SubstanceResponse, SubstanceTypes
 from albert.session import AlbertSession
-from albert.utils.exceptions import SDKNotSupportedError
 
 
 class SubstanceCollection(BaseCollection):
