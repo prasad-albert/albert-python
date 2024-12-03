@@ -212,7 +212,7 @@ class InventorySpecValue(BaseAlbertModel):
 
 
 class InventorySpec(BaseAlbertModel):
-    id: str = Field(..., alias="albertId")
+    id: str | None = Field(default=None, alias="albertId")
     name: str
     data_column_id: str = Field(..., alias="datacolumnId")
     data_column_name: str | None = Field(default=None, alias="datacolumnName")
