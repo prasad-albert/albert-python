@@ -211,28 +211,38 @@ class InventoryCollection(BaseCollection):
             for item in self.session.get(url, params={"id": batch}).json()
         ]
 
-    def add_specs(self, *, inventory_id: str, specs: list[InventorySpec]) -> InventorySpecList:
-        """Adds an Inventory Spec (an inventory property that was not directly measured via a task, but is a generic property of that inentory item).
+    def add_specs(
+        self,
+        *,
+        inventory_id: str,
+        specs: InventorySpec | list[InventorySpec],
+    ) -> InventorySpecList:
+        """Add inventory specs to the inventory item.
+
+        An `InventorySpec` is a property that was not directly measured via a task,
+        but is a generic property of that inentory item.
 
         Parameters
         ----------
         inventory_id : str
             The Albert ID of the inventory item to add the specs to
         specs : list[InventorySpec]
-            List of InventorySpec objects to add to the inventory item, which described the value and, optionally, the conditions associated with the value (via workflow).
+            List of InventorySpec objects to add to the inventory item,
+            which described the value and, optionally,
+            the conditions associated with the value (via workflow).
 
         Returns
         -------
         InventorySpecList
-            The Spec attached to the Inventory Item.
+            The list of InventorySpecs attached to the InventoryItem.
         """
+        if not inventory_id.startswith("INV"):
+            inventory_id = f"INV{inventory_id}"
         if isinstance(specs, InventorySpec):
             specs = [specs]
-        if not inventory_id.startswith("INV"):
-            inventory_id = "INV" + inventory_id
-        url = f"{self.base_path}/{inventory_id}/specs"
         response = self.session.put(
-            url, json=[x.model_dump(exclude_unset=True, by_alias=True, mode="json") for x in specs]
+            url=f"{self.base_path}/{inventory_id}/specs",
+            json=[x.model_dump(exclude_unset=True, by_alias=True, mode="json") for x in specs],
         )
         return InventorySpecList(**response.json())
 
