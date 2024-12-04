@@ -477,7 +477,7 @@ class InventoryCollection(BaseCollection):
                                 "oldValue": id,
                             }
                         )
-            elif attribute == "company":
+            elif attribute == "company" and old_value is not None or new_value is not None:
                 if old_value is None and new_value is not None:
                     payload["data"].append(
                         {
