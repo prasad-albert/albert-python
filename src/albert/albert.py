@@ -24,6 +24,7 @@ from albert.collections.property_data import PropertyDataCollection
 from albert.collections.reports import ReportCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.storage_locations import StorageLocationsCollection
+from albert.collections.substance import SubstanceCollection
 from albert.collections.tags import TagCollection
 from albert.collections.tasks import TaskCollection
 from albert.collections.un_numbers import UnNumberCollection
@@ -202,3 +203,7 @@ class Albert:
     @property
     def btinsights(self) -> BTInsightCollection:
         return BTInsightCollection(session=self.session)
+
+    @property
+    def substances(self) -> SubstanceCollection:
+        return SubstanceCollection(session=self.session)
