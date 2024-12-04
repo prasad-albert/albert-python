@@ -1,11 +1,11 @@
-version: "2.1"
+version: 2.1
 
 orbs:
   python: circleci/python@2.1.1
   snyk: snyk/snyk@1.1.2
 
 jobs:
-  snyk-app-scan:
+  snyk_app_scan:
     executor:
       name: python/default
       tag: "3.10.15"
@@ -84,20 +84,18 @@ jobs:
 workflows:
   main:
     jobs:
-      - snyk-app-scan:
-          name: Snyk App Scan
-          context: dev
       - test:
           name: Test
           context: ds-dev
       - validate_version_bump:
           name: Validate Version Bump
           context: ds-dev
+      - snyk_app_scan:
+          name: Snyk App Scan
+          context: dev
       - publish:
           name: Publish
           context: ds-dev
-          requires:
-            - Test
           filters:
             branches:
               only: ["main"]
