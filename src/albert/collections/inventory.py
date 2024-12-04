@@ -55,6 +55,7 @@ class InventoryCollection(BaseCollection):
         "unit_category",
         "security_class",
         "alias",
+        "acls",
         "metadata",
     }
 
