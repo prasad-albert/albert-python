@@ -55,7 +55,6 @@ class InventoryCollection(BaseCollection):
         "unit_category",
         "security_class",
         "alias",
-        "acls",
         "metadata",
     }
 
@@ -357,7 +356,7 @@ class InventoryCollection(BaseCollection):
             The payload for the PATCH request.
         """
 
-        _updatable_attributes_special = {"company", "tags", "cas"}
+        _updatable_attributes_special = {"company", "tags", "cas", "acls"}
         payload = self._generate_patch_payload(existing=existing, updated=updated)
         payload = payload.model_dump(mode="json", by_alias=True)
         for attribute in _updatable_attributes_special:
@@ -435,6 +434,25 @@ class InventoryCollection(BaseCollection):
                                     "newValue": str(new_lookup[id].min),
                                 }
                             )
+
+            elif attribute == "acls":
+                if old_value and new_value and new_value != old_value:
+                    payload["data"].append(
+                        {
+                            "operation": "update",
+                            "attribute": "ACL",
+                            "oldValue": [x.model_dump(by_alias=True) for x in old_value],
+                            "newValue": [x.model_dump(by_alias=True) for x in new_value],
+                        }
+                    )
+                elif new_value:
+                    payload["data"].append(
+                        {
+                            "operation": "add",
+                            "attribute": "ACL",
+                            "newValue": [x.model_dump(by_alias=True) for x in new_value],
+                        }
+                    )
 
             elif attribute == "tags":
                 if (old_value is None or old_value == []) and new_value is not None:
