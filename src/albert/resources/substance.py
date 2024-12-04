@@ -844,4 +844,4 @@ class SubstanceResponse(BaseAlbertModel):
     """
 
     substances: list[SubstanceTypes]
-    substance_errors: list[Any] | None = Field(None, alias="substanceErrors")
+    substance_errors: list[dict[str, Any]] | None = Field(None, alias="substanceErrors")
