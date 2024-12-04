@@ -669,6 +669,9 @@ class SubstanceInfo(BaseAlbertModel):
         Information about serious eye damage.
     respiratory_skin_sens_info : list[RespiratorySkinSensInfo] | None
         Information about respiratory skin sensitization.
+    is_known : bool
+        Indicates if the substance is known (i.e. has known regulatory or hazard information in the database)
+        (note this is an alias for the isCas field which behaves in a non intuitive way in the API so we have opted to use is_known for usability instead)
     """
 
     type: Literal["Substance"] = "Substance"
