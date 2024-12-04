@@ -1,5 +1,5 @@
 from albert.albert import Albert
-from albert.resources.substance import SubstanceInfo, UnknownSubstance
+from albert.resources.substance import SubstanceInfo
 
 
 def test_get_by_ids(client: Albert):
@@ -37,7 +37,7 @@ def test_get_by_id(client: Albert):
 
 def test_get_by_id_bad_cas_id(client: Albert):
     substance = client.substances.get_by_id(cas_id="not-a-cas-id")
-    assert isinstance(substance, UnknownSubstance)
+    assert not substance.is_known
 
 
 def test_get_multiple_ids_with_unknown_substances(client: Albert):
@@ -48,9 +48,9 @@ def test_get_multiple_ids_with_unknown_substances(client: Albert):
     # that for the given cas IDs we get the correct substance type back
     for substance in substances:
         if substance.cas_id in ["134180-76-0", "1310-73-2"]:
-            assert isinstance(substance, SubstanceInfo)
+            assert substance.is_known
         else:
-            assert isinstance(substance, UnknownSubstance)
+            assert not substance.is_known
 
 
 def test_get_by_id_with_region(client: Albert):

@@ -1,5 +1,5 @@
 from albert.collections.base import BaseCollection
-from albert.resources.substance import SubstanceResponse, SubstanceTypes
+from albert.resources.substance import SubstanceInfo, SubstanceResponse
 from albert.session import AlbertSession
 
 
@@ -19,9 +19,9 @@ class SubstanceCollection(BaseCollection):
 
     Methods
     -------
-    get_by_ids(cas_ids: list[str], region: str = "US") -> list[SubstanceTypes]
+    get_by_ids(cas_ids: list[str], region: str = "US") -> list[SubstanceInfo]
         Retrieves a list of substances by their CAS IDs and optional region.
-    get_by_id(cas_id: str, region: str = "US") -> SubstanceTypes
+    get_by_id(cas_id: str, region: str = "US") -> SubstanceInfo
         Retrieves a single substance by its CAS ID and optional region.
     """
 
@@ -31,12 +31,12 @@ class SubstanceCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{SubstanceCollection._api_version}/substances"
 
-    def get_by_ids(self, *, cas_ids: list[str], region: str = "US") -> list[SubstanceTypes]:
+    def get_by_ids(self, *, cas_ids: list[str], region: str = "US") -> list[SubstanceInfo]:
         url = f"{self.base_path}"
         response = self.session.get(url, params={"casIDs": ",".join(cas_ids), "region": region})
         return SubstanceResponse.model_validate(response.json()).substances
 
-    def get_by_id(self, *, cas_id: str, region: str = "US") -> SubstanceTypes:
+    def get_by_id(self, *, cas_id: str, region: str = "US") -> SubstanceInfo:
         """
         Get a substance by its CAS ID.
 
@@ -47,7 +47,7 @@ class SubstanceCollection(BaseCollection):
 
         Returns
         -------
-        SubstanceTypes
+        SubstanceInfo
             The retrieved substance or raises an error if not found.
         """
         return self.get_by_ids(cas_ids=[cas_id], region=region)[0]

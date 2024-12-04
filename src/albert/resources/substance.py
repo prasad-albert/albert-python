@@ -802,33 +802,7 @@ class SubstanceInfo(BaseAlbertModel):
     respiratory_skin_sens_info: list[RespiratorySkinSensInfo] | None = Field(
         None, alias="respiratorySkinSensInfo"
     )
-
-
-class UnknownSubstance(BaseAlbertModel):
-    """
-    UnknownSubstance is a Pydantic model representing an unknown substance.
-    """
-
-    type: Literal["UnknownSubstance"] = "UnknownSubstance"
-    cas_id: str = Field(..., alias="casID")
-    is_cas: bool = Field(..., alias="isCas")
-
-
-def substance_discriminator(value: dict[str, Any]) -> Literal["Substance", "UnknownSubstance"]:
-    # Note that when the substance is unknown, the API returns a different structure
-    # and it contains a field called "isCas" which is False
-    if "isCas" in value and value["isCas"] is False:
-        value["type"] = "UnknownSubstance"
-        return "UnknownSubstance"
-    value["type"] = "Substance"
-    return "Substance"
-
-
-SubstanceTypes = Annotated[
-    Annotated[SubstanceInfo, Tag("Substance")]
-    | Annotated[UnknownSubstance, Tag("UnknownSubstance")],
-    Discriminator(substance_discriminator),
-]
+    is_known: bool = Field(default=True, alias="isCas")
 
 
 class SubstanceResponse(BaseAlbertModel):
@@ -843,5 +817,5 @@ class SubstanceResponse(BaseAlbertModel):
         A list of errors related to substances, if any.
     """
 
-    substances: list[SubstanceTypes]
+    substances: list[SubstanceInfo]
     substance_errors: list[dict[str, Any]] | None = Field(None, alias="substanceErrors")
