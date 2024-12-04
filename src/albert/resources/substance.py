@@ -447,9 +447,9 @@ class RespiratorySkinSensInfo(BaseAlbertModel):
     species: str | None = None
 
 
-class Substance(BaseAlbertModel):
+class SubstanceInfo(BaseAlbertModel):
     """
-    Substance is a Pydantic model representing information about a chemical substance.
+    SubstanceInfo is a Pydantic model representing information about a chemical substance.
 
     Attributes
     ----------
@@ -825,7 +825,8 @@ def substance_discriminator(value: dict[str, Any]) -> Literal["Substance", "Unkn
 
 
 SubstanceTypes = Annotated[
-    Annotated[Substance, Tag("Substance")] | Annotated[UnknownSubstance, Tag("UnknownSubstance")],
+    Annotated[SubstanceInfo, Tag("Substance")]
+    | Annotated[UnknownSubstance, Tag("UnknownSubstance")],
     Discriminator(substance_discriminator),
 ]
 
