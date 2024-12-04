@@ -169,7 +169,7 @@ class InventoryItem(BaseTaggedEntity, EntityLinkConvertible):
     formula_id: str | None = Field(default=None, alias="formulaId", exclude=True, frozen=True)
     symbols: list[dict] | None = Field(default=None, alias="Symbols", exclude=True, frozen=True)
     un_number: str | None = Field(default=None, alias="unNumber", exclude=True, frozen=True)
-    acls: list[ACL] | None = Field(default=None, alias="ACL", exclude=True, frozen=False)
+    acls: list[ACL] | None = Field(default=None, alias="ACL")
 
     @field_validator("company", mode="before")
     @classmethod
