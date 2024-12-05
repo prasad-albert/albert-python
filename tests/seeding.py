@@ -824,6 +824,7 @@ def generate_task_seeds(
     seeded_workflows,
     seeded_products,
 ) -> list[BaseTask]:
+    formulation_proj = [x for x in seeded_projects if x.id == seeded_products[2].project_id][0]
     return [
         # Property Task 1
         PropertyTask(
@@ -884,8 +885,8 @@ def generate_task_seeds(
             ],
             location=seeded_locations[1],
             priority=TaskPriority.LOW,
-            project=seeded_projects[2],
-            parent_id=seeded_products[2].project_id,
+            project=formulation_proj,
+            parent_id=formulation_proj.id,
             assigned_to=user,
             start_date="2024-10-01",
             due_date="2024-10-31",
@@ -904,8 +905,8 @@ def generate_task_seeds(
             ],
             location=seeded_locations[2],
             priority=TaskPriority.MEDIUM,
-            project=seeded_projects[2],
-            parent_id=seeded_products[2].project_id,
+            project=formulation_proj,
+            parent_id=formulation_proj.id,
             assigned_to=user,
             start_date="2024-10-01",
             due_date="2024-10-31",

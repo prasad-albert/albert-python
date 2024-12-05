@@ -498,6 +498,7 @@ def seeded_products(
     seeded_sheet: Sheet,
     seeded_inventory: list[InventoryItem],
 ) -> list[InventoryItem]:
+    product_name_prefix = f"{seed_prefix} - My cool formulation"
     products = []
 
     components = [
@@ -507,16 +508,18 @@ def seeded_products(
     for n in range(4):
         products.append(
             seeded_sheet.add_formulation(
-                formulation_name=f"{seed_prefix} - My cool formulation {str(n)}",
+                formulation_name=f"{product_name_prefix} {str(n)}",
                 components=components,
             )
         )
-    return list(
-        client.inventory.list(
+    return [
+        x
+        for x in client.inventory.list(
             category=InventoryCategory.FORMULAS,
-            text=f"{seed_prefix} - My cool formulation",
+            text=product_name_prefix,
         )
-    )
+        if x.name.startswith(f"{seed_prefix} - My cool formulation")
+    ]
 
 
 @pytest.fixture(scope="session")
