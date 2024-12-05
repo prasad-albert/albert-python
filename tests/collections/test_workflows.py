@@ -18,5 +18,5 @@ def test_blocks_dupes(client: Albert, seeded_workflows: list[Workflow]):
     wf.id = None
     wf.status = None
 
-    r = client.workflows.create(workflow=wf)
-    assert r.id == seeded_workflows[0].id
+    r = client.workflows.create(workflows=wf)
+    assert r[0].id == seeded_workflows[0].id
