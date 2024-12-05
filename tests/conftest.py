@@ -518,7 +518,7 @@ def seeded_products(
             category=InventoryCategory.FORMULAS,
             text=product_name_prefix,
         )
-        if x.name.startswith(f"{seed_prefix} - My cool formulation")
+        if x.name.startswith(product_name_prefix)
     ]
 
 
