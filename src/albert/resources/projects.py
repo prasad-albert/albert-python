@@ -93,9 +93,8 @@ class Project(BaseResource, EntityLinkConvertible):
     metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
     # Read-only fields
     status: str | None = Field(default=None, exclude=True, frozen=True)
-    state: State | None = Field(
-        default=None, exclude=True
-    )  # Cannot be sent in a create POST, but can be used to from a PATCH for update.
+    # Cannot be sent in a create POST, but can be used to from a PATCH for update.
+    state: State | None = Field(default=None, exclude=True)
 
     @field_validator("status", mode="before")
     def validate_status(cls, value):
