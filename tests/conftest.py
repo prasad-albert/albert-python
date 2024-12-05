@@ -65,6 +65,7 @@ def client() -> Albert:
     return Albert(
         base_url="https://app.albertinvent.com",
         client_credentials=credentials,
+        max_retries=3,
     )
 
 

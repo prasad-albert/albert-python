@@ -40,7 +40,7 @@ class AlbertSession(requests.Session):
         base_url: str,
         token: str | None = None,
         client_credentials: ClientCredentials | None = None,
-        retries: int = 3,
+        retries: int | None = None,
     ):
         super().__init__()
         self.base_url = base_url

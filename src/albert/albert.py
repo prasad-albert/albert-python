@@ -49,6 +49,8 @@ class Albert:
     client_credentials: ClientCredentials, optional
         The client credentials for programmatic authentication.
         Client credentials can be read from the environment by `ClientCredentials.from_env()`.
+    max_retries : int, optional
+        The maximum number of retries for failed requests (default is None).
 
     Attributes
     ----------
@@ -70,11 +72,13 @@ class Albert:
         base_url: str | None = None,
         token: str | None = None,
         client_credentials: ClientCredentials | None = None,
+        max_retries: int | None = None,
     ):
         self.session = AlbertSession(
             base_url=base_url or os.getenv("ALBERT_BASE_URL") or "https://app.albertinvent.com",
             token=token or os.getenv("ALBERT_TOKEN"),
             client_credentials=client_credentials,
+            max_retries=max_retries,
         )
 
     @property
