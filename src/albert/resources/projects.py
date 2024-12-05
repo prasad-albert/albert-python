@@ -91,7 +91,7 @@ class Project(BaseResource, EntityLinkConvertible):
     task_config: list[TaskConfig] | None = Field(default_factory=list)
     grid: GridDefault | None = None
     metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
-    status: str | None = Field(default=None, frozen=True, exclude=True)
+    status: str | None = Field(default=None, exclude=True)
 
     # Read-only fields
     state: State | None = Field(default=None, exclude=True, frozen=True)
