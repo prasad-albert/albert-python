@@ -4,6 +4,9 @@ The package is built using the [uv](https://docs.astral.sh/uv/getting-started/in
 To get started, install uv on your system by running
 
 ```
+# For Mac OS users
+brew install uv
+# or
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
