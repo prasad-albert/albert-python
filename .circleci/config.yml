@@ -32,7 +32,7 @@ jobs:
             uv sync
             uv export > requirements_lock.txt
             uv pip compile requirements_lock.txt > requirements.txt
-            uv pip install --system requirements.txt
+            uv pip install --system -r requirements.txt
       - snyk/scan:
           fail-on-issues: false
           monitor-on-build: true
