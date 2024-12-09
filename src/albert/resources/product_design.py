@@ -16,14 +16,14 @@ class NormalizedCAS(BaseResource):
     smiles: str | None = Field(default=None)
 
 
-class InventorySDS(BaseResource):
+class UnpackedInventorySDS(BaseResource):
     albert_id: str | None = Field(default=None, alias="albertId")
     value: float | None = Field(default=None)
     sds_class: str | None = Field(default=None, alias="class")
     un_number: str | None = Field(default=None, alias="unNumber")
 
 
-class CasInfo(BaseResource):
+class UnpackedCasInfo(BaseResource):
     id: str | None = Field(default=None)
     name: str | None = Field(default=None)
     min: float | None = Field(default=None)
@@ -33,7 +33,7 @@ class CasInfo(BaseResource):
     cas_sum: float | None = Field(default=None, alias="casSum")
 
 
-class InventoryListItem(BaseResource):
+class UnpackedInventoryListItem(BaseResource):
     row_inventory_id: str | None = Field(default=None, alias="rowInventoryId")
     value: float | None = Field(default=None)
     column_id: str | None = Field(default=None, alias="colId")
@@ -42,19 +42,27 @@ class InventoryListItem(BaseResource):
     row_id: str | None = Field(default=None, alias="rowId")
 
 
-class Inventory(InventoryListItem):
+class UnpackedInventory(UnpackedInventoryListItem):
     id: str | None = Field(default=None)
     name: str | None = Field(default=None)
     rsn_number: str | None = Field(default=None, alias="rsnNumber")
     total_cas_sum: float | None = Field(default=None, alias="totalCasSum")
     value: float | None = Field(default=None)
-    sds_info: InventorySDS | None = Field(default=None, alias="sdsInfo")
-    cas_info: list[CasInfo] | None = Field(default=None, alias="casInfo")
+    sds_info: UnpackedInventorySDS | None = Field(default=None, alias="sdsInfo")
+    cas_info: list[UnpackedCasInfo] | None = Field(default=None, alias="casInfo")
 
 
 class UnpackedProductDesign(BaseAlbertModel):
-    cas_level_substances: list[CasLevelSubstance] = Field(default=None, alias="casLevelSubstances")
-    normalized_cas_list: list[NormalizedCAS] = Field(default=None, alias="normalizedCasList")
-    inventory_sds_list: list[InventorySDS] = Field(default=None, alias="inventorySDSList")
-    inventories: list[Inventory] = Field(default=None, alias="Inventories")
-    inventory_list: list[InventoryListItem] = Field(default=None, alias="inventoryList")
+    cas_level_substances: list[CasLevelSubstance] | None = Field(
+        default=None, alias="casLevelSubstances"
+    )
+    normalized_cas_list: list[NormalizedCAS] | None = Field(
+        default=None, alias="normalizedCasList"
+    )
+    inventory_sds_list: list[UnpackedInventorySDS] | None = Field(
+        default=None, alias="inventorySDSList"
+    )
+    inventories: list[UnpackedInventory] | None = Field(default=None, alias="Inventories")
+    inventory_list: list[UnpackedInventoryListItem] | None = Field(
+        default=None, alias="inventoryList"
+    )

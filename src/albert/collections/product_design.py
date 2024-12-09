@@ -19,20 +19,20 @@ class ProductDesignCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{ProductDesignCollection._api_version}/productdesign"
 
-    def get_unpacked_formula(self, *, formula_ids: list[str]) -> UnpackedProductDesign:
+    def get_unpacked_product(self, *, inventory_ids: list[str]) -> UnpackedProductDesign:
         """
-        Get unpacked formula by formula id
+        Get unpacked product by inventory IDs
 
         Parameters
         ----------
-        formula_ids : list[str]
-            The formula ids to get unpacked formula for
+        inventory_ids : list[str]
+            Theinventory ids to get unpacked formula for
 
         Returns
         -------
-        UnpackedProductDesign
-            The unpacked formula
+        list[UnpackedProductDesign]
+            The unpacked product/formula
         """
         url = f"{self.base_path}/PREDICTION/unpack"
-        response = self.session.get(url, params={"formulaId": formula_ids})
+        response = self.session.get(url, params={"formulaId": inventory_ids})
         return [UnpackedProductDesign(**x) for x in response.json()]
