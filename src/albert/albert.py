@@ -19,6 +19,7 @@ from albert.collections.notes import NotesCollection
 from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
 from albert.collections.pricings import PricingCollection
+from albert.collections.product_design import ProductDesignCollection
 from albert.collections.projects import ProjectCollection
 from albert.collections.property_data import PropertyDataCollection
 from albert.collections.reports import ReportCollection
@@ -176,6 +177,10 @@ class Albert:
     @property
     def property_data(self) -> PropertyDataCollection:
         return PropertyDataCollection(session=self.session)
+
+    @property
+    def product_design(self) -> ProductDesignCollection:
+        return ProductDesignCollection(session=self.session)
 
     @property
     def storage_locations(self) -> StorageLocationsCollection:
