@@ -2,7 +2,7 @@ from pydantic import AliasChoices, Field, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.parameter_groups import ParameterGroup
-from albert.resources.parameters import Parameter
+from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import EntityLinkConvertible, SerializeAsEntityLink
 from albert.resources.units import Unit
 
@@ -48,6 +48,8 @@ class ParameterSetpoint(BaseAlbertModel):
     unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
     parameter_id: str | None = Field(alias="id", default=None)
     intervals: list[Interval] | None = Field(default=None, alias="Intervals")
+    category: ParameterCategory | None = Field(default=None)
+    short_name: str | None = Field(default=None, alias="shortName")
 
     @model_validator(mode="after")
     def check_parameter_setpoint_validity(self):
