@@ -62,6 +62,8 @@ class ParameterSetpoint(BaseAlbertModel):
             raise ValueError("Either parameter or parameter_id must be provided.")
         if self.value is not None and self.intervals is not None:
             raise ValueError("Cannot provide both value and intervals.")
+        if isinstance(self.value, dict) and self.short_name is None:
+            raise ValueError("Please provide a short_name.")
         return self
 
 
