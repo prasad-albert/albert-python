@@ -22,7 +22,7 @@ from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.parameter_groups import ParameterGroup
-from albert.resources.parameters import Parameter
+from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.projects import Project
 from albert.resources.roles import Role
 from albert.resources.sheets import Component, Sheet
@@ -123,6 +123,11 @@ def static_user(client: Albert) -> User:
 def static_roles(client: Albert) -> list[Role]:
     # Roles are not deleted or created. We just use the existing roles.
     return list(client.roles.list())
+
+
+@pytest.fixture(scope="session")
+def static_consumeable_parameter(client: Albert) -> Parameter:
+    return client.parameters.list(names="Consumables", exact_match=True)[0]
 
 
 @pytest.fixture(scope="session")
@@ -423,6 +428,7 @@ def seeded_parameter_groups(
     seeded_parameters,
     seeded_tags,
     seeded_units,
+    static_consumeable_parameter: Parameter,
 ) -> Iterator[list[ParameterGroup]]:
     seeded = []
     for parameter_group in generate_parameter_group_seeds(
@@ -430,6 +436,7 @@ def seeded_parameter_groups(
         seeded_parameters=seeded_parameters,
         seeded_tags=seeded_tags,
         seeded_units=seeded_units,
+        static_consumeable_parameter=static_consumeable_parameter,
     ):
         created_parameter_group = client.parameter_groups.create(parameter_group=parameter_group)
         seeded.append(created_parameter_group)
@@ -482,11 +489,15 @@ def seeded_workflows(
     seed_prefix: str,
     seeded_parameter_groups: list[ParameterGroup],
     seeded_parameters: list[Parameter],
+    static_consumeable_parameter: Parameter,
+    seeded_inventory: list[InventoryItem],
 ) -> list[Workflow]:
     all_workflows = generate_workflow_seeds(
         seed_prefix=seed_prefix,
         seeded_parameter_groups=seeded_parameter_groups,
         seeded_parameters=seeded_parameters,
+        static_consumeable_parameter=static_consumeable_parameter,
+        seeded_inventory=seeded_inventory,
     )
 
     return client.workflows.create(workflows=all_workflows)
