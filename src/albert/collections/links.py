@@ -59,7 +59,7 @@ class LinksCollection(BaseCollection):
             deserialize=lambda items: [Link(**item) for item in items],
         )
 
-    def get_by_id(self, id: str) -> Link:
+    def get_by_id(self, *, id: str) -> Link:
         """
         Retrieves a link entity by its ID.
 
@@ -77,7 +77,7 @@ class LinksCollection(BaseCollection):
         response = self.session.get(path)
         return Link(**response.json())
 
-    def create(self, links: List[Link]) -> List[Link]:  # noqa: UP006 `list` is defined in this collection, so need to use `List`
+    def create(self, *, links: List[Link]) -> List[Link]:  # noqa: UP006 `list` is defined in this collection, so need to use `List`
         """
         Creates a new link entity.
 
