@@ -18,6 +18,7 @@ from albert.resources.inventory import (
     InventoryMinimum,
     InventoryUnitCategory,
 )
+from albert.resources.links import Link, LinkCategory
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.lots import (
@@ -926,3 +927,17 @@ def generate_note_seeds(
         note=f"{seed_prefix} This is a note for an inventory item",
     )
     return [task_note, inv_note]
+
+
+def generate_link_seeds(seeded_tasks: list[BaseTask]):
+    # NOTE: As more Links are available, we should add tests for them
+    links = []
+    for task in seeded_tasks[1:]:
+        links.append(
+            Link(
+                parent=seeded_tasks[0].to_entity_link(),
+                child=task.to_entity_link(),
+                category=LinkCategory.LINKED_TASK,
+            )
+        )
+    return links
