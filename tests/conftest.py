@@ -40,6 +40,7 @@ from tests.seeding import (
     generate_data_column_seeds,
     generate_data_template_seeds,
     generate_inventory_seeds,
+    generate_link_seeds,
     generate_list_item_seeds,
     generate_location_seeds,
     generate_lot_seeds,
@@ -572,3 +573,12 @@ def seeded_notes(
     for note in seeded:
         with suppress(NotFoundError):
             client.notes.delete(id=note.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_links(client: Albert, seeded_tasks: list[BaseTask]):
+    seeded = client.links.create(links=generate_link_seeds(seeded_tasks=seeded_tasks))
+    yield seeded
+    for link in seeded:
+        with suppress(NotFoundError):
+            client.links.delete(id=link.id)
