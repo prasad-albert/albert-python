@@ -101,7 +101,7 @@ class ListsCollection(BaseCollection):
         )
         return ListItem(**response.json())
 
-    def delete(self, *, id: str | ListItem) -> None:
+    def delete(self, *, id: str) -> None:
         """
         Delete a lists entry item by its ID.
 
