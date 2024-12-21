@@ -114,8 +114,6 @@ class ListsCollection(BaseCollection):
         -------
         None
         """
-        if isinstance(id, ListItem):
-            id = id.id
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
