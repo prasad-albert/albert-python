@@ -128,7 +128,10 @@ def static_roles(client: Albert) -> list[Role]:
 
 @pytest.fixture(scope="session")
 def static_consumeable_parameter(client: Albert) -> Parameter:
-    return list(client.parameters.list(names="Consumables", exact_match=True))[0]
+    parameters = list(client.parameters.list(names="Consumables", exact_match=True))
+    if not parameters:
+        raise ValueError("No parameters found with the name 'Consumables'")
+    return parameters[0]
 
 
 @pytest.fixture(scope="session")
