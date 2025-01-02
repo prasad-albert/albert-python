@@ -128,7 +128,7 @@ def static_roles(client: Albert) -> list[Role]:
 
 @pytest.fixture(scope="session")
 def static_consumeable_parameter(client: Albert) -> Parameter:
-    return client.parameters.list(names="Consumables", exact_match=True)[0]
+    return client.parameters.list(names="Consumables", exact_match=True).to_list()[0]
 
 
 @pytest.fixture(scope="session")
