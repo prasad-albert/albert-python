@@ -2,16 +2,16 @@ from typing import Annotated, TypeVar
 
 from pydantic import PlainSerializer
 
-from albert.resources.base import BaseEntityLink, EntityLinkConvertible
+from albert.resources.base import BaseAlbertModel, BaseEntityLink
 
 
-def convert_to_entity_link(value: EntityLinkConvertible | BaseEntityLink) -> BaseEntityLink:
-    if isinstance(value, EntityLinkConvertible):
+def convert_to_entity_link(value: BaseAlbertModel | BaseEntityLink) -> BaseEntityLink:
+    if isinstance(value, BaseAlbertModel):
         return value.to_entity_link()
     return value
 
 
-EntityType = TypeVar("EntityType", bound=EntityLinkConvertible)
+EntityType = TypeVar("EntityType", bound=BaseAlbertModel)
 
 SerializeAsEntityLink = Annotated[
     EntityType | BaseEntityLink,

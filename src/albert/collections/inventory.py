@@ -7,6 +7,7 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
+from albert.resources.acls import AccessControlLevel
 from albert.resources.inventory import (
     InventoryCategory,
     InventoryItem,
@@ -436,13 +437,24 @@ class InventoryCollection(BaseCollection):
                             )
 
             elif attribute == "acls":
+                new_val_dump = [
+                    x.model_dump(by_alias=True)
+                    for x in new_value
+                    if x.fgc
+                    in [
+                        AccessControlLevel.INVENTORY_OWNER,
+                        AccessControlLevel.INVENTORY_VIEWER,
+                    ]
+                ]
+                if new_val_dump == []:
+                    continue
                 if old_value and new_value and new_value != old_value:
                     payload["data"].append(
                         {
                             "operation": "update",
                             "attribute": "ACL",
                             "oldValue": [x.model_dump(by_alias=True) for x in old_value],
-                            "newValue": [x.model_dump(by_alias=True) for x in new_value],
+                            "newValue": new_val_dump,
                         }
                     )
                 elif new_value:
@@ -450,7 +462,7 @@ class InventoryCollection(BaseCollection):
                         {
                             "operation": "add",
                             "attribute": "ACL",
-                            "newValue": [x.model_dump(by_alias=True) for x in new_value],
+                            "newValue": new_val_dump,
                         }
                     )
 

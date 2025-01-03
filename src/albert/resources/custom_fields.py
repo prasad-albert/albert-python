@@ -107,11 +107,8 @@ class CustomField(BaseResource):
 
     @model_validator(mode="after")
     def confirm_field_compatability(self) -> "CustomField":
-        if self.field_type == FieldType.LIST:
-            if self.category is None:
-                raise ValueError("Category must be set for list fields")
-        elif self.field_type == FieldType.STRING and self.searchable is not None:
-            raise ValueError("Searchable must be None for string fields")
+        if self.field_type == FieldType.LIST and self.category is None:
+            raise ValueError("Category must be set for list fields")
         if self.lookup_column is not None and self.service != ServiceType.INVENTORIES:
             raise ValueError("Lookup column is only allowed for inventories")
         if self.lookup_row is not None and (
