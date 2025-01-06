@@ -369,7 +369,6 @@ class InventoryCollection(BaseCollection):
             old_value = getattr(existing, attribute)
             new_value = getattr(updated, attribute)
             if attribute == "cas":
-                print(f"Old value: {old_value}")
                 if (old_value is None or old_value == []) and new_value is not None:
                     for c in new_value:
                         payload["data"].append(
@@ -573,7 +572,6 @@ class InventoryCollection(BaseCollection):
                             "newValue": new_value.id,
                         }
                     )
-        print(payload)
         return payload
 
     def update(self, *, inventory_item: InventoryItem) -> InventoryItem:
