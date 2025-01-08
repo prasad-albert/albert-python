@@ -406,9 +406,9 @@ class InventoryCollection(BaseCollection):
                                 "operation": "add",
                                 "attribute": "casId",
                                 "newValue": new_lookup[id].id,
-                                "max": new_lookup[id].max,
-                                "min": new_lookup[id].min,
-                                "inventoryValue": new_lookup[id].target,
+                                "max": str(new_lookup[id].max),
+                                "min": str(new_lookup[id].min),
+                                "inventoryValue": str(new_lookup[id].target),
                                 "casCategory": new_lookup[id].cas_category,
                             }
                         )
