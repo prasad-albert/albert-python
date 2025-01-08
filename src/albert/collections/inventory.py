@@ -401,17 +401,17 @@ class InventoryCollection(BaseCollection):
                     to_check_for_update = old_set.intersection(new_set)
 
                     for id in to_add:
-                        payload["data"].append(
-                            {
-                                "operation": "add",
-                                "attribute": "casId",
-                                "newValue": new_lookup[id].id,
-                                "max": str(new_lookup[id].max),
-                                "min": str(new_lookup[id].min),
-                                "inventoryValue": str(new_lookup[id].target),
-                                "casCategory": new_lookup[id].cas_category,
-                            }
-                        )
+                        add_payload = {
+                            "operation": "add",
+                            "attribute": "casId",
+                            "newValue": new_lookup[id].id,
+                            "max": new_lookup[id].max,
+                            "min": new_lookup[id].min,
+                            "inventoryValue": new_lookup[id].target,
+                            "casCategory": new_lookup[id].cas_category,
+                        }
+                        add_payload = {k: v for k, v in add_payload.items() if v is not None}
+                        payload["data"].append(add_payload)
                     for id in to_del:
                         payload["data"].append(
                             {
