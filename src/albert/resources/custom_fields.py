@@ -94,7 +94,7 @@ class CustomField(BaseResource):
     id: str | None = Field(default=None, alias="albertId")
     field_type: FieldType = Field(alias="type")
     display_name: str = Field(default=None, alias="labelName")
-    searchable: bool | None = Field(default=None)
+    searchable: bool | None = Field(default=None, alias="search")
     service: ServiceType
     hidden: bool | None = Field(default=None)
     lookup_column: bool | None = Field(default=None, alias="lkpColumn")

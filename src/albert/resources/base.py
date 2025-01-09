@@ -72,10 +72,10 @@ class BaseResource(BaseAlbertModel):
     )
 
     def to_entity_link(self) -> BaseEntityLink:
-        if hasattr(self, "id"):
+        if hasattr(self, "id") and self.id is not None:
             return BaseEntityLink(id=self.id)
         return AlbertException(
-            "`id` is required to create an entity link. Ensure the linked object is registered."
+            "A non-null `id` is required to create an entity link. Ensure the linked object is registered and has a valid `id`."
         )
 
 

@@ -89,7 +89,7 @@ class CustomFieldCollection(BaseCollection):
         for patch in payload.data:
             if patch.attribute == "hidden" and patch.operation == "add":
                 patch.operation = "update"
-                patch.old_value = True
+                patch.old_value = False
 
         # run patch
         url = f"{self.base_path}/{custom_field.id}"
