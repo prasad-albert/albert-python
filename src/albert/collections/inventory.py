@@ -423,61 +423,101 @@ class InventoryCollection(BaseCollection):
                         )
                     for id in to_check_for_update:
                         if old_lookup[id].max != new_lookup[id].max:
-                            payload["data"].append(
-                                _remove_old_value_on_add(
+                            if new_lookup[id].max is not None:
+                                payload["data"].append(
+                                    _remove_old_value_on_add(
+                                        {
+                                            "operation": "update"
+                                            if old_lookup[id].max is not None
+                                            else "add",
+                                            "attribute": "max",
+                                            "entityId": id,
+                                            "oldValue": str(old_lookup[id].max),
+                                            "newValue": str(new_lookup[id].max),
+                                        }
+                                    )
+                                )
+                            else:
+                                payload["data"].append(
                                     {
-                                        "operation": "update"
-                                        if old_lookup[id].max is not None
-                                        else "add",
+                                        "operation": "delete",
                                         "attribute": "max",
                                         "entityId": id,
                                         "oldValue": str(old_lookup[id].max),
-                                        "newValue": str(new_lookup[id].max),
                                     }
                                 )
-                            )
                         if old_lookup[id].min != new_lookup[id].min:
-                            payload["data"].append(
-                                _remove_old_value_on_add(
+                            if new_lookup[id].min is not None:
+                                payload["data"].append(
+                                    _remove_old_value_on_add(
+                                        {
+                                            "operation": "update"
+                                            if old_lookup[id].min is not None
+                                            else "add",
+                                            "attribute": "min",
+                                            "entityId": id,
+                                            "oldValue": str(old_lookup[id].min),
+                                            "newValue": str(new_lookup[id].min),
+                                        }
+                                    )
+                                )
+                            else:
+                                payload["data"].append(
                                     {
-                                        "operation": "update"
-                                        if old_lookup[id].min is not None
-                                        else "add",
+                                        "operation": "delete",
                                         "attribute": "min",
                                         "entityId": id,
                                         "oldValue": str(old_lookup[id].min),
-                                        "newValue": str(new_lookup[id].min),
                                     }
                                 )
-                            )
                         if old_lookup[id].target != new_lookup[id].target:
-                            payload["data"].append(
-                                _remove_old_value_on_add(
+                            if new_lookup[id].target is not None:
+                                payload["data"].append(
+                                    _remove_old_value_on_add(
+                                        {
+                                            "operation": "update"
+                                            if old_lookup[id].target is not None
+                                            else "add",
+                                            "attribute": "inventoryValue",
+                                            "entityId": id,
+                                            "oldValue": str(old_lookup[id].target),
+                                            "newValue": str(new_lookup[id].target),
+                                        }
+                                    )
+                                )
+                            else:
+                                payload["data"].append(
                                     {
-                                        "operation": "update"
-                                        if old_lookup[id].target is not None
-                                        else "add",
+                                        "operation": "delete",
                                         "attribute": "inventoryValue",
                                         "entityId": id,
                                         "oldValue": str(old_lookup[id].target),
-                                        "newValue": str(new_lookup[id].target),
                                     }
                                 )
-                            )
                         if old_lookup[id].cas_category != new_lookup[id].cas_category:
-                            payload["data"].append(
-                                _remove_old_value_on_add(
+                            if new_lookup[id].cas_category is not None:
+                                payload["data"].append(
+                                    _remove_old_value_on_add(
+                                        {
+                                            "operation": "update"
+                                            if old_lookup[id].cas_category is not None
+                                            else "add",
+                                            "attribute": "casCategory",
+                                            "entityId": id,
+                                            "oldValue": str(old_lookup[id].cas_category),
+                                            "newValue": str(new_lookup[id].cas_category),
+                                        }
+                                    )
+                                )
+                            else:
+                                payload["data"].append(
                                     {
-                                        "operation": "update"
-                                        if old_lookup[id].cas_category is not None
-                                        else "add",
+                                        "operation": "delete",
                                         "attribute": "casCategory",
                                         "entityId": id,
                                         "oldValue": str(old_lookup[id].cas_category),
-                                        "newValue": str(new_lookup[id].cas_category),
                                     }
                                 )
-                            )
 
             elif attribute == "acls":
                 new_val_dump = [
