@@ -109,7 +109,7 @@ class ParameterGroupSetpoints(BaseAlbertModel):
         return self
 
 
-class Workflow(BaseResource, EntityLinkConvertible):
+class Workflow(BaseResource):
     """A Pydantic Class representing a workflow in Albert.
 
     Workflows are combinations of Data Templates and Parameter groups and their associated setpoints.
