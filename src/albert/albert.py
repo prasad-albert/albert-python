@@ -12,6 +12,7 @@ from albert.collections.data_columns import DataColumnCollection
 from albert.collections.data_templates import DataTemplateCollection
 from albert.collections.files import FileCollection
 from albert.collections.inventory import InventoryCollection
+from albert.collections.links import LinksCollection
 from albert.collections.lists import ListsCollection
 from albert.collections.locations import LocationCollection
 from albert.collections.lots import LotCollection
@@ -216,3 +217,7 @@ class Albert:
     @property
     def substances(self) -> SubstanceCollection:
         return SubstanceCollection(session=self.session)
+
+    @property
+    def links(self) -> LinksCollection:
+        return LinksCollection(session=self.session)
