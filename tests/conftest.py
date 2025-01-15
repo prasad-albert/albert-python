@@ -22,7 +22,7 @@ from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
 from albert.resources.parameter_groups import ParameterGroup
-from albert.resources.parameters import Parameter, ParameterCategory
+from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
 from albert.resources.roles import Role
 from albert.resources.sheets import Component, Sheet
