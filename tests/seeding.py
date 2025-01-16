@@ -560,7 +560,9 @@ def generate_parameter_group_seeds(
                     value="500.0",
                     unit=seeded_units[2],
                 ),
-                ParameterValue(parameter=static_consumeable_parameter),
+                ParameterValue(
+                    parameter=static_consumeable_parameter, category=ParameterCategory.SPECIAL
+                ),
             ],
             tags=[seeded_tags[0]],
         ),
@@ -775,8 +777,9 @@ def generate_workflow_seeds(
                         ),
                         ParameterSetpoint(
                             parameter_id=static_consumeable_parameter.id,
-                            short_name=f"{seed_prefix} - Equipment",
+                            short_name=f"{seed_prefix[0:6]} - Equipment",
                             value=consumeable_inv.to_entity_link(),
+                            category=ParameterCategory.SPECIAL,
                         ),
                         ParameterSetpoint(
                             parameter=_get_param_from_id(
@@ -808,7 +811,6 @@ def generate_workflow_seeds(
                             value="12.2",
                             unit=seeded_parameter_groups[2].parameters[1].unit,
                             categoty=ParameterCategory.NORMAL,
-                            short_name=f"{seed_prefix} - Short Name",
                         ),
                         ParameterSetpoint(
                             parameter_id=seeded_parameter_groups[2].parameters[0].id,
