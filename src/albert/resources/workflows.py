@@ -1,8 +1,8 @@
 from pydantic import AliasChoices, Field, model_validator
 
-from albert.resources.base import BaseAlbertModel, BaseResource
+from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
 from albert.resources.parameter_groups import ParameterGroup
-from albert.resources.parameters import Parameter
+from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
 
@@ -34,20 +34,27 @@ class ParameterSetpoint(BaseAlbertModel):
         The parameter to set the setpoint on. Provide either a parameter or a parameter_id.
     parameter_id : str
         The id of the parameter. Provide either a parameter or a parameter_id.
-    value : str | dict[str, str]
-        The value of the setpoint. If the parameter is a InventoryItem, provide a dictionary of values.
+    value : str | BaseEntityLink
+        The value of the setpoint. If the parameter is a InventoryItem, provide the BaseEntityLink of the InventoryItem.
     unit : Unit
         The unit of the setpoint.
     intervals : list[Interval]
         The intervals of the setpoint. Either ether intervals or value + unit
+    category : ParameterCategory
+        The category of the parameter. Special for InventoryItem (then use name to specify "Equipment", "Consumeable", etc), normal for all others
+    short_name : str
+        The short / display name of the parameter. Required if value is a dictionary.
 
     """
 
     parameter: Parameter | None = Field(exclude=True, default=None)
-    value: str | dict[str, str] | None = Field(default=None)
+    value: str | BaseEntityLink | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
     parameter_id: str | None = Field(alias="id", default=None)
     intervals: list[Interval] | None = Field(default=None, alias="Intervals")
+    category: ParameterCategory | None = Field(default=None)
+    short_name: str | None = Field(default=None, alias="shortName")
+    name: str | None = Field(default=None)
 
     @model_validator(mode="after")
     def check_parameter_setpoint_validity(self):
@@ -60,6 +67,11 @@ class ParameterSetpoint(BaseAlbertModel):
             raise ValueError("Either parameter or parameter_id must be provided.")
         if self.value is not None and self.intervals is not None:
             raise ValueError("Cannot provide both value and intervals.")
+        if isinstance(self.value, dict) and self.short_name is None:
+            raise ValueError("Please provide a short_name.")
+        if isinstance(self.value, dict) and self.category is None:
+            # Help the user out by setting the category to special if it's not set
+            self.category = ParameterCategory.SPECIAL
         return self
 
 
