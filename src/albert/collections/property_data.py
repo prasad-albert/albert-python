@@ -207,7 +207,7 @@ class PropertyDataCollection(BaseCollection):
         response = self.session.post(
             url=f"{self.base_path}/{task_id}",
             json=[x.model_dump(exclude_none=True, by_alias=True, mode="json") for x in properties],
-            params=params
+            params=params,
         )
 
         registered_properties = [
