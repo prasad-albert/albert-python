@@ -182,7 +182,7 @@ class PropertyDataCollection(BaseCollection):
             )
         return self.get_all_task_properties(task_id=task_id)
 
-    def add_properies_to_task(
+    def add_properties_to_task(
         self,
         *,
         inventory_id: str,
@@ -207,6 +207,7 @@ class PropertyDataCollection(BaseCollection):
         response = self.session.post(
             url=f"{self.base_path}/{task_id}",
             json=[x.model_dump(exclude_none=True, by_alias=True, mode="json") for x in properties],
+            params=params,
         )
 
         registered_properties = [

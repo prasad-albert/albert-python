@@ -38,7 +38,7 @@ def test_add_to_task(client: Albert, seeded_tasks: list[BaseTask]):
             data_template=full_data[0].data_template,
         )
         payload.append(data_to_add)
-    r = client.property_data.add_properies_to_task(
+    r = client.property_data.add_properties_to_task(
         task_id=prop_task.id,
         properties=payload,
         inventory_id=full_data[0].inventory.inventory_id,
