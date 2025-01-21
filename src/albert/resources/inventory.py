@@ -11,7 +11,6 @@ from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.tags import Tag
-from albert.resources.un_numbers import UnNumber
 from albert.utils.types import BaseAlbertModel
 
 

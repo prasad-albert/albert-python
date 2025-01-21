@@ -1,6 +1,5 @@
 import logging
 from collections.abc import Iterator
-from typing import Sequence
 
 from pydantic import TypeAdapter
 

@@ -10,7 +10,6 @@ from albert.resources.facet import FacetItem, FacetValue
 from albert.resources.inventory import (
     CasAmount,
     InventoryItem,
-    InventorySearchResultItem,
     InventorySpec,
     InventorySpecValue,
     InventoryUnitCategory,
