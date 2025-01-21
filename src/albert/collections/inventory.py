@@ -289,6 +289,8 @@ class InventoryCollection(BaseCollection):
         paginate_items: bool = True,
         deserialize,
     ):
+        # Note there are other parameters we could add support for
+        # helpers incase the user fails to provide a list for any of these.
         if isinstance(cas, Cas):
             cas = [cas]
         if isinstance(category, InventoryCategory):
@@ -535,9 +537,6 @@ class InventoryCollection(BaseCollection):
         def deserialize(items: list[dict]) -> list[InventoryItem]:
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 
-        # Note there are other parameters we could add supprt for
-
-        # helpers incase the user fails to provide a list for any of these.
         return self._call_search_endpoint(
             limit=limit,
             text=text,
