@@ -360,7 +360,6 @@ class InventoryCollection(BaseCollection):
             created_by=created_by,
             lot_owner=lot_owner,
             tags=tags,
-            match_all_conditions=match_all_conditions,
         )
         response = self.session.get(
             url=f"{self.base_path}/search"
