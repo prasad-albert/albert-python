@@ -12,7 +12,7 @@ from albert.resources.facet import FacetItem
 from albert.resources.inventory import (
     InventoryCategory,
     InventoryItem,
-    InventorySearchResultItem,
+    InventorySearchItem,
     InventorySpec,
     InventorySpecList,
 )
@@ -444,7 +444,7 @@ class InventoryCollection(BaseCollection):
         lot_owner: list[User] = None,
         tags: list[str] = None,
         match_all_conditions: bool = False,
-    ) -> list[InventorySearchResultItem]:
+    ) -> list[InventorySearchItem]:
         """
         Get a list of inventory items that match the search criteria and
         return the raw search records. These are not full inventory item
@@ -452,7 +452,7 @@ class InventoryCollection(BaseCollection):
         """
 
         def deserialize(items: list[dict]):
-            return [InventorySearchResultItem.model_validate(x) for x in items]
+            return [InventorySearchItem.model_validate(x) for x in items]
 
         results = self._call_search_endpoint(
             limit=limit,

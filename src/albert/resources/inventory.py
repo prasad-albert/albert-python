@@ -255,7 +255,7 @@ class InventorySearchSDSItem(BaseAlbertModel):
     un_classification: str | None = Field(default=None, alias="unClassification")
 
 
-class InventorySearchResultItem(BaseAlbertModel):
+class InventorySearchItem(BaseAlbertModel):
     id: str = Field(alias="albertId")
     name: str = Field(default="")
     description: str = Field(default="")
