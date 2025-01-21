@@ -268,29 +268,24 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def _call_search_endpoint(
+    def _prepare_parameters(
         self,
         *,
-        limit: int = 100,
-        text: str | None = None,
-        cas: list[Cas] | Cas | None = None,
-        category: list[InventoryCategory] | InventoryCategory | None = None,
-        company: list[Company] | Company | None = None,
-        order: OrderBy = OrderBy.DESCENDING,
-        sort_by: str | None = "createdAt",
-        location: list[Location] | None = None,
-        storage_location: list[StorageLocation] | None = None,
-        project_id: str | None = None,
-        sheet_id: str | None = None,
-        created_by: list[User] = None,
-        lot_owner: list[User] = None,
-        tags: list[str] = None,
-        match_all_conditions: bool = False,
-        paginate_items: bool = True,
-        deserialize,
+        limit,
+        text,
+        cas,
+        category,
+        company,
+        order,
+        sort_by,
+        location,
+        storage_location,
+        project_id,
+        sheet_id,
+        created_by,
+        lot_owner,
+        tags,
     ):
-        # Note there are other parameters we could add support for
-        # helpers incase the user fails to provide a list for any of these.
         if isinstance(cas, Cas):
             cas = [cas]
         if isinstance(category, InventoryCategory):
@@ -327,22 +322,7 @@ class InventoryCollection(BaseCollection):
             "projectId": project_id,
         }
 
-        if paginate_items:
-            return AlbertPaginator(
-                mode=PaginationMode.OFFSET,
-                path=f"{self.base_path}/llmsearch"
-                if match_all_conditions
-                else f"{self.base_path}/search",
-                params=params,
-                session=self.session,
-                deserialize=deserialize,
-            )
-        else:
-            response = self.session.get(
-                url=f"{self.base_path}/search",
-                params=params,
-            )
-            return deserialize(response.json())
+        return params
 
     def get_all_facets(
         self,
@@ -367,8 +347,8 @@ class InventoryCollection(BaseCollection):
         def deserialize(data):
             return [FacetItem.model_validate(x) for x in data["Facets"]]
 
-        return self._call_search_endpoint(
-            limit=1,  # We don't need an actual records here we just need the facets
+        params = self._prepare_parameters(
+            limit=1,
             text=text,
             cas=cas,
             category=category,
@@ -381,9 +361,14 @@ class InventoryCollection(BaseCollection):
             lot_owner=lot_owner,
             tags=tags,
             match_all_conditions=match_all_conditions,
-            paginate_items=False,
-            deserialize=deserialize,
         )
+        response = self.session.get(
+            url=f"{self.base_path}/search"
+            if match_all_conditions
+            else f"{self.base_path}/llmsearch",
+            params=params,
+        )
+        return deserialize(response.json())
 
     def get_facet_by_name(
         self,
@@ -401,7 +386,7 @@ class InventoryCollection(BaseCollection):
         lot_owner: list[User] = None,
         tags: list[str] = None,
         match_all_conditions: bool = False,
-    ) -> FacetItem:
+    ) -> list[FacetItem]:
         """
         Returns a specific facet by its name with all the filters applied to the search.
         This can be used for example to fetch all remaining tags as part of an iterative
@@ -444,7 +429,7 @@ class InventoryCollection(BaseCollection):
         lot_owner: list[User] = None,
         tags: list[str] = None,
         match_all_conditions: bool = False,
-    ) -> list[InventorySearchItem]:
+    ) -> Iterator[InventorySearchItem]:
         """
         Get a list of inventory items that match the search criteria and
         return the raw search records. These are not full inventory item
@@ -454,7 +439,7 @@ class InventoryCollection(BaseCollection):
         def deserialize(items: list[dict]):
             return [InventorySearchItem.model_validate(x) for x in items]
 
-        results = self._call_search_endpoint(
+        params = self._prepare_parameters(
             limit=limit,
             text=text,
             cas=cas,
@@ -467,11 +452,16 @@ class InventoryCollection(BaseCollection):
             created_by=created_by,
             lot_owner=lot_owner,
             tags=tags,
-            match_all_conditions=match_all_conditions,
-            paginate_items=True,
+        )
+        return AlbertPaginator(
+            mode=PaginationMode.OFFSET,
+            path=f"{self.base_path}/llmsearch"
+            if match_all_conditions
+            else f"{self.base_path}/search",
+            params=params,
+            session=self.session,
             deserialize=deserialize,
         )
-        return results
 
     def list(
         self,
@@ -537,7 +527,7 @@ class InventoryCollection(BaseCollection):
         def deserialize(items: list[dict]) -> list[InventoryItem]:
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 
-        return self._call_search_endpoint(
+        params = self._prepare_parameters(
             limit=limit,
             text=text,
             cas=cas,
@@ -552,7 +542,14 @@ class InventoryCollection(BaseCollection):
             created_by=created_by,
             lot_owner=lot_owner,
             tags=tags,
-            match_all_conditions=match_all_conditions,
+        )
+        return AlbertPaginator(
+            mode=PaginationMode.OFFSET,
+            path=f"{self.base_path}/search"
+            if match_all_conditions
+            else f"{self.base_path}/llmsearch",
+            params=params,
+            session=self.session,
             deserialize=deserialize,
         )
 
