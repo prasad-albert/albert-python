@@ -409,7 +409,10 @@ class InventoryCollection(BaseCollection):
             tags=tags,
             match_all_conditions=match_all_conditions,
         )
-        filtered_facets = list(filter(lambda x: x.name in name or x.name.lower() in name, facets))
+        filtered_facets = []
+        for facet in facets:
+            if facet.name in name or facet.name.lower() in name:
+                filtered_facets.append(facet)
 
         return filtered_facets
 
