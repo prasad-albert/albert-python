@@ -362,9 +362,9 @@ class InventoryCollection(BaseCollection):
             tags=tags,
         )
         response = self.session.get(
-            url=f"{self.base_path}/search"
+            url=f"{self.base_path}/llmsearch"
             if match_all_conditions
-            else f"{self.base_path}/llmsearch",
+            else f"{self.base_path}/search",
             params=params,
         )
         return deserialize(response.json())
@@ -547,9 +547,9 @@ class InventoryCollection(BaseCollection):
         )
         return AlbertPaginator(
             mode=PaginationMode.OFFSET,
-            path=f"{self.base_path}/search"
+            path=f"{self.base_path}/llmsearch"
             if match_all_conditions
-            else f"{self.base_path}/llmsearch",
+            else f"{self.base_path}/search",
             params=params,
             session=self.session,
             deserialize=deserialize,
