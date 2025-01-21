@@ -335,7 +335,7 @@ def test_get_facet_by_name(client: Albert):
 def test_get_search_records(
     client: Albert, seeded_inventory: list[InventoryItem], seeded_tags: list[Tag]
 ):
-    res = client.inventory.get_search_records(
+    res = client.inventory.search(
         tags=[x.tag for x in seeded_tags[:2]], match_all_conditions=True, limit=100
     )
     c = 0

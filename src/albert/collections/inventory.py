@@ -415,7 +415,7 @@ class InventoryCollection(BaseCollection):
 
         return filtered_facets
 
-    def get_search_records(
+    def search(
         self,
         *,
         limit: int = 100,
