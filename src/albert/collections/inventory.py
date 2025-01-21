@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Iterator
+from typing import Sequence
 
 from pydantic import TypeAdapter
 
@@ -8,9 +9,11 @@ from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.acls import AccessControlLevel
+from albert.resources.facet import FacetItem
 from albert.resources.inventory import (
     InventoryCategory,
     InventoryItem,
+    InventorySearchResultItem,
     InventorySpec,
     InventorySpecList,
 )
@@ -266,10 +269,10 @@ class InventoryCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def list(
+    def _call_search_endpoint(
         self,
         *,
-        limit: int = 100,
+        limit: int | None = 100,
         text: str | None = None,
         cas: list[Cas] | Cas | None = None,
         category: list[InventoryCategory] | InventoryCategory | None = None,
@@ -283,17 +286,10 @@ class InventoryCollection(BaseCollection):
         created_by: list[User] = None,
         lot_owner: list[User] = None,
         tags: list[str] = None,
-    ) -> Iterator[InventoryItem]:
-        """
-        List inventory items with optional filters.
-        """
-
-        def deserialize(items: list[dict]) -> list[InventoryItem]:
-            return self.get_by_ids(ids=[x["albertId"] for x in items])
-
-        # Note there are other parameters we could add supprt for
-
-        # helpers incase the user fails to provide a list for any of these.
+        match_all_conditions: bool = False,
+        paginate_items: bool = True,
+        deserialize,
+    ):
         if isinstance(cas, Cas):
             cas = [cas]
         if isinstance(category, InventoryCategory):
@@ -330,11 +326,233 @@ class InventoryCollection(BaseCollection):
             "projectId": project_id,
         }
 
-        return AlbertPaginator(
-            mode=PaginationMode.OFFSET,
-            path=f"{self.base_path}/search",
-            params=params,
-            session=self.session,
+        if paginate_items:
+            return AlbertPaginator(
+                mode=PaginationMode.OFFSET,
+                path=f"{self.base_path}/llmsearch"
+                if match_all_conditions
+                else f"{self.base_path}/search",
+                params=params,
+                session=self.session,
+                deserialize=deserialize,
+            )
+        else:
+            response = self.session.get(
+                url=f"{self.base_path}/search",
+                params=params,
+            )
+            return deserialize(response.json())
+
+    def get_facets(
+        self,
+        *,
+        text: str | None = None,
+        cas: list[Cas] | Cas | None = None,
+        category: list[InventoryCategory] | InventoryCategory | None = None,
+        company: list[Company] | Company | None = None,
+        location: list[Location] | None = None,
+        storage_location: list[StorageLocation] | None = None,
+        project_id: str | None = None,
+        sheet_id: str | None = None,
+        created_by: list[User] = None,
+        lot_owner: list[User] = None,
+        tags: list[str] = None,
+        match_all_conditions: bool = False,
+    ) -> list[FacetItem]:
+        """
+        Get available facets for inventory items based on the provided filters.
+        """
+
+        def deserialize(data):
+            return [FacetItem.model_validate(x) for x in data["Facets"]]
+
+        return self._call_search_endpoint(
+            limit=10,
+            text=text,
+            cas=cas,
+            category=category,
+            company=company,
+            location=location,
+            storage_location=storage_location,
+            project_id=project_id,
+            sheet_id=sheet_id,
+            created_by=created_by,
+            lot_owner=lot_owner,
+            tags=tags,
+            match_all_conditions=match_all_conditions,
+            paginate_items=False,
+            deserialize=deserialize,
+        )
+
+    def get_facet_by_name(
+        self,
+        name: str | list[str],
+        *,
+        text: str | None = None,
+        cas: list[Cas] | Cas | None = None,
+        category: list[InventoryCategory] | InventoryCategory | None = None,
+        company: list[Company] | Company | None = None,
+        location: list[Location] | None = None,
+        storage_location: list[StorageLocation] | None = None,
+        project_id: str | None = None,
+        sheet_id: str | None = None,
+        created_by: list[User] = None,
+        lot_owner: list[User] = None,
+        tags: list[str] = None,
+        match_all_conditions: bool = False,
+    ) -> FacetItem:
+        """
+        Returns a specific facet by its name.
+        """
+        if isinstance(name, str):
+            name = [name]
+
+        facets = self.get_facets(
+            text=text,
+            cas=cas,
+            category=category,
+            company=company,
+            location=location,
+            storage_location=storage_location,
+            project_id=project_id,
+            sheet_id=sheet_id,
+            created_by=created_by,
+            lot_owner=lot_owner,
+            tags=tags,
+            match_all_conditions=match_all_conditions,
+        )
+        filtered_facets = list(filter(lambda x: x.name in name or x.name.lower() in name, facets))
+
+        return filtered_facets
+
+    def get_search_records(
+        self,
+        *,
+        limit: int = 100,
+        text: str | None = None,
+        cas: list[Cas] | Cas | None = None,
+        category: list[InventoryCategory] | InventoryCategory | None = None,
+        company: list[Company] | Company | None = None,
+        location: list[Location] | None = None,
+        storage_location: list[StorageLocation] | None = None,
+        project_id: str | None = None,
+        sheet_id: str | None = None,
+        created_by: list[User] = None,
+        lot_owner: list[User] = None,
+        tags: list[str] = None,
+        match_all_conditions: bool = False,
+    ) -> list[InventoryItem]:
+        """
+        Get a list of inventory items that match the search criteria and
+        return the raw search records. These are not full inventory item
+        objects, but are special short documents intended for fast summary results
+        """
+
+        def deserialize(items: list[dict]):
+            return [InventorySearchResultItem.model_validate(x) for x in items]
+
+        results = self._call_search_endpoint(
+            limit=limit,
+            text=text,
+            cas=cas,
+            category=category,
+            company=company,
+            location=location,
+            storage_location=storage_location,
+            project_id=project_id,
+            sheet_id=sheet_id,
+            created_by=created_by,
+            lot_owner=lot_owner,
+            tags=tags,
+            match_all_conditions=match_all_conditions,
+            paginate_items=True,
+            deserialize=deserialize,
+        )
+        return results
+
+    def list(
+        self,
+        *,
+        limit: int = 100,
+        text: str | None = None,
+        cas: list[Cas] | Cas | None = None,
+        category: list[InventoryCategory] | InventoryCategory | None = None,
+        company: list[Company] | Company | None = None,
+        order: OrderBy = OrderBy.DESCENDING,
+        sort_by: str | None = "createdAt",
+        location: list[Location] | None = None,
+        storage_location: list[StorageLocation] | None = None,
+        project_id: str | None = None,
+        sheet_id: str | None = None,
+        created_by: list[User] = None,
+        lot_owner: list[User] = None,
+        tags: list[str] = None,
+        match_all_conditions: bool = False,
+    ) -> Iterator[InventoryItem]:
+        """
+        List inventory items with optional filters.
+
+        Parameters
+        ----------
+        limit : int, optional
+            Maximum number of items to return (default is 100)
+        text : str, optional
+            Text to search for in inventory names and descriptions
+        cas : list[Cas] | Cas | None, optional
+            Filter by CAS number(s)
+        category : list[InventoryCategory] | InventoryCategory | None, optional
+            Filter by inventory category/categories
+        company : list[Company] | Company | None, optional
+            Filter by manufacturing company/companies
+        order : OrderBy, optional
+            Sort order, either ASCENDING or DESCENDING (default is DESCENDING)
+        sort_by : str, optional
+            Field to sort by (default is "createdAt")
+        location : list[Location] | None, optional
+            Filter by location(s)
+        storage_location : list[StorageLocation] | None, optional
+            Filter by storage location(s)
+        project_id : str, optional
+            Filter by project ID
+        sheet_id : str, optional
+            Filter by sheet ID
+        created_by : list[User], optional
+            Filter by creator(s)
+        lot_owner : list[User], optional
+            Filter by lot owner(s)
+        tags : list[str], optional
+            Filter by tag(s)
+        match_all_conditions : bool, optional
+            Whether to match all conditions (default is False -- e.g. OR between conditions)
+
+        Returns
+        -------
+        Iterator[InventoryItem]
+            An iterator over the matching inventory items
+        """
+
+        def deserialize(items: list[dict]) -> list[InventoryItem]:
+            return self.get_by_ids(ids=[x["albertId"] for x in items])
+
+        # Note there are other parameters we could add supprt for
+
+        # helpers incase the user fails to provide a list for any of these.
+        return self._call_search_endpoint(
+            limit=limit,
+            text=text,
+            cas=cas,
+            category=category,
+            company=company,
+            order=order,
+            sort_by=sort_by,
+            location=location,
+            storage_location=storage_location,
+            project_id=project_id,
+            sheet_id=sheet_id,
+            created_by=created_by,
+            lot_owner=lot_owner,
+            tags=tags,
+            match_all_conditions=match_all_conditions,
             deserialize=deserialize,
         )
 
@@ -613,6 +831,17 @@ class InventoryCollection(BaseCollection):
                         }
                     )
         return payload
+
+    def test_func(self, input: Sequence[str]) -> Sequence[str]:
+        # this is technically a linting error because Sequence has no methods
+        # and this function would also accept a set
+        input.append("test")
+        return input
+
+    def other_func(self):
+        result: list[str] = self.test_func(["a", "b", "c"])
+        result.append("test")
+        return result
 
     def update(self, *, inventory_item: InventoryItem) -> InventoryItem:
         """
