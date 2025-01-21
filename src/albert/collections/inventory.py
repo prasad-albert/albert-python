@@ -443,7 +443,7 @@ class InventoryCollection(BaseCollection):
         lot_owner: list[User] = None,
         tags: list[str] = None,
         match_all_conditions: bool = False,
-    ) -> list[InventoryItem]:
+    ) -> list[InventorySearchResultItem]:
         """
         Get a list of inventory items that match the search criteria and
         return the raw search records. These are not full inventory item
