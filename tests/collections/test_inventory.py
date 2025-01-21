@@ -292,7 +292,7 @@ def test_update_inventory_item_advanced_attributes(
 
 
 def test_get_facets(client: Albert):
-    facets = client.inventory.get_facets()
+    facets = client.inventory.get_all_facets()
     assert len(facets) > 0
     expected_facets = [
         "Category",

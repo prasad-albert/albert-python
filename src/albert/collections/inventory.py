@@ -272,7 +272,7 @@ class InventoryCollection(BaseCollection):
     def _call_search_endpoint(
         self,
         *,
-        limit: int | None = 100,
+        limit: int = 100,
         text: str | None = None,
         cas: list[Cas] | Cas | None = None,
         category: list[InventoryCategory] | InventoryCategory | None = None,
@@ -343,7 +343,7 @@ class InventoryCollection(BaseCollection):
             )
             return deserialize(response.json())
 
-    def get_facets(
+    def get_all_facets(
         self,
         *,
         text: str | None = None,
@@ -367,7 +367,7 @@ class InventoryCollection(BaseCollection):
             return [FacetItem.model_validate(x) for x in data["Facets"]]
 
         return self._call_search_endpoint(
-            limit=10,
+            limit=1,  # We don't need an actual records here we just need the facets
             text=text,
             cas=cas,
             category=category,
@@ -402,12 +402,14 @@ class InventoryCollection(BaseCollection):
         match_all_conditions: bool = False,
     ) -> FacetItem:
         """
-        Returns a specific facet by its name.
+        Returns a specific facet by its name with all the filters applied to the search.
+        This can be used for example to fetch all remaining tags as part of an iterative
+        refinement of a search.
         """
         if isinstance(name, str):
             name = [name]
 
-        facets = self.get_facets(
+        facets = self.get_all_facets(
             text=text,
             cas=cas,
             category=category,
