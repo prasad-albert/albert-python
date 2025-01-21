@@ -834,17 +834,6 @@ class InventoryCollection(BaseCollection):
                     )
         return payload
 
-    def test_func(self, input: Sequence[str]) -> Sequence[str]:
-        # this is technically a linting error because Sequence has no methods
-        # and this function would also accept a set
-        input.append("test")
-        return input
-
-    def other_func(self):
-        result: list[str] = self.test_func(["a", "b", "c"])
-        result.append("test")
-        return result
-
     def update(self, *, inventory_item: InventoryItem) -> InventoryItem:
         """
         Update an inventory item.
