@@ -19,42 +19,61 @@ def validate_albert_id_types(func):
         for param_name, value in bound_args.arguments.items():
             hint = hints.get(param_name)
 
-            # Check if None is allowed in the type hint
+            # Skip if no type hint
+            if not hint:
+                validated_args[param_name] = value
+                continue
+
+            # Handle Union types first
+            base_type = hint
             allows_none = False
-            if hint and get_origin(hint) is Union:
+            if get_origin(hint) is Union:
                 type_args = get_args(hint)
                 allows_none = type(None) in type_args
-                # Find the non-None type in the Union
-                for type_arg in type_args:
-                    if get_origin(type_arg) is Annotated:
-                        hint = type_arg
-                        break
+                # Find all AlbertIdTypes in the Union
+                albert_types = [
+                    t
+                    for t in type_args
+                    if get_origin(t) is Annotated and t in get_args(AlbertIdType)
+                ]
+                if len(albert_types) > 1:
+                    raise TypeError(
+                        f"Parameter '{param_name}' cannot accept multiple AlbertIdTypes"
+                    )
+                elif albert_types:
+                    base_type = albert_types[0]
 
-            # Skip validation only if value is None AND None is allowed
-            if value is None and allows_none:
-                validated_args[param_name] = None
+            # Skip if not an Annotated type
+            if get_origin(base_type) is not Annotated:
+                validated_args[param_name] = value
                 continue
-            elif value is None:
+
+            # Skip if not an AlbertIdType
+            if base_type not in get_args(AlbertIdType):
+                validated_args[param_name] = value
+                continue
+
+            # Handle None for optional parameters
+            if value is None:
+                if allows_none:
+                    validated_args[param_name] = None
+                    continue
                 raise TypeError(f"{param_name} is not an optional parameter")
 
-            # Check if it's an Annotated type
-            if hint and get_origin(hint) is Annotated:
-                type_args = get_args(hint)
-                # Get validators, specifically handling BeforeValidator annotations
-                validators = []
-                for arg in type_args[1:]:
-                    if isinstance(arg, BeforeValidator):
-                        validators.append(arg.func)
-                    elif callable(arg):
-                        validators.append(arg)
+            # Get validators from the Annotated type
+            type_args = get_args(base_type)
+            validators = []
+            for arg in type_args[1:]:
+                if isinstance(arg, BeforeValidator):
+                    validators.append(arg.func)
+                elif callable(arg):
+                    validators.append(arg)
 
-                # Apply all validators in order
-                validated_value = str(value)
-                for validator in validators:
-                    validated_value = validator(validated_value)
-                validated_args[param_name] = validated_value
-            else:
-                validated_args[param_name] = value
+            # Apply validators
+            validated_value = str(value)
+            for validator in validators:
+                validated_value = validator(validated_value)
+            validated_args[param_name] = validated_value
 
         return func(**validated_args)
 
