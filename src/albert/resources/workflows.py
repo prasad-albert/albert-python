@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from pydantic import AliasChoices, Field, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
@@ -5,6 +7,30 @@ from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
+
+
+class IntervalParameter(BaseAlbertModel):
+    """
+    A class representing the interval parameter of a workflow.
+    This is not a platform entity, but a helper class to make parsing
+    the interval_combinations easier.
+
+    Attributes
+    ----------
+    interval_param_name : str
+        The name of the interval parameter.
+    interval_id : str
+        The id of the interval parameter.
+    interval_value : str
+        The value of the interval parameter.
+    interval_unit : str
+        The unit of the interval parameter.
+    """
+
+    interval_param_name: str | None = Field(default=None)
+    interval_id: str | None = Field(default=None)
+    interval_value: str | None = Field(default=None)
+    interval_unit: str | None = Field(default=None)
 
 
 class Interval(BaseAlbertModel):
@@ -21,6 +47,29 @@ class Interval(BaseAlbertModel):
 
     value: str | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
+    row_id: str | None = Field(default=None, alias="rowId")
+
+
+class IntervalCombination(BaseAlbertModel):
+    """
+    A class representing the interval combination of a workflow.
+
+    Attributes
+    ----------
+    interval_id: str | None
+        forign key reference to the interval id
+        this combination is associated with
+        It will have the form ROW# or ROW#XROW# depending on
+        if it is a single interval or a product of two intervals
+    interval_params: str | None
+        The parameters of the interval row.
+    interval_string: str | None
+        The string representation of the interval combination
+    """
+
+    interval_id: str | None = Field(default=None, alias="interval")
+    interval_params: str | None = Field(default=None, alias="intervalParams")
+    interval_string: str | None = Field(default=None, alias="intervalString")
 
 
 class ParameterSetpoint(BaseAlbertModel):
@@ -44,7 +93,8 @@ class ParameterSetpoint(BaseAlbertModel):
         The category of the parameter. Special for InventoryItem (then use name to specify "Equipment", "Consumeable", etc), normal for all others
     short_name : str
         The short / display name of the parameter. Required if value is a dictionary.
-
+    row_id : str
+        The id of the parameter with respect to the interval row id.
     """
 
     parameter: Parameter | None = Field(exclude=True, default=None)
@@ -55,6 +105,17 @@ class ParameterSetpoint(BaseAlbertModel):
     category: ParameterCategory | None = Field(default=None)
     short_name: str | None = Field(default=None, alias="shortName")
     name: str | None = Field(default=None)
+    row_id: str | None = Field(default=None, alias="rowId")
+
+    def model_post_init(self, __context) -> None:
+        """
+        Note:   We use post init here rather than doing the assignment
+                in the validator because `name` is a pydantic field
+                and setting it will trigger the model validation again
+                causing an infinite recursion error
+        """
+        if self.parameter is not None and not self.name:
+            self.name = self.parameter.name
 
     @model_validator(mode="after")
     def check_parameter_setpoint_validity(self):
@@ -126,9 +187,59 @@ class Workflow(BaseResource):
 
     name: str
     parameter_group_setpoints: list[ParameterGroupSetpoints] = Field(alias="ParameterGroups")
+    interval_combinations: list[IntervalCombination] | None = Field(
+        default=None, alias="IntervalCombinations"
+    )
     id: str | None = Field(
         alias="albertId",
         default=None,
         validation_alias=AliasChoices("albertId", "existingAlbertId"),
         exclude=True,
     )
+
+    # post init fields
+    interval_parameters: list[IntervalParameter] = Field(exclude=True, default_factory=list)
+
+    def model_post_init(self, __context) -> None:
+        self._populate_interval_parameters()
+
+    def _populate_interval_parameters(self):
+        for parameter_group_setpoint in self.parameter_group_setpoints:
+            for parameter_setpoint in parameter_group_setpoint.parameter_setpoints:
+                if parameter_setpoint.intervals is not None:
+                    for interval in parameter_setpoint.intervals:
+                        self.interval_parameters.append(
+                            IntervalParameter(
+                                interval_param_name=parameter_setpoint.name,
+                                interval_id=interval.row_id,
+                                interval_value=interval.value,
+                                interval_unit=interval.unit.name,
+                            )
+                        )
+        return self
+
+    def get_interval_id(self, parameter_values: dict[str, any]) -> str:
+        # now we need to get the interval_id for the parameter_values
+        interval_id = ""
+        for param_name, param_value in parameter_values.items():
+            matching_interval = None
+            for workflow_interval in self.interval_parameters:
+                if workflow_interval.interval_param_name == param_name and (
+                    param_value == workflow_interval.interval_value
+                    or str(param_value) == workflow_interval.interval_value
+                ):
+                    matching_interval = workflow_interval
+                    break
+
+            if matching_interval is None:
+                raise ValueError(
+                    f"No matching interval found for parameter '{param_name}' with value '{param_value}'"
+                )
+
+            interval_id += (
+                f"X{matching_interval.interval_id}"
+                if interval_id != ""
+                else matching_interval.interval_id
+            )
+
+        return interval_id
