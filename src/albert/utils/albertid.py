@@ -1,8 +1,79 @@
+from collections.abc import Iterable
 from functools import wraps
 from inspect import signature
 from typing import Annotated, Union, get_args, get_origin, get_type_hints
 
 from pydantic import BeforeValidator
+
+
+def _validate_type(param_name: str, value: any, hint: type | None) -> tuple[bool, any]:
+    if not hint:
+        return True, value
+
+    origin = get_origin(hint)
+
+    if origin is None:
+        # This handles both NoneType and simple types like str, int, etc.
+        if hint is type(None) and value is None:
+            return True, value
+        if isinstance(value, hint):
+            return True, value
+        return False, None
+
+    if origin is Union:
+        # Check if the value is valid for any of the Union types
+        valid_flags, values = zip(
+            *[_validate_type(param_name, value, t) for t in get_args(hint)], strict=True
+        )
+        if sum(valid_flags) > 1:
+            raise TypeError(
+                f"value for parameter {param_name} matches multiple types in the union - only one AlbertIdType is allowed in a union"
+            )
+        if any(valid_flags):
+            return True, values[valid_flags.index(True)]
+
+        return False, None
+
+    elif issubclass(origin, Iterable):
+        if not issubclass(type(value), Iterable):
+            # If we accept iterable types but we aren't an iterable
+            # then fail validation as we need another type to pass
+            return False, None
+
+        valid_flags, values = zip(
+            *[_validate_type(param_name, v, get_args(hint)[0]) for v in value], strict=True
+        )
+        if not all(valid_flags):
+            raise TypeError(
+                f"one or more elements of the iterable in {param_name} does not match the expected IdType"
+            )
+        # The zip above casts the values iterable into a tuple
+        # we convert it back to the original type passed in
+        return True, type(value)(values)
+    elif origin is Annotated:
+        if not hint in get_args(AlbertIdType):
+            # skip any annoated types that aren't albertIds
+            return True, value
+
+        if value is None or (
+            issubclass(type(value), Iterable) and not isinstance(value, str | bytes)
+        ):
+            return False, None
+        # This is an AlbertIdType and we need to parse
+        # and verify it is in an expected form for the
+        # platform
+        id_validator = None
+        for arg in get_args(hint):
+            if isinstance(arg, BeforeValidator):
+                id_validator = arg.func
+
+        if id_validator is None:
+            raise TypeError(f"type {hint} is missing the required BeforeValidator annotation")
+        # Now we format/validate the value
+        return True, id_validator(str(value))
+    else:
+        # Skip any types that are not Annotated
+        return True, value
 
 
 def validate_albert_id_types(func):
@@ -19,61 +90,29 @@ def validate_albert_id_types(func):
         for param_name, value in bound_args.arguments.items():
             hint = hints.get(param_name)
 
-            # Skip if no type hint
-            if not hint:
-                validated_args[param_name] = value
-                continue
+            # Do a quick check to see if there are mulitple AlbertIdType hints in the union
+            if (
+                get_origin(hint) is Union
+                and sum(arg in get_args(AlbertIdType) for arg in get_args(hint)) > 1
+            ):
+                raise TypeError(
+                    f"hints for parameter {param_name} matches multiple types in the union - only one AlbertIdType is allowed in a union"
+                )
 
-            # Handle Union types first
-            base_type = hint
-            allows_none = False
-            if get_origin(hint) is Union:
-                type_args = get_args(hint)
-                allows_none = type(None) in type_args
-                # Find all AlbertIdTypes in the Union
-                albert_types = [
-                    t
-                    for t in type_args
-                    if get_origin(t) is Annotated and t in get_args(AlbertIdType)
-                ]
-                if len(albert_types) > 1:
-                    raise TypeError(
-                        f"Parameter '{param_name}' cannot accept multiple AlbertIdTypes"
-                    )
-                elif albert_types:
-                    base_type = albert_types[0]
-
-            # Skip if not an Annotated type
-            if get_origin(base_type) is not Annotated:
-                validated_args[param_name] = value
-                continue
-
-            # Skip if not an AlbertIdType
-            if base_type not in get_args(AlbertIdType):
-                validated_args[param_name] = value
-                continue
-
-            # Handle None for optional parameters
+            # If the value is None, check if the type hint allows None
             if value is None:
-                if allows_none:
+                # Check if hint is a Union type that includes None
+                if get_origin(hint) is Union and type(None) in get_args(hint):
                     validated_args[param_name] = None
                     continue
+                # Not a Union with None, so this is invalid
                 raise TypeError(f"{param_name} is not an optional parameter")
 
-            # Get validators from the Annotated type
-            type_args = get_args(base_type)
-            validators = []
-            for arg in type_args[1:]:
-                if isinstance(arg, BeforeValidator):
-                    validators.append(arg.func)
-                elif callable(arg):
-                    validators.append(arg)
-
-            # Apply validators
-            validated_value = str(value)
-            for validator in validators:
-                validated_value = validator(validated_value)
-            validated_args[param_name] = validated_value
+            is_valid, value = _validate_type(param_name, value, hint)
+            if is_valid:
+                validated_args[param_name] = value
+            else:
+                raise ValueError(f"parameter {param_name} of type {hint} failed validations")
 
         return func(**validated_args)
 
