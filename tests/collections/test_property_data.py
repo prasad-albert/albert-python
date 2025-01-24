@@ -1,4 +1,3 @@
-
 from albert import Albert
 from albert.resources.property_data import (
     InventoryDataColumn,

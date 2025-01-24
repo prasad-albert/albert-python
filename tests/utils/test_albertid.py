@@ -10,59 +10,81 @@ from albert.utils.albertid import (
     ensure_interval_id,
     ensure_inventory_id,
     ensure_lot_id,
+    ensure_parameter_id,
+    ensure_paramter_group_id,
     ensure_project_id,
+    ensure_project_search_id,
     ensure_propertydata_id,
     ensure_search_inventory_id,
     ensure_tag_id,
     ensure_task_id,
+    ensure_unit_id,
     validate_albert_id_types,
 )
 
 
-def test_ensure_inventory_id():
-    # Test with and without prefix
-    assert ensure_inventory_id("123") == "INV123"
-    assert ensure_inventory_id("INV123") == "INV123"
-    assert ensure_inventory_id("inv123") == "INV123"
+@pytest.mark.parametrize(
+    "ensure_func,prefix,optional_code,error_msg",
+    [
+        (ensure_inventory_id, "INV", "A", "InventoryIdType cannot be empty"),
+        (ensure_tag_id, "TAG", "", "TagIdType cannot be empty"),
+        (ensure_datacolumn_id, "DAC", "", "DataColumnIdType cannot be empty"),
+        (ensure_datatemplate_id, "DAT", "", "DataTemplateIdType cannot be empty"),
+        (ensure_propertydata_id, "PTD", "", "PropertyDataIdType cannot be empty"),
+        (ensure_block_id, "BLK", "", "BlockIdType cannot be empty"),
+        (ensure_interval_id, "INT", "", "IntervalIdType cannot be empty"),
+        (ensure_task_id, "TAS", "", "TaskIdType cannot be empty"),
+        (ensure_project_id, "PRO", "P", "ProjectIdType cannot be empty"),
+        (ensure_lot_id, "LOT", "", "LotIdType cannot be empty"),
+        (ensure_parameter_id, "PRM", "", "ParameterIdType cannot be empty"),
+        (ensure_paramter_group_id, "PRG", "", "ParameterGroupIdType cannot be empty"),
+        (ensure_unit_id, "UNI", "", "UnitIdType cannot be empty"),
+    ],
+)
+def test_ensure_id_functions(ensure_func, prefix, optional_code, error_msg):
+    # Test with Simple ID
+    assert ensure_func(f"{optional_code}123") == f"{prefix}{optional_code}123"
 
-    with pytest.raises(ValueError, match="Inventory ID cannot be empty"):
-        ensure_inventory_id("")
+    # Test with prefixed ID (uppercase)
+    assert ensure_func(f"{prefix}{optional_code}123") == f"{prefix}{optional_code}123"
+
+    # Test with prefixed ID (lowercase)
+    assert ensure_func(f"{prefix.lower()}{optional_code}123") == f"{prefix}{optional_code}123"
+
+    # Test empty strings
+    with pytest.raises(ValueError, match=error_msg):
+        ensure_func("")
+    with pytest.raises(ValueError, match=error_msg):
+        ensure_func(None)
+
+    # If there is no additional id Code, then numerical ids should be converted to a string
+    if not optional_code:
+        assert ensure_func(123) == f"{prefix}123"
 
 
-def test_ensure_tag_id():
-    assert ensure_tag_id("123") == "TAG123"
-    assert ensure_tag_id("TAG123") == "TAG123"
-    assert ensure_tag_id("tag123") == "TAG123"
+@pytest.mark.parametrize(
+    "ensure_func,prefix,optional_code,error_msg",
+    [
+        (ensure_search_inventory_id, "INV", "N", "SearchInventoryIdType cannot be empty"),
+        (ensure_project_search_id, "PRO", "P", "ProjectSearchIdType cannot be empty"),
+    ],
+)
+def test_ensure_search_inventory_id(ensure_func, prefix, optional_code, error_msg):
+    # Test with Simple ID
+    assert ensure_func(f"{optional_code}123") == f"{optional_code}123"
 
-    with pytest.raises(ValueError, match="Tag ID cannot be empty"):
-        ensure_tag_id("")
+    # Test with prefixed ID (uppercase)
+    assert ensure_func(f"{prefix}{optional_code}123") == f"{optional_code}123"
 
+    # Test with prefixed ID (lowercase)
+    assert ensure_func(f"{prefix.lower()}{optional_code}123") == f"{optional_code}123"
 
-def test_ensure_datacolumn_id():
-    assert ensure_datacolumn_id("123") == "DAC123"
-    assert ensure_datacolumn_id("DAC123") == "DAC123"
-    assert ensure_datacolumn_id("dac123") == "DAC123"
+    # Test empty string
+    with pytest.raises(ValueError, match=error_msg):
+        ensure_func("")
 
-    with pytest.raises(ValueError, match="Data column ID cannot be empty"):
-        ensure_datacolumn_id("")
-
-
-def test_ensure_datatemplate_id():
-    assert ensure_datatemplate_id("123") == "DAT123"
-    assert ensure_datatemplate_id("DAT123") == "DAT123"
-    assert ensure_datatemplate_id("dat123") == "DAT123"
-
-    with pytest.raises(ValueError, match="Data template ID cannot be empty"):
-        ensure_datatemplate_id("")
-
-
-def test_ensure_propertydata_id():
-    assert ensure_propertydata_id("123") == "PTD123"
-    assert ensure_propertydata_id("PTD123") == "PTD123"
-    assert ensure_propertydata_id("ptd123") == "PTD123"
-
-    with pytest.raises(ValueError, match="Property data ID cannot be empty"):
-        ensure_propertydata_id("")
+    if not optional_code:
+        assert ensure_func(123) == "123"
 
 
 # Test functions with and without decorator
@@ -200,57 +222,3 @@ def test_validate_albert_id_types_error_cases():
     # Should handle None
     with pytest.raises(TypeError, match="is not an optional parameter"):
         error_func(inventory_id=None)
-
-
-def test_ensure_block_id():
-    assert ensure_block_id("123") == "BLK123"
-    assert ensure_block_id("BLK123") == "BLK123"
-    assert ensure_block_id("blk123") == "BLK123"
-
-    with pytest.raises(ValueError, match="Block ID cannot be empty"):
-        ensure_block_id("")
-
-
-def test_ensure_interval_id():
-    assert ensure_interval_id("123") == "INT123"
-    assert ensure_interval_id("INT123") == "INT123"
-    assert ensure_interval_id("int123") == "INT123"
-
-    with pytest.raises(ValueError, match="Interval ID cannot be empty"):
-        ensure_interval_id("")
-
-
-def test_ensure_task_id():
-    assert ensure_task_id("123") == "TAS123"
-    assert ensure_task_id("TAS123") == "TAS123"
-    assert ensure_task_id("tas123") == "TAS123"
-
-    with pytest.raises(ValueError, match="Task ID cannot be empty"):
-        ensure_task_id("")
-
-
-def test_ensure_project_id():
-    assert ensure_project_id("123") == "PRO123"
-    assert ensure_project_id("PRO123") == "PRO123"
-    assert ensure_project_id("pro123") == "PRO123"
-
-    with pytest.raises(ValueError, match="Project ID cannot be empty"):
-        ensure_project_id("")
-
-
-def test_ensure_lot_id():
-    assert ensure_lot_id("123") == "LOT123"
-    assert ensure_lot_id("LOT123") == "LOT123"
-    assert ensure_lot_id("lot123") == "LOT123"
-
-    with pytest.raises(ValueError, match="Lot ID cannot be empty"):
-        ensure_lot_id("")
-
-
-def test_ensure_search_inventory_id():
-    assert ensure_search_inventory_id("N123") == "N123"
-    assert ensure_search_inventory_id("INVP123") == "P123"
-    assert ensure_search_inventory_id("invZ123") == "Z123"
-
-    with pytest.raises(ValueError, match="Search inventory ID cannot be empty"):
-        ensure_search_inventory_id("")

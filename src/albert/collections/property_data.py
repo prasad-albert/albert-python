@@ -26,14 +26,14 @@ from albert.utils.albertid import (
     SearchInventoryIdType,
     TaskIdType,
     UserIdType,
-    add_albert_id_valiators,
+    with_albert_id_validation,
 )
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 from albert.utils.patches import PatchOperation
 
 
-@add_albert_id_valiators
+@with_albert_id_validation
 class PropertyDataCollection(BaseCollection):
     _api_version = "v3"
 
