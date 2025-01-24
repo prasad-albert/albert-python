@@ -24,6 +24,7 @@ from albert.utils.albertid import (
     LotIdType,
     ProjectIdType,
     SearchInventoryIdType,
+    SearchProjectIdType,
     TaskIdType,
     UserIdType,
     with_albert_id_validation,
@@ -362,7 +363,7 @@ class PropertyDataCollection(BaseCollection):
         sort_by: str | None = None,
         # Core platform identifiers
         inventory_ids: list[SearchInventoryIdType] | SearchInventoryIdType | None = None,
-        project_ids: list[ProjectIdType] | ProjectIdType | None = None,
+        project_ids: list[SearchProjectIdType] | SearchProjectIdType | None = None,
         lot_ids: list[LotIdType] | LotIdType | None = None,
         # Data structure filters
         category: list[DataEntity] | DataEntity | None = None,

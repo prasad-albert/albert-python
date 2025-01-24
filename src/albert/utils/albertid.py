@@ -268,7 +268,7 @@ def ensure_project_search_id(id: str | int) -> str:
     return id
 
 
-ProjectSearchIdType = Annotated[str, BeforeValidator(ensure_project_search_id)]
+SearchProjectIdType = Annotated[str, BeforeValidator(ensure_project_search_id)]
 
 
 def ensure_lot_id(id: str | int) -> str:
