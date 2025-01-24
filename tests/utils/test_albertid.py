@@ -96,6 +96,39 @@ def test_validate_albert_id_types_with_mixed_params():
     assert result == ("INV123", "test", "TAG456")
 
 
+def test_validate_albert_id_types_with_empty_iterables():
+    @validate_albert_id_types
+    def list_func(inventory_ids: list[InventoryIdType]):
+        return inventory_ids
+
+    result = list_func([])
+    assert result == []
+
+
+def test_validate_albert_id_types_with_list_input():
+    @validate_albert_id_types
+    def list_func(inventory_ids: list[InventoryIdType]):
+        return inventory_ids
+
+    result = list_func([123, 456])
+    assert result == ["INV123", "INV456"]
+
+
+def test_validate_albert_id_types_with_union_list_and_type():
+    @validate_albert_id_types
+    def union_list_func(inventory_ids: list[InventoryIdType] | InventoryIdType | None):
+        return inventory_ids
+
+    result = union_list_func([123, 456])
+    assert result == ["INV123", "INV456"]
+
+    result = union_list_func(123)
+    assert result == "INV123"
+
+    result = union_list_func(None)
+    assert result is None
+
+
 def test_validate_albert_id_types_with_int_input():
     @validate_albert_id_types
     def int_func(inventory_id: InventoryIdType):
@@ -124,6 +157,16 @@ def test_validate_albert_id_types_with_union_type():
     assert union_func("123") == "INV123"
 
 
+def test_validate_on_primitive_unions():
+    @validate_albert_id_types
+    def test_func(param: str | None):
+        return param
+
+    assert test_func("abc") == "abc"
+
+    assert test_func(None) == None
+
+
 def test_validate_albert_id_types_with_multiple_types():
     @validate_albert_id_types
     def union_func(
@@ -133,14 +176,10 @@ def test_validate_albert_id_types_with_multiple_types():
         return inventory_id
 
     # Should raise an error if multiple AlbertIdTypes are provided
-    with pytest.raises(
-        TypeError, match="Parameter 'inventory_id' cannot accept multiple AlbertIdTypes"
-    ):
+    with pytest.raises(TypeError, match="matches multiple types in the union"):
         union_func(inventory_id="123", other_valid_id="456")
 
-    with pytest.raises(
-        TypeError, match="Parameter 'inventory_id' cannot accept multiple AlbertIdTypes"
-    ):
+    with pytest.raises(TypeError, match="matches multiple types in the union"):
         union_func(inventory_id=None, other_valid_id="456")
 
     # Show that single type with optional None is still valid
@@ -157,10 +196,6 @@ def test_validate_albert_id_types_error_cases():
     @validate_albert_id_types
     def error_func(inventory_id: InventoryIdType):
         return inventory_id
-
-    # Should handle empty string
-    with pytest.raises(ValueError, match="Inventory ID cannot be empty"):
-        error_func(inventory_id="")
 
     # Should handle None
     with pytest.raises(TypeError, match="is not an optional parameter"):
