@@ -42,7 +42,7 @@ def _validate_type(param_name: str, value: any, hint: type | None) -> tuple[bool
         return False, None
 
     elif issubclass(origin, Iterable):
-        if not issubclass(type(value), Iterable):
+        if not issubclass(type(value), Iterable) or isinstance(value, str | bytes):
             # If we accept iterable types but we aren't an iterable
             # then fail validation as we need another type to pass
             return False, None
@@ -101,22 +101,24 @@ def validate_albert_id_types(func):
         # Process each argument
         for param_name, value in bound_args.arguments.items():
             hint = hints.get(param_name)
+            is_albert_id_type = [arg in get_args(AlbertIdType) for arg in get_args(hint)]
 
             # Do a quick check to see if there are mulitple AlbertIdType hints in the union
-            if (
-                get_origin(hint) in [Union, UnionType]
-                and sum(arg in get_args(AlbertIdType) for arg in get_args(hint)) > 1
-            ):
+            if get_origin(hint) in [Union, UnionType] and sum(is_albert_id_type) > 1:
                 raise TypeError(
-                    f"hints for parameter {param_name} matches multiple types in the union - only one AlbertIdType is allowed in a union"
+                    f"hints for parameter {param_name} match multiple AlbertIdTypes in the union - only one AlbertIdType is allowed in a given union"
                 )
 
             # If the value is None, check if the type hint allows None
             if value is None:
+                has_albert_types = any(is_albert_id_type)
                 # Check if hint is a Union type that includes None
-                if get_origin(hint) in [Union, UnionType] and type(None) in get_args(hint):
-                    validated_args[param_name] = None
-                    continue
+                if get_origin(hint) in [Union, UnionType]:
+                    args = get_args(hint)
+                    # If no AlbertIdTypes in union, or if there are and None is allowed, accept None
+                    if (has_albert_types and type(None) in args) or not has_albert_types:
+                        validated_args[param_name] = None
+                        continue
                 # Not a Union with None, so this is invalid
                 raise TypeError(f"{param_name} is not an optional parameter")
 
@@ -151,7 +153,7 @@ def _validate_coded_id(id: str | int, id_type: str) -> str:
         # Based on the type hint this should be impossible
         # but if someone ignores the hints we need to check this
         raise TypeError(f"{id_type} must be a string")
-    return id
+    return str(id)
 
 
 def _validate_convertible_id(id: str | int, id_type: str) -> str:

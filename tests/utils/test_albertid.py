@@ -99,13 +99,13 @@ def test_validate_albert_id_types_decorator():
         return inventory_id, tag_id
 
     # Test decorated function
-    inv_id, tag_id = decorated_func(inventory_id="123", tag_id="456")
-    assert inv_id == "INV123"
+    inv_id, tag_id = decorated_func(inventory_id="A123", tag_id="456")
+    assert inv_id == "INVA123"
     assert tag_id == "TAG456"
 
     # Test undecorated function - should not validate/transform
-    inv_id, tag_id = undecorated_func(inventory_id="123", tag_id="456")
-    assert inv_id == "123"
+    inv_id, tag_id = undecorated_func(inventory_id="A123", tag_id="456")
+    assert inv_id == "A123"
     assert tag_id == "456"
 
 
@@ -114,8 +114,8 @@ def test_validate_albert_id_types_with_mixed_params():
     def mixed_func(inventory_id: InventoryIdType, name: str, tag_id: TagIdType):
         return inventory_id, name, tag_id
 
-    result = mixed_func(inventory_id="123", name="test", tag_id="456")
-    assert result == ("INV123", "test", "TAG456")
+    result = mixed_func(inventory_id="A123", name="test", tag_id="456")
+    assert result == ("INVA123", "test", "TAG456")
 
 
 def test_validate_albert_id_types_with_empty_iterables():
@@ -132,8 +132,14 @@ def test_validate_albert_id_types_with_list_input():
     def list_func(inventory_ids: list[InventoryIdType]):
         return inventory_ids
 
-    result = list_func([123, 456])
-    assert result == ["INV123", "INV456"]
+    result = list_func(["A123", "A456"])
+    assert result == ["INVA123", "INVA456"]
+
+    with pytest.raises(
+        ValueError,
+        match="InventoryIdType requires a type code e.g. 'A' for raw materials as in 'A1425'",
+    ):
+        list_func([123, 456])
 
 
 def test_validate_albert_id_types_with_union_list_and_type():
@@ -141,23 +147,14 @@ def test_validate_albert_id_types_with_union_list_and_type():
     def union_list_func(inventory_ids: list[InventoryIdType] | InventoryIdType | None):
         return inventory_ids
 
-    result = union_list_func([123, 456])
-    assert result == ["INV123", "INV456"]
+    result = union_list_func(["A123", "A456"])
+    assert result == ["INVA123", "INVA456"]
 
-    result = union_list_func(123)
-    assert result == "INV123"
+    result = union_list_func("A123")
+    assert result == "INVA123"
 
     result = union_list_func(None)
     assert result is None
-
-
-def test_validate_albert_id_types_with_int_input():
-    @validate_albert_id_types
-    def int_func(inventory_id: InventoryIdType):
-        return inventory_id
-
-    # Should handle integer input by converting to string first
-    assert int_func(inventory_id=123) == "INV123"
 
 
 def test_validate_albert_id_types_with_optional_parameter():
@@ -170,23 +167,34 @@ def test_validate_albert_id_types_with_optional_parameter():
     assert optional_func("test", "123") == ("test", "TAG123")
 
 
-def test_validate_albert_id_types_with_union_type():
+def test_validate_albert_id_types_with_optional_type():
     @validate_albert_id_types
-    def union_func(inventory_id: InventoryIdType | None):
+    def optional_func(inventory_id: InventoryIdType | None):
         return inventory_id
 
-    assert union_func(None) == None
-    assert union_func("123") == "INV123"
+    assert optional_func(None) == None
+    assert optional_func("A123") == "INVA123"
 
 
-def test_validate_on_primitive_unions():
+@pytest.mark.parametrize(
+    "param,param2,param3,expected",
+    [
+        ("abc", 123, "def", ("abc", 123, "def")),
+        (None, 123, "def", (None, 123, "def")),
+        ("abc", None, "def", ("abc", None, "def")),
+        (None, None, "def", (None, None, "def")),
+        ("abc", 123, None, ("abc", 123, None)),
+        (None, 123, None, (None, 123, None)),
+        ("abc", None, None, ("abc", None, None)),
+        (None, None, None, (None, None, None)),
+    ],
+)
+def test_validate_on_primitive_unions(param, param2, param3, expected):
     @validate_albert_id_types
-    def test_func(param: str | None):
-        return param
+    def test_func(param: str | None, param2: int | None, param3: str | int):
+        return param, param2, param3
 
-    assert test_func("abc") == "abc"
-
-    assert test_func(None) == None
+    assert test_func(param, param2, param3) == expected
 
 
 def test_validate_albert_id_types_with_multiple_types():
@@ -198,10 +206,10 @@ def test_validate_albert_id_types_with_multiple_types():
         return inventory_id
 
     # Should raise an error if multiple AlbertIdTypes are provided
-    with pytest.raises(TypeError, match="matches multiple types in the union"):
+    with pytest.raises(TypeError, match="match multiple AlbertIdTypes in the union"):
         union_func(inventory_id="123", other_valid_id="456")
 
-    with pytest.raises(TypeError, match="matches multiple types in the union"):
+    with pytest.raises(TypeError, match="match multiple AlbertIdTypes in the union"):
         union_func(inventory_id=None, other_valid_id="456")
 
     # Show that single type with optional None is still valid
@@ -214,7 +222,7 @@ def test_validate_albert_id_types_with_multiple_types():
     assert valid_func("123") == "TAG123"
 
 
-def test_validate_albert_id_types_error_cases():
+def test_validate_albert_id_types_required_id():
     @validate_albert_id_types
     def error_func(inventory_id: InventoryIdType):
         return inventory_id
