@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field, field_validator, model_validator
 
@@ -199,3 +199,41 @@ class InventoryPropertyDataCreate(BaseResource):
         default_factory=list, max_length=1, alias="DataColumn"
     )
     status: PropertyDataStatus | None = Field(default=None)
+
+
+####### Property Data Search #######
+
+
+class WorkflowItem(BaseAlbertModel):
+    name: str
+    id: str
+    value: str
+    parameter_group_id: str = Field(..., alias="parameterGroupId")
+    value_numeric: float | None = Field(None, alias="valueNumeric")
+    unit_name: str | None = Field(None, alias="unitName")
+    unit_id: str | None = Field(None, alias="unitId")
+
+
+class Result(BaseAlbertModel):
+    value_numeric: float | None = Field(None, alias="valueNumeric")
+    name: str
+    id: str
+    value: str | None = None
+    trial: str
+    value_string: str | None = Field(None, alias="valueString")
+
+
+class PropertyDataSearchItem(BaseAlbertModel):
+    workflow: list[WorkflowItem]
+    data_template_id: str = Field(..., alias="dataTemplateId")
+    workflow_name: str | None = Field(None, alias="workflowName")
+    parent_id: str = Field(..., alias="parentId")
+    data_template_name: str = Field(..., alias="dataTemplateName")
+    result: Result
+    created_by: str = Field(..., alias="createdBy")
+    inventory_id: str = Field(..., alias="inventoryId")
+    id: str
+    category: str
+    project_id: Any = Field(..., alias="projectId")
+    workflow_id: str = Field(..., alias="workflowId")
+    task_id: str = Field(..., alias="taskId")

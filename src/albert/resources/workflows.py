@@ -52,7 +52,12 @@ class Interval(BaseAlbertModel):
 
 class IntervalCombination(BaseAlbertModel):
     """
-    A class representing the interval combination of a workflow.
+    A class representing the interval combinations of on a workflow.
+    This is returned by the workflow endpoint when at least one parameter
+    in the workflow has been intervalized.
+
+    Interval Combinations can be single intervalized parameters or cartesian prodcuts of
+    two intervalized parameters.
 
     Attributes
     ----------
@@ -62,9 +67,11 @@ class IntervalCombination(BaseAlbertModel):
         It will have the form ROW# or ROW#XROW# depending on
         if it is a single interval or a product of two intervals
     interval_params: str | None
-        The parameters of the interval row.
+        The parameters participating in the interval.
     interval_string: str | None
         The string representation of the interval combination
+        This will have the form "[Parameter Name]: [Parameter Value] [Parameter Unit]"
+        for each parameter in the interval combination
     """
 
     interval_id: str | None = Field(default=None, alias="interval")

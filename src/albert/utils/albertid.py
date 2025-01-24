@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from functools import wraps
 from inspect import signature
+from types import UnionType
 from typing import Annotated, Union, get_args, get_origin, get_type_hints
 
 from pydantic import BeforeValidator
@@ -20,7 +21,13 @@ def _validate_type(param_name: str, value: any, hint: type | None) -> tuple[bool
             return True, value
         return False, None
 
-    if origin is Union:
+    if origin in [
+        Union,
+        UnionType,
+    ]:  # Handle both Union syntaxes -- the first one is the GenericAlias which works
+        # for all complex unions formed with the | character
+        # the latter one is required to handle unions between primiatives e.g. str | None
+        # doesn't have an origin of Union, it has a hint of type types.UnionType
         # Check if the value is valid for any of the Union types
         valid_flags, values = zip(
             *[_validate_type(param_name, value, t) for t in get_args(hint)], strict=True
@@ -39,6 +46,11 @@ def _validate_type(param_name: str, value: any, hint: type | None) -> tuple[bool
             # If we accept iterable types but we aren't an iterable
             # then fail validation as we need another type to pass
             return False, None
+
+        # if we accept iterable types and we are an iterable type
+        # but we are empty then pass
+        if len(value) == 0:
+            return True, value
 
         valid_flags, values = zip(
             *[_validate_type(param_name, v, get_args(hint)[0]) for v in value], strict=True
@@ -92,7 +104,7 @@ def validate_albert_id_types(func):
 
             # Do a quick check to see if there are mulitple AlbertIdType hints in the union
             if (
-                get_origin(hint) is Union
+                get_origin(hint) in [Union, UnionType]
                 and sum(arg in get_args(AlbertIdType) for arg in get_args(hint)) > 1
             ):
                 raise TypeError(
@@ -102,7 +114,7 @@ def validate_albert_id_types(func):
             # If the value is None, check if the type hint allows None
             if value is None:
                 # Check if hint is a Union type that includes None
-                if get_origin(hint) is Union and type(None) in get_args(hint):
+                if get_origin(hint) in [Union, UnionType] and type(None) in get_args(hint):
                     validated_args[param_name] = None
                     continue
                 # Not a Union with None, so this is invalid
@@ -239,15 +251,16 @@ UserIdType = Annotated[str, BeforeValidator(ensure_user_id)]
 
 
 AlbertIdType = (
-    UserIdType
-    | BlockIdType
-    | InventoryIdType
-    | IntervalIdType
-    | TagIdType
+    BlockIdType
     | DataColumnIdType
     | DataTemplateIdType
-    | PropertyDataIdType
-    | TaskIdType
-    | ProjectIdType
+    | IntervalIdType
+    | InventoryIdType
     | LotIdType
+    | ProjectIdType
+    | PropertyDataIdType
+    | SearchInventoryIdType
+    | TagIdType
+    | TaskIdType
+    | UserIdType
 )
