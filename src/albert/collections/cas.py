@@ -133,7 +133,7 @@ class CasCollection(BaseCollection):
 
     import re
 
-    def _clean_cas_number(self, text):
+    def _clean_cas_number(self, text: str):
         """
         Cleans up strings that start with a CAS-like number by removing excess spaces within the CAS number format.
         This function mimics how the Albert backend checks for matching CAS numbers.
@@ -143,8 +143,6 @@ class CasCollection(BaseCollection):
         Returns:
         - str, the cleaned string with corrected CAS number formatting.
         """
-        if not isinstance(text, str):
-            return text
 
         # Regex pattern to match CAS numbers at the start of the string (e.g., "50  - 0 -0")
         pattern = r"^(\d+)\s*-\s*(\d+)\s*-\s*(\d+)"
