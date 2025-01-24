@@ -1,4 +1,3 @@
-from collections.abc import Iterator
 
 from albert import Albert
 from albert.resources.property_data import (
