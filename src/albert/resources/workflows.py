@@ -1,4 +1,3 @@
-
 from pydantic import AliasChoices, Field, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
