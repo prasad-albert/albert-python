@@ -633,6 +633,15 @@ def generate_inventory_seeds(
             ],
             tags=[seeded_tags[0].tag],  # make sure it knows to use the tag object
         ),
+        InventoryItem(
+            name=f"{seed_prefix} - Sulfuric Acid",
+            description="Common salt used in various applications.",
+            category=InventoryCategory.RAW_MATERIALS,
+            unit_category=InventoryUnitCategory.MASS,
+            security_class=SecurityClass.SHARED,
+            company=seeded_companies[0],
+            tags=[seeded_tags[0].tag, seeded_tags[1].tag],
+        ),
     ]
 
 

@@ -6,6 +6,7 @@ from albert.exceptions import BadRequestError
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.data_columns import DataColumn
+from albert.resources.facet import FacetItem, FacetValue
 from albert.resources.inventory import (
     CasAmount,
     InventoryItem,
@@ -16,6 +17,7 @@ from albert.resources.inventory import (
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.workflows import Workflow
+from albert.utils.albertid import ensure_inventory_id
 
 
 def _list_asserts(returned_list):
@@ -48,6 +50,30 @@ def test_advanced_inventory_list(
         if i == 10:  # just check the first 10 for speed
             break
         assert "ethanol" in x.name.lower()
+
+
+def test_match_all_conditions(
+    client: Albert, seeded_inventory: list[InventoryItem], seeded_tags: list[Tag]
+):
+    # First test is using OR between conditions
+    # this should return our 3 test items
+    inventory = client.inventory.list(
+        tags=[seeded_tags[0].tag, seeded_tags[1].tag],
+    )
+
+    for x in inventory:
+        for tag in x.tags:
+            assert tag.tag in [seeded_tags[0].tag, seeded_tags[1].tag]
+    # This one tests using AND conditions and will return only
+    # one item that has both seeded tags
+    inventory = client.inventory.list(
+        tags=[seeded_tags[0].tag, seeded_tags[1].tag],
+        match_all_conditions=True,
+    )
+    for x in inventory:
+        assert len(x.tags) >= 2
+        for tag in x.tags:
+            assert tag.tag in [seeded_tags[0].tag, seeded_tags[1].tag]
 
 
 def test_get_by_id(client: Albert, seeded_inventory):
@@ -262,3 +288,58 @@ def test_update_inventory_item_advanced_attributes(
     with pytest.raises(BadRequestError):
         fetched_item.company = None
         client.inventory.update(inventory_item=fetched_item)
+
+
+def test_get_facets(client: Albert):
+    facets = client.inventory.get_all_facets()
+    assert len(facets) > 0
+    expected_facets = [
+        "Category",
+        "Manufacturer",
+        "Location",
+        "Storage Location",
+        "CAS Number",
+        "Tags",
+        "Pictograms",
+        "Quarantine Status",
+        "Created By",
+        "Lot Owner",
+        "Lot Created By",
+    ]
+    for facet in facets:
+        assert isinstance(facet, FacetItem)
+        assert facet.name in expected_facets
+
+    assert isinstance(facets[0].value[0], FacetValue)
+
+
+def test_get_facet_by_name(client: Albert):
+    facets = client.inventory.get_facet_by_name("Category")
+    assert isinstance(facets, list)
+    assert len(facets) > 0
+    assert isinstance(facets[0], FacetItem)
+    assert facets[0].name == "Category"
+
+    facets = client.inventory.get_facet_by_name(["Category", "Manufacturer"])
+    assert len(facets) == 2
+    assert facets[0].name == "Category"
+    assert facets[1].name == "Manufacturer"
+
+    # The list order is not preserved, the API always returns facets in the same order
+    facets = client.inventory.get_facet_by_name(["Manufacturer", "Category"])
+    assert len(facets) == 2
+    assert facets[0].name == "Category"
+    assert facets[1].name == "Manufacturer"
+
+
+def test_get_search_records(
+    client: Albert, seeded_inventory: list[InventoryItem], seeded_tags: list[Tag]
+):
+    res = client.inventory.search(
+        tags=[x.tag for x in seeded_tags[:2]], match_all_conditions=True, limit=100
+    )
+    c = 0
+    for x in res:
+        assert ensure_inventory_id(x.id) in [y.id for y in seeded_inventory]
+        c += 1
+    assert c == 1
