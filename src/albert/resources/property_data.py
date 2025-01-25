@@ -214,7 +214,7 @@ class WorkflowItem(BaseAlbertModel):
     unit_id: str | None = Field(None, alias="unitId")
 
 
-class Result(BaseAlbertModel):
+class PropertyDataResult(BaseAlbertModel):
     value_numeric: float | None = Field(None, alias="valueNumeric")
     name: str
     id: str
@@ -229,7 +229,7 @@ class PropertyDataSearchItem(BaseAlbertModel):
     workflow_name: str | None = Field(None, alias="workflowName")
     parent_id: str = Field(..., alias="parentId")
     data_template_name: str = Field(..., alias="dataTemplateName")
-    result: Result
+    result: PropertyDataResult
     created_by: str = Field(..., alias="createdBy")
     inventory_id: str = Field(..., alias="inventoryId")
     id: str

@@ -2,6 +2,7 @@ import pytest
 
 from albert.utils.albertid import (
     InventoryIdType,
+    LotIdType,
     TagIdType,
     UserIdType,
     ensure_block_id,
@@ -230,3 +231,11 @@ def test_validate_albert_id_types_required_id():
     # Should handle None
     with pytest.raises(TypeError, match="is not an optional parameter"):
         error_func(inventory_id=None)
+
+
+def test_validate_albert_id_types_with_return_types():
+    @validate_albert_id_types
+    def return_func(inventory_id: InventoryIdType) -> LotIdType:
+        return "123"
+
+    assert return_func("A123") == "INVA123"

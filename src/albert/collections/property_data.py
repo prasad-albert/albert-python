@@ -1,4 +1,5 @@
 import re
+from typing import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.tasks import TaskCollection
@@ -379,7 +380,7 @@ class PropertyDataCollection(BaseCollection):
         # Response customization
         return_fields: list[str] | str | None = None,
         return_facets: list[str] | str | None = None,
-    ):
+    ) -> Iterator[PropertyDataSearchItem]:
         """Search for property data with various filtering options.
 
         Parameters

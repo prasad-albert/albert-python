@@ -231,7 +231,11 @@ DataColumnIdType = Annotated[str, BeforeValidator(ensure_datacolumn_id)]
 
 def ensure_datatemplate_id(id: str | int) -> str:
     id = _validate_convertible_id(id, "DataTemplateIdType")
-    return id.upper() if id.upper().startswith("DAT") else f"DAT{id}"
+    if id.upper().startswith("DAT"):
+        return id.upper()
+    elif id.upper().startswith("DT"):
+        return f"DAT{id[2:]}"
+    return f"DAT{id}"
 
 
 DataTemplateIdType = Annotated[str, BeforeValidator(ensure_datatemplate_id)]

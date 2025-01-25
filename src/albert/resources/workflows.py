@@ -203,7 +203,7 @@ class Workflow(BaseResource):
     )
 
     # post init fields
-    interval_parameters: list[IntervalParameter] = Field(exclude=True, default_factory=list)
+    _interval_parameters: list[IntervalParameter] = Field(exclude=True, default_factory=list)
 
     def model_post_init(self, __context) -> None:
         self._populate_interval_parameters()
@@ -213,7 +213,7 @@ class Workflow(BaseResource):
             for parameter_setpoint in parameter_group_setpoint.parameter_setpoints:
                 if parameter_setpoint.intervals is not None:
                     for interval in parameter_setpoint.intervals:
-                        self.interval_parameters.append(
+                        self._interval_parameters.append(
                             IntervalParameter(
                                 interval_param_name=parameter_setpoint.name,
                                 interval_id=interval.row_id,
@@ -224,12 +224,46 @@ class Workflow(BaseResource):
         return self
 
     def get_interval_id(self, parameter_values: dict[str, any]) -> str:
-        # now we need to get the interval_id for the parameter_values
+        """Get the interval ID for a set of parameter values.
+
+        This method matches parameter values to intervals defined in the workflow and constructs
+        a composite interval ID. For multiple parameters, the interval IDs are joined with 'X'.
+
+        Parameters
+        ----------
+        parameter_values : dict[str, any]
+            Dictionary mapping parameter names to their values. Values can be numbers or strings
+            that match the interval values defined in the workflow.
+
+        Returns
+        -------
+        str
+            The composite interval ID string. For a single parameter this is just the interval ID.
+            For multiple parameters, interval IDs are joined with 'X' (e.g. "ROW1XROW2").
+
+        Raises
+        ------
+        ValueError
+            If any parameter value does not match a defined interval in the workflow.
+
+        Examples
+        --------
+        >>> workflow = Workflow(...)
+        >>> # Single parameter
+        >>> workflow.get_interval_id({"Temperature": 25})
+        'ROW1'
+        >>> # Multiple parameters
+        >>> workflow.get_interval_id({"Temperature": 25, "Time": 60})
+        'ROW1XROW2'
+        >>> # Non-matching value raises error
+        >>> workflow.get_interval_id({"Temperature": 999})
+        ValueError: No matching interval found for parameter 'Temperature' with value '999'
+        """
         interval_id = ""
         for param_name, param_value in parameter_values.items():
             matching_interval = None
-            for workflow_interval in self.interval_parameters:
-                if workflow_interval.interval_param_name == param_name and (
+            for workflow_interval in self._interval_parameters:
+                if workflow_interval.interval_param_name.lower() == param_name.lower() and (
                     param_value == workflow_interval.interval_value
                     or str(param_value) == workflow_interval.interval_value
                 ):
