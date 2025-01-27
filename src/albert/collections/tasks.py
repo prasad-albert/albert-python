@@ -118,6 +118,6 @@ class TaskCollection(BaseCollection):
         )
         self.session.patch(
             url=f"{self.base_path}/{task.id}",
-            json=patch_payload.model_dump(mode="json", by_alias=True),
+            json=[patch_payload.model_dump(mode="json", by_alias=True)],
         )
         return self.get_by_id(id=task.id)
