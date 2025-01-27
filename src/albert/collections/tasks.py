@@ -19,7 +19,7 @@ class TaskCollection(BaseCollection):
         "state",
         "tags",
         "assignedTo",
-        "dueDate",
+        "due_date",
     }
 
     def __init__(self, *, session: AlbertSession):
