@@ -128,7 +128,7 @@ class BaseTask(BaseTaggedEntity):
     name: str
     category: TaskCategory
     parent_id: str | None = Field(alias="parentId", default=None)
-    metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
+    metadata: dict[str, MetadataItem] | dict = Field(alias="Metadata", default_factory=dict)
     sources: list[TaskSource] | None = Field(default_factory=list, alias="Sources")
     inventory_information: list[InventoryInformation] = Field(alias="Inventories", default=None)
     location: SerializeAsEntityLink[Location] | None = Field(default=None, alias="Location")

@@ -18,7 +18,7 @@ class TaskCollection(BaseCollection):
         "priority",
         "state",
         "tags",
-        "assignedTo",
+        "assigned_to",
         "due_date",
     }
 
