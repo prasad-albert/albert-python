@@ -112,12 +112,14 @@ class TaskCollection(BaseCollection):
         )
 
     def update(self, *, task: BaseTask) -> BaseTask:
-        patch_payload = self._generate_patch_payload(
+        patch_payload_obj = self._generate_patch_payload(
             existing=self.get_by_id(id=task.id),
             updated=task,
         )
+        patch_payload = [patch_payload_obj.model_dump(mode="json", by_alias=True)]
+        patch_payload[0]["id"] = task.id
         self.session.patch(
             url=f"{self.base_path}/{task.id}",
-            json=[patch_payload.model_dump(mode="json", by_alias=True)],
+            json=patch_payload,
         )
         return self.get_by_id(id=task.id)
