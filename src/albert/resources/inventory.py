@@ -165,6 +165,7 @@ class InventoryItem(BaseTaggedEntity):
     metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
     project_id: str | None = Field(default=None, alias="parentId")
     acls: list[ACL] = Field(default_factory=list, alias="ACL")
+    recent_atachment_id = Field(default=None, alias="recentAttachmentId")
 
     # Read-only fields
     task_config: list[dict] | None = Field(
