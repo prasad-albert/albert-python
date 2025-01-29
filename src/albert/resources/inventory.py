@@ -165,7 +165,6 @@ class InventoryItem(BaseTaggedEntity):
     metadata: dict[str, MetadataItem] | None = Field(alias="Metadata", default=None)
     project_id: str | None = Field(default=None, alias="parentId")
     acls: list[ACL] = Field(default_factory=list, alias="ACL")
-    recent_atachment_id: str | None = Field(default=None, alias="recentAttachmentId")
 
     # Read-only fields
     task_config: list[dict] | None = Field(
@@ -174,6 +173,9 @@ class InventoryItem(BaseTaggedEntity):
     formula_id: str | None = Field(default=None, alias="formulaId", exclude=True, frozen=True)
     symbols: list[dict] | None = Field(default=None, alias="Symbols", exclude=True, frozen=True)
     un_number: str | None = Field(default=None, alias="unNumber", exclude=True, frozen=True)
+    recent_atachment_id: str | None = Field(
+        default=None, alias="recentAttachmentId", exclude=True, frozen=True
+    )
 
     @field_validator("company", mode="before")
     @classmethod
