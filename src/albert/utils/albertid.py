@@ -4,7 +4,7 @@ from pydantic import BeforeValidator, validate_call
 
 
 def with_albert_id_validation(cls):
-    """Class decorator that adds validate_albert_id_types to all methods"""
+    """Class decorator that adds validate_call to all methods"""
     for attr_name, attr_value in cls.__dict__.items():
         if callable(attr_value) and not attr_name.startswith("__"):
             setattr(cls, attr_name, validate_call(attr_value))
