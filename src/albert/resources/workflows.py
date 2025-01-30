@@ -203,7 +203,9 @@ class Workflow(BaseResource):
     )
 
     # post init fields
-    _interval_parameters: list[IntervalParameter] = Field(exclude=True, default_factory=list)
+    Workflow__interval_parameters: list[IntervalParameter] = Field(
+        exclude=True, default_factory=list
+    )
 
     def model_post_init(self, __context) -> None:
         self._populate_interval_parameters()
@@ -213,7 +215,7 @@ class Workflow(BaseResource):
             for parameter_setpoint in parameter_group_setpoint.parameter_setpoints:
                 if parameter_setpoint.intervals is not None:
                     for interval in parameter_setpoint.intervals:
-                        self._interval_parameters.append(
+                        self.Workflow__interval_parameters.append(
                             IntervalParameter(
                                 interval_param_name=parameter_setpoint.name,
                                 interval_id=interval.row_id,
@@ -262,7 +264,7 @@ class Workflow(BaseResource):
         interval_id = ""
         for param_name, param_value in parameter_values.items():
             matching_interval = None
-            for workflow_interval in self._interval_parameters:
+            for workflow_interval in self.Workflow__interval_parameters:
                 if workflow_interval.interval_param_name.lower() == param_name.lower() and (
                     param_value == workflow_interval.interval_value
                     or str(param_value) == workflow_interval.interval_value
