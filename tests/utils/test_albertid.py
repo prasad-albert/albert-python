@@ -3,7 +3,6 @@ from pydantic import validate_call
 
 from albert.utils.albertid import (
     InventoryIdType,
-    LotIdType,
     TagIdType,
     UserIdType,
     ensure_block_id,
@@ -21,7 +20,6 @@ from albert.utils.albertid import (
     ensure_tag_id,
     ensure_task_id,
     ensure_unit_id,
-    validate_call,
 )
 
 

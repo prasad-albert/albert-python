@@ -1,5 +1,5 @@
 import re
-from typing import Iterator
+from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.tasks import TaskCollection
@@ -23,7 +23,6 @@ from albert.utils.albertid import (
     IntervalIdType,
     InventoryIdType,
     LotIdType,
-    ProjectIdType,
     SearchInventoryIdType,
     SearchProjectIdType,
     TaskIdType,
