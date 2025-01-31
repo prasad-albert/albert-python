@@ -101,7 +101,7 @@ def test_get_by_ids(client: Albert, seeded_inventory):
     assert {x.id for x in bulk_get_no_inv} == set(inventory_ids)
 
 
-def test_inventory_update(client: Albert, seed_prefix: str, seeded_companies: list[Company]):
+def test_inventory_update(client: Albert, seed_prefix: str):
     # create a new test inventory item
     ii = InventoryItem(
         name=f"{seed_prefix} - SDK UPDATE/DELETE TEST",
@@ -109,7 +109,7 @@ def test_inventory_update(client: Albert, seed_prefix: str, seeded_companies: li
         category=InventoryCategory.RAW_MATERIALS,
         unit_category=InventoryUnitCategory.MASS,
         security_class=SecurityClass.SHARED,
-        company=seeded_companies[0],
+        company="",
     )
     created = client.inventory.create(inventory_item=ii)
 
