@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import AfterValidator, validate_call
+from pydantic import AfterValidator
 
 _ALBERT_PREFIXES = {
     "BlockId": "BLK",
@@ -33,6 +33,7 @@ def _validate_coded_id(id: str, id_type: str) -> str:
         )
     return id
 
+
 def _is_valid_albert_prefix(id: str) -> bool:
     """Check if the id starts with a valid Albert prefix."""
     return any(id.upper().startswith(prefix) for prefix in _ALBERT_PREFIXES.values())
@@ -48,7 +49,7 @@ def _ensure_albert_id(id: str, id_type: str) -> str:
     """
     if not id:
         raise ValueError(f"{id_type} cannot be empty")
-    
+
     prefix = _ALBERT_PREFIXES[id_type]
 
     # Check if already has correct prefix
