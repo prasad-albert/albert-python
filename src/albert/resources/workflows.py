@@ -1,4 +1,4 @@
-from pydantic import AliasChoices, Field, model_validator
+from pydantic import AliasChoices, Field, PrivateAttr, model_validator
 
 from albert.exceptions import AlbertException
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
@@ -6,6 +6,7 @@ from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
+from albert.utils.albertid import IntervalId
 
 
 class IntervalParameter(BaseAlbertModel):
@@ -27,7 +28,7 @@ class IntervalParameter(BaseAlbertModel):
     """
 
     interval_param_name: str | None = Field(default=None)
-    interval_id: str | None = Field(default=None)
+    interval_id: IntervalId | None = Field(default=None)
     interval_value: str | None = Field(default=None)
     interval_unit: str | None = Field(default=None)
 
@@ -204,7 +205,7 @@ class Workflow(BaseResource):
     )
 
     # post init fields
-    _interval_parameters: list[IntervalParameter]
+    _interval_parameters: list[IntervalParameter] = PrivateAttr(default_factory=list)
 
     def model_post_init(self, __context) -> None:
         self._populate_interval_parameters()
