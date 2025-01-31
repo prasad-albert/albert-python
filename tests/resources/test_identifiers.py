@@ -30,20 +30,20 @@ from albert.resources.identifiers import (
 @pytest.mark.parametrize(
     "ensure_func,prefix,entity_code,error_msg",
     [
-        (ensure_inventory_id, "INV", "A", "InventoryIdType cannot be empty"),
-        (ensure_tag_id, "TAG", "", "TagIdType cannot be empty"),
-        (ensure_data_column_id, "DAC", "", "DataColumnIdType cannot be empty"),
-        (ensure_datatemplate_id, "DAT", "", "DataTemplateIdType cannot be empty"),
-        (ensure_propertydata_id, "PTD", "", "PropertyDataIdType cannot be empty"),
-        (ensure_block_id, "BLK", "", "BlockIdType cannot be empty"),
-        (ensure_row_id, "ROW", "", "RowIdType cannot be empty"),
-        (ensure_task_id, "TAS", "", "TaskIdType cannot be empty"),
-        (ensure_project_id, "PRO", "P", "ProjectIdType cannot be empty"),
-        (ensure_lot_id, "LOT", "", "LotIdType cannot be empty"),
-        (ensure_parameter_id, "PRM", "", "ParameterIdType cannot be empty"),
-        (ensure_paramter_group_id, "PRG", "", "ParameterGroupIdType cannot be empty"),
-        (ensure_unit_id, "UNI", "", "UnitIdType cannot be empty"),
-        (ensure_workflow_id, "WFL", "", "WorkflowIdType cannot be empty"),
+        (ensure_inventory_id, "INV", "A", "InventoryId cannot be empty"),
+        (ensure_tag_id, "TAG", "", "TagId cannot be empty"),
+        (ensure_data_column_id, "DAC", "", "DataColumnId cannot be empty"),
+        (ensure_datatemplate_id, "DAT", "", "DataTemplateId cannot be empty"),
+        (ensure_propertydata_id, "PTD", "", "PropertyDataId cannot be empty"),
+        (ensure_block_id, "BLK", "", "BlockId cannot be empty"),
+        (ensure_row_id, "ROW", "", "RowId cannot be empty"),
+        (ensure_task_id, "TAS", "", "TaskId cannot be empty"),
+        (ensure_project_id, "PRO", "P", "ProjectId cannot be empty"),
+        (ensure_lot_id, "LOT", "", "LotId cannot be empty"),
+        (ensure_parameter_id, "PRM", "", "ParameterId cannot be empty"),
+        (ensure_paramter_group_id, "PRG", "", "ParameterGroupId cannot be empty"),
+        (ensure_unit_id, "UNI", "", "UnitId cannot be empty"),
+        (ensure_workflow_id, "WFL", "", "WorkflowId cannot be empty"),
     ],
 )
 def test_ensure_id_functions(
@@ -94,8 +94,8 @@ def test_ensure_interval_id():
 @pytest.mark.parametrize(
     "ensure_func,prefix,optional_code,error_msg",
     [
-        (ensure_search_inventory_id, "INV", "N", "SearchInventoryIdType cannot be empty"),
-        (ensure_project_search_id, "PRO", "P", "ProjectSearchIdType cannot be empty"),
+        (ensure_search_inventory_id, "INV", "N", "SearchInventoryId cannot be empty"),
+        (ensure_project_search_id, "PRO", "P", "ProjectSearchId cannot be empty"),
     ],
 )
 def test_ensure_search_inventory_id(ensure_func, prefix, optional_code, error_msg):
@@ -166,7 +166,7 @@ def test_validate_call_with_list_input():
 
     with pytest.raises(
         ValueError,
-        match="InventoryIdType requires a type code e.g. 'A' for raw materials as in 'A1425'",
+        match="InventoryId requires a type code e.g. 'A' for raw materials as in 'A1425'",
     ):
         list_func(["123", "456"])
 
