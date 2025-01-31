@@ -259,7 +259,7 @@ class Workflow(BaseResource):
         'ROW1XROW2'
         >>> # Non-matching value raises error
         >>> workflow.get_interval_id({"Temperature": 999})
-        ValueError: No matching interval found for parameter 'Temperature' with value '999'
+        AlbertException: No matching interval found for parameter 'Temperature' with value '999'
         """
         interval_id = ""
         for param_name, param_value in parameter_values.items():
