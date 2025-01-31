@@ -9,6 +9,7 @@ from albert.resources.lots import Lot
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
 from albert.resources.workflows import Workflow
+from albert.utils.albertid import ParameterGroupId, PropertyDataId, UnitId, WorkflowId
 from albert.utils.patches import PatchDatum
 
 ########################## Supporting GET Classes ##########################
@@ -206,18 +207,18 @@ class InventoryPropertyDataCreate(BaseResource):
 
 class WorkflowItem(BaseAlbertModel):
     name: str
-    id: str
+    id: WorkflowId
     value: str
-    parameter_group_id: str = Field(..., alias="parameterGroupId")
+    parameter_group_id: ParameterGroupId = Field(..., alias="parameterGroupId")
     value_numeric: float | None = Field(None, alias="valueNumeric")
     unit_name: str | None = Field(None, alias="unitName")
-    unit_id: str | None = Field(None, alias="unitId")
+    unit_id: UnitId | None = Field(None, alias="unitId")
 
 
 class PropertyDataResult(BaseAlbertModel):
     value_numeric: float | None = Field(None, alias="valueNumeric")
     name: str
-    id: str
+    id: PropertyDataId
     value: str | None = None
     trial: str
     value_string: str | None = Field(None, alias="valueString")

@@ -1,6 +1,8 @@
 import re
 from collections.abc import Iterator
 
+from pydantic import validate_call
+
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.tasks import TaskCollection
 from albert.resources.property_data import (
@@ -19,22 +21,20 @@ from albert.resources.property_data import (
 from albert.resources.tasks import PropertyTask
 from albert.session import AlbertSession
 from albert.utils.albertid import (
-    BlockIdType,
-    IntervalIdType,
-    InventoryIdType,
-    LotIdType,
-    SearchInventoryIdType,
-    SearchProjectIdType,
-    TaskIdType,
+    BlockId,
+    IntervalId,
+    InventoryId,
+    LotId,
+    SearchInventoryId,
+    SearchProjectId,
+    TaskId,
     UserIdType,
-    with_albert_id_validation,
 )
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 from albert.utils.patches import PatchOperation
 
 
-@with_albert_id_validation
 class PropertyDataCollection(BaseCollection):
     _api_version = "v3"
 
@@ -50,20 +50,21 @@ class PropertyDataCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{PropertyDataCollection._api_version}/propertydata"
 
-    def _get_task_from_id(self, *, id: TaskIdType) -> PropertyTask:
+    @validate_call
+    def _get_task_from_id(self, *, id: TaskId) -> PropertyTask:
         return TaskCollection(session=self.session).get_by_id(id=id)
 
-    def get_properties_on_inventory(
-        self, *, inventory_id: InventoryIdType
-    ) -> InventoryPropertyData:
+    @validate_call
+    def get_properties_on_inventory(self, *, inventory_id: InventoryId) -> InventoryPropertyData:
         """Returns all the properties of an inventory item."""
         params = {"entity": "inventory", "id": [inventory_id]}
         response = self.session.get(url=self.base_path, params=params)
         response_json = response.json()
         return InventoryPropertyData(**response_json[0])
 
+    @validate_call
     def add_properties_to_inventory(
-        self, *, inventory_id: InventoryIdType, properties: list[InventoryDataColumn]
+        self, *, inventory_id: InventoryId, properties: list[InventoryDataColumn]
     ) -> list[InventoryPropertyDataCreate]:
         returned = []
         for p in properties:
@@ -80,8 +81,9 @@ class PropertyDataCollection(BaseCollection):
             returned.append(InventoryPropertyDataCreate(**response_json))
         return returned
 
+    @validate_call
     def update_property_on_inventory(
-        self, *, inventory_id: InventoryIdType, property_data: InventoryDataColumn
+        self, *, inventory_id: InventoryId, property_data: InventoryDataColumn
     ) -> InventoryPropertyData:
         existing_properties = self.get_properties_on_inventory(inventory_id=inventory_id)
         existing_value = None
@@ -116,13 +118,14 @@ class PropertyDataCollection(BaseCollection):
         )
         return self.get_properties_on_inventory(inventory_id=inventory_id)
 
+    @validate_call
     def get_task_block_properties(
         self,
         *,
-        inventory_id: InventoryIdType,
-        task_id: TaskIdType,
-        block_id: BlockIdType,
-        lot_id: LotIdType | None = None,
+        inventory_id: InventoryId,
+        task_id: TaskId,
+        block_id: BlockId,
+        lot_id: LotId | None = None,
     ) -> TaskPropertyData:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
@@ -140,7 +143,8 @@ class PropertyDataCollection(BaseCollection):
         response_json = response.json()
         return TaskPropertyData(**response_json[0])
 
-    def check_for_task_data(self, *, task_id: TaskIdType) -> list[CheckPropertyData]:
+    @validate_call
+    def check_for_task_data(self, *, task_id: TaskId) -> list[CheckPropertyData]:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
 
@@ -156,8 +160,9 @@ class PropertyDataCollection(BaseCollection):
         response = self.session.get(url=self.base_path, params=params)
         return [CheckPropertyData(**x) for x in response.json()]
 
+    @validate_call
     def check_block_interval_for_data(
-        self, *, block_id: BlockIdType, task_id: TaskIdType, interval_id: IntervalIdType
+        self, *, block_id: BlockId, task_id: TaskId, interval_id: IntervalId
     ) -> CheckPropertyData:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
@@ -173,7 +178,8 @@ class PropertyDataCollection(BaseCollection):
         response = self.session.get(url=self.base_path, params=params)
         return CheckPropertyData(response.json())
 
-    def get_all_task_properties(self, *, task_id: TaskIdType) -> list[TaskPropertyData]:
+    @validate_call
+    def get_all_task_properties(self, *, task_id: TaskId) -> list[TaskPropertyData]:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
         all_info = []
@@ -190,8 +196,9 @@ class PropertyDataCollection(BaseCollection):
 
         return all_info
 
+    @validate_call
     def update_property_on_task(
-        self, *, task_id: TaskIdType, patch_payload: list[PropertyDataPatchDatum]
+        self, *, task_id: TaskId, patch_payload: list[PropertyDataPatchDatum]
     ):
         if len(patch_payload) >= 0:
             if not task_id.startswith("TAS"):
@@ -205,13 +212,14 @@ class PropertyDataCollection(BaseCollection):
             )
         return self.get_all_task_properties(task_id=task_id)
 
+    @validate_call
     def add_properties_to_task(
         self,
         *,
-        inventory_id: InventoryIdType,
-        task_id: TaskIdType,
-        block_id: BlockIdType,
-        lot_id: LotIdType | None = None,
+        inventory_id: InventoryId,
+        task_id: TaskId,
+        block_id: BlockId,
+        lot_id: LotId | None = None,
         properties: list[TaskPropertyCreate],
     ):
         params = {
@@ -352,6 +360,7 @@ class PropertyDataCollection(BaseCollection):
 
         return patch_data
 
+    @validate_call
     def search(
         self,
         *,
@@ -362,9 +371,9 @@ class PropertyDataCollection(BaseCollection):
         order: OrderBy | None = None,
         sort_by: str | None = None,
         # Core platform identifiers
-        inventory_ids: list[SearchInventoryIdType] | SearchInventoryIdType | None = None,
-        project_ids: list[SearchProjectIdType] | SearchProjectIdType | None = None,
-        lot_ids: list[LotIdType] | LotIdType | None = None,
+        inventory_ids: list[SearchInventoryId] | SearchInventoryId | None = None,
+        project_ids: list[SearchProjectId] | SearchProjectId | None = None,
+        lot_ids: list[LotId] | LotId | None = None,
         # Data structure filters
         category: list[DataEntity] | DataEntity | None = None,
         data_templates: list[str] | str | None = None,

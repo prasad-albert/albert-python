@@ -65,7 +65,8 @@ def client() -> Albert:
     )
     return Albert(
         base_url="https://app.albertinvent.com",
-        client_credentials=credentials,
+        # client_credentials=credentials,
+        token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoyLCJhdWQiOiJhbGJlcnQiLCJpZCI6IlVTUjEzIiwic3ViIjoiVVNSMTMiLCJ0ZW5hbnRJZCI6IlRFTjUiLCJwYXJ0aXRpb24iOiJhbGJlcnRkZW1vIiwicm9sZSI6IkFMQiNST0wxIiwiY2xhc3MiOiJhZG1pbiIsInVzZXJUeXBlSWQiOjEsInN1YnNjcmlwdGlvbiI6IkF1dGhvcml6ZWQiLCJvaWQiOiJjZTdlNDFiMy1iN2IyLTRiMmQtOTYyYS0xNzY5NDM2NmVlOWQiLCJlbWFpbCI6ImpvbmF0aGFuQGFsYmVydGludmVudC5jb20iLCJuYW1lIjoiSm9uYXRoYW4gV2VsY2giLCJpYXQiOjE3Mzc1NTkxMDYsImV4cCI6MTczODc2ODcwNn0.JCiokt4FFFtbl6AQd2_l1x3bUR4ERNa7mSt66ue3CH0",
         retries=3,
     )
 
@@ -405,6 +406,7 @@ def seeded_inventory(
     ):
         created_inventory = client.inventory.create(inventory_item=inventory)
         seeded.append(created_inventory)
+    time.sleep(1.5)
     yield seeded
     for inventory in seeded:
         # If the inv has been used in a formulation, it cannot be deleted and will give a BadRequestError
@@ -534,7 +536,7 @@ def seeded_products(
             category=InventoryCategory.FORMULAS,
             text=product_name_prefix,
         )
-        if x.name.startswith(product_name_prefix)
+        if x.name is not None and x.name.startswith(product_name_prefix)
     ]
 
 

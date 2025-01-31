@@ -1,5 +1,6 @@
 from pydantic import AliasChoices, Field, model_validator
 
+from albert.exceptions import AlbertException
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter, ParameterCategory
@@ -203,9 +204,7 @@ class Workflow(BaseResource):
     )
 
     # post init fields
-    Workflow__interval_parameters: list[IntervalParameter] = Field(
-        exclude=True, default_factory=list
-    )
+    _interval_parameters: list[IntervalParameter]
 
     def model_post_init(self, __context) -> None:
         self._populate_interval_parameters()
@@ -215,7 +214,7 @@ class Workflow(BaseResource):
             for parameter_setpoint in parameter_group_setpoint.parameter_setpoints:
                 if parameter_setpoint.intervals is not None:
                     for interval in parameter_setpoint.intervals:
-                        self.Workflow__interval_parameters.append(
+                        self._interval_parameters.append(
                             IntervalParameter(
                                 interval_param_name=parameter_setpoint.name,
                                 interval_id=interval.row_id,
@@ -264,7 +263,7 @@ class Workflow(BaseResource):
         interval_id = ""
         for param_name, param_value in parameter_values.items():
             matching_interval = None
-            for workflow_interval in self.Workflow__interval_parameters:
+            for workflow_interval in self._interval_parameters:
                 if workflow_interval.interval_param_name.lower() == param_name.lower() and (
                     param_value == workflow_interval.interval_value
                     or str(param_value) == workflow_interval.interval_value
@@ -273,7 +272,7 @@ class Workflow(BaseResource):
                     break
 
             if matching_interval is None:
-                raise ValueError(
+                raise AlbertException(
                     f"No matching interval found for parameter '{param_name}' with value '{param_value}'"
                 )
 

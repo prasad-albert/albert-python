@@ -1,9 +1,11 @@
+from collections.abc import Callable
+
 import pytest
 from pydantic import validate_call
 
 from albert.utils.albertid import (
-    InventoryIdType,
-    TagIdType,
+    InventoryId,
+    TagId,
     UserIdType,
     ensure_block_id,
     ensure_datacolumn_id,
@@ -20,11 +22,12 @@ from albert.utils.albertid import (
     ensure_tag_id,
     ensure_task_id,
     ensure_unit_id,
+    ensure_workflow_id,
 )
 
 
 @pytest.mark.parametrize(
-    "ensure_func,prefix,optional_code,error_msg",
+    "ensure_func,prefix,entity_code,error_msg",
     [
         (ensure_inventory_id, "INV", "A", "InventoryIdType cannot be empty"),
         (ensure_tag_id, "TAG", "", "TagIdType cannot be empty"),
@@ -39,27 +42,26 @@ from albert.utils.albertid import (
         (ensure_parameter_id, "PRM", "", "ParameterIdType cannot be empty"),
         (ensure_paramter_group_id, "PRG", "", "ParameterGroupIdType cannot be empty"),
         (ensure_unit_id, "UNI", "", "UnitIdType cannot be empty"),
+        (ensure_workflow_id, "WFL", "", "WorkflowIdType cannot be empty"),
     ],
 )
-def test_ensure_id_functions(ensure_func, prefix, optional_code, error_msg):
+def test_ensure_id_functions(
+    ensure_func: Callable[[str], str], prefix: str, entity_code: str, error_msg: str
+):
     # Test with Simple ID
-    assert ensure_func(f"{optional_code}123") == f"{prefix}{optional_code}123"
+    assert ensure_func(f"{entity_code}123") == f"{prefix}{entity_code}123"
 
     # Test with prefixed ID (uppercase)
-    assert ensure_func(f"{prefix}{optional_code}123") == f"{prefix}{optional_code}123"
+    assert ensure_func(f"{prefix}{entity_code}123") == f"{prefix}{entity_code}123"
 
     # Test with prefixed ID (lowercase)
-    assert ensure_func(f"{prefix.lower()}{optional_code}123") == f"{prefix}{optional_code}123"
+    assert ensure_func(f"{prefix.lower()}{entity_code}123") == f"{prefix}{entity_code}123"
 
     # Test empty strings
     with pytest.raises(ValueError, match=error_msg):
         ensure_func("")
     with pytest.raises(ValueError, match=error_msg):
         ensure_func(None)
-
-    # If there is no additional id Code, then numerical ids should be converted to a string
-    if not optional_code:
-        assert ensure_func(123) == f"{prefix}123"
 
 
 @pytest.mark.parametrize(
@@ -91,11 +93,11 @@ def test_ensure_search_inventory_id(ensure_func, prefix, optional_code, error_ms
 def test_validate_call_decorator():
     # Function with decorator
     @validate_call
-    def decorated_func(inventory_id: InventoryIdType, tag_id: TagIdType):
+    def decorated_func(inventory_id: InventoryId, tag_id: TagId):
         return inventory_id, tag_id
 
     # Function without decorator
-    def undecorated_func(inventory_id: InventoryIdType, tag_id: TagIdType):
+    def undecorated_func(inventory_id: InventoryId, tag_id: TagId):
         return inventory_id, tag_id
 
     # Test decorated function
@@ -111,7 +113,7 @@ def test_validate_call_decorator():
 
 def test_validate_call_with_mixed_params():
     @validate_call
-    def mixed_func(inventory_id: InventoryIdType, name: str, tag_id: TagIdType):
+    def mixed_func(inventory_id: InventoryId, name: str, tag_id: TagId):
         return inventory_id, name, tag_id
 
     result = mixed_func(inventory_id="A123", name="test", tag_id="456")
@@ -120,7 +122,7 @@ def test_validate_call_with_mixed_params():
 
 def test_validate_call_with_empty_iterables():
     @validate_call
-    def list_func(inventory_ids: list[InventoryIdType]):
+    def list_func(inventory_ids: list[InventoryId]):
         return inventory_ids
 
     result = list_func([])
@@ -129,7 +131,7 @@ def test_validate_call_with_empty_iterables():
 
 def test_validate_call_with_list_input():
     @validate_call
-    def list_func(inventory_ids: list[InventoryIdType]):
+    def list_func(inventory_ids: list[InventoryId]):
         return inventory_ids
 
     result = list_func(["A123", "A456"])
@@ -139,12 +141,12 @@ def test_validate_call_with_list_input():
         ValueError,
         match="InventoryIdType requires a type code e.g. 'A' for raw materials as in 'A1425'",
     ):
-        list_func([123, 456])
+        list_func(["123", "456"])
 
 
 def test_validate_call_with_union_list_and_type():
     @validate_call
-    def union_list_func(inventory_ids: list[InventoryIdType] | InventoryIdType | None):
+    def union_list_func(inventory_ids: list[InventoryId] | InventoryId | None):
         return inventory_ids
 
     result = union_list_func(["A123", "A456"])
@@ -159,7 +161,7 @@ def test_validate_call_with_union_list_and_type():
 
 def test_validate_call_with_optional_parameter():
     @validate_call
-    def optional_func(name: str, tag_id: TagIdType | None = None):
+    def optional_func(name: str, tag_id: TagId | None = None):
         return name, tag_id
 
     # Should work with None value for optional parameter
@@ -169,36 +171,39 @@ def test_validate_call_with_optional_parameter():
 
 def test_validate_call_with_optional_type():
     @validate_call
-    def optional_func(inventory_id: InventoryIdType | None):
+    def optional_func(inventory_id: InventoryId | None):
         return inventory_id
 
     assert optional_func(None) == None
     assert optional_func("A123") == "INVA123"
 
 
-@pytest.mark.xfail(
-    reason="This would require custom reflection code to check the annotations for multiple instances of an albertidtype prior to passing them into pydantic"
-)
 def test_validate_call_with_multiple_types():
     # TODO: Think about if there is a way to do this using
     # just pydantic...
     @validate_call
     def union_func(
-        other_valid_id: TagIdType | None,
-        inventory_id: InventoryIdType | UserIdType | None,
+        other_valid_id: TagId | None,
+        multi_id_field: InventoryId | UserIdType | None,
     ):
-        return inventory_id
+        return multi_id_field, other_valid_id
 
-    # Should raise an error if multiple AlbertIdTypes are provided
-    with pytest.raises(TypeError, match="match multiple AlbertIdTypes in the union"):
-        union_func(inventory_id="A123", other_valid_id="456")
+    result = union_func(multi_id_field="A123", other_valid_id="456")
+    assert result == ("INVA123", "TAG456")
 
-    with pytest.raises(TypeError, match="match multiple AlbertIdTypes in the union"):
-        union_func(inventory_id=None, other_valid_id="456")
+    result = union_func(multi_id_field=None, other_valid_id="456")
+    assert result == (None, "TAG456")
+
+    result = union_func(multi_id_field="INVA123", other_valid_id=None)
+    assert result == ("INVA123", None)
+
+    # Note that this
+    result = union_func(multi_id_field="USR111", other_valid_id=None)
+    assert result == ("USR111", None)
 
     # Show that single type with optional None is still valid
     @validate_call
-    def valid_func(tag_id: TagIdType | None):
+    def valid_func(tag_id: TagId | None):
         return tag_id
 
     assert valid_func(None) is None
@@ -208,17 +213,17 @@ def test_validate_call_with_multiple_types():
 
 def test_validate_call_required_id():
     @validate_call
-    def error_func(inventory_id: InventoryIdType):
+    def error_func(inventory_id: InventoryId):
         return inventory_id
 
     # Should handle None
-    with pytest.raises(ValueError, match="cannot be empty"):
+    with pytest.raises(ValueError, match="should be a valid string"):
         error_func(inventory_id=None)
 
 
 def test_validate_call_with_return_types():
     @validate_call
-    def return_func(inventory_id: InventoryIdType) -> InventoryIdType:
+    def return_func(inventory_id: InventoryId) -> InventoryId:
         return inventory_id
 
     assert return_func("A123") == "INVA123"
