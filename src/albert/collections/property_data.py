@@ -21,7 +21,6 @@ from albert.resources.property_data import (
     InventoryDataColumn,
     InventoryPropertyData,
     InventoryPropertyDataCreate,
-    PropertyData,
     PropertyDataPatchDatum,
     PropertyDataSearchItem,
     PropertyValue,
