@@ -6,7 +6,7 @@ from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.units import Unit
-from albert.utils.albertid import IntervalId
+from albert.utils.albertid import IntervalId, ParameterGroupId, ParameterId, RowId
 
 
 class IntervalParameter(BaseAlbertModel):
@@ -19,7 +19,7 @@ class IntervalParameter(BaseAlbertModel):
     ----------
     interval_param_name : str
         The name of the interval parameter.
-    interval_id : str
+    interval_id : IntervalId
         The id of the interval parameter.
     interval_value : str
         The value of the interval parameter.
@@ -47,7 +47,7 @@ class Interval(BaseAlbertModel):
 
     value: str | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
-    row_id: str | None = Field(default=None, alias="rowId")
+    row_id: RowId | None = Field(default=None, alias="rowId")
 
 
 class IntervalCombination(BaseAlbertModel):
@@ -61,7 +61,7 @@ class IntervalCombination(BaseAlbertModel):
 
     Attributes
     ----------
-    interval_id: str | None
+    interval_id: IntervalId | None
         forign key reference to the interval id
         this combination is associated with
         It will have the form ROW# or ROW#XROW# depending on
@@ -74,7 +74,7 @@ class IntervalCombination(BaseAlbertModel):
         for each parameter in the interval combination
     """
 
-    interval_id: str | None = Field(default=None, alias="interval")
+    interval_id: IntervalId | None = Field(default=None, alias="interval")
     interval_params: str | None = Field(default=None, alias="intervalParams")
     interval_string: str | None = Field(default=None, alias="intervalString")
 
@@ -88,7 +88,7 @@ class ParameterSetpoint(BaseAlbertModel):
     ----------
     parameter : Parameter
         The parameter to set the setpoint on. Provide either a parameter or a parameter_id.
-    parameter_id : str
+    parameter_id : ParameterId
         The id of the parameter. Provide either a parameter or a parameter_id.
     value : str | BaseEntityLink
         The value of the setpoint. If the parameter is a InventoryItem, provide the BaseEntityLink of the InventoryItem.
@@ -100,19 +100,19 @@ class ParameterSetpoint(BaseAlbertModel):
         The category of the parameter. Special for InventoryItem (then use name to specify "Equipment", "Consumeable", etc), normal for all others
     short_name : str
         The short / display name of the parameter. Required if value is a dictionary.
-    row_id : str
+    row_id : RowId
         The id of the parameter with respect to the interval row id.
     """
 
     parameter: Parameter | None = Field(exclude=True, default=None)
     value: str | BaseEntityLink | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
-    parameter_id: str | None = Field(alias="id", default=None)
+    parameter_id: ParameterId | None = Field(alias="id", default=None)
     intervals: list[Interval] | None = Field(default=None, alias="Intervals")
     category: ParameterCategory | None = Field(default=None)
     short_name: str | None = Field(default=None, alias="shortName")
     name: str | None = Field(default=None)
-    row_id: str | None = Field(default=None, alias="rowId")
+    row_id: RowId | None = Field(default=None, alias="rowId")
 
     def model_post_init(self, __context) -> None:
         """
@@ -151,7 +151,7 @@ class ParameterGroupSetpoints(BaseAlbertModel):
     ----------
     parameter_group : ParameterGroup
         The parameter group to set the setpoints on. Provide either a parameter_group or a paramerter_group_id
-    parameter_group_id : str
+    parameter_group_id : ParameterGroupId
         The id of the parameter group.  Provide either a parameter_group or a paramerter_group_id
     parameter_group_name : str
         The name of the parameter group. This is a read-only field.
@@ -160,7 +160,7 @@ class ParameterGroupSetpoints(BaseAlbertModel):
     """
 
     parameter_group: ParameterGroup | None = Field(exclude=True, default=None)
-    parameter_group_id: str | None = Field(alias="id", default=None)
+    parameter_group_id: ParameterGroupId | None = Field(alias="id", default=None)
     parameter_group_name: str | None = Field(alias="name", default=None, frozen=True, exclude=True)
     parameter_setpoints: list[ParameterSetpoint] = Field(default_factory=list, alias="Parameters")
 

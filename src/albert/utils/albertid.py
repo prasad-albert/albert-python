@@ -71,15 +71,15 @@ def _ensure_albert_id(id: str, prefix: str, id_type: str) -> str:
 
 
 def ensure_block_id(id: str) -> str:
-    return _ensure_albert_id(id, "BLK", "BlockIdType")
+    return _ensure_albert_id(id, "BLK", "BlockId")
 
 
 BlockId = Annotated[str, AfterValidator(ensure_block_id)]
 
 
 def ensure_inventory_id(id: str) -> str:
-    id = _validate_coded_id(id, "InventoryIdType")
-    return _ensure_albert_id(id, "INV", "InventoryIdType")
+    id = _validate_coded_id(id, "InventoryId")
+    return _ensure_albert_id(id, "INV", "InventoryId")
 
 
 InventoryId = Annotated[str, AfterValidator(ensure_inventory_id)]
@@ -89,7 +89,7 @@ InventoryId = Annotated[str, AfterValidator(ensure_inventory_id)]
 # for certain fields. this one is for inventory IDs that are passed in
 # as a filter.
 def ensure_search_inventory_id(id: str) -> str:
-    id = _validate_coded_id(id, "SearchInventoryIdType")
+    id = _validate_coded_id(id, "SearchInventoryId")
     if id.upper().startswith("INV"):
         id = id[3:]  # Remove INV prefix
     return id
@@ -99,28 +99,40 @@ SearchInventoryId = Annotated[str, AfterValidator(ensure_search_inventory_id)]
 
 
 def ensure_interval_id(id: str) -> str:
-    return _ensure_albert_id(id, "INT", "IntervalIdType")
+    if not id:
+        raise ValueError("IntervalId cannot be empty")
+
+    # Check if it matches ROW# or ROW#XROW# pattern
+    parts = id.upper().split("X")
+    if len(parts) > 2:
+        raise ValueError(f"IntervalId {id} is invalid. Must be in format ROW# or ROW#XROW#")
+
+    for part in parts:
+        if not part.startswith("ROW") or not part[3:].isdigit():
+            raise ValueError(f"IntervalId {id} is invalid. Must be in format ROW# or ROW#XROW#")
+
+    return id.upper()
 
 
 IntervalId = Annotated[str, AfterValidator(ensure_interval_id)]
 
 
 def ensure_parameter_id(id: str) -> str:
-    return _ensure_albert_id(id, "PRM", "ParameterIdType")
+    return _ensure_albert_id(id, "PRM", "ParameterId")
 
 
 ParameterId = Annotated[str, AfterValidator(ensure_parameter_id)]
 
 
 def ensure_paramter_group_id(id: str) -> str:
-    return _ensure_albert_id(id, "PRG", "ParameterGroupIdType")
+    return _ensure_albert_id(id, "PRG", "ParameterGroupId")
 
 
 ParameterGroupId = Annotated[str, AfterValidator(ensure_paramter_group_id)]
 
 
 def ensure_datacolumn_id(id: str) -> str:
-    return _ensure_albert_id(id, "DAC", "DataColumnIdType")
+    return _ensure_albert_id(id, "DAC", "DataColumnId")
 
 
 DataColumnId = Annotated[str, AfterValidator(ensure_datacolumn_id)]
@@ -129,35 +141,35 @@ DataColumnId = Annotated[str, AfterValidator(ensure_datacolumn_id)]
 def ensure_datatemplate_id(id: str) -> str:
     if id and id.upper().startswith("DT"):
         id = f"DAT{id[2:]}"  # Replace DT with DAT
-    return _ensure_albert_id(id, "DAT", "DataTemplateIdType")
+    return _ensure_albert_id(id, "DAT", "DataTemplateId")
 
 
 DataTemplateId = Annotated[str, AfterValidator(ensure_datatemplate_id)]
 
 
 def ensure_propertydata_id(id: str) -> str:
-    return _ensure_albert_id(id, "PTD", "PropertyDataIdType")
+    return _ensure_albert_id(id, "PTD", "PropertyDataId")
 
 
 PropertyDataId = Annotated[str, AfterValidator(ensure_propertydata_id)]
 
 
 def ensure_task_id(id: str) -> str:
-    return _ensure_albert_id(id, "TAS", "TaskIdType")
+    return _ensure_albert_id(id, "TAS", "TaskId")
 
 
 TaskId = Annotated[str, AfterValidator(ensure_task_id)]
 
 
 def ensure_project_id(id: str) -> str:
-    return _ensure_albert_id(id, "PRO", "ProjectIdType")
+    return _ensure_albert_id(id, "PRO", "ProjectId")
 
 
 ProjectId = Annotated[str, AfterValidator(ensure_project_id)]
 
 
 def ensure_project_search_id(id: str) -> str:
-    id = _validate_coded_id(id, "ProjectSearchIdType")
+    id = _validate_coded_id(id, "ProjectSearchId")
     if id.upper().startswith("PRO"):
         id = id[3:]  # Remove PRO prefix
     return id
@@ -167,35 +179,42 @@ SearchProjectId = Annotated[str, AfterValidator(ensure_project_search_id)]
 
 
 def ensure_lot_id(id: str) -> str:
-    return _ensure_albert_id(id, "LOT", "LotIdType")
+    return _ensure_albert_id(id, "LOT", "LotId")
 
 
 LotId = Annotated[str, AfterValidator(ensure_lot_id)]
 
 
 def ensure_tag_id(id: str) -> str:
-    return _ensure_albert_id(id, "TAG", "TagIdType")
+    return _ensure_albert_id(id, "TAG", "TagId")
 
 
 TagId = Annotated[str, AfterValidator(ensure_tag_id)]
 
 
 def ensure_user_id(id: str) -> str:
-    return _ensure_albert_id(id, "USR", "UserIdType")
+    return _ensure_albert_id(id, "USR", "UserId")
 
 
-UserIdType = Annotated[str, AfterValidator(ensure_user_id)]
+UserId = Annotated[str, AfterValidator(ensure_user_id)]
 
 
 def ensure_unit_id(id: str) -> str:
-    return _ensure_albert_id(id, "UNI", "UnitIdType")
+    return _ensure_albert_id(id, "UNI", "UnitId")
 
 
 UnitId = Annotated[str, AfterValidator(ensure_unit_id)]
 
 
 def ensure_workflow_id(id: str) -> str:
-    return _ensure_albert_id(id, "WFL", "WorkflowIdType")
+    return _ensure_albert_id(id, "WFL", "WorkflowId")
 
 
 WorkflowId = Annotated[str, AfterValidator(ensure_workflow_id)]
+
+
+def ensure_row_id(id: str) -> str:
+    return _ensure_albert_id(id, "ROW", "RowId")
+
+
+RowId = Annotated[str, AfterValidator(ensure_row_id)]

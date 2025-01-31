@@ -28,7 +28,7 @@ from albert.utils.albertid import (
     SearchInventoryId,
     SearchProjectId,
     TaskId,
-    UserIdType,
+    UserId,
 )
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
@@ -383,8 +383,8 @@ class PropertyDataCollection(BaseCollection):
         parameter_group: list[str] | str | None = None,
         unit: list[str] | str | None = None,
         # User filters
-        created_by: list[UserIdType] | UserIdType | None = None,
-        task_created_by: list[UserIdType] | UserIdType | None = None,
+        created_by: list[UserId] | UserId | None = None,
+        task_created_by: list[UserId] | UserId | None = None,
         # Response customization
         return_fields: list[str] | str | None = None,
         return_facets: list[str] | str | None = None,

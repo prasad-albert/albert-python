@@ -6,7 +6,7 @@ from pydantic import validate_call
 from albert.utils.albertid import (
     InventoryId,
     TagId,
-    UserIdType,
+    UserId,
     ensure_block_id,
     ensure_datacolumn_id,
     ensure_datatemplate_id,
@@ -18,6 +18,7 @@ from albert.utils.albertid import (
     ensure_project_id,
     ensure_project_search_id,
     ensure_propertydata_id,
+    ensure_row_id,
     ensure_search_inventory_id,
     ensure_tag_id,
     ensure_task_id,
@@ -35,7 +36,7 @@ from albert.utils.albertid import (
         (ensure_datatemplate_id, "DAT", "", "DataTemplateIdType cannot be empty"),
         (ensure_propertydata_id, "PTD", "", "PropertyDataIdType cannot be empty"),
         (ensure_block_id, "BLK", "", "BlockIdType cannot be empty"),
-        (ensure_interval_id, "INT", "", "IntervalIdType cannot be empty"),
+        (ensure_row_id, "ROW", "", "RowIdType cannot be empty"),
         (ensure_task_id, "TAS", "", "TaskIdType cannot be empty"),
         (ensure_project_id, "PRO", "P", "ProjectIdType cannot be empty"),
         (ensure_lot_id, "LOT", "", "LotIdType cannot be empty"),
@@ -62,6 +63,32 @@ def test_ensure_id_functions(
         ensure_func("")
     with pytest.raises(ValueError, match=error_msg):
         ensure_func(None)
+
+
+def test_ensure_interval_id():
+    assert ensure_interval_id("ROW123") == "ROW123"
+    assert ensure_interval_id("ROW123XROW456") == "ROW123XROW456"
+    with pytest.raises(ValueError, match="IntervalId cannot be empty"):
+        ensure_interval_id("")
+
+    assert ensure_row_id("row123") == "ROW123"
+
+    assert ensure_row_id("row123Xrow456") == "ROW123XROW456"
+
+    with pytest.raises(ValueError, match="Must be in format ROW# or ROW#XROW#"):
+        ensure_interval_id("ROW123XROW456XROW789")
+
+    with pytest.raises(ValueError, match="Must be in format ROW# or ROW#XROW#"):
+        ensure_interval_id("123")
+
+    with pytest.raises(ValueError, match="Must be in format ROW# or ROW#XROW#"):
+        ensure_interval_id("123X456")
+
+    with pytest.raises(ValueError, match="Must be in format ROW# or ROW#XROW#"):
+        ensure_interval_id("ROW123XROW456X")
+
+    with pytest.raises(ValueError, match="Must be in format ROW# or ROW#XROW#"):
+        ensure_interval_id("ROW123XROW456XROW789")
 
 
 @pytest.mark.parametrize(
@@ -184,7 +211,7 @@ def test_validate_call_with_multiple_types():
     @validate_call
     def union_func(
         other_valid_id: TagId | None,
-        multi_id_field: InventoryId | UserIdType | None,
+        multi_id_field: InventoryId | UserId | None,
     ):
         return multi_id_field, other_valid_id
 
