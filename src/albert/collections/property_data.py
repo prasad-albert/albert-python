@@ -11,6 +11,7 @@ from albert.resources.property_data import (
     InventoryDataColumn,
     InventoryPropertyData,
     InventoryPropertyDataCreate,
+    PropertyData,
     PropertyDataPatchDatum,
     PropertyDataSearchItem,
     PropertyValue,
@@ -127,9 +128,6 @@ class PropertyDataCollection(BaseCollection):
         block_id: BlockId,
         lot_id: LotId | None = None,
     ) -> TaskPropertyData:
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
-
         params = {
             "entity": "task",
             "blockId": block_id,
@@ -145,9 +143,6 @@ class PropertyDataCollection(BaseCollection):
 
     @validate_call
     def check_for_task_data(self, *, task_id: TaskId) -> list[CheckPropertyData]:
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
-
         task_info = self._get_task_from_id(id=task_id)
 
         params = {
@@ -164,9 +159,6 @@ class PropertyDataCollection(BaseCollection):
     def check_block_interval_for_data(
         self, *, block_id: BlockId, task_id: TaskId, interval_id: IntervalId
     ) -> CheckPropertyData:
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
-
         params = {
             "entity": "block",
             "action": "checkdata",
@@ -180,8 +172,6 @@ class PropertyDataCollection(BaseCollection):
 
     @validate_call
     def get_all_task_properties(self, *, task_id: TaskId) -> list[TaskPropertyData]:
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
         all_info = []
         task_data_info = self.check_for_task_data(task_id=task_id)
         for combo_info in task_data_info:
@@ -201,8 +191,6 @@ class PropertyDataCollection(BaseCollection):
         self, *, task_id: TaskId, patch_payload: list[PropertyDataPatchDatum]
     ):
         if len(patch_payload) >= 0:
-            if not task_id.startswith("TAS"):
-                task_id = f"TAS{task_id}"
             self.session.patch(
                 url=f"{self.base_path}/{task_id}",
                 json=[

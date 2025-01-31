@@ -8,7 +8,7 @@ from albert.utils.albertid import (
     TagId,
     UserId,
     ensure_block_id,
-    ensure_datacolumn_id,
+    ensure_data_column_id,
     ensure_datatemplate_id,
     ensure_interval_id,
     ensure_inventory_id,
@@ -32,7 +32,7 @@ from albert.utils.albertid import (
     [
         (ensure_inventory_id, "INV", "A", "InventoryIdType cannot be empty"),
         (ensure_tag_id, "TAG", "", "TagIdType cannot be empty"),
-        (ensure_datacolumn_id, "DAC", "", "DataColumnIdType cannot be empty"),
+        (ensure_data_column_id, "DAC", "", "DataColumnIdType cannot be empty"),
         (ensure_datatemplate_id, "DAT", "", "DataTemplateIdType cannot be empty"),
         (ensure_propertydata_id, "PTD", "", "PropertyDataIdType cannot be empty"),
         (ensure_block_id, "BLK", "", "BlockIdType cannot be empty"),

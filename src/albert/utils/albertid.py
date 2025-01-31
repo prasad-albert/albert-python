@@ -131,11 +131,11 @@ def ensure_paramter_group_id(id: str) -> str:
 ParameterGroupId = Annotated[str, AfterValidator(ensure_paramter_group_id)]
 
 
-def ensure_datacolumn_id(id: str) -> str:
+def ensure_data_column_id(id: str) -> str:
     return _ensure_albert_id(id, "DAC", "DataColumnId")
 
 
-DataColumnId = Annotated[str, AfterValidator(ensure_datacolumn_id)]
+DataColumnId = Annotated[str, AfterValidator(ensure_data_column_id)]
 
 
 def ensure_datatemplate_id(id: str) -> str:
