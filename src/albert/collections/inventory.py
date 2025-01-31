@@ -344,9 +344,6 @@ class InventoryCollection(BaseCollection):
         Get available facets for inventory items based on the provided filters.
         """
 
-        def deserialize(data):
-            return [FacetItem.model_validate(x) for x in data["Facets"]]
-
         params = self._prepare_parameters(
             limit=1,
             text=text,
@@ -367,7 +364,7 @@ class InventoryCollection(BaseCollection):
             else f"{self.base_path}/search",
             params=params,
         )
-        return deserialize(response.json())
+        return [FacetItem.model_validate(x) for x in response.json()["Facets"]]
 
     def get_facet_by_name(
         self,

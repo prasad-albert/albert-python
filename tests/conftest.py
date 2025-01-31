@@ -405,6 +405,7 @@ def seeded_inventory(
     ):
         created_inventory = client.inventory.create(inventory_item=inventory)
         seeded.append(created_inventory)
+    time.sleep(1.5)
     yield seeded
     for inventory in seeded:
         # If the inv has been used in a formulation, it cannot be deleted and will give a BadRequestError
@@ -534,7 +535,7 @@ def seeded_products(
             category=InventoryCategory.FORMULAS,
             text=product_name_prefix,
         )
-        if x.name.startswith(product_name_prefix)
+        if x.name is not None and x.name.startswith(product_name_prefix)
     ]
 
 
