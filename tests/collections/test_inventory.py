@@ -1,3 +1,4 @@
+import time
 import pytest
 
 from albert.albert import Albert
@@ -108,10 +109,14 @@ def test_inventory_update(client: Albert, seed_prefix: str):
         description="SDK item that will be updated and deleted.",
         category=InventoryCategory.RAW_MATERIALS,
         unit_category=InventoryUnitCategory.MASS,
-        security_class=SecurityClass.SHARED,
+        security_class=SecurityClass.CONFIDENTIAL,
         company="",
     )
     created = client.inventory.create(inventory_item=ii)
+
+    # Give time for the DB to sync - somewhere between 1 and 3 seconds is needed
+    # for this test to work
+    time.sleep(3)
 
     assert client.inventory.inventory_exists(inventory_item=created)
     d = "testing SDK CRUD"
