@@ -23,14 +23,6 @@ _ALBERT_PREFIXES = {
 }
 
 
-def with_type_validation(cls):
-    """Class decorator that adds validate_call to methods specified in _type_validated_methods"""
-    for attr_name, attr_value in cls.__dict__.items():
-        if callable(attr_value) and attr_name in cls._type_validated_methods:
-            setattr(cls, attr_name, validate_call(attr_value))
-    return cls
-
-
 def _validate_coded_id(id: str, id_type: str) -> str:
     """Common validation for all ID types."""
     if not id:
@@ -39,12 +31,7 @@ def _validate_coded_id(id: str, id_type: str) -> str:
         raise ValueError(
             f"{id_type} requires a type code e.g. 'A' for raw materials as in 'A1425'"
         )
-    if not isinstance(id, str):
-        # Based on the type hint this should be impossible
-        # but if someone ignores the hints we need to check this
-        raise TypeError(f"{id_type} must be a string")
-    return str(id)
-
+    return id
 
 def _is_valid_albert_prefix(id: str) -> bool:
     """Check if the id starts with a valid Albert prefix."""
