@@ -7,6 +7,7 @@ from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.data_columns import DataColumn
 from albert.resources.facet import FacetItem, FacetValue
+from albert.resources.identifiers import ensure_inventory_id
 from albert.resources.inventory import (
     CasAmount,
     InventoryItem,
@@ -17,7 +18,6 @@ from albert.resources.inventory import (
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.workflows import Workflow
-from albert.utils.albertid import ensure_inventory_id
 
 
 def _list_asserts(returned_list):

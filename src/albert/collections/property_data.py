@@ -5,6 +5,16 @@ from pydantic import validate_call
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.tasks import TaskCollection
+from albert.resources.identifiers import (
+    BlockId,
+    IntervalId,
+    InventoryId,
+    LotId,
+    SearchInventoryId,
+    SearchProjectId,
+    TaskId,
+    UserId,
+)
 from albert.resources.property_data import (
     CheckPropertyData,
     DataEntity,
@@ -21,16 +31,6 @@ from albert.resources.property_data import (
 )
 from albert.resources.tasks import PropertyTask
 from albert.session import AlbertSession
-from albert.utils.albertid import (
-    BlockId,
-    IntervalId,
-    InventoryId,
-    LotId,
-    SearchInventoryId,
-    SearchProjectId,
-    TaskId,
-    UserId,
-)
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 from albert.utils.patches import PatchOperation

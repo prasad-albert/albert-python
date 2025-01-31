@@ -5,11 +5,7 @@ from pydantic import Field, field_validator, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
 from albert.resources.data_templates import DataTemplate
-from albert.resources.lots import Lot
-from albert.resources.serialization import SerializeAsEntityLink
-from albert.resources.units import Unit
-from albert.resources.workflows import Workflow
-from albert.utils.albertid import (
+from albert.resources.identifiers import (
     DataColumnId,
     DataTemplateId,
     InventoryId,
@@ -20,6 +16,10 @@ from albert.utils.albertid import (
     UnitId,
     WorkflowId,
 )
+from albert.resources.lots import Lot
+from albert.resources.serialization import SerializeAsEntityLink
+from albert.resources.units import Unit
+from albert.resources.workflows import Workflow
 from albert.utils.patches import PatchDatum
 
 ########################## Supporting GET Classes ##########################

@@ -102,5 +102,10 @@ def test_search_property_data(client: Albert, seed_prefix: str, seeded_tasks: li
         )
 
     # now search for the properties
-    res = client.property_data.search(result=f"{property_search_string}(50-56)")
-    print(res)
+    _ = client.property_data.search(result=f"{property_search_string}(50-56)")
+    # Currently the search indexes are not updated automatically so we cannot use
+    # the SDK entities to search against and no other entities are static enough
+    # for us to use as a reliable unit test.
+    # For now we simply confirm that the above doesn't throw an HTTP exception (e.g. the search
+    # syntax is valid and the call isn't returning a 400/500). Once the search index
+    # moves to a more real-time dynamic update we can complete this test.

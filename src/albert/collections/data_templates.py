@@ -2,8 +2,8 @@ from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.resources.data_templates import DataTemplate
+from albert.resources.identifiers import DataTemplateId
 from albert.session import AlbertSession
-from albert.utils.albertid import DataTemplateId
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
