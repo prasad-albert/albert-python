@@ -43,6 +43,7 @@ class CellType(str, Enum):
     LKP = "LKP"
     FOR = "FOR"
     EXTINV = "EXTINV"
+    BTI = "BTI"
 
 
 class DesignType(str, Enum):
