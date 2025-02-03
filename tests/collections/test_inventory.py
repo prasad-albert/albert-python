@@ -1,12 +1,16 @@
+import time
+
 import pytest
 
 from albert.albert import Albert
 from albert.collections.inventory import InventoryCategory
 from albert.exceptions import BadRequestError
+from albert.resources.base import SecurityClass
 from albert.resources.cas import Cas
 from albert.resources.companies import Company
 from albert.resources.data_columns import DataColumn
 from albert.resources.facet import FacetItem, FacetValue
+from albert.resources.identifiers import ensure_inventory_id
 from albert.resources.inventory import (
     CasAmount,
     InventoryItem,
@@ -17,7 +21,6 @@ from albert.resources.inventory import (
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 from albert.resources.workflows import Workflow
-from albert.utils.albertid import ensure_inventory_id
 
 
 def _list_asserts(returned_list):
@@ -100,18 +103,32 @@ def test_get_by_ids(client: Albert, seeded_inventory):
     assert {x.id for x in bulk_get_no_inv} == set(inventory_ids)
 
 
-def test_inventory_update(client: Albert, seeded_inventory):
-    assert client.inventory.inventory_exists(inventory_item=seeded_inventory[2])
-    test_inv_item = seeded_inventory[2]
+def test_inventory_update(client: Albert, seed_prefix: str):
+    # create a new test inventory item
+    ii = InventoryItem(
+        name=f"{seed_prefix} - SDK UPDATE/DELETE TEST",
+        description="SDK item that will be updated and deleted.",
+        category=InventoryCategory.RAW_MATERIALS,
+        unit_category=InventoryUnitCategory.MASS,
+        security_class=SecurityClass.CONFIDENTIAL,
+        company="",
+    )
+    created = client.inventory.create(inventory_item=ii)
+
+    # Give time for the DB to sync - somewhere between 1 and 3 seconds is needed
+    # for this test to work
+    time.sleep(3)
+
+    assert client.inventory.inventory_exists(inventory_item=created)
     d = "testing SDK CRUD"
-    test_inv_item.description = d
+    created.description = d
 
-    updated = client.inventory.update(inventory_item=test_inv_item)
+    updated = client.inventory.update(inventory_item=created)
     assert updated.description == d
-    assert updated.id == seeded_inventory[2].id
+    assert updated.id == created.id
 
-    client.inventory.delete(id=test_inv_item)
-    assert not client.inventory.inventory_exists(inventory_item=test_inv_item)
+    client.inventory.delete(id=created.id)
+    assert not client.inventory.inventory_exists(inventory_item=created)
 
 
 def test_collection_blocks_formulation(client: Albert, seeded_projects):

@@ -897,6 +897,25 @@ def generate_task_seeds(
             due_date="2024-10-31",
             location=seeded_locations[1],
         ),
+        # Property Task 3
+        PropertyTask(
+            name=f"{seed_prefix} - Property Task 3",
+            category=TaskCategory.PROPERTY,
+            inventory_information=[
+                InventoryInformation(
+                    inventory_id=seeded_inventory[2].id,
+                )
+            ],
+            priority=TaskPriority.HIGH,
+            blocks=[
+                Block(
+                    workflow=[seeded_workflows[1]],
+                    data_template=[seeded_data_templates[1]],
+                )
+            ],
+            due_date="2024-10-31",
+            location=seeded_locations[1],
+        ),
         # Batch Task 1
         # Use the Formulations used in #tests/resources/test_sheets/py defined as seeded_products
         BatchTask(
