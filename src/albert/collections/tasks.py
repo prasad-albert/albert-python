@@ -35,7 +35,7 @@ class TaskCollection(BaseCollection):
         task_data = response.json()[0]
         return TaskAdapter.validate_python(task_data)
 
-    def add_block(self, *, task_id: str, data_template_id: str, workflow_id: str) -> BaseTask:
+    def add_block(self, *, task_id: str, data_template_id: str, workflow_id: str) -> None:
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
         url = f"{self.base_path}/{task_id}"
@@ -52,9 +52,9 @@ class TaskCollection(BaseCollection):
             }
         ]
         self.session.patch(url=url, json=payload)
-        return self.get_by_id(id=task_id)
+        return None
 
-    def remove_block(self, *, task_id: str, block_id: str) -> BaseTask:
+    def remove_block(self, *, task_id: str, block_id: str) -> None:
         """_summary_
 
         Parameters
@@ -85,7 +85,7 @@ class TaskCollection(BaseCollection):
             }
         ]
         self.session.patch(url=url, json=payload)
-        return self.get_by_id(id=task_id)
+        return None
 
     def delete(self, *, id: str) -> None:
         url = f"{self.base_path}/{id}"
