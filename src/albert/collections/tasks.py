@@ -66,8 +66,7 @@ class TaskCollection(BaseCollection):
 
         Returns
         -------
-        BaseTask
-            The updated task
+        None
         """
         if not task_id.startswith("TAS"):
             task_id = f"TAS{task_id}"
