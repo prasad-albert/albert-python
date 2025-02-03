@@ -35,6 +35,58 @@ class TaskCollection(BaseCollection):
         task_data = response.json()[0]
         return TaskAdapter.validate_python(task_data)
 
+    def add_block(self, *, task_id: str, data_template_id: str, workflow_id: str) -> BaseTask:
+        if not task_id.startswith("TAS"):
+            task_id = f"TAS{task_id}"
+        url = f"{self.base_path}/{task_id}"
+        payload = [
+            {
+                "id": task_id,
+                "data": [
+                    {
+                        "operation": "add",
+                        "attribute": "Block",
+                        "newValue": [{"datId": data_template_id, "Workflow": {"id": workflow_id}}],
+                    }
+                ],
+            }
+        ]
+        self.session.patch(url=url, json=payload)
+        return self.get_by_id(id=task_id)
+
+    def remove_block(self, *, task_id: str, block_id: str) -> BaseTask:
+        """_summary_
+
+        Parameters
+        ----------
+        task_id : str
+            ID of the Task to remove the block from (e.g., TASFOR1234)
+        block_id : str
+            ID of the Block to remove (e.g., BLK1)
+
+        Returns
+        -------
+        BaseTask
+            The updated task
+        """
+        if not task_id.startswith("TAS"):
+            task_id = f"TAS{task_id}"
+        url = f"{self.base_path}/{task_id}"
+        payload = [
+            {
+                "id": task_id,
+                "data": [
+                    {
+                        "operation": "delete",
+                        "attribute": "Block",
+                        "oldValue": [block_id],
+                    }
+                ],
+            }
+        ]
+        self.session.patch(url=url, json=payload)
+        return self.get_by_id(id=task_id)
+
     def delete(self, *, id: str) -> None:
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
