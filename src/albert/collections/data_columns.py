@@ -153,7 +153,7 @@ class DataColumnCollection(BaseCollection):
             The updated data column object.
         """
         patch_payload = self._generate_patch_payload(
-            existing=self.get_by_id(data_column.id),
+            existing=self.get_by_id(id=data_column.id),
             updated=data_column,
         )
         self.session.patch(
