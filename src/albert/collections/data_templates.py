@@ -43,7 +43,7 @@ class DataTemplateCollection(BaseCollection):
                 return h
         return None
 
-    def add_data_columns_to_template(
+    def add_data_columns(
         self, *, data_template_id: str, data_columns: list[DataColumnValue]
     ) -> DataTemplate:
         payload = {
@@ -169,9 +169,7 @@ class DataTemplateCollection(BaseCollection):
                     )
                 if len(to_add) > 0:
                     new_dcs = [x for x in new_value if x.data_column_id in to_add]
-                    self.add_data_columns_to_template(
-                        data_template_id=data_template.id, data_columns=new_dcs
-                    )
+                    self.add_data_columns(data_template_id=data_template.id, data_columns=new_dcs)
                 for dc_id in to_update:
                     actions = []
                     old_dc_val = next(x for x in old_value if x.data_column_id == dc_id)
