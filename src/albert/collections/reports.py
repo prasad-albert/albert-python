@@ -1,3 +1,5 @@
+from typing import Any
+
 from albert.collections.base import BaseCollection
 from albert.resources.reports import ReportInfo
 from albert.session import AlbertSession
@@ -24,6 +26,7 @@ class ReportCollection(BaseCollection):
         report_type_id: str,
         project_ids: list[str],
         unique_ids: list[str] | None = None,
+        input_data: dict[str, Any] | None = None,
     ) -> ReportInfo:
         """Get a datascience report by its report type ID.
 
@@ -35,7 +38,8 @@ class ReportCollection(BaseCollection):
             Project IDs to query on the input data.
         unique_ids : list[str] | None
             Optional unique IDs to query on the input data.
-
+        input_data : dict[str, Any] | None
+            Additional input data for generating the report.
         Returns
         -------
         ReportInfo
@@ -45,5 +49,10 @@ class ReportCollection(BaseCollection):
         params = {"inputData[projectId]": project_ids}
         if unique_ids is not None:
             params["inputData[uniqueId]"] = unique_ids
+
+        input_data = input_data or {}
+        for key, value in input_data.items():
+            params[f"inputData[{key}]"] = value
+
         response = self.session.get(path, params=params)
         return ReportInfo(**response.json())
