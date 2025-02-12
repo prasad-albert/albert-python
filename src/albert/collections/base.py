@@ -37,6 +37,11 @@ class BaseCollection:
         if updated_metadata is None:
             updated_metadata = {}
 
+        print("Existing metadata")
+        print(existing_metadata)
+        print("Updated metadata")
+        print(updated_metadata)
+
         data = []
         for key, value in existing_metadata.items():
             attribute = f"Metadata.{key}"
@@ -67,7 +72,7 @@ class BaseCollection:
                         )
                     )
             elif value != updated_metadata[key]:
-                if isinstance(value, str):
+                if isinstance(updated_metadata[key], str):
                     data.append(
                         PatchDatum(
                             attribute=attribute,
@@ -76,8 +81,9 @@ class BaseCollection:
                             new_value=updated_metadata[key],
                         )
                     )
-                elif isinstance(value, list):
-                    existing_id = {v.id for v in value}
+                elif isinstance(updated_metadata[key], list):
+                    print("HERE abc")
+                    existing_id = {v.id for v in value} if isinstance(value, list) else {value.id}
                     updated_id = {v.id for v in updated_metadata[key]}
                     to_add = updated_id - existing_id
                     to_remove = existing_id - updated_id
@@ -155,12 +161,14 @@ class BaseCollection:
             old_value = getattr(existing, attribute, None)
             new_value = getattr(updated, attribute, None)
             if attribute == "metadata" and generate_metadata_diff:
+                print("HERE123")
                 data.extend(
                     self._generate_metadata_diff(
                         existing_metadata=old_value,
                         updated_metadata=new_value,
                     )
                 )
+                print(data)
             else:
                 # Get the serialization alias name for the attribute, if it exists
                 alias = existing.model_fields[attribute].alias or attribute
@@ -187,5 +195,5 @@ class BaseCollection:
                             new_value=new_value,
                         )
                     )
-
+        print(data)
         return PatchPayload(data=data)

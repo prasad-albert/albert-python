@@ -10,7 +10,7 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 class ParameterCollection(BaseCollection):
     _api_version = "v3"
-    _updatable_attributes = {"name"}
+    _updatable_attributes = {"name", "metadata"}
 
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
@@ -61,13 +61,46 @@ class ParameterCollection(BaseCollection):
             deserialize=lambda items: [Parameter(**item) for item in items],
         )
 
+    def _is_metadata_item_list(
+        self, *, existing_object: Parameter, updated_object: Parameter, metadata_field: str
+    ):
+        if not metadata_field.startswith("Metadata."):
+            return False
+        else:
+            metadata_field = metadata_field.split(".")[1]
+        if existing_object.metadata is None:
+            existing_object.metadata = {}
+        if updated_object.metadata is None:
+            updated_object.metadata = {}
+        existing = existing_object.metadata.get(metadata_field, None)
+        updated = updated_object.metadata.get(metadata_field, None)
+        return isinstance(existing, list) or isinstance(updated, list)
+
     def update(self, *, parameter: Parameter) -> Parameter:
+        existing = self.get_by_id(id=parameter.id)
         payload = self._generate_patch_payload(
-            existing=self.get_by_id(id=parameter.id),
+            existing=existing,
             updated=parameter,
         )
-        self.session.patch(
-            f"{self.base_path}/{parameter.id}",
-            json=payload.model_dump(mode="json", by_alias=True),
-        )
+        payload_dump = payload.model_dump(mode="json", by_alias=True)
+        for i, change in enumerate(payload_dump["data"]):
+            if not self._is_metadata_item_list(
+                existing_object=existing,
+                updated_object=parameter,
+                metadata_field=change["attribute"],
+            ):
+                change["operation"] = "update"
+                if "newValue" in change and change["newValue"] is None:
+                    del change["newValue"]
+                if "oldValue" in change and change["oldValue"] is None:
+                    del change["oldValue"]
+                payload_dump["data"][i] = change
+        if len(payload_dump["data"]) == 0:
+            return parameter
+        for e in payload_dump["data"]:
+            print(e)
+            self.session.patch(
+                f"{self.base_path}/{parameter.id}",
+                json={"data": [e]},
+            )
         return self.get_by_id(id=parameter.id)

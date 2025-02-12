@@ -52,6 +52,24 @@ class DataTemplateAndTargets(BaseAlbertModel):
     targets: list[Target]
 
 
+class Standard(BaseAlbertModel):
+    id: str = Field(read_only=True)
+    standard_id: str | None = Field(alias="standardId", read_only=True, default=None)
+    name: str | None = Field(default=None, read_only=True)
+    standard_organization: str | None = Field(
+        alias="standardOrganization", default=None, read_only=True
+    )
+
+
+class BlockDataTemplateInfo(BaseAlbertModel):
+    data_template_id: str = Field(alias="id")
+    name: str
+    full_name: str | None = Field(alias="fullName", default=None)
+    data_template_id: str
+    standards: Standard | None = Field(default=None, alias="Standards")
+    targets: list[Target] | None = Field(default=None, alias="Targets")
+
+
 class TaskState(str, Enum):
     UNCLAIMED = "Unclaimed"
     NOT_STARTED = "Not Started"
@@ -89,7 +107,7 @@ class InventoryInformation(BaseAlbertModel):
 class Block(BaseAlbertModel):
     id: str | None = Field(default=None)
     workflow: list[SerializeAsEntityLink[Workflow]] = Field(alias="Workflow", min_length=1)
-    data_template: list[SerializeAsEntityLink[DataTemplate]] | DataTemplateAndTargets = Field(
+    data_template: list[BlockDataTemplateInfo] | DataTemplateAndTargets = Field(
         alias="Datatemplate", min_length=1, max_length=1
     )
     parameter_quantity_used: dict | None = Field(

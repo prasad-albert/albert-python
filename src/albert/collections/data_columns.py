@@ -11,7 +11,7 @@ class DataColumnCollection(BaseCollection):
     """A collection for interacting with Data Columns in Albert."""
 
     _api_version = "v3"
-    _updatable_attributes = {"name"}
+    _updatable_attributes = {"name", "metadata"}
 
     def __init__(self, *, session: AlbertSession):
         """Initialize the DataColumnCollection with the provided session."""
@@ -52,6 +52,7 @@ class DataColumnCollection(BaseCollection):
             The data column object on match or None
         """
         response = self.session.get(f"{self.base_path}/{id}")
+        print(response.json())
         dc = DataColumn(**response.json())
         return dc
 
@@ -138,26 +139,46 @@ class DataColumnCollection(BaseCollection):
         """
         self.session.delete(f"{self.base_path}/{id}")
 
+    def _is_metadata_item_list(
+        self, *, existing_object: DataColumn, updated_object: DataColumn, metadata_field: str
+    ):
+        if not metadata_field.startswith("Metadata."):
+            return False
+        else:
+            metadata_field = metadata_field.split(".")[1]
+        if existing_object.metadata is None:
+            existing_object.metadata = {}
+        if updated_object.metadata is None:
+            updated_object.metadata = {}
+        existing = existing_object.metadata.get(metadata_field, None)
+        updated = updated_object.metadata.get(metadata_field, None)
+        return isinstance(existing, list) or isinstance(updated, list)
+
     def update(self, *, data_column: DataColumn) -> DataColumn:
-        """
-        Update a data column entity.
-
-        Parameters
-        ----------
-        data_column : DataColumn
-            The data column object to update.
-
-        Returns
-        -------
-        DataColumn
-            The updated data column object.
-        """
-        patch_payload = self._generate_patch_payload(
-            existing=self.get_by_id(id=data_column.id),
+        existing = self.get_by_id(id=data_column.id)
+        payload = self._generate_patch_payload(
+            existing=existing,
             updated=data_column,
         )
-        self.session.patch(
-            f"self.base_path/{data_column.id}",
-            json=patch_payload.model_dump(mode="json", by_alias=True),
-        )
+        payload_dump = payload.model_dump(mode="json", by_alias=True)
+        for i, change in enumerate(payload_dump["data"]):
+            if not self._is_metadata_item_list(
+                existing_object=existing,
+                updated_object=data_column,
+                metadata_field=change["attribute"],
+            ):
+                change["operation"] = "update"
+                if "newValue" in change and change["newValue"] is None:
+                    del change["newValue"]
+                if "oldValue" in change and change["oldValue"] is None:
+                    del change["oldValue"]
+                payload_dump["data"][i] = change
+        if len(payload_dump["data"]) == 0:
+            return data_column
+        for e in payload_dump["data"]:
+            print(e)
+            self.session.patch(
+                f"{self.base_path}/{data_column.id}",
+                json={"data": [e]},
+            )
         return self.get_by_id(id=data_column.id)

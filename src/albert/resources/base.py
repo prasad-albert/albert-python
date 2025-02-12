@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import Field, PrivateAttr
+from pydantic import ConfigDict, Field, PrivateAttr
 
 from albert.exceptions import AlbertException
 from albert.session import AlbertSession
@@ -36,6 +36,9 @@ class AuditFields(BaseAlbertModel):
 class BaseEntityLink(BaseAlbertModel):
     id: str
     name: str | None = Field(default=None, exclude=True)
+    model_config = ConfigDict(
+        extra="allow",  # Allow additional fields
+    )
 
     def to_entity_link(self) -> "BaseEntityLink":
         # Convience method to return self, so you can call this method on objects that are already entity links

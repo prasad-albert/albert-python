@@ -90,6 +90,12 @@ class CustomFieldCollection(BaseCollection):
             if patch.attribute in ("hidden", "search") and patch.operation == "add":
                 patch.operation = "update"
                 patch.old_value = False
+            if (
+                patch.attribute in ("entityCategory")
+                and patch.operation == "add"
+                and isinstance(patch.new_value, list)
+            ):
+                patch.new_value = patch.new_value[0]
 
         # run patch
         url = f"{self.base_path}/{custom_field.id}"
