@@ -98,7 +98,6 @@ class ParameterCollection(BaseCollection):
         if len(payload_dump["data"]) == 0:
             return parameter
         for e in payload_dump["data"]:
-            print(e)
             self.session.patch(
                 f"{self.base_path}/{parameter.id}",
                 json={"data": [e]},

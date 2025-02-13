@@ -52,7 +52,6 @@ class DataColumnCollection(BaseCollection):
             The data column object on match or None
         """
         response = self.session.get(f"{self.base_path}/{id}")
-        print(response.json())
         dc = DataColumn(**response.json())
         return dc
 
@@ -176,7 +175,6 @@ class DataColumnCollection(BaseCollection):
         if len(payload_dump["data"]) == 0:
             return data_column
         for e in payload_dump["data"]:
-            print(e)
             self.session.patch(
                 f"{self.base_path}/{data_column.id}",
                 json={"data": [e]},
