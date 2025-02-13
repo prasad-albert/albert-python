@@ -4,7 +4,6 @@ from typing import Annotated, Literal
 from pydantic import Field, TypeAdapter
 
 from albert.resources.base import BaseAlbertModel, MetadataItem, SecurityClass
-from albert.resources.data_templates import DataTemplate
 from albert.resources.locations import Location
 from albert.resources.projects import Project
 from albert.resources.serialization import SerializeAsEntityLink
