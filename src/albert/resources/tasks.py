@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 from pydantic import Field, TypeAdapter
 
 from albert.resources.base import BaseAlbertModel, MetadataItem, SecurityClass
+from albert.resources.data_templates import DataTemplate
 from albert.resources.locations import Location
 from albert.resources.projects import Project
 from albert.resources.serialization import SerializeAsEntityLink
@@ -64,7 +65,6 @@ class BlockDataTemplateInfo(BaseAlbertModel):
     data_template_id: str = Field(alias="id")
     name: str
     full_name: str | None = Field(alias="fullName", default=None)
-    data_template_id: str
     standards: Standard | None = Field(default=None, alias="Standards")
     targets: list[Target] | None = Field(default=None, alias="Targets")
 
@@ -106,9 +106,11 @@ class InventoryInformation(BaseAlbertModel):
 class Block(BaseAlbertModel):
     id: str | None = Field(default=None)
     workflow: list[SerializeAsEntityLink[Workflow]] = Field(alias="Workflow", min_length=1)
-    data_template: list[BlockDataTemplateInfo] | DataTemplateAndTargets = Field(
-        alias="Datatemplate", min_length=1, max_length=1
-    )
+    data_template: (
+        list[BlockDataTemplateInfo]
+        | DataTemplateAndTargets
+        | list[SerializeAsEntityLink[DataTemplate]]
+    ) = Field(alias="Datatemplate", min_length=1, max_length=1)
     parameter_quantity_used: dict | None = Field(
         alias="parameterQuantityUsed", default=None, exclude=True
     )

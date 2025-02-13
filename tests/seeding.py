@@ -40,6 +40,7 @@ from albert.resources.tasks import (
     BatchSizeUnit,
     BatchTask,
     Block,
+    BlockDataTemplateInfo,
     InventoryInformation,
     PropertyTask,
     TaskCategory,
