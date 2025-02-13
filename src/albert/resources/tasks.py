@@ -62,7 +62,7 @@ class Standard(BaseAlbertModel):
 
 
 class BlockDataTemplateInfo(BaseAlbertModel):
-    data_template_id: str = Field(alias="id")
+    id: str = Field(alias="id")
     name: str
     full_name: str | None = Field(alias="fullName", default=None)
     standards: Standard | None = Field(default=None, alias="Standards")
