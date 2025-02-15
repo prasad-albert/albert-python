@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Iterator
 
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, validate_call
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
@@ -9,6 +9,7 @@ from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
 from albert.resources.acls import AccessControlLevel
 from albert.resources.facet import FacetItem
+from albert.resources.identifiers import InventoryId, ProjectId, SearchProjectId, WorksheetId
 from albert.resources.inventory import (
     InventoryCategory,
     InventoryItem,
@@ -160,13 +161,14 @@ class InventoryCollection(BaseCollection):
         )
         return InventoryItem(**response.json())
 
-    def get_by_id(self, *, id: str) -> InventoryItem:
+    @validate_call
+    def get_by_id(self, *, id: InventoryId) -> InventoryItem:
         """
         Retrieve an inventory item by its ID.
 
         Parameters
         ----------
-        id : str
+        id : InventoryId
             The ID of the inventory item.
 
         Returns
@@ -174,19 +176,18 @@ class InventoryCollection(BaseCollection):
         InventoryItem
             The retrieved inventory item.
         """
-        if not id.startswith("INV"):
-            id = "INV" + id
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return InventoryItem(**response.json())
 
-    def get_by_ids(self, *, ids: list[str]) -> list[InventoryItem]:
+    @validate_call
+    def get_by_ids(self, *, ids: list[InventoryId]) -> list[InventoryItem]:
         """
         Retrieve an set of inventory items by their IDs.
 
         Parameters
         ----------
-        ids : str
+        ids : list[InventoryId]
             The list of IDs of the inventory items.
 
         Returns
@@ -195,7 +196,6 @@ class InventoryCollection(BaseCollection):
             The retrieved inventory items.
         """
         url = f"{self.base_path}/ids"
-        ids = [x if x.startswith("INV") else f"INV{x}" for x in ids]
         batches = [ids[i : i + 250] for i in range(0, len(ids), 250)]
         return [
             InventoryItem(**item)
@@ -203,9 +203,9 @@ class InventoryCollection(BaseCollection):
             for item in self.session.get(url, params={"id": batch}).json()["Items"]
         ]
 
-    def get_specs(self, *, ids: list[str]) -> list[InventorySpecList]:
+    @validate_call
+    def get_specs(self, *, ids: list[InventoryId]) -> list[InventorySpecList]:
         url = f"{self.base_path}/specs"
-        ids = [x if x.startswith("INV") else f"INV{x}" for x in ids]
         batches = [ids[i : i + 250] for i in range(0, len(ids), 250)]
         ta = TypeAdapter(InventorySpecList)
         return [
@@ -214,10 +214,11 @@ class InventoryCollection(BaseCollection):
             for item in self.session.get(url, params={"id": batch}).json()
         ]
 
+    @validate_call
     def add_specs(
         self,
         *,
-        inventory_id: str,
+        inventory_id: InventoryId,
         specs: InventorySpec | list[InventorySpec],
     ) -> InventorySpecList:
         """Add inventory specs to the inventory item.
@@ -227,7 +228,7 @@ class InventoryCollection(BaseCollection):
 
         Parameters
         ----------
-        inventory_id : str
+        inventory_id : InventoryId
             The Albert ID of the inventory item to add the specs to
         specs : list[InventorySpec]
             List of InventorySpec objects to add to the inventory item,
@@ -239,8 +240,6 @@ class InventoryCollection(BaseCollection):
         InventorySpecList
             The list of InventorySpecs attached to the InventoryItem.
         """
-        if not inventory_id.startswith("INV"):
-            inventory_id = f"INV{inventory_id}"
         if isinstance(specs, InventorySpec):
             specs = [specs]
         response = self.session.put(
@@ -249,25 +248,26 @@ class InventoryCollection(BaseCollection):
         )
         return InventorySpecList(**response.json())
 
-    def delete(self, *, id: str) -> None:
+    @validate_call
+    def delete(self, *, id: InventoryId | None = None, item: InventoryItem | None = None) -> None:
         """
         Delete an inventory item by its ID.
 
         Parameters
         ----------
-        id : str
+        id : InventoryId
             The ID of the inventory item.
 
         Returns
         -------
         None
         """
-        if isinstance(id, InventoryItem):
-            id = id.id
-        id = id if id.startswith("INV") else "INV" + id
+        id = id or item.id
+
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
+    @validate_call
     def _prepare_parameters(
         self,
         *,
@@ -280,8 +280,8 @@ class InventoryCollection(BaseCollection):
         sort_by: str | None = None,
         location: list[Location] | Location | None = None,
         storage_location: list[StorageLocation] | StorageLocation | None = None,
-        project_id: str | None = None,
-        sheet_id: str | None = None,
+        project_id: SearchProjectId | None = None,
+        sheet_id: WorksheetId | None = None,
         created_by: list[User] | User | None = None,
         lot_owner: list[User] | None = None,
         tags: list[str] | None = None,
@@ -300,8 +300,6 @@ class InventoryCollection(BaseCollection):
             location = [location]
         if isinstance(storage_location, StorageLocation):
             storage_location = [storage_location]
-        if project_id is not None and project_id.startswith("PRO"):
-            project_id = project_id[3:]  # this search doesnt use the prefix
 
         params = {
             "limit": limit,
@@ -324,6 +322,7 @@ class InventoryCollection(BaseCollection):
 
         return params
 
+    @validate_call
     def get_all_facets(
         self,
         *,
@@ -333,8 +332,8 @@ class InventoryCollection(BaseCollection):
         company: list[Company] | Company | None = None,
         location: list[Location] | None = None,
         storage_location: list[StorageLocation] | None = None,
-        project_id: str | None = None,
-        sheet_id: str | None = None,
+        project_id: ProjectId | None = None,
+        sheet_id: WorksheetId | None = None,
         created_by: list[User] = None,
         lot_owner: list[User] = None,
         tags: list[str] = None,
@@ -366,6 +365,7 @@ class InventoryCollection(BaseCollection):
         )
         return [FacetItem.model_validate(x) for x in response.json()["Facets"]]
 
+    @validate_call
     def get_facet_by_name(
         self,
         name: str | list[str],
@@ -376,8 +376,8 @@ class InventoryCollection(BaseCollection):
         company: list[Company] | Company | None = None,
         location: list[Location] | None = None,
         storage_location: list[StorageLocation] | None = None,
-        project_id: str | None = None,
-        sheet_id: str | None = None,
+        project_id: ProjectId | None = None,
+        sheet_id: WorksheetId | None = None,
         created_by: list[User] = None,
         lot_owner: list[User] = None,
         tags: list[str] = None,
@@ -412,6 +412,7 @@ class InventoryCollection(BaseCollection):
 
         return filtered_facets
 
+    @validate_call
     def search(
         self,
         *,
@@ -422,8 +423,8 @@ class InventoryCollection(BaseCollection):
         company: list[Company] | Company | None = None,
         location: list[Location] | None = None,
         storage_location: list[StorageLocation] | None = None,
-        project_id: str | None = None,
-        sheet_id: str | None = None,
+        project_id: ProjectId | None = None,
+        sheet_id: WorksheetId | None = None,
         created_by: list[User] = None,
         lot_owner: list[User] = None,
         tags: list[str] = None,
@@ -462,6 +463,7 @@ class InventoryCollection(BaseCollection):
             deserialize=deserialize,
         )
 
+    @validate_call
     def list(
         self,
         *,
@@ -474,8 +476,8 @@ class InventoryCollection(BaseCollection):
         sort_by: str | None = "createdAt",
         location: list[Location] | None = None,
         storage_location: list[StorageLocation] | None = None,
-        project_id: str | None = None,
-        sheet_id: str | None = None,
+        project_id: ProjectId | None = None,
+        sheet_id: WorksheetId | None = None,
         created_by: list[User] = None,
         lot_owner: list[User] = None,
         tags: list[str] = None,
