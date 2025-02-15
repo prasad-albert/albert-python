@@ -249,7 +249,7 @@ class InventoryCollection(BaseCollection):
         return InventorySpecList(**response.json())
 
     @validate_call
-    def delete(self, *, id: InventoryId | None = None, item: InventoryItem | None = None) -> None:
+    def delete(self, *, id: InventoryId) -> None:
         """
         Delete an inventory item by its ID.
 
@@ -262,7 +262,6 @@ class InventoryCollection(BaseCollection):
         -------
         None
         """
-        id = id or item.id
 
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
