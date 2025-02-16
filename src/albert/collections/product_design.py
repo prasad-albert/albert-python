@@ -1,4 +1,7 @@
+from pydantic import validate_call
+
 from albert.collections.base import BaseCollection
+from albert.resources.identifiers import InventoryId
 from albert.resources.product_design import UnpackedProductDesign
 from albert.session import AlbertSession
 
@@ -19,14 +22,15 @@ class ProductDesignCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{ProductDesignCollection._api_version}/productdesign"
 
-    def get_unpacked_product(self, *, inventory_ids: list[str]) -> UnpackedProductDesign:
+    @validate_call
+    def get_unpacked_product(self, *, inventory_ids: list[InventoryId]) -> UnpackedProductDesign:
         """
         Get unpacked product by inventory IDs
 
         Parameters
         ----------
-        inventory_ids : list[str]
-            Theinventory ids to get unpacked formula for
+        inventory_ids : list[InventoryId]
+            The inventory ids to get unpacked formula for
 
         Returns
         -------
