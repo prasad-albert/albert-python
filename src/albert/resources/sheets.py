@@ -205,7 +205,7 @@ class Design(BaseSessionResource):
                     type=v["type"],
                     session=self.session,
                     sheet=self.sheet,
-                    invetory_id=v.get("id", None),
+                    inventory_id=v.get("id", None),
                 )
             )
         return columns
