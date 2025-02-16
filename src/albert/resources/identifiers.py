@@ -17,7 +17,9 @@ _ALBERT_PREFIXES = {
     "TaskId": "TAS",
     "UnitId": "UNI",
     "UserId": "USR",
+    "WorksheetId": "WKS",
     "WorkflowId": "WFL",
+    # Search Specific Ids
     "SearchInventoryId": "INV",
     "SearchProjectId": "PRO",
 }
@@ -183,6 +185,13 @@ def ensure_tag_id(id: str) -> str:
 
 
 TagId = Annotated[str, AfterValidator(ensure_tag_id)]
+
+
+def ensure_worksheet_id(id: str) -> str:
+    return _ensure_albert_id(id, "WorksheetId")
+
+
+WorksheetId = Annotated[str, AfterValidator(ensure_worksheet_id)]
 
 
 def ensure_user_id(id: str) -> str:
