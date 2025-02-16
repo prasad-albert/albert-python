@@ -142,7 +142,7 @@ def static_custom_fields(client: Albert) -> list[CustomField]:
             registered_cf = client.custom_fields.create(custom_field=cf)
         except BadRequestError as e:
             # If it's already registered, this will raise a BadRequestError
-            registered_cf = client.custom_fields.get_by_name(name=cf.name)
+            registered_cf = client.custom_fields.get_by_name(name=cf.name, service=cf.service)
             if registered_cf is None:  # If it was something else, raise the error
                 raise e
         seeded.append(registered_cf)

@@ -176,7 +176,7 @@ class Design(BaseSessionResource):
                 c["inventory_id"] = c.get("id", None)
                 this_cell = Cell(**c)
                 col_id = c["colId"]
-                name = c.get("name", None)
+                name = c.get("name", c.get("id", None))
                 row[f"{col_id}#{name}"] = this_cell
             all_rows.append(row)
         return pd.DataFrame.from_records(all_rows, index=all_index)

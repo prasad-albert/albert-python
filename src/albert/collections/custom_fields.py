@@ -36,8 +36,8 @@ class CustomFieldCollection(BaseCollection):
         response = self.session.get(f"{self.base_path}/{id}")
         return CustomField(**response.json())
 
-    def get_by_name(self, *, name: str) -> CustomField | None:
-        for custom_field in self.list(name=name):
+    def get_by_name(self, *, name: str, service: ServiceType | None = None) -> CustomField | None:
+        for custom_field in self.list(name=name, service=service):
             if custom_field.name.lower() == name.lower():
                 return custom_field
         return None
@@ -90,6 +90,12 @@ class CustomFieldCollection(BaseCollection):
             if patch.attribute in ("hidden", "search") and patch.operation == "add":
                 patch.operation = "update"
                 patch.old_value = False
+            if (
+                patch.attribute in ("entityCategory")
+                and patch.operation == "add"
+                and isinstance(patch.new_value, list)
+            ):
+                patch.new_value = patch.new_value[0]
 
         # run patch
         url = f"{self.base_path}/{custom_field.id}"
