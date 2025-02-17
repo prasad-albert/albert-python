@@ -377,9 +377,9 @@ class InventoryCollection(BaseCollection):
         storage_location: list[StorageLocation] | None = None,
         project_id: ProjectId | None = None,
         sheet_id: WorksheetId | None = None,
-        created_by: list[User] = None,
-        lot_owner: list[User] = None,
-        tags: list[str] = None,
+        created_by: list[User] | None = None,
+        lot_owner: list[User] | None = None,
+        tags: list[str] | None = None,
         match_all_conditions: bool = False,
     ) -> list[FacetItem]:
         """
@@ -424,9 +424,9 @@ class InventoryCollection(BaseCollection):
         storage_location: list[StorageLocation] | None = None,
         project_id: ProjectId | None = None,
         sheet_id: WorksheetId | None = None,
-        created_by: list[User] = None,
-        lot_owner: list[User] = None,
-        tags: list[str] = None,
+        created_by: list[User] | None = None,
+        lot_owner: list[User] | None = None,
+        tags: list[str] | None = None,
         match_all_conditions: bool = False,
     ) -> Iterator[InventorySearchItem]:
         """
@@ -477,9 +477,9 @@ class InventoryCollection(BaseCollection):
         storage_location: list[StorageLocation] | None = None,
         project_id: ProjectId | None = None,
         sheet_id: WorksheetId | None = None,
-        created_by: list[User] = None,
-        lot_owner: list[User] = None,
-        tags: list[str] = None,
+        created_by: list[User] | None = None,
+        lot_owner: list[User] | None = None,
+        tags: list[str] | None = None,
         match_all_conditions: bool = False,
     ) -> Iterator[InventoryItem]:
         """
