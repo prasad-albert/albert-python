@@ -1,12 +1,11 @@
 import pytest
 
+pytestmark = pytest.mark.xfail(
+    reason="Bug in Albert API -- https://support.albertinvent.com/hc/en-us/requests/8339"
+)
 from albert import Albert
 from albert.resources.custom_fields import CustomField, FieldType
 from albert.resources.lists import ListItem
-
-pytest.mark.xfail(
-    reason="Bug in Albert API -- https://support.albertinvent.com/hc/en-us/requests/8340"
-)
 
 
 def _list_asserts(list_items: list[ListItem]):
