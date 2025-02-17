@@ -1,5 +1,11 @@
+import pytest
+
 from albert.albert import Albert
 from albert.resources.custom_fields import CustomField
+
+pytest.mark.xfail(
+    reason="Bug in Albert API -- https://support.albertinvent.com/hc/en-us/requests/8339"
+)
 
 
 def test_update(client: Albert, static_custom_fields: list[CustomField]):
