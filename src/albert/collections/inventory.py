@@ -23,6 +23,21 @@ from albert.resources.users import User
 from albert.session import AlbertSession
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
+# "all" modules selectable in inventory merge
+DEFAULT_MODULES_MERGE = [
+    "PRICING",
+    "NOTES",
+    "SDS",
+    "PD",
+    "BD",
+    "LOT",
+    "CAS",
+    "TAS",
+    "WFL",
+    "PRG",
+    "PTD",
+]
+
 
 class InventoryCollection(BaseCollection):
     """
@@ -78,33 +93,19 @@ class InventoryCollection(BaseCollection):
         """
 
         # assume "all" modules if not specified explicitly
-        if not modules:
-            # get full list
-            modules = [
-                "PRICING",
-                "NOTES",
-                "SDS",
-                "PD",
-                "BD",
-                "LOT",
-                "CAS",
-                "TAS",
-                "WFL",
-                "PRG",
-                "PTD",
-            ]
+        modules = modules if modules is not None else DEFAULT_MODULES_MERGE
 
         # define merge endpoint
         url = f"{self.base_path}/merge"
 
-        if isinstance(inventory_child, InventoryItem):
-            child_inventories = [{"id": inventory_child.id}]
+        if isinstance(child_id, InventoryId):
+            child_inventories = [{"id": child_id}]
         else:
-            child_inventories = [{"id": i.id} for i in inventory_child]
+            child_inventories = [{"id": i} for i in child_id]
 
         # define payload
         payload = {
-            "parentId": inventory_parent.id,
+            "parentId": parent_id,
             "modules": modules,
             "ChildInventories": child_inventories,
         }
