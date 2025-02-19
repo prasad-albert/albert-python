@@ -10,6 +10,7 @@ from albert.resources.identifiers import (
     DataTemplateId,
     InventoryId,
     ParameterGroupId,
+    ParameterId,
     ProjectId,
     PropertyDataId,
     TaskId,
@@ -217,7 +218,7 @@ class InventoryPropertyDataCreate(BaseResource):
 
 class WorkflowItem(BaseAlbertModel):
     name: str
-    id: WorkflowId
+    id: ParameterId
     value: str
     parameter_group_id: ParameterGroupId = Field(..., alias="parameterGroupId")
     value_numeric: float | None = Field(None, alias="valueNumeric")
@@ -236,16 +237,16 @@ class PropertyDataResult(BaseAlbertModel):
 
 
 class PropertyDataSearchItem(BaseAlbertModel):
-    workflow: list[WorkflowItem]
-    data_template_id: DataTemplateId = Field(..., alias="dataTemplateId")
-    workflow_name: str | None = Field(None, alias="workflowName")
-    parent_id: TaskId = Field(..., alias="parentId")
-    data_template_name: str = Field(..., alias="dataTemplateName")
-    result: PropertyDataResult
-    created_by: str = Field(..., alias="createdBy")
-    inventory_id: InventoryId = Field(..., alias="inventoryId")
     id: PropertyDataId
     category: str
+    workflow: list[WorkflowItem]
+    result: PropertyDataResult
+    data_template_id: DataTemplateId = Field(..., alias="dataTemplateId")
+    workflow_name: str | None = Field(default=None, alias="workflowName")
+    parent_id: TaskId | InventoryId = Field(..., alias="parentId")
+    data_template_name: str = Field(..., alias="dataTemplateName")
+    created_by: str = Field(..., alias="createdBy")
+    inventory_id: InventoryId = Field(..., alias="inventoryId")
     project_id: ProjectId = Field(..., alias="projectId")
     workflow_id: WorkflowId = Field(..., alias="workflowId")
-    task_id: TaskId = Field(..., alias="taskId")
+    task_id: TaskId | None = Field(default=None, alias="taskId")
