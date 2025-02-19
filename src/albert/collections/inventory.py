@@ -829,6 +829,52 @@ class InventoryCollection(BaseCollection):
                     )
         return payload
 
+    def merge(
+        self,
+        *,
+        inventory_parent: InventoryItem,
+        inventory_child: InventoryItem | list[InventoryItem],
+        modules: list[str] | None,
+    ):
+        """
+        merge one or multiple child inventory into a parent inventory item;
+        """
+
+        # assume "all" modules if not specified explicitly
+        if not modules:
+            # get full list
+            modules = [
+                "PRICING",
+                "NOTES",
+                "SDS",
+                "PD",
+                "BD",
+                "LOT",
+                "CAS",
+                "TAS",
+                "WFL",
+                "PRG",
+                "PTD",
+            ]
+
+        # define merge endpoint
+        url = f"{self.base_path}/merge"
+
+        if isinstance(inventory_child, InventoryItem):
+            child_inventories = [{"id": inventory_child.id}]
+        else:
+            child_inventories = [{"id": i.id} for i in inventory_child]
+
+        # define payload
+        payload = {
+            "parentId": inventory_parent.id,
+            "modules": modules,
+            "ChildInventories": child_inventories,
+        }
+
+        # post request
+        self.session.post(url, json=payload)
+
     def update(self, *, inventory_item: InventoryItem) -> InventoryItem:
         """
         Update an inventory item.
