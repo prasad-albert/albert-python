@@ -69,8 +69,8 @@ class InventoryCollection(BaseCollection):
     def merge(
         self,
         *,
-        inventory_parent: InventoryItem,
-        inventory_child: InventoryItem | list[InventoryItem],
+        parent_id: InventoryId,
+        child_id: InventoryId | list[InventoryId],
         modules: list[str] | None,
     ) -> None:
         """
