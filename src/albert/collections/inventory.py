@@ -23,6 +23,21 @@ from albert.resources.users import User
 from albert.session import AlbertSession
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
+# "all" modules selectable in inventory merge
+DEFAULT_MODULES_MERGE = [
+    "PRICING",
+    "NOTES",
+    "SDS",
+    "PD",
+    "BD",
+    "LOT",
+    "CAS",
+    "TAS",
+    "WFL",
+    "PRG",
+    "PTD",
+]
+
 
 class InventoryCollection(BaseCollection):
     """
@@ -65,6 +80,38 @@ class InventoryCollection(BaseCollection):
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
         self.base_path = f"/api/{InventoryCollection._api_version}/inventories"
+
+    def merge(
+        self,
+        *,
+        parent_id: InventoryId,
+        child_id: InventoryId | list[InventoryId],
+        modules: list[str] | None = None,
+    ) -> None:
+        """
+        merge one or multiple child inventory into a parent inventory item;
+        """
+
+        # assume "all" modules if not specified explicitly
+        modules = modules if modules is not None else DEFAULT_MODULES_MERGE
+
+        # define merge endpoint
+        url = f"{self.base_path}/merge"
+
+        if isinstance(child_id, list):
+            child_inventories = [{"id": i} for i in child_id]
+        else:
+            child_inventories = [{"id": child_id}]
+
+        # define payload
+        payload = {
+            "parentId": parent_id,
+            "modules": modules,
+            "ChildInventories": child_inventories,
+        }
+
+        # post request
+        self.session.post(url, json=payload)
 
     def inventory_exists(self, *, inventory_item: InventoryItem) -> bool:
         """
