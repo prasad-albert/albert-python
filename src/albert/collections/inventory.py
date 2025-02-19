@@ -86,7 +86,7 @@ class InventoryCollection(BaseCollection):
         *,
         parent_id: InventoryId,
         child_id: InventoryId | list[InventoryId],
-        modules: list[str] | None,
+        modules: list[str] | None = None,
     ) -> None:
         """
         merge one or multiple child inventory into a parent inventory item;
@@ -98,10 +98,10 @@ class InventoryCollection(BaseCollection):
         # define merge endpoint
         url = f"{self.base_path}/merge"
 
-        if isinstance(child_id, InventoryId):
-            child_inventories = [{"id": child_id}]
-        else:
+        if isinstance(child_id, list):
             child_inventories = [{"id": i} for i in child_id]
+        else:
+            child_inventories = [{"id": child_id}]
 
         # define payload
         payload = {
