@@ -72,7 +72,7 @@ class InventoryCollection(BaseCollection):
         inventory_parent: InventoryItem,
         inventory_child: InventoryItem | list[InventoryItem],
         modules: list[str] | None,
-    ):
+    ) -> None:
         """
         merge one or multiple child inventory into a parent inventory item;
         """
