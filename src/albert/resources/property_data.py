@@ -219,11 +219,11 @@ class InventoryPropertyDataCreate(BaseResource):
 class WorkflowItem(BaseAlbertModel):
     name: str
     id: ParameterId
-    value: str
-    parameter_group_id: ParameterGroupId = Field(..., alias="parameterGroupId")
-    value_numeric: float | None = Field(None, alias="valueNumeric")
-    unit_name: str | None = Field(None, alias="unitName")
-    unit_id: UnitId | None = Field(None, alias="unitId")
+    value: str | None = Field(default=None)
+    parameter_group_id: ParameterGroupId | None = Field(default=None, alias="parameterGroupId")
+    value_numeric: float | None = Field(default=None, alias="valueNumeric")
+    unit_name: str | None = Field(default=None, alias="unitName")
+    unit_id: UnitId | None = Field(default=None, alias="unitId")
 
 
 class PropertyDataResult(BaseAlbertModel):
