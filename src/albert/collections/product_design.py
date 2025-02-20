@@ -25,27 +25,31 @@ class ProductDesignCollection(BaseCollection):
         self.base_path = f"/api/{ProductDesignCollection._api_version}/productdesign"
 
     @validate_call
-    def get_unpacked_product(
+    def get_unpacked_products(
         self,
         *,
         inventory_ids: list[InventoryId],
         unpack_id: Literal["DESIGN", "PREDICTION"] = "PREDICTION",
-    ) -> UnpackedProductDesign:
+    ) -> list[UnpackedProductDesign]:
         """
-        Get unpacked product by inventory IDs
+        Get unpacked products by inventory IDs.
 
         Parameters
         ----------
         inventory_ids : list[InventoryId]
-            The inventory ids to get unpacked formula for
+            The inventory ids to get unpacked formulas for.
         unpack_id: Literal["DESIGN", "PREDICTION"]
             The ID for the unpack operation.
 
         Returns
         -------
         list[UnpackedProductDesign]
-            The unpacked product/formula
+            The unpacked products/formulas.
         """
         url = f"{self.base_path}/{unpack_id}/unpack"
-        response = self.session.get(url, params={"formulaId": inventory_ids})
-        return [UnpackedProductDesign(**x) for x in response.json()]
+        batches = [inventory_ids[i : i + 50] for i in range(0, len(inventory_ids), 50)]
+        return [
+            UnpackedProductDesign(**item)
+            for batch in batches
+            for item in self.session.get(url, params={"formulaId": batch}).json()
+        ]
