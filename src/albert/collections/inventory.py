@@ -16,6 +16,7 @@ from albert.resources.inventory import (
     InventorySearchItem,
     InventorySpec,
     InventorySpecList,
+    MergeInventory,
 )
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
@@ -103,12 +104,10 @@ class InventoryCollection(BaseCollection):
         else:
             child_inventories = [{"id": child_id}]
 
-        # define payload
-        payload = {
-            "parentId": parent_id,
-            "modules": modules,
-            "ChildInventories": child_inventories,
-        }
+        # define payload using the class
+        payload = MergeInventory(
+            parent_id=parent_id, modules=modules, child_inventories=child_inventories
+        ).model_dump(by_alias=True, exclude_none=True, mode="json")
 
         # post request
         self.session.post(url, json=payload)

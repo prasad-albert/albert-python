@@ -7,6 +7,7 @@ from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.resources.acls import ACL
 from albert.resources.base import MetadataItem, SecurityClass, Status
+from albert.resources.identifiers import InventoryId
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
@@ -271,3 +272,9 @@ class InventorySearchItem(BaseAlbertModel):
         default=0.0, alias="inventoryOnHand"
     )  # missing element implies none on hand
     sds: InventorySearchSDSItem | None = Field(default=None, alias="SDS")
+
+
+class MergeInventory(BaseAlbertModel):
+    parent_id: InventoryId = Field(alias="parentId")
+    modules: list[str] | None = Field(default=None)
+    child_inventories: list[dict[str, InventoryId]] = Field(alias="ChildInventories")
