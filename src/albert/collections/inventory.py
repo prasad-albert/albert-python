@@ -11,32 +11,19 @@ from albert.resources.acls import AccessControlLevel
 from albert.resources.facet import FacetItem
 from albert.resources.identifiers import InventoryId, ProjectId, SearchProjectId, WorksheetId
 from albert.resources.inventory import (
+    ALL_MERGE_MODULES,
     InventoryCategory,
     InventoryItem,
     InventorySearchItem,
     InventorySpec,
     InventorySpecList,
+    MergeInventory,
 )
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.users import User
 from albert.session import AlbertSession
 from albert.utils.pagination import AlbertPaginator, PaginationMode
-
-# "all" modules selectable in inventory merge
-DEFAULT_MODULES_MERGE = [
-    "PRICING",
-    "NOTES",
-    "SDS",
-    "PD",
-    "BD",
-    "LOT",
-    "CAS",
-    "TAS",
-    "WFL",
-    "PRG",
-    "PTD",
-]
 
 
 class InventoryCollection(BaseCollection):
@@ -89,11 +76,24 @@ class InventoryCollection(BaseCollection):
         modules: list[str] | None = None,
     ) -> None:
         """
-        merge one or multiple child inventory into a parent inventory item;
+        Merge one or multiple child inventory into a parent inventory item.
+
+        Parameters
+        ----------
+        parent_id : InventoryId
+            The ID of the parent inventory item.
+        child_id : InventoryId | list[InventoryId]
+            The ID(s) of the child inventory item(s).
+        modules : list[str], optional
+            The merge modules to use (default is all).
+
+        Returns
+        -------
+        None
         """
 
         # assume "all" modules if not specified explicitly
-        modules = modules if modules is not None else DEFAULT_MODULES_MERGE
+        modules = modules if modules is not None else ALL_MERGE_MODULES
 
         # define merge endpoint
         url = f"{self.base_path}/merge"
@@ -103,15 +103,15 @@ class InventoryCollection(BaseCollection):
         else:
             child_inventories = [{"id": child_id}]
 
-        # define payload
-        payload = {
-            "parentId": parent_id,
-            "modules": modules,
-            "ChildInventories": child_inventories,
-        }
+        # define payload using the class
+        payload = MergeInventory(
+            parent_id=parent_id,
+            child_inventories=child_inventories,
+            modules=modules,
+        )
 
         # post request
-        self.session.post(url, json=payload)
+        self.session.post(url, json=payload.model_dump(mode="json", by_alias=True))
 
     def inventory_exists(self, *, inventory_item: InventoryItem) -> bool:
         """
