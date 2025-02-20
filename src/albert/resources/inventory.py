@@ -14,6 +14,21 @@ from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.tags import Tag
 from albert.utils.types import BaseAlbertModel
 
+ALL_MERGE_MODULES = [
+    "PRICING",
+    "NOTES",
+    "SDS",
+    "PD",
+    "BD",
+    "LOT",
+    "CAS",
+    "TAS",
+    "WFL",
+    "PRG",
+    "PTD",
+]
+"""All modules selectable for inventory merge."""
+
 
 class InventoryCategory(str, Enum):
     RAW_MATERIALS = "RawMaterials"
@@ -276,5 +291,5 @@ class InventorySearchItem(BaseAlbertModel):
 
 class MergeInventory(BaseAlbertModel):
     parent_id: InventoryId = Field(alias="parentId")
-    modules: list[str] | None = Field(default=None)
     child_inventories: list[dict[str, InventoryId]] = Field(alias="ChildInventories")
+    modules: list[str] | None = Field(default=None)
