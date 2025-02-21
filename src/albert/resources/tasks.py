@@ -53,11 +53,11 @@ class DataTemplateAndTargets(BaseAlbertModel):
 
 
 class Standard(BaseAlbertModel):
-    id: str = Field(read_only=True)
-    standard_id: str | None = Field(alias="standardId", read_only=True, default=None)
-    name: str | None = Field(default=None, read_only=True)
+    id: str = Field(frozen=True)
+    standard_id: str | None = Field(alias="standardId", frozen=True, default=None)
+    name: str | None = Field(default=None, frozen=True)
     standard_organization: str | None = Field(
-        alias="standardOrganization", default=None, read_only=True
+        alias="standardOrganization", default=None, frozen=True
     )
 
 
