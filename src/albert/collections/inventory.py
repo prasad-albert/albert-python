@@ -575,7 +575,7 @@ class InventoryCollection(BaseCollection):
 
         params = self._prepare_parameters(
             limit=limit,
-            text=text,
+            text=text if len(text) < 50 else text[0:50],
             cas=cas,
             category=category,
             company=company,
