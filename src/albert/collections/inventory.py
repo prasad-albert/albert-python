@@ -7,7 +7,6 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.cas import Cas
 from albert.collections.companies import Company, CompanyCollection
 from albert.collections.tags import TagCollection
-from albert.resources.acls import AccessControlLevel
 from albert.resources.facet import FacetItem
 from albert.resources.identifiers import InventoryId, ProjectId, SearchProjectId, WorksheetId
 from albert.resources.inventory import (
@@ -782,34 +781,46 @@ class InventoryCollection(BaseCollection):
                                 )
 
             elif attribute == "acls":
-                new_val_dump = [
-                    x.model_dump(by_alias=True)
-                    for x in new_value
-                    if x.fgc
-                    in [
-                        AccessControlLevel.INVENTORY_OWNER,
-                        AccessControlLevel.INVENTORY_VIEWER,
-                    ]
-                ]
-                if new_val_dump == []:
-                    continue
-                if old_value and new_value and new_value != old_value:
+                existing_ids = [x.id for x in existing.acls]
+                new_ids = [x.id for x in updated.acls]
+                to_add = set(new_ids) - set(existing_ids)
+                to_del = set(existing_ids) - set(new_ids)
+                to_update = set(existing_ids).intersection(new_ids)
+                if len(to_add) > 0:
                     payload["data"].append(
                         {
-                            "operation": "update",
                             "attribute": "ACL",
-                            "oldValue": [x.model_dump(by_alias=True) for x in old_value],
-                            "newValue": new_val_dump,
-                        }
-                    )
-                elif new_value:
-                    payload["data"].append(
-                        {
                             "operation": "add",
-                            "attribute": "ACL",
-                            "newValue": new_val_dump,
-                        }
+                            "newValue": [
+                                x.model_dump(by_alias=True) for x in updated.acls if x.id in to_add
+                            ],
+                        },
                     )
+                if len(to_del) > 0:
+                    payload["data"].append(
+                        {
+                            "attribute": "ACL",
+                            "operation": "delete",
+                            "oldValue": [
+                                x.model_dump(by_alias=True)
+                                for x in existing.acls
+                                if x.id in to_del
+                            ],
+                        },
+                    )
+                for acl_id in to_update:
+                    existing_fgc = [x.fgc for x in existing.acls if x.id == acl_id][0]
+                    updated_fgc = [x.fgc for x in updated.acls if x.id == acl_id][0]
+                    if existing_fgc != updated_fgc:
+                        payload["data"].append(
+                            {
+                                "attribute": "fgc",
+                                "id": acl_id,
+                                "operation": "update",
+                                "oldValue": existing_fgc.value,
+                                "newValue": updated_fgc.value,
+                            },
+                        )
 
             elif attribute == "tags":
                 if (old_value is None or old_value == []) and new_value is not None:
