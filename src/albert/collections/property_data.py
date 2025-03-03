@@ -7,6 +7,8 @@ from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.tasks import TaskCollection
 from albert.resources.identifiers import (
     BlockId,
+    DataColumnId,
+    DataTemplateId,
     IntervalId,
     InventoryId,
     LotId,
@@ -361,6 +363,8 @@ class PropertyDataCollection(BaseCollection):
         inventory_ids: list[SearchInventoryId] | SearchInventoryId | None = None,
         project_ids: list[SearchProjectId] | SearchProjectId | None = None,
         lot_ids: list[LotId] | LotId | None = None,
+        data_template_ids: DataTemplateId | list[DataTemplateId] | None = None,
+        data_column_ids: DataColumnId | list[DataColumnId] | None = None,
         # Data structure filters
         category: list[DataEntity] | DataEntity | None = None,
         data_templates: list[str] | str | None = None,
@@ -397,6 +401,10 @@ class PropertyDataCollection(BaseCollection):
             Filter by project IDs.
         lot_ids : LotIdType or list of LotIdType, optional
             Filter by lot IDs.
+        date_template_ids : DataTemplateId or list of DataTemplateId, optional
+            Filter by data template IDs.
+        data_column_ids: DataColumnId or list of DataColumnId, optional
+            Filter by data column IDs.
         category : DataEntity or list of DataEntity, optional
             Filter by data entity categories.
         data_templates : str or list of str (exact match), optional
@@ -433,6 +441,10 @@ class PropertyDataCollection(BaseCollection):
             project_ids = [project_ids]
         if isinstance(lot_ids, str):
             lot_ids = [lot_ids]
+        if isinstance(data_template_ids, str):
+            data_template_ids = [data_template_ids]
+        if isinstance(data_column_ids, str):
+            data_column_ids = [data_column_ids]
         if isinstance(category, DataEntity):
             category = [category]
         if isinstance(data_templates, str):
@@ -460,19 +472,19 @@ class PropertyDataCollection(BaseCollection):
             "text": text,
             "order": order.value if order is not None else None,
             "sortBy": sort_by,
-            "inventoryIds": [str(x) for x in inventory_ids] if inventory_ids is not None else None,
-            "projectIds": [str(x) for x in project_ids] if project_ids is not None else None,
-            "lotIds": [str(x) for x in lot_ids] if lot_ids is not None else None,
+            "inventoryIds": inventory_ids if inventory_ids is not None else None,
+            "projectIds": project_ids if project_ids is not None else None,
+            "lotIds": lot_ids if lot_ids is not None else None,
+            "dataTemplateId": data_template_ids if data_template_ids is not None else None,
+            "dataColumnId": data_column_ids if data_column_ids is not None else None,
             "category": [c.value for c in category] if category is not None else None,
             "dataTemplates": data_templates,
             "dataColumns": data_columns,
             "parameters": parameters,
             "parameterGroup": parameter_group,
             "unit": unit,
-            "createdBy": [str(x) for x in created_by] if created_by is not None else None,
-            "taskCreatedBy": [str(x) for x in task_created_by]
-            if task_created_by is not None
-            else None,
+            "createdBy": created_by if created_by is not None else None,
+            "taskCreatedBy": task_created_by if task_created_by is not None else None,
             "returnFields": return_fields,
             "returnFacets": return_facets,
         }
