@@ -15,7 +15,7 @@ def get_token_refresh_time(token: str, *, buffer: timedelta | None) -> datetime:
     claims = jwt.decode(token, options={"verify_signature": False})
     try:
         exp_time = datetime.fromtimestamp(claims["exp"], tz=timezone.utc)
-    except ValueError:
+    except (OSError, ValueError):
         # exp is in millis, not seconds, so datetime fails
         exp_time = datetime.fromtimestamp(claims["exp"] / 1000, tz=timezone.utc)
     buffer = buffer or timedelta(seconds=0)

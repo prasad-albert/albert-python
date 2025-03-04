@@ -201,7 +201,7 @@ class TaskPropertyCreate(BaseResource):
 
 
 class PropertyDataPatchDatum(PatchDatum):
-    property_column_id: DataColumnId = Field(alias="id")
+    property_column_id: DataColumnId | PropertyDataId = Field(alias="id")
 
 
 class InventoryPropertyDataCreate(BaseResource):
