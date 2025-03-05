@@ -332,9 +332,9 @@ class PropertyDataCollection(BaseCollection):
                 trial_number=posted_prop.trial_number,
                 interval_combination=posted_prop.interval_combination,
             )
-
-            these_patches = self._generate_data_patch_payload(trial=on_platform_row)
-            patches.extend(these_patches)
+            if on_platform_row is not None:
+                these_patches = self._generate_data_patch_payload(trial=on_platform_row)
+                patches.extend(these_patches)
             covered_interval_trials.add(this_interval_trial)
         return patches
 
