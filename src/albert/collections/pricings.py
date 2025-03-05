@@ -43,11 +43,11 @@ class PricingCollection(BaseCollection):
         self,
         *,
         inventory_id: str,
-        group_by: PricingBy = None,
-        filter_by: PricingBy = None,
-        filter_id: str = None,
-        order_by: OrderBy = None,
-    ) -> Pricing:
+        group_by: PricingBy | None = None,
+        filter_by: PricingBy | None = None,
+        filter_id: str | None = None,
+        order_by: OrderBy | None = None,
+    ) -> list[Pricing]:
         params = {
             "parentId": inventory_id,
             "groupBy": group_by,
