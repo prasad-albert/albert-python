@@ -191,7 +191,7 @@ class PropertyDataCollection(BaseCollection):
     def update_property_on_task(
         self, *, task_id: TaskId, patch_payload: list[PropertyDataPatchDatum]
     ):
-        if len(patch_payload) >= 0:
+        if len(patch_payload) > 0:
             self.session.patch(
                 url=f"{self.base_path}/{task_id}",
                 json=[
@@ -238,6 +238,76 @@ class PropertyDataCollection(BaseCollection):
             return self.update_property_on_task(task_id=task_id, patch_payload=patches)
         else:
             return self.get_all_task_properties(task_id=task_id)
+
+    @validate_call
+    def update_or_create_task_properties(
+        self,
+        *,
+        inventory_id: InventoryId,
+        task_id: TaskId,
+        block_id: BlockId,
+        lot_id: LotId | None = None,
+        properties: list[TaskPropertyCreate],
+    ):
+        existing_data_rows = self.get_task_block_properties(
+            inventory_id=inventory_id, task_id=task_id, block_id=block_id, lot_id=lot_id
+        )
+        (update_patches, new_values) = self._form_existing_row_value_patches(
+            existing_data_rows=existing_data_rows, properties=properties
+        )
+
+        calculated_patches = self._form_calculated_task_property_patches(
+            existing_data_rows=existing_data_rows, properties=properties
+        )
+        all_patches = update_patches + calculated_patches
+        if len(new_values) > 0:
+            self.update_property_on_task(task_id=task_id, patch_payload=all_patches)
+            return self.add_properties_to_task(
+                inventory_id=inventory_id,
+                task_id=task_id,
+                block_id=block_id,
+                lot_id=lot_id,
+                properties=new_values,
+            )
+        else:
+            return self.update_property_on_task(task_id=task_id, patch_payload=all_patches)
+
+    ################### Methods to support Updated Row Value patches #################
+
+    def _form_existing_row_value_patches(
+        self, *, existing_data_rows: TaskPropertyData, properties: list[TaskPropertyCreate]
+    ):
+        patches = []
+        new_properties = []
+        for prop in properties:
+            exists = False
+            if prop.trial_number is not None:  # may be an update
+                for interval in existing_data_rows.data:
+                    if interval.interval_combination == prop.interval_combination:
+                        for trial in interval.trials:
+                            if trial.trial_number == prop.trial_number:
+                                for data_column in trial.data_columns:
+                                    if (
+                                        (
+                                            data_column.data_column_unique_id
+                                            == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
+                                        )
+                                        and data_column.property_data is not None
+                                        and (data_column.property_data.value != prop.value)
+                                    ):
+                                        exists = True
+                                        patches.append(
+                                            PropertyDataPatchDatum(
+                                                id=data_column.property_data.id,
+                                                operation=PatchOperation.UPDATE,
+                                                attribute="value",
+                                                new_value=prop.value,
+                                                old_value=data_column.property_data.value,
+                                            )
+                                        )
+            if not exists:
+                new_properties.append(prop)
+        return (patches, new_properties)
 
     ################### Methods to support calculated value patches ##################
 
