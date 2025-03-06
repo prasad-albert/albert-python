@@ -274,78 +274,59 @@ class PropertyDataCollection(BaseCollection):
 
     ################### Methods to support Updated Row Value patches #################
 
-    # def _form_existing_row_value_patches(
-    #     self, *, existing_data_rows: TaskPropertyData, properties: list[TaskPropertyCreate]
-    # ):
-    #     patches = []
-    #     new_properties = []
-    #     for prop in properties:
-    #         exists = False
-    #         if prop.trial_number is not None:  # may be an update
-    #             for interval in existing_data_rows.data:
-    #                 if interval.interval_combination == prop.interval_combination:
-    #                     for trial in interval.trials:
-    #                         if trial.trial_number == prop.trial_number:
-    #                             for data_column in trial.data_columns:
-    #                                 if (
-    #                                     (
-    #                                         data_column.data_column_unique_id
-    #                                         == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
-    #                                     )
-    #                                     and data_column.property_data is not None
-    #                                     and (data_column.property_data.value != prop.value)
-    #                                 ):
-    #                                     exists = True
-    #                                     patches.append(
-    #                                         PropertyDataPatchDatum(
-    #                                             id=data_column.property_data.id,
-    #                                             operation=PatchOperation.UPDATE,
-    #                                             attribute="value",
-    #                                             new_value=prop.value,
-    #                                             old_value=data_column.property_data.value,
-    #                                         )
-    #                                     )
-    #         if not exists:
-    #             new_properties.append(prop)
-    #     return (patches, new_properties)
-
     def _form_existing_row_value_patches(
         self, *, existing_data_rows: TaskPropertyData, properties: list[TaskPropertyCreate]
     ):
         patches = []
         new_properties = []
+
         for prop in properties:
-            exists = False
             if prop.trial_number is None:
                 continue
-            for interval in existing_data_rows.data:
-                if interval.interval_combination != prop.interval_combination:
-                    continue
-                for trial in interval.trials:
-                    if trial.trial_number != prop.trial_number:
-                        continue
-                    for data_column in trial.data_columns:
-                        if (
-                            (
-                                data_column.data_column_unique_id
-                                == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
-                            )
-                            and data_column.property_data is not None
-                            and (data_column.property_data.value != prop.value)
-                        ):
-                            exists = True
-                            patches.append(
-                                PropertyDataPatchDatum(
-                                    id=data_column.property_data.id,
-                                    operation=PatchOperation.UPDATE,
-                                    attribute="value",
-                                    new_value=prop.value,
-                                    old_value=data_column.property_data.value,
-                                )
-                            )
-            if not exists:
+
+            if not self._process_property(prop, existing_data_rows, patches):
                 new_properties.append(prop)
-        return (patches, new_properties)
+
+        return patches, new_properties
+
+    def _process_property(
+        self, prop: TaskPropertyCreate, existing_data_rows: TaskPropertyData, patches: list
+    ):
+        for interval in existing_data_rows.data:
+            if interval.interval_combination != prop.interval_combination:
+                continue
+
+            for trial in interval.trials:
+                if trial.trial_number != prop.trial_number:
+                    continue
+
+                if self._process_trial(trial, prop, patches):
+                    return True
+
+        return False
+
+    def _process_trial(self, trial: Trial, prop: TaskPropertyCreate, patches: list):
+        for data_column in trial.data_columns:
+            if (
+                data_column.data_column_unique_id
+                == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
+                and data_column.property_data is not None
+            ):
+                if data_column.property_data.value == prop.value:
+                    # No need to update this value
+                    return True
+                patches.append(
+                    PropertyDataPatchDatum(
+                        id=data_column.property_data.id,
+                        operation=PatchOperation.UPDATE,
+                        attribute="value",
+                        new_value=prop.value,
+                        old_value=data_column.property_data.value,
+                    )
+                )
+                return True
+
+        return False
 
     ################### Methods to support calculated value patches ##################
 
@@ -442,8 +423,8 @@ class PropertyDataCollection(BaseCollection):
                                 old_value=None,
                             )
                         )
-                    elif (
-                        column.property_data.value != recalculated_value
+                    elif str(column.property_data.value) != str(
+                        recalculated_value
                     ):  # Existing value differs
                         patch_data.append(
                             PropertyDataPatchDatum(
