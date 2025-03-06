@@ -84,7 +84,7 @@ class ParameterValue(BaseAlbertModel):
 
 class ParameterGroup(BaseTaggedEntity):
     name: str
-    type: PGType | None = Field(default = None)
+    type: PGType | None = Field(default=None)
     id: str | None = Field(None, alias="albertId")
     description: str | None = Field(default=None)
     security_class: SecurityClass = Field(default=SecurityClass.RESTRICTED, alias="class")
