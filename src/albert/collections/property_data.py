@@ -284,14 +284,17 @@ class PropertyDataCollection(BaseCollection):
             if prop.trial_number is None:
                 continue
 
-            if not self._process_property(prop, existing_data_rows, patches):
+            prop_patches = self._process_property(prop, existing_data_rows)
+            if prop_patches:
+                patches.extend(prop_patches)
+            else:
                 new_properties.append(prop)
 
         return patches, new_properties
 
     def _process_property(
-        self, prop: TaskPropertyCreate, existing_data_rows: TaskPropertyData, patches: list
-    ):
+        self, prop: TaskPropertyCreate, existing_data_rows: TaskPropertyData
+    ) -> list | None:
         for interval in existing_data_rows.data:
             if interval.interval_combination != prop.interval_combination:
                 continue
@@ -300,12 +303,13 @@ class PropertyDataCollection(BaseCollection):
                 if trial.trial_number != prop.trial_number:
                     continue
 
-                if self._process_trial(trial, prop, patches):
-                    return True
+                trial_patches = self._process_trial(trial, prop)
+                if trial_patches:
+                    return trial_patches
 
-        return False
+        return None
 
-    def _process_trial(self, trial: Trial, prop: TaskPropertyCreate, patches: list):
+    def _process_trial(self, trial: Trial, prop: TaskPropertyCreate) -> list | None:
         for data_column in trial.data_columns:
             if (
                 data_column.data_column_unique_id
@@ -314,8 +318,8 @@ class PropertyDataCollection(BaseCollection):
             ):
                 if data_column.property_data.value == prop.value:
                     # No need to update this value
-                    return True
-                patches.append(
+                    return None
+                return [
                     PropertyDataPatchDatum(
                         id=data_column.property_data.id,
                         operation=PatchOperation.UPDATE,
@@ -323,10 +327,9 @@ class PropertyDataCollection(BaseCollection):
                         new_value=prop.value,
                         old_value=data_column.property_data.value,
                     )
-                )
-                return True
+                ]
 
-        return False
+        return None
 
     ################### Methods to support calculated value patches ##################
 
