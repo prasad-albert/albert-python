@@ -211,6 +211,32 @@ class PropertyDataCollection(BaseCollection):
         lot_id: LotId | None = None,
         properties: list[TaskPropertyCreate],
     ):
+        """
+        Add new task properties for a given task.
+
+        This method only works for new values. If a trial number is provided in the TaskPropertyCreate,
+        it must relate to an existing trial. New trials must be added with no trial number provided.
+        Do not try to create multiple new trials in one call as this will lead to unexpected behavior.
+        Build out new trials in a loop if many new trials are needed.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory.
+        task_id : TaskId
+            The ID of the task.
+        block_id : BlockId
+            The ID of the block.
+        lot_id : LotId, optional
+            The ID of the lot, by default None.
+        properties : list[TaskPropertyCreate]
+            A list of TaskPropertyCreate objects representing the properties to add.
+
+        Returns
+        -------
+        list[TaskPropertyData]
+            The newly created task properties.
+        """
         params = {
             "blockId": block_id,
             "inventoryId": inventory_id,
@@ -248,7 +274,34 @@ class PropertyDataCollection(BaseCollection):
         block_id: BlockId,
         lot_id: LotId | None = None,
         properties: list[TaskPropertyCreate],
-    ):
+    ) -> list[TaskPropertyData]:
+        """
+        Update or create task properties for a given task.
+
+        If a trial number is provided in the TaskPropertyCreate, it must relate to an existing trial.
+        New trials must be added with no trial number provided. Do not try to create multiple new trials
+        in one call as this will lead to unexpected behavior. Build out new trials in a loop if many new
+        trials are needed.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory.
+        task_id : TaskId
+            The ID of the task.
+        block_id : BlockId
+            The ID of the block.
+        lot_id : LotId, optional
+            The ID of the lot, by default None.
+        properties : list[TaskPropertyCreate]
+            A list of TaskPropertyCreate objects representing the properties to update or create.
+
+        Returns
+        -------
+        list[TaskPropertyData]
+            The updated or newly created task properties.
+
+        """
         existing_data_rows = self.get_task_block_properties(
             inventory_id=inventory_id, task_id=task_id, block_id=block_id, lot_id=lot_id
         )
@@ -282,6 +335,7 @@ class PropertyDataCollection(BaseCollection):
 
         for prop in properties:
             if prop.trial_number is None:
+                new_properties.append(prop)
                 continue
 
             prop_patches = self._process_property(prop, existing_data_rows)
@@ -289,7 +343,6 @@ class PropertyDataCollection(BaseCollection):
                 patches.extend(prop_patches)
             else:
                 new_properties.append(prop)
-
         return patches, new_properties
 
     def _process_property(
@@ -392,6 +445,9 @@ class PropertyDataCollection(BaseCollection):
             # Replace column names with their numeric values in the calculation string
             for col, value in column_values.items():
                 calculation = calculation.replace(col, str(value))
+                calculation = calculation.replace(
+                    "^", "**"
+                )  # Replace '^' with '**' for exponentiation
             # Evaluate the resulting expression
             return eval(calculation)
         except Exception as e:
