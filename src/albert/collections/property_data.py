@@ -252,7 +252,7 @@ class PropertyDataCollection(BaseCollection):
         existing_data_rows = self.get_task_block_properties(
             inventory_id=inventory_id, task_id=task_id, block_id=block_id, lot_id=lot_id
         )
-        (update_patches, new_values) = self._form_existing_row_value_patches(
+        update_patches, new_values = self._form_existing_row_value_patches(
             existing_data_rows=existing_data_rows, properties=properties
         )
 
@@ -274,6 +274,41 @@ class PropertyDataCollection(BaseCollection):
 
     ################### Methods to support Updated Row Value patches #################
 
+    # def _form_existing_row_value_patches(
+    #     self, *, existing_data_rows: TaskPropertyData, properties: list[TaskPropertyCreate]
+    # ):
+    #     patches = []
+    #     new_properties = []
+    #     for prop in properties:
+    #         exists = False
+    #         if prop.trial_number is not None:  # may be an update
+    #             for interval in existing_data_rows.data:
+    #                 if interval.interval_combination == prop.interval_combination:
+    #                     for trial in interval.trials:
+    #                         if trial.trial_number == prop.trial_number:
+    #                             for data_column in trial.data_columns:
+    #                                 if (
+    #                                     (
+    #                                         data_column.data_column_unique_id
+    #                                         == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
+    #                                     )
+    #                                     and data_column.property_data is not None
+    #                                     and (data_column.property_data.value != prop.value)
+    #                                 ):
+    #                                     exists = True
+    #                                     patches.append(
+    #                                         PropertyDataPatchDatum(
+    #                                             id=data_column.property_data.id,
+    #                                             operation=PatchOperation.UPDATE,
+    #                                             attribute="value",
+    #                                             new_value=prop.value,
+    #                                             old_value=data_column.property_data.value,
+    #                                         )
+    #                                     )
+    #         if not exists:
+    #             new_properties.append(prop)
+    #     return (patches, new_properties)
+
     def _form_existing_row_value_patches(
         self, *, existing_data_rows: TaskPropertyData, properties: list[TaskPropertyCreate]
     ):
@@ -281,30 +316,33 @@ class PropertyDataCollection(BaseCollection):
         new_properties = []
         for prop in properties:
             exists = False
-            if prop.trial_number is not None:  # may be an update
-                for interval in existing_data_rows.data:
-                    if interval.interval_combination == prop.interval_combination:
-                        for trial in interval.trials:
-                            if trial.trial_number == prop.trial_number:
-                                for data_column in trial.data_columns:
-                                    if (
-                                        (
-                                            data_column.data_column_unique_id
-                                            == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
-                                        )
-                                        and data_column.property_data is not None
-                                        and (data_column.property_data.value != prop.value)
-                                    ):
-                                        exists = True
-                                        patches.append(
-                                            PropertyDataPatchDatum(
-                                                id=data_column.property_data.id,
-                                                operation=PatchOperation.UPDATE,
-                                                attribute="value",
-                                                new_value=prop.value,
-                                                old_value=data_column.property_data.value,
-                                            )
-                                        )
+            if prop.trial_number is None:
+                continue
+            for interval in existing_data_rows.data:
+                if interval.interval_combination != prop.interval_combination:
+                    continue
+                for trial in interval.trials:
+                    if trial.trial_number != prop.trial_number:
+                        continue
+                    for data_column in trial.data_columns:
+                        if (
+                            (
+                                data_column.data_column_unique_id
+                                == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
+                            )
+                            and data_column.property_data is not None
+                            and (data_column.property_data.value != prop.value)
+                        ):
+                            exists = True
+                            patches.append(
+                                PropertyDataPatchDatum(
+                                    id=data_column.property_data.id,
+                                    operation=PatchOperation.UPDATE,
+                                    attribute="value",
+                                    new_value=prop.value,
+                                    old_value=data_column.property_data.value,
+                                )
+                            )
             if not exists:
                 new_properties.append(prop)
         return (patches, new_properties)
