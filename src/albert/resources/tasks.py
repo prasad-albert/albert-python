@@ -87,7 +87,7 @@ class InventoryInformation(BaseAlbertModel):
         The inventory id of the item to be used in the task.
     lot_id : str, optional
         The lot id of the item to be used in the task. Reccomended for Property and General tasks.
-    batch_size : float, optional
+    batch_size : float, Required for Batch tasks, otherwise optional.
         The batch size to make of the related InventoryItem. Required for Batch tasks.
     selected_lot : bool, read only
         Whether the lot is selected for the task. Default is None.
@@ -100,7 +100,7 @@ class InventoryInformation(BaseAlbertModel):
     selected_lot: bool | None = Field(alias="selectedLot", exclude=True, frozen=True, default=None)
     barcode_id: str | None = Field(alias="barcodeId", default=None)
     quantity_used: float | None = Field(alias="quantityUsed", default=None)
-    selected_lot: bool | None = Field(alias="selectedLot", default=None)
+    selected_lot: bool | None = Field(alias="selectedLot", default=None, exclude=True)
 
 
 class Block(BaseAlbertModel):
@@ -169,6 +169,37 @@ class BaseTask(BaseTaggedEntity):
 
 
 class PropertyTask(BaseTask):
+    """
+    Represents a batch task.
+
+    This class is used to create and manage batch tasks. It includes the base task attributes
+    and additional attributes specific to batch tasks.
+
+    Attributes
+    ----------
+    name : str
+        The name of the batch task.
+    inventory_information : list[InventoryInformation]
+        Information about the inventory associated with the batch task.
+    location : SerializeAsEntityLink[Location]
+        The location where the batch task is performed.
+    parent_id : str
+        The ID of the parent project.
+    blocks : list[Block]
+        A list of blocks associated with the batch task.
+    id : str, optional
+        The ID of the batch task, by default None.
+
+    metadata : dict[str, MetadataItem], optional
+        Metadata associated with the batch task, by default an empty dictionary.
+    due_date : str, optional
+        The due date of the batch task. YYY-MM-DD format, by default None.
+    notes : str, optional
+        Notes associated with the batch task, by default None.
+    priority : TaskPriority, optional
+        The priority of the batch task, by default None.
+    """
+
     category: Literal[TaskCategory.PROPERTY] = TaskCategory.PROPERTY
     blocks: list[Block] | None = Field(alias="Blocks", default=None)
     qc_task: bool | None = Field(alias="qcTask", default=None)
@@ -177,6 +208,68 @@ class PropertyTask(BaseTask):
 
 
 class BatchTask(BaseTask):
+    """
+    Represents a batch task.
+
+    This class is used to create and manage batch tasks. It includes the base task attributes
+    and additional attributes specific to batch tasks.
+
+    Attributes
+    ----------
+    name : str
+        The name of the batch task.
+    inventory_information : list[InventoryInformation]
+        Information about the inventory associated with the batch task.
+    location : SerializeAsEntityLink[Location]
+        The location where the batch task is performed.
+    parent_id : str
+        The ID of the parent project.
+    id : str, optional
+        The ID of the batch task, by default None.
+
+    batch_size_unit : str, optional
+        The unit of measurement for the batch size, by default None.
+    metadata : dict[str, MetadataItem], optional
+        Metadata associated with the batch task, by default an empty dictionary.
+    workflows : list[SerializeAsEntityLink[Workflow]], optional
+        A list of workflows associated with the batch task, by default None.
+    due_date : str, optional
+        The due date of the batch task. YYY-MM-DD format, by default None.
+    notes : str, optional
+        Notes associated with the batch task, by default None.
+    priority : TaskPriority, optional
+        The priority of the batch task, by default None.
+
+    sources : list[TaskSource], optional
+        A list of sources associated with the batch task, by default an empty list.
+    security_class : SecurityClass, optional
+        The security class of the batch task, by default None.
+    pass_fail : bool, optional
+        Whether the batch task is pass/fail, by default None.
+    start_date : str, read only
+        The start date of the batch task, by default None.
+    claimed_date : str, read only
+        The claimed date of the batch task, by default None.
+    completed_date : str, read only
+        The completed date of the batch task, by default None.
+    closed_date : str, read only
+        The closed date of the batch task, by default None.
+    state : TaskState, optional
+        The state of the batch task, by default None.
+    project : SerializeAsEntityLink[Project] | list[SerializeAsEntityLink[Project]], optional
+        The project(s) associated with the batch task, by default None.
+    assigned_to : SerializeAsEntityLink[User], optional
+        The user assigned to the batch task, by default None.
+    qc_task : bool, optional
+        Whether the batch task is a QC task, by default None.
+    batch_task_id : str, optional
+        The ID of the batch task, by default None.
+    target : str, optional
+        The target of the batch task, by default None.
+    qc_task_data : list[QCTaskData], optional
+        A list of QC task data associated with the batch task, by default None.
+    """
+
     category: Literal[TaskCategory.BATCH, TaskCategory.BATCH_WITH_QC] = TaskCategory.BATCH
     batch_size_unit: BatchSizeUnit | None = Field(alias="batchSizeUnit", default=None)
     qc_task: bool | None = Field(alias="qcTask", default=None)
