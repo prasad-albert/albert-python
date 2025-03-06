@@ -198,6 +198,23 @@ class PropertyTask(BaseTask):
         Notes associated with the batch task, by default None.
     priority : TaskPriority, optional
         The priority of the batch task, by default None.
+    assigned_to : SerializeAsEntityLink[User], optional
+        The user assigned to the batch task, by default None.
+
+    state : TaskState, optional
+        The state of the batch task, by default None.
+    sources : list[TaskSource], optional
+        A list of sources associated with the batch task, by default an empty list.
+    security_class : SecurityClass, optional
+        The security class of the batch task, by default None.
+    start_date : str, read only
+        The start date of the batch task, by default None.
+    claimed_date : str, read only
+        The claimed date of the batch task, by default None.
+    completed_date : str, read only
+        The completed date of the batch task, by default None.
+    closed_date : str, read only
+        The closed date of the batch task, by default None.
     """
 
     category: Literal[TaskCategory.PROPERTY] = TaskCategory.PROPERTY
@@ -239,7 +256,13 @@ class BatchTask(BaseTask):
         Notes associated with the batch task, by default None.
     priority : TaskPriority, optional
         The priority of the batch task, by default None.
+    project : SerializeAsEntityLink[Project] | list[SerializeAsEntityLink[Project]], optional
+        The project(s) associated with the batch task, by default None.
+    assigned_to : SerializeAsEntityLink[User], optional
+        The user assigned to the batch task, by default None.
 
+    state : TaskState, optional
+        The state of the batch task, by default None.
     sources : list[TaskSource], optional
         A list of sources associated with the batch task, by default an empty list.
     security_class : SecurityClass, optional
@@ -254,12 +277,6 @@ class BatchTask(BaseTask):
         The completed date of the batch task, by default None.
     closed_date : str, read only
         The closed date of the batch task, by default None.
-    state : TaskState, optional
-        The state of the batch task, by default None.
-    project : SerializeAsEntityLink[Project] | list[SerializeAsEntityLink[Project]], optional
-        The project(s) associated with the batch task, by default None.
-    assigned_to : SerializeAsEntityLink[User], optional
-        The user assigned to the batch task, by default None.
     qc_task : bool, optional
         Whether the batch task is a QC task, by default None.
     batch_task_id : str, optional
