@@ -175,6 +175,38 @@ class InventoryDataColumn(BaseAlbertModel):
 
 
 class TaskPropertyCreate(BaseResource):
+    """
+    Represents a task property to be created.
+
+    This class is used to create new task properties. Users can use the `Workflowe.get_interval_id`
+    method to find the correct interval given the names and setpoints of the parameters.
+
+    Parameters
+    ----------
+    entity : Literal[DataEntity.TASK]
+        The entity type, which is always `DataEntity.TASK` for task properties.
+    interval_combination : str
+        The interval combination, which can be found using `Workflowe.get_interval_id`.
+        Examples include "default", "ROW4XROW2", "ROW2".
+    data_column : TaskDataColumn
+        The data column associated with the task property.
+    value : str, optional
+        The value of the task property, by default None.
+    visible_trial_number : int, optional
+        The visible trial number, by default None. This can always be left empty.
+    trial_number : int, optional
+        The trial number, by default None. Leave this blank to create a new row/trial.
+    data_template : SerializeAsEntityLink[DataTemplate]
+        The data template associated with the task property.
+
+    Notes
+    -----
+    - Users can use `Workflow.get_interval_id(parameter_values={"name1":"value1", "name2":"value2"})`
+      to find the correct interval given the names and setpoints of the parameters.
+    - Leave `trial_number` blank to create a new row/trial.
+    - `visible_trial_number` can always be left empty.
+    """
+
     entity: Literal[DataEntity.TASK] = Field(default=DataEntity.TASK)
     interval_combination: str = Field(
         alias="intervalCombination",

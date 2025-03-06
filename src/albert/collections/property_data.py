@@ -191,7 +191,7 @@ class PropertyDataCollection(BaseCollection):
     def update_property_on_task(
         self, *, task_id: TaskId, patch_payload: list[PropertyDataPatchDatum]
     ):
-        if len(patch_payload) >= 0:
+        if len(patch_payload) > 0:
             self.session.patch(
                 url=f"{self.base_path}/{task_id}",
                 json=[
@@ -211,6 +211,32 @@ class PropertyDataCollection(BaseCollection):
         lot_id: LotId | None = None,
         properties: list[TaskPropertyCreate],
     ):
+        """
+        Add new task properties for a given task.
+
+        This method only works for new values. If a trial number is provided in the TaskPropertyCreate,
+        it must relate to an existing trial. New trials must be added with no trial number provided.
+        Do not try to create multiple new trials in one call as this will lead to unexpected behavior.
+        Build out new trials in a loop if many new trials are needed.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory.
+        task_id : TaskId
+            The ID of the task.
+        block_id : BlockId
+            The ID of the block.
+        lot_id : LotId, optional
+            The ID of the lot, by default None.
+        properties : list[TaskPropertyCreate]
+            A list of TaskPropertyCreate objects representing the properties to add.
+
+        Returns
+        -------
+        list[TaskPropertyData]
+            The newly created task properties.
+        """
         params = {
             "blockId": block_id,
             "inventoryId": inventory_id,
@@ -239,6 +265,125 @@ class PropertyDataCollection(BaseCollection):
         else:
             return self.get_all_task_properties(task_id=task_id)
 
+    @validate_call
+    def update_or_create_task_properties(
+        self,
+        *,
+        inventory_id: InventoryId,
+        task_id: TaskId,
+        block_id: BlockId,
+        lot_id: LotId | None = None,
+        properties: list[TaskPropertyCreate],
+    ) -> list[TaskPropertyData]:
+        """
+        Update or create task properties for a given task.
+
+        If a trial number is provided in the TaskPropertyCreate, it must relate to an existing trial.
+        New trials must be added with no trial number provided. Do not try to create multiple new trials
+        in one call as this will lead to unexpected behavior. Build out new trials in a loop if many new
+        trials are needed.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory.
+        task_id : TaskId
+            The ID of the task.
+        block_id : BlockId
+            The ID of the block.
+        lot_id : LotId, optional
+            The ID of the lot, by default None.
+        properties : list[TaskPropertyCreate]
+            A list of TaskPropertyCreate objects representing the properties to update or create.
+
+        Returns
+        -------
+        list[TaskPropertyData]
+            The updated or newly created task properties.
+
+        """
+        existing_data_rows = self.get_task_block_properties(
+            inventory_id=inventory_id, task_id=task_id, block_id=block_id, lot_id=lot_id
+        )
+        update_patches, new_values = self._form_existing_row_value_patches(
+            existing_data_rows=existing_data_rows, properties=properties
+        )
+
+        calculated_patches = self._form_calculated_task_property_patches(
+            existing_data_rows=existing_data_rows, properties=properties
+        )
+        all_patches = update_patches + calculated_patches
+        if len(new_values) > 0:
+            self.update_property_on_task(task_id=task_id, patch_payload=all_patches)
+            return self.add_properties_to_task(
+                inventory_id=inventory_id,
+                task_id=task_id,
+                block_id=block_id,
+                lot_id=lot_id,
+                properties=new_values,
+            )
+        else:
+            return self.update_property_on_task(task_id=task_id, patch_payload=all_patches)
+
+    ################### Methods to support Updated Row Value patches #################
+
+    def _form_existing_row_value_patches(
+        self, *, existing_data_rows: TaskPropertyData, properties: list[TaskPropertyCreate]
+    ):
+        patches = []
+        new_properties = []
+
+        for prop in properties:
+            if prop.trial_number is None:
+                new_properties.append(prop)
+                continue
+
+            prop_patches = self._process_property(prop, existing_data_rows)
+            if prop_patches:
+                patches.extend(prop_patches)
+            else:
+                new_properties.append(prop)
+        return patches, new_properties
+
+    def _process_property(
+        self, prop: TaskPropertyCreate, existing_data_rows: TaskPropertyData
+    ) -> list | None:
+        for interval in existing_data_rows.data:
+            if interval.interval_combination != prop.interval_combination:
+                continue
+
+            for trial in interval.trials:
+                if trial.trial_number != prop.trial_number:
+                    continue
+
+                trial_patches = self._process_trial(trial, prop)
+                if trial_patches:
+                    return trial_patches
+
+        return None
+
+    def _process_trial(self, trial: Trial, prop: TaskPropertyCreate) -> list | None:
+        for data_column in trial.data_columns:
+            if (
+                data_column.data_column_unique_id
+                == f"{prop.data_column.data_column_id}#{prop.data_column.column_sequence}"
+                and data_column.property_data is not None
+            ):
+                if data_column.property_data.value == prop.value:
+                    # No need to update this value
+                    return None
+                return [
+                    PropertyDataPatchDatum(
+                        id=data_column.property_data.id,
+                        operation=PatchOperation.UPDATE,
+                        attribute="value",
+                        new_value=prop.value,
+                        old_value=data_column.property_data.value,
+                    )
+                ]
+
+        return None
+
     ################### Methods to support calculated value patches ##################
 
     def _form_calculated_task_property_patches(
@@ -262,9 +407,9 @@ class PropertyDataCollection(BaseCollection):
                 trial_number=posted_prop.trial_number,
                 interval_combination=posted_prop.interval_combination,
             )
-
-            these_patches = self._generate_data_patch_payload(trial=on_platform_row)
-            patches.extend(these_patches)
+            if on_platform_row is not None:
+                these_patches = self._generate_data_patch_payload(trial=on_platform_row)
+                patches.extend(these_patches)
             covered_interval_trials.add(this_interval_trial)
         return patches
 
@@ -300,6 +445,9 @@ class PropertyDataCollection(BaseCollection):
             # Replace column names with their numeric values in the calculation string
             for col, value in column_values.items():
                 calculation = calculation.replace(col, str(value))
+                calculation = calculation.replace(
+                    "^", "**"
+                )  # Replace '^' with '**' for exponentiation
             # Evaluate the resulting expression
             return eval(calculation)
         except Exception as e:
@@ -334,8 +482,8 @@ class PropertyDataCollection(BaseCollection):
                                 old_value=None,
                             )
                         )
-                    elif (
-                        column.property_data.value != recalculated_value
+                    elif str(column.property_data.value) != str(
+                        recalculated_value
                     ):  # Existing value differs
                         patch_data.append(
                             PropertyDataPatchDatum(
