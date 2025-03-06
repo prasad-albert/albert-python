@@ -92,7 +92,9 @@ class TaskCollection(BaseCollection):
         """
         url = f"{self.base_path}/{task_id}"
         task = self.get_by_id(id=task_id)
-        assert isinstance(task, PropertyTask)
+        if not isinstance(task, PropertyTask):
+            logger.error(f"Task {task_id} is not an instance of PropertyTask")
+            return None
         for b in task.blocks:
             if b.id != block_id:
                 continue
