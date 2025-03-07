@@ -1,10 +1,17 @@
 from collections.abc import Iterator
 
+from pydantic import validate_call
 from requests.exceptions import RetryError
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.exceptions import AlbertHTTPError
-from albert.resources.tasks import BaseTask, TaskAdapter, TaskCategory
+from albert.resources.identifiers import (
+    BlockId,
+    DataTemplateId,
+    TaskId,
+    WorkflowId,
+)
+from albert.resources.tasks import BaseTask, PropertyTask, TaskAdapter, TaskCategory
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
@@ -35,9 +42,10 @@ class TaskCollection(BaseCollection):
         task_data = response.json()[0]
         return TaskAdapter.validate_python(task_data)
 
-    def add_block(self, *, task_id: str, data_template_id: str, workflow_id: str) -> None:
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
+    @validate_call
+    def add_block(
+        self, *, task_id: TaskId, data_template_id: DataTemplateId, workflow_id: WorkflowId
+    ) -> None:
         url = f"{self.base_path}/{task_id}"
         payload = [
             {
@@ -54,7 +62,69 @@ class TaskCollection(BaseCollection):
         self.session.patch(url=url, json=payload)
         return None
 
-    def remove_block(self, *, task_id: str, block_id: str) -> None:
+    @validate_call
+    def update_block_workflow(
+        self, *, task_id: TaskId, block_id: BlockId, workflow_id: WorkflowId
+    ) -> None:
+        """
+        Update the workflow of a specific block within a task.
+
+        This method updates the workflow of a specified block within a task.
+        Parameters
+        ----------
+        task_id : str
+            The ID of the task.
+        block_id : str
+            The ID of the block within the task.
+        workflow_id : str
+            The ID of the new workflow to be assigned to the block.
+
+        Returns
+        -------
+        None
+            This method does not return any value.
+
+        Notes
+        -----
+        - The method asserts that the retrieved task is an instance of `PropertyTask`.
+        - If the block's current workflow matches the new workflow ID, no update is performed.
+        - The method handles the case where the block has a default workflow named "No Parameter Group".
+        """
+        url = f"{self.base_path}/{task_id}"
+        task = self.get_by_id(id=task_id)
+        if not isinstance(task, PropertyTask):
+            logger.error(f"Task {task_id} is not an instance of PropertyTask")
+            raise TypeError(f"Task {task_id} is not an instance of PropertyTask")
+        for b in task.blocks:
+            if b.id != block_id:
+                continue
+            for w in b.workflow:
+                if w.name == "No Parameter Group" and len(b.workflow) > 1:
+                    # hardcoded default workflow
+                    continue
+                existing_workflow_id = w.id
+        if existing_workflow_id == workflow_id:
+            logger.info(f"Block {block_id} already has workflow {workflow_id}")
+            return None
+        patch = [
+            {
+                "data": [
+                    {
+                        "operation": "update",
+                        "attribute": "workflow",
+                        "oldValue": existing_workflow_id,
+                        "newValue": workflow_id,
+                        "blockId": block_id,
+                    }
+                ],
+                "id": task_id,
+            }
+        ]
+        self.session.patch(url=url, json=patch)
+        return None
+
+    @validate_call
+    def remove_block(self, *, task_id: TaskId, block_id: BlockId) -> None:
         """_summary_
 
         Parameters
@@ -68,8 +138,6 @@ class TaskCollection(BaseCollection):
         -------
         None
         """
-        if not task_id.startswith("TAS"):
-            task_id = f"TAS{task_id}"
         url = f"{self.base_path}/{task_id}"
         payload = [
             {
@@ -86,16 +154,13 @@ class TaskCollection(BaseCollection):
         self.session.patch(url=url, json=payload)
         return None
 
-    def delete(self, *, id: str) -> None:
+    @validate_call
+    def delete(self, *, id: TaskId) -> None:
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
-    def get_by_id(self, *, id: str) -> BaseTask:
-        # each type of task has it's own sub-prefix.
-        # Sometimes the core "TAS" prefix is dropped on the object.
-        # This ensures both the TAS and sub prefix are present on the ID
-        if not id.startswith("TAS"):
-            id = f"TAS{id}"
+    @validate_call
+    def get_by_id(self, *, id: TaskId) -> BaseTask:
         url = f"{self.base_path}/multi/{id}"
         response = self.session.get(url)
         return TaskAdapter.validate_python(response.json())
