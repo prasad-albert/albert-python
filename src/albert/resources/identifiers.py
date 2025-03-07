@@ -150,13 +150,6 @@ PropertyDataId = Annotated[str, AfterValidator(ensure_propertydata_id)]
 
 
 def ensure_task_id(id: str) -> str:
-    """Each type of Task has its own prefix, and sometimes the TAS prefix is missing."""
-    if id and (
-        id.upper().startswith("FOR")
-        or id.upper().startswith("LAB")
-        or id.upper().startswith("GEN")
-    ):
-        id = f"TAS{id}"
     return _ensure_albert_id(id, "TaskId")
 
 
