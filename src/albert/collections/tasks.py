@@ -94,7 +94,7 @@ class TaskCollection(BaseCollection):
         task = self.get_by_id(id=task_id)
         if not isinstance(task, PropertyTask):
             logger.error(f"Task {task_id} is not an instance of PropertyTask")
-            return None
+            raise TypeError(f"Task {task_id} is not an instance of PropertyTask")
         for b in task.blocks:
             if b.id != block_id:
                 continue
