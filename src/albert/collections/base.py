@@ -40,7 +40,7 @@ class BaseCollection:
         for key, value in existing_metadata.items():
             attribute = f"Metadata.{key}"
             if key not in updated_metadata:
-                if isinstance(value, str):
+                if isinstance(value, str | int | float):
                     data.append(
                         PatchDatum(
                             attribute=attribute,
@@ -66,7 +66,7 @@ class BaseCollection:
                         )
                     )
             elif value != updated_metadata[key]:
-                if isinstance(updated_metadata[key], str):
+                if isinstance(updated_metadata[key], str | int | float):
                     data.append(
                         PatchDatum(
                             attribute=attribute,
@@ -109,7 +109,7 @@ class BaseCollection:
         for key, value in updated_metadata.items():
             attribute = f"Metadata.{key}"
             if key not in existing_metadata:
-                if isinstance(value, str):
+                if isinstance(value, str | int | float):
                     data.append(
                         PatchDatum(
                             attribute=attribute,
