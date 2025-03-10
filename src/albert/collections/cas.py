@@ -37,13 +37,13 @@ class CasCollection(BaseCollection):
 
         Parameters
         ----------
-        limit : int, optional
+        limit : int | None, optional
             The maximum number of CAS entities to return, by default 50.
-        start_key : Optional[str], optional
+        start_key : str | None, optional
             The primary key of the first item that this operation will evaluate.
-        number : Optional[str], optional
+        number : str | None, optional
             Fetches list of CAS by CAS number.
-        id : Optional[str], optional
+        id : str | None, optional
             Fetches list of CAS using the CAS Albert ID.
         order_by : OrderBy, optional
             The order by which to sort the results, by default OrderBy.DESCENDING.

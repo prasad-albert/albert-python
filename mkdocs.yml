@@ -9,20 +9,36 @@ plugins:
       handlers:
         python:
           options:
+            docstring_style: numpy
+            extensions:
+              - griffe_pydantic:
+                  schema: true
+            annotations_path: brief
             show_submodules: true
-          selection:
-            docstring_style: numpy  # Explicitly set Numpy docstrings
-            members: true
-            inherited_members: true
-            filters: 
-              - "!^_"
-              - "!^__"
+            members_order: source
+            filters: ["!^_"]
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            signature_crossrefs: true
+          import:
+            - url: https://docs.python.org/3/objects.inv
+              domains: [py, std]
           rendering:
-            show_root_heading: true  # Show class/function names
+            show_source: false
+            show_root_heading: true
+            heading_level: 2
+            show_bases: false  # Hides inherited classes at the top
+            group_by_category: true  # Prevents automatic category grouping
+            show_docstring_attributes: true
+            show_if_no_docstring: true
+            separate_signature: true
+            show_field_details: true
+            allow_inspection: true
 
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
-  - Full SDK Reference: references.md
-  - Collections: collections.md
-  - Resources: resources.md
+  - SDK Reference:
+    - Attachments: attachments.md
+    - Cas: cas.md
