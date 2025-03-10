@@ -107,7 +107,7 @@ jobs:
             else
               echo "Skipping version bump check for non-production base branch '${BASE_BRANCH}'"
             fi
-
+  
 workflows:
   main:
     jobs:

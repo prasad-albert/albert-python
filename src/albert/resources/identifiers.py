@@ -46,7 +46,6 @@ def _ensure_albert_id(id: str, id_type: str) -> str:
 
     Args:
         id: The ID to validate and format
-        prefix: The expected prefix (e.g. 'INV', 'PRO')
         id_type: The type name for more helpful error messages
     """
     if not id:

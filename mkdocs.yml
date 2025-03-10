@@ -1,0 +1,28 @@
+site_name: "Albert Python SDK Docs"
+theme:
+  name: "material"
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_submodules: true
+          selection:
+            docstring_style: numpy  # Explicitly set Numpy docstrings
+            members: true
+            inherited_members: true
+            filters: 
+              - "!^_"
+              - "!^__"
+          rendering:
+            show_root_heading: true  # Show class/function names
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Full SDK Reference: references.md
+  - Collections: collections.md
+  - Resources: resources.md
