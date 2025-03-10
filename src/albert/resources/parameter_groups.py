@@ -43,7 +43,7 @@ class PGMetadata(BaseResource):
     standards: list[BaseEntityLink] = Field(alias="Standards")
 
 
-class Validation(BaseAlbertModel):
+class ValueValidation(BaseAlbertModel):
     # We may want to abstract this out if we end up reusing on Data Templates
     datatype: DataType = Field(...)
     value: str | None = Field(default=None)
@@ -82,7 +82,7 @@ class ParameterValue(BaseAlbertModel):
     value: str | SerializeAsEntityLink[InventoryItem] | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
     added: AuditFields | None = Field(alias="Added", default=None, exclude=True)
-    validation: list[Validation] | None = Field(default=None)
+    validation: list[ValueValidation] | None = Field(default=None)
 
     # Read-only fields
     name: str | None = Field(default=None, exclude=True, frozen=True)
