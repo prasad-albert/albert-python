@@ -21,10 +21,35 @@ class PGType(str, Enum):
     PROPERTY = "property"
 
 
+class DataType(str, Enum):
+    NUMBER = "number"
+    STRING = "string"
+    ENUM = "enum"
+
+
+class Operator(str, Enum):
+    # We may want to abstract this out if we end up reusing on Data Templates
+    BETWEEN = "between"
+    LESS_THAN = "lt"
+    LESS_THAN_OR_EQUAL = "lte"
+    GREATER_THAN_OR_EQUAL = "gte"
+    GREATER_THAN = "gt"
+    EQUALS = "eq"
+
+
 class PGMetadata(BaseResource):
     """The metadata of a parameter group"""
 
     standards: list[BaseEntityLink] = Field(alias="Standards")
+
+
+class ValueValidation(BaseAlbertModel):
+    # We may want to abstract this out if we end up reusing on Data Templates
+    datatype: DataType = Field(...)
+    value: str | None = Field(default=None)
+    min: str | None = Field(default=None)
+    max: str | None = Field(default=None)
+    operator: Operator | None = Field(default=None)
 
 
 class ParameterValue(BaseAlbertModel):
@@ -41,7 +66,7 @@ class ParameterValue(BaseAlbertModel):
     short_name : str | None
         The short name of the parameter value.
     value : str | None
-        The value of the parameter. Can be a string or an InventoryItem (if, for example, the parameter is an instrumnt choice).
+        The default value of the parameter. Can be a string or an InventoryItem (if, for example, the parameter is an instrumnt choice).
     unit : Unit | None
         The unit of measure for the provided parameter value.
     name : str
@@ -56,7 +81,8 @@ class ParameterValue(BaseAlbertModel):
     short_name: str | None = Field(alias="shortName", default=None)
     value: str | SerializeAsEntityLink[InventoryItem] | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
-    added: AuditFields | None = Field(alias="Added", default=None)
+    added: AuditFields | None = Field(alias="Added", default=None, exclude=True)
+    validation: list[ValueValidation] | None = Field(default=None)
 
     # Read-only fields
     name: str | None = Field(default=None, exclude=True, frozen=True)
