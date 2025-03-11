@@ -171,6 +171,6 @@ workflows:
             - Setup
           filters:
             branches:
-              only: ["main", "feature/autodocs"]
+              only: ["main"]
 
               
