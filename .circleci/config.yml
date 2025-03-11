@@ -87,8 +87,6 @@ jobs:
       name: python/default
       tag: "3.10.15"
     steps:
-      - attach_workspace:
-          at: /home/circleci
       - run:
           name: Install dependencies
           command: uv sync
@@ -167,8 +165,8 @@ workflows:
       - deploy_docs:
           name: Deploy Docs
           context: ds-dev
-          # requires:
-          #   - Publish
+          requires:
+            - Setup
           filters:
             branches:
               only: ["main", "feature/autodocs"]
