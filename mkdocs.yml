@@ -15,9 +15,9 @@ plugins:
               - griffe_pydantic:
                   schema: true
             annotations_path: brief
-            show_submodules: false
-            members_order: source
-            filters: ["!^_"]
+            # members_order: source #this does it in order of the file, ABC by default
+            filters: 
+              - "!^_"
             docstring_options:
               ignore_init_summary: true
             merge_init_into_class: true
@@ -25,6 +25,10 @@ plugins:
             show_signature_annotations: true
             signature_crossrefs: true
             show_if_no_docstring: true
+            summary:
+              attributes: false
+              functions: true
+              modules: false #I'm not sure what this one does, honestly
           import:
             - url: https://docs.python.org/3/objects.inv
               domains: [py, std]
