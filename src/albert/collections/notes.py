@@ -18,8 +18,6 @@ class NotesCollection(BaseCollection):
 
         Parameters
         ----------
-        parent_id : str
-            The parent ID of the note.
         note : str
             The note content.
 

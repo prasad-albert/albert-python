@@ -29,9 +29,13 @@ class AlbertSession(requests.Session):
     Parameters
     ----------
     base_url : str
-        The base URL to prefix to all requests.
+        The base URL to prefix to all requests. (e.g., "https://sandbox.albertinvent.com")
     retries : int
         The number of retries for failed requests. Defaults to 3.
+    client_credentials : ClientCredentials | None
+        The client credentials for programmatic authentication. Optional if token is provided.
+    token : str | None
+        The JWT token for authentication. Optional if client credentials are provided.
     """
 
     def __init__(

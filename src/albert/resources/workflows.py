@@ -51,8 +51,7 @@ class Interval(BaseAlbertModel):
 
 
 class IntervalCombination(BaseAlbertModel):
-    """
-    A class representing the interval combinations of on a workflow.
+    """A class representing the interval combinations of on a workflow.
     This is returned by the workflow endpoint when at least one parameter
     in the workflow has been intervalized.
 

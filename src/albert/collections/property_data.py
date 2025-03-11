@@ -549,7 +549,7 @@ class PropertyDataCollection(BaseCollection):
             Filter by project IDs.
         lot_ids : LotIdType or list of LotIdType, optional
             Filter by lot IDs.
-        date_template_ids : DataTemplateId or list of DataTemplateId, optional
+        data_template_ids : DataTemplateId or list of DataTemplateId, optional
             Filter by data template IDs.
         data_column_ids: DataColumnId or list of DataColumnId, optional
             Filter by data column IDs.
