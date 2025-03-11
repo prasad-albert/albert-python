@@ -168,7 +168,7 @@ workflows:
           name: Deploy Docs
           context: ds-dev
           requires:
-            - publish
+            - Publish
           filters:
             branches:
               only: ["main"]
