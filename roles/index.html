@@ -898,6 +898,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#albert.collections.roles.AlbertSession" class="md-nav__link">
+    <span class="md-ellipsis">
+      AlbertSession
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AlbertSession">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#albert.collections.roles.AlbertSession.base_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      base_url
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#albert.collections.roles.AlbertSession.request" class="md-nav__link">
+    <span class="md-ellipsis">
+      request
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#albert.collections.roles.BaseCollection" class="md-nav__link">
     <span class="md-ellipsis">
       BaseCollection
@@ -962,39 +995,6 @@
   <a href="#albert.collections.roles.Role.tenant" class="md-nav__link">
     <span class="md-ellipsis">
       tenant
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#albert.collections.roles.AlbertSession" class="md-nav__link">
-    <span class="md-ellipsis">
-      AlbertSession
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="AlbertSession">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#albert.collections.roles.AlbertSession.base_url" class="md-nav__link">
-    <span class="md-ellipsis">
-      base_url
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#albert.collections.roles.AlbertSession.request" class="md-nav__link">
-    <span class="md-ellipsis">
-      request
     </span>
   </a>
   
@@ -1352,6 +1352,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#albert.collections.roles.AlbertSession" class="md-nav__link">
+    <span class="md-ellipsis">
+      AlbertSession
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AlbertSession">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#albert.collections.roles.AlbertSession.base_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      base_url
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#albert.collections.roles.AlbertSession.request" class="md-nav__link">
+    <span class="md-ellipsis">
+      request
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#albert.collections.roles.BaseCollection" class="md-nav__link">
     <span class="md-ellipsis">
       BaseCollection
@@ -1416,39 +1449,6 @@
   <a href="#albert.collections.roles.Role.tenant" class="md-nav__link">
     <span class="md-ellipsis">
       tenant
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#albert.collections.roles.AlbertSession" class="md-nav__link">
-    <span class="md-ellipsis">
-      AlbertSession
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="AlbertSession">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#albert.collections.roles.AlbertSession.base_url" class="md-nav__link">
-    <span class="md-ellipsis">
-      base_url
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#albert.collections.roles.AlbertSession.request" class="md-nav__link">
-    <span class="md-ellipsis">
-      request
     </span>
   </a>
   
@@ -1525,6 +1525,7 @@
 
 
 
+
   <div class="doc doc-children">
 
 
@@ -1533,6 +1534,263 @@
 
 
 
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="albert.collections.roles.AlbertSession" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">AlbertSession</span>
+
+
+</h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">AlbertSession</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">base_url</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span><span class="p">,</span>
+    <span class="n">token</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">client_credentials</span><span class="p">:</span> <span class="n"><span title="albert.utils.client_credentials.ClientCredentials">ClientCredentials</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">retries</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="requests.Session">Session</span></code></p>
+
+
+        <p>A session that has a base URL, which is prefixed to all request URLs.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>base_url</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The base URL to prefix to all requests.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>retries</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of retries for failed requests. Defaults to 3.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="request (albert.collections.roles.AlbertSession.request)" href="#albert.collections.roles.AlbertSession.request">request</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
+
+
+                  <details class="quote">
+                    <summary>Source code in <code>src/albert/session.py</code></summary>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">client_credentials</span><span class="p">:</span> <span class="n">ClientCredentials</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="n">base_url</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;albert-SDK V.</span><span class="si">{</span><span class="n">albert</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_client_credentials</span> <span class="o">=</span> <span class="n">client_credentials</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_access_token</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_access_token_refresh_time</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client_credentials</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_token</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_access_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either client credentials or token must be specified.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Set up retry logic</span>
+    <span class="n">retry</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span>
+        <span class="n">total</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
+        <span class="n">read</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
+        <span class="n">connect</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
+        <span class="n">backoff_factor</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">status_forcelist</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">502</span><span class="p">,</span> <span class="mi">503</span><span class="p">,</span> <span class="mi">504</span><span class="p">,</span> <span class="mi">403</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">adapter</span> <span class="o">=</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="n">retry</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+                  </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="albert.collections.roles.AlbertSession.base_url" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">base_url</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">base_url</span> <span class="o">=</span> <span class="n"><span title="albert.session.AlbertSession(base_url)">base_url</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="albert.collections.roles.AlbertSession.request" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">request</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">request</span><span class="p">(</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="requests.Response">Response</span></span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/albert/session.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_requires_refresh</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client_credentials</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_token</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-class">
 
@@ -1581,6 +1839,7 @@
           </tr>
       </tbody>
     </table>
+
 
 
 
@@ -1745,6 +2004,7 @@
 
 
 
+
   <div class="doc doc-children">
 
 
@@ -1857,241 +2117,6 @@
 
 
 
-<h2 id="albert.collections.roles.AlbertSession" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">AlbertSession</span>
-
-
-</h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">AlbertSession</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">base_url</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span><span class="p">,</span>
-    <span class="n">token</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client_credentials</span><span class="p">:</span> <span class="n"><span title="albert.utils.client_credentials.ClientCredentials">ClientCredentials</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">retries</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-            <p class="doc doc-class-bases">
-              Bases: <code><span title="requests.Session">Session</span></code></p>
-
-
-        <p>A session that has a base URL, which is prefixed to all request URLs.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>base_url</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The base URL to prefix to all requests.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>retries</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The number of retries for failed requests. Defaults to 3.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-
-
-
-
-
-                  <details class="quote">
-                    <summary>Source code in <code>src/albert/session.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">client_credentials</span><span class="p">:</span> <span class="n">ClientCredentials</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="n">base_url</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;albert-SDK V.</span><span class="si">{</span><span class="n">albert</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_client_credentials</span> <span class="o">=</span> <span class="n">client_credentials</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_access_token</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_access_token_refresh_time</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client_credentials</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_token</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_access_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either client credentials or token must be specified.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Set up retry logic</span>
-    <span class="n">retry</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span>
-        <span class="n">total</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
-        <span class="n">read</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
-        <span class="n">connect</span><span class="o">=</span><span class="n">retries</span><span class="p">,</span>
-        <span class="n">backoff_factor</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
-        <span class="n">status_forcelist</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">502</span><span class="p">,</span> <span class="mi">503</span><span class="p">,</span> <span class="mi">504</span><span class="p">,</span> <span class="mi">403</span><span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">adapter</span> <span class="o">=</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="n">retry</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;https://&quot;</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-                  </details>
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="albert.collections.roles.AlbertSession.base_url" class="doc doc-heading">
-            <span class="doc doc-object-name doc-attribute-name">base_url</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
-  </span>
-
-</h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">base_url</span> <span class="o">=</span> <span class="n"><span title="albert.session.AlbertSession(base_url)">base_url</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-    </div>
-
-</div>
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="albert.collections.roles.AlbertSession.request" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">request</span>
-
-
-</h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">request</span><span class="p">(</span>
-    <span class="n">method</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="requests.Response">Response</span></span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-
-            <details class="quote">
-              <summary>Source code in <code>src/albert/session.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">:</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_requires_refresh</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client_credentials</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_refresh_token</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
 <h2 id="albert.collections.roles.RoleCollection" class="doc doc-heading">
             <span class="doc doc-object-name doc-class-name">RoleCollection</span>
 
@@ -2141,6 +2166,28 @@
 
 
 
+
+
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="list (albert.collections.roles.RoleCollection.list)" href="#albert.collections.roles.RoleCollection.list">list</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Lists the available Roles</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
 
 
                   <details class="quote">
