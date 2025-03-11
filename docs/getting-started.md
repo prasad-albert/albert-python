@@ -1,3 +1,4 @@
+# Getting Started
 
 ## Overview
 The SDK is built around two main concepts:

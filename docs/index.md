@@ -1,17 +1,25 @@
-# Welcome to MkDocs
+# Albert Python SDK
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+The Albert Python SDK provides a comprehensive and easy-to-use interface for interacting with the Albert API. The SDK is designed to simplify the process of working with various resources such as inventories, projects, companies, and tags by providing Resource Collections and Resource Models.
 
-## Commands
+> [!WARNING]
+> The Albert SDK is still in the early phases of development. As such, patterns may change, and methods may not work as expected. Do not use this package unless you are comfortable with these limitations.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+## Installation
 
-## Project layout
+TODO: Add installation instructions from PyPI once published
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+For developers, please see the CONTRIBUTING.MD for local installation instructions.
+
+## Overview
+The SDK is built around two main concepts:
+
+1. *Resource Models*: Represent individual entities like InventoryItem, Project, Company, and Tag. These are all controlled using Pydantic.
+
+2. *Resource Collections*: Provide methods to interact with the API endpoints related to a specific resource, such as listing, creating, updating, and deleting resources.
+
+### Resource Models
+Resource Models represent the data structure of individual resources. They encapsulate the attributes and behaviors of a single resource. For example, an `InventoryItem` has attributes like `name`, `description`, `category`, and `tags`.
+
+### Resource Collections
+Resource Collections act as managers for Resource Models. They provide methods for performing CRUD operations (Create, Read, Update, Delete) on the resources. For example, the `InventoryCollection` class has methods like create, `get_by_id()`, `list()`, `update()`, and `delete()`. `list()` methods generally accept parameters to narrow the query to use it like a search.
