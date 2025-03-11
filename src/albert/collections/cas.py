@@ -8,6 +8,8 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class CasCollection(BaseCollection):
+    "CasCollection is a collection class for managing Cas entities on the Albert Platform."
+
     _updatable_attributes = {"notes", "description", "smiles"}
     _api_version = "v3"
 
@@ -192,6 +194,18 @@ class CasCollection(BaseCollection):
         self.session.delete(url)
 
     def update(self, *, updated_object: Cas) -> Cas:
+        """Updates a CAS entity. The updated object must have the same ID as the object you want to update.
+
+        Parameters
+        ----------
+        updated_object : Cas
+            The Updated Cas object.
+
+        Returns
+        -------
+        Cas
+            The updated Cas object as it appears in Albert
+        """
         # Fetch the current object state from the server or database
         existing_cas = self.get_by_id(id=updated_object.id)
 

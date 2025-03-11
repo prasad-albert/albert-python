@@ -12,7 +12,7 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 class TagCollection(BaseCollection):
     """
-    TagCollection is a collection class for managing tag entities.
+    TagCollection is a collection class for managing Tag entities in the Albert platform.
 
     Parameters
     ----------

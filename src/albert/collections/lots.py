@@ -8,10 +8,19 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class LotCollection(BaseCollection):
+    """LotCollection is a collection class for managing Lot entities in the Albert platform."""
+
     _api_version = "v3"
     _updatable_attributes = {"metadata"}
 
     def __init__(self, *, session: AlbertSession):
+        """A collection for interacting with Lots in Albert.
+
+        Parameters
+        ----------
+        session : AlbertSession
+            An Albert session instance.
+        """
         super().__init__(session=session)
         self.base_path = f"/api/{LotCollection._api_version}/lots"
 
@@ -27,16 +36,47 @@ class LotCollection(BaseCollection):
         return all_lots
 
     def get_by_id(self, *, id: str) -> Lot:
+        """Get a lot by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the lot to get.
+
+        Returns
+        -------
+        Lot
+            The lot with the provided ID.
+        """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return Lot(**response.json())
 
     def get_by_ids(self, *, ids: list[str]) -> list[Lot]:
+        """Get a list of lots by their IDs.
+
+        Parameters
+        ----------
+        ids : list[str]
+            A list of lot IDs to get.
+
+        Returns
+        -------
+        list[Lot]
+            A list of lots with the provided IDs.
+        """
         url = f"{self.base_path}/ids"
         response = self.session.get(url, params={"id": ids})
         return [Lot(**lot) for lot in response.json()["Items"]]
 
     def delete(self, *, id: str) -> None:
+        """Delete a lot by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the lot to delete.
+        """
         url = f"{self.base_path}?id={id}"
         self.session.delete(url)
 
@@ -80,7 +120,7 @@ class LotCollection(BaseCollection):
         begins_with : bool, optional
             Determines if barcodeId begins with a certain value, by default False.
 
-        Returns
+        Yields
         -------
         Iterator[Lot]
             An iterator of Lot objects.

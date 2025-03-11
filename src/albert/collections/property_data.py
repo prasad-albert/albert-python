@@ -38,6 +38,8 @@ from albert.utils.patches import PatchOperation
 
 
 class PropertyDataCollection(BaseCollection):
+    """PropertyDataCollection is a collection class for managing Property Data entities in the Albert platform."""
+
     _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
@@ -58,7 +60,18 @@ class PropertyDataCollection(BaseCollection):
 
     @validate_call
     def get_properties_on_inventory(self, *, inventory_id: InventoryId) -> InventoryPropertyData:
-        """Returns all the properties of an inventory item."""
+        """Returns all the properties of an inventory item.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory item to retrieve properties for.
+
+        Returns
+        -------
+        InventoryPropertyData
+            The properties of the inventory item.
+        """
         params = {"entity": "inventory", "id": [inventory_id]}
         response = self.session.get(url=self.base_path, params=params)
         response_json = response.json()
@@ -68,6 +81,20 @@ class PropertyDataCollection(BaseCollection):
     def add_properties_to_inventory(
         self, *, inventory_id: InventoryId, properties: list[InventoryDataColumn]
     ) -> list[InventoryPropertyDataCreate]:
+        """Add new properties to an inventory item.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory item to add properties to.
+        properties : list[InventoryDataColumn]
+            The properties to add.
+
+        Returns
+        -------
+        list[InventoryPropertyDataCreate]
+            The registered properties.
+        """
         returned = []
         for p in properties:
             # Can only add one at a time.
@@ -87,6 +114,20 @@ class PropertyDataCollection(BaseCollection):
     def update_property_on_inventory(
         self, *, inventory_id: InventoryId, property_data: InventoryDataColumn
     ) -> InventoryPropertyData:
+        """Update a property on an inventory item.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory item to update the property on.
+        property_data : InventoryDataColumn
+            The updated property data.
+
+        Returns
+        -------
+        InventoryPropertyData
+            The updated property data as returned by the server.
+        """
         existing_properties = self.get_properties_on_inventory(inventory_id=inventory_id)
         existing_value = None
         for p in existing_properties.custom_property_data:
@@ -129,6 +170,24 @@ class PropertyDataCollection(BaseCollection):
         block_id: BlockId,
         lot_id: LotId | None = None,
     ) -> TaskPropertyData:
+        """Returns all the properties within a Property Task block for a specific inventory item.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory.
+        task_id : TaskId
+            The Property task ID.
+        block_id : BlockId
+            The Block ID of the block to retrieve properties for.
+        lot_id : LotId | None, optional
+            The specific Lot of the inventory Item to retrieve lots for, by default None
+
+        Returns
+        -------
+        TaskPropertyData
+            The properties of the inventory item within the block.
+        """
         params = {
             "entity": "task",
             "blockId": block_id,
@@ -144,6 +203,18 @@ class PropertyDataCollection(BaseCollection):
 
     @validate_call
     def check_for_task_data(self, *, task_id: TaskId) -> list[CheckPropertyData]:
+        """Checks if a task has data.
+
+        Parameters
+        ----------
+        task_id : TaskId
+            The ID of the task to check for data.
+
+        Returns
+        -------
+        list[CheckPropertyData]
+            A list of CheckPropertyData objects representing the data status of each block + inventory item of the task.
+        """
         task_info = self._get_task_from_id(id=task_id)
 
         params = {
@@ -160,6 +231,22 @@ class PropertyDataCollection(BaseCollection):
     def check_block_interval_for_data(
         self, *, block_id: BlockId, task_id: TaskId, interval_id: IntervalId
     ) -> CheckPropertyData:
+        """Check if a specific block interval has data.
+
+        Parameters
+        ----------
+        block_id : BlockId
+            The ID of the block.
+        task_id : TaskId
+            The ID of the task.
+        interval_id : IntervalId
+            The ID of the interval.
+
+        Returns
+        -------
+        CheckPropertyData
+            _description_
+        """
         params = {
             "entity": "block",
             "action": "checkdata",
@@ -173,6 +260,18 @@ class PropertyDataCollection(BaseCollection):
 
     @validate_call
     def get_all_task_properties(self, *, task_id: TaskId) -> list[TaskPropertyData]:
+        """Returns all the properties for a specific task.
+
+        Parameters
+        ----------
+        task_id : TaskId
+            The ID of the task to retrieve properties for.
+
+        Returns
+        -------
+        list[TaskPropertyData]
+            A list of TaskPropertyData objects representing the properties within the task.
+        """
         all_info = []
         task_data_info = self.check_for_task_data(task_id=task_id)
         for combo_info in task_data_info:
@@ -190,7 +289,21 @@ class PropertyDataCollection(BaseCollection):
     @validate_call
     def update_property_on_task(
         self, *, task_id: TaskId, patch_payload: list[PropertyDataPatchDatum]
-    ):
+    ) -> list[TaskPropertyData]:
+        """Updates a specific property on a task.
+
+        Parameters
+        ----------
+        task_id : TaskId
+            The ID of the task.
+        patch_payload : list[PropertyDataPatchDatum]
+            The specific patch to make to update the property.
+
+        Returns
+        -------
+        list[TaskPropertyData]
+            A list of TaskPropertyData objects representing the properties within the task.
+        """
         if len(patch_payload) > 0:
             self.session.patch(
                 url=f"{self.base_path}/{task_id}",

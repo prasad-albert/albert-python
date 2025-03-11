@@ -18,6 +18,8 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class TaskCollection(BaseCollection):
+    """TaskCollection is a collection class for managing Task entities in the Albert platform."""
+
     _api_version = "v3"
     _updatable_attributes = {
         "metadata",
@@ -30,10 +32,29 @@ class TaskCollection(BaseCollection):
     }
 
     def __init__(self, *, session: AlbertSession):
+        """Initialize the TaskCollection.
+
+        Parameters
+        ----------
+        session : AlbertSession
+            The Albert Session information
+        """
         super().__init__(session=session)
         self.base_path = f"/api/{TaskCollection._api_version}/tasks"
 
     def create(self, *, task: BaseTask) -> BaseTask:
+        """Create a new task. Tasks can be of different types, such as PropertyTask, and are created using the provided task object.
+
+        Parameters
+        ----------
+        task : BaseTask
+            The task object to create.
+
+        Returns
+        -------
+        BaseTask
+            The registered task object.
+        """
         payload = [task.model_dump(mode="json", by_alias=True, exclude_none=True)]
         url = f"{self.base_path}/multi?category={task.category.value}"
         if task.parent_id is not None:
@@ -46,6 +67,23 @@ class TaskCollection(BaseCollection):
     def add_block(
         self, *, task_id: TaskId, data_template_id: DataTemplateId, workflow_id: WorkflowId
     ) -> None:
+        """Add a block to a Property task.
+
+        Parameters
+        ----------
+        task_id : TaskId
+            The ID of the task to add the block to.
+        data_template_id : DataTemplateId
+            The ID of the data template to use for the block.
+        workflow_id : WorkflowId
+            The ID of the workflow to assign to the block.
+
+        Returns
+        -------
+        None
+            This method does not return any value.
+
+        """
         url = f"{self.base_path}/{task_id}"
         payload = [
             {
@@ -125,7 +163,7 @@ class TaskCollection(BaseCollection):
 
     @validate_call
     def remove_block(self, *, task_id: TaskId, block_id: BlockId) -> None:
-        """_summary_
+        """Remove a block from a Property task.
 
         Parameters
         ----------
@@ -156,11 +194,30 @@ class TaskCollection(BaseCollection):
 
     @validate_call
     def delete(self, *, id: TaskId) -> None:
+        """Delete a task.
+
+        Parameters
+        ----------
+        id : TaskId
+            The ID of the task to delete.
+        """
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
     @validate_call
     def get_by_id(self, *, id: TaskId) -> BaseTask:
+        """Retrieve a task by its ID.
+
+        Parameters
+        ----------
+        id : TaskId
+            The ID of the task to retrieve.
+
+        Returns
+        -------
+        BaseTask
+            The task object with the provided ID.
+        """
         url = f"{self.base_path}/multi/{id}"
         response = self.session.get(url)
         return TaskAdapter.validate_python(response.json())
@@ -168,8 +225,6 @@ class TaskCollection(BaseCollection):
     def list(
         self,
         *,
-        limit: int = 100,
-        offset: int = 0,
         order: OrderBy = OrderBy.DESCENDING,
         text: str | None = None,
         sort_by: str | None = None,
@@ -186,7 +241,52 @@ class TaskCollection(BaseCollection):
         parameter_group: list[str] | None = None,
         created_by: list[str] | None = None,
         project_id: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> Iterator[BaseTask]:
+        """Search for tasks matching the given criteria.
+
+        Parameters
+        ----------
+        order : OrderBy, optional
+            The order in which to return results, by default OrderBy.DESCENDING
+        text : str | None, optional
+            The text to search for, by default None
+        sort_by : str | None, optional
+            The attribute to sort by, by default None
+        tags : list[str] | None, optional
+            The tags to search for, by default None
+        task_id : list[str] | None, optional
+            The related task IDs to search for, by default None
+        linked_task : list[str] | None, optional
+            The Linked Task IDs to search for, by default None
+        category : TaskCategory | None, optional
+            The category of the task to search for, by default None
+        albert_id : list[str] | None, optional
+            The Albert IDs to search for, by default None
+        data_template : list[str] | None, optional
+            The data template IDs to search for, by default None
+        assigned_to : list[str] | None, optional
+            The User IDs to search for, by default None
+        location : list[str] | None, optional
+            The Locations names to search for, by default None
+        priority : list[str] | None, optional
+            The Priority levels to search for, by default None
+        status : list[str] | None, optional
+            The Task Statuses to search for, by default None
+        parameter_group : list[str] | None, optional
+            The related Parameter Group IDs to search for, by default None
+        created_by : list[str] | None, optional
+            The User IDs of the task creators to search for, by default None
+        project_id : str | None, optional
+            The Project ID to search for, by default None
+
+        Yields
+        ------
+        Iterator[BaseTask]
+            An iterator of matching Task objects.
+        """
+
         def deserialize(items: list[dict]) -> Iterator[BaseTask]:
             for item in items:
                 id = item["albertId"]
@@ -228,6 +328,18 @@ class TaskCollection(BaseCollection):
         )
 
     def update(self, *, task: BaseTask) -> BaseTask:
+        """Update a task.
+
+        Parameters
+        ----------
+        task : BaseTask
+            The updated Task object.
+
+        Returns
+        -------
+        BaseTask
+            The updated Task object as it exists in the Albert platform.
+        """
         patch_payload_obj = self._generate_patch_payload(
             existing=self.get_by_id(id=task.id),
             updated=task,

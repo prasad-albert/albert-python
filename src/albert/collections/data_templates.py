@@ -9,6 +9,8 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class DataTemplateCollection(BaseCollection):
+    """DataTemplateCollection is a collection class for managing DataTemplate entities in the Albert platform."""
+
     _api_version = "v3"
     _updatable_attributes = {"name", "description"}
 
@@ -17,6 +19,18 @@ class DataTemplateCollection(BaseCollection):
         self.base_path = f"/api/{DataTemplateCollection._api_version}/datatemplates"
 
     def create(self, *, data_template: DataTemplate) -> DataTemplate:
+        """Creates a new data template.
+
+        Parameters
+        ----------
+        data_template : DataTemplate
+            The DataTemplate object to create.
+
+        Returns
+        -------
+        DataTemplate
+            The registered DataTemplate object with an ID.
+        """
         response = self.session.post(
             self.base_path,
             json=data_template.model_dump(mode="json", by_alias=True, exclude_none=True),
@@ -24,10 +38,34 @@ class DataTemplateCollection(BaseCollection):
         return DataTemplate(**response.json())
 
     def get_by_id(self, *, id: DataTemplateId) -> DataTemplate:
+        """Get a data template by its ID.
+
+        Parameters
+        ----------
+        id : DataTemplateId
+            The ID of the data template to get.
+
+        Returns
+        -------
+        DataTemplate
+            The data template object on match or None
+        """
         response = self.session.get(f"{self.base_path}/{id}")
         return DataTemplate(**response.json())
 
-    def get_by_ids(self, *, ids: list[str]) -> list[DataTemplate]:
+    def get_by_ids(self, *, ids: list[DataTemplateId]) -> list[DataTemplate]:
+        """Get a list of data templates by their IDs.
+
+        Parameters
+        ----------
+        ids : list[DataTemplateId]
+            The list of DataTemplate IDs to get.
+
+        Returns
+        -------
+        list[DataTemplate]
+            A list of DataTemplate objects with the provided IDs.
+        """
         url = f"{self.base_path}/ids"
         batches = [ids[i : i + 250] for i in range(0, len(ids), 250)]
         return [
@@ -37,6 +75,18 @@ class DataTemplateCollection(BaseCollection):
         ]
 
     def get_by_name(self, *, name: str) -> DataTemplate | None:
+        """Get a data template by its name.
+
+        Parameters
+        ----------
+        name : str
+            The name of the data template to get.
+
+        Returns
+        -------
+        DataTemplate | None
+            The matching data template object or None if not found.
+        """
         hits = list(self.list(name=name))
         for h in hits:
             if h.name.lower() == name.lower():
@@ -46,6 +96,20 @@ class DataTemplateCollection(BaseCollection):
     def add_data_columns(
         self, *, data_template_id: str, data_columns: list[DataColumnValue]
     ) -> DataTemplate:
+        """Adds data columns to a data template.
+
+        Parameters
+        ----------
+        data_template_id : str
+            The ID of the data template to add the columns to.
+        data_columns : list[DataColumnValue]
+            The list of DataColumnValue objects to add to the data template.
+
+        Returns
+        -------
+        DataTemplate
+            The updated DataTemplate object.
+        """
         payload = {
             "DataColumns": [
                 x.model_dump(mode="json", by_alias=True, exclude_none=True) for x in data_columns
@@ -60,28 +124,28 @@ class DataTemplateCollection(BaseCollection):
     def list(
         self,
         *,
-        limit: int = 100,
-        offset: int = 0,
-        order_by: OrderBy = OrderBy.DESCENDING,
         name: str | None = None,
         user_id: str | None = None,
+        order_by: OrderBy = OrderBy.DESCENDING,
+        limit: int = 100,
+        offset: int = 0,
     ) -> Iterator[DataTemplate]:
         """
         Lists data template entities with optional filters.
 
         Parameters
         ----------
-        order_by : OrderBy, optional
-            The order by which to sort the results, by default OrderBy.DESCENDING.
         name : Union[str, None], optional
             The name of the data template to filter by, by default None.
         user_id : str, optional
             user_id to filter by, by default None.
+        order_by : OrderBy, optional
+            The order by which to sort the results, by default OrderBy.DESCENDING.
 
         Returns
         -------
         Iterator[DataTemplate]
-            An iterator of DataTemplate objects.
+            An iterator of DataTemplate objects matching the provided criteria.
         """
 
         def deserialize(items: list[dict]) -> list[DataTemplate]:
@@ -104,6 +168,18 @@ class DataTemplateCollection(BaseCollection):
         )
 
     def update(self, *, data_template: DataTemplate) -> DataTemplate:
+        """Updates a data template.
+
+        Parameters
+        ----------
+        data_template : DataTemplate
+            The DataTemplate object to update. The ID must be set and matching the ID of the DataTemplate to update.
+
+        Returns
+        -------
+        DataTemplate
+            The Updated DataTemplate object.
+        """
         existing = self.get_by_id(id=data_template.id)
         base_payload = self._generate_patch_payload(existing=existing, updated=data_template)
         payload = base_payload.model_dump(mode="json", by_alias=True)
@@ -208,4 +284,11 @@ class DataTemplateCollection(BaseCollection):
         return self.get_by_id(id=existing.id)  # always do this in case columns were added
 
     def delete(self, *, id: str) -> None:
+        """Deletes a data template by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the data template to delete.
+        """
         self.session.delete(f"{self.base_path}/{id}")

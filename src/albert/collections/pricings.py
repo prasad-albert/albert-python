@@ -12,6 +12,8 @@ class PricingBy(str, Enum):
 
 
 class PricingCollection(BaseCollection):
+    """PricingCollection is a collection class for managing Pricing entities in the Albert platform."""
+
     _api_version = "v3"
     _updatable_attributes = {
         "pack_size",
@@ -26,15 +28,46 @@ class PricingCollection(BaseCollection):
     }
 
     def __init__(self, *, session: AlbertSession):
+        """Initializes the PricingCollection with the provided session.
+
+        Parameters
+        ----------
+        session : AlbertSession
+            The Albert session instance.
+        """
         super().__init__(session=session)
         self.base_path = f"/api/{PricingCollection._api_version}/pricings"
 
     def create(self, *, pricing: Pricing) -> Pricing:
+        """Creates a new Pricing entity.
+
+        Parameters
+        ----------
+        pricing : Pricing
+            The Pricing entity to create.
+
+        Returns
+        -------
+        Pricing
+            The created Pricing entity.
+        """
         payload = pricing.model_dump(by_alias=True, exclude_none=True, mode="json")
         response = self.session.post(self.base_path, json=payload)
         return Pricing(**response.json())
 
     def get_by_id(self, *, id: str) -> Pricing:
+        """Retrieves a Pricing entity by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the Pricing entity to retrieve.
+
+        Returns
+        -------
+        Pricing
+            The Pricing entity if found, None otherwise.
+        """
         url = f"{self.base_path}/{id}"
         response = self.session.get(url)
         return Pricing(**response.json())
@@ -48,6 +81,26 @@ class PricingCollection(BaseCollection):
         filter_id: str | None = None,
         order_by: OrderBy | None = None,
     ) -> list[Pricing]:
+        """Returns a list of Pricing entities for the given inventory ID as per the provided parameters.
+
+        Parameters
+        ----------
+        inventory_id : str
+            The ID of the inventory to retrieve pricings for.
+        group_by : PricingBy | None, optional
+            Grouping by PricingBy, by default None
+        filter_by : PricingBy | None, optional
+            Filter by PricingBy, by default None
+        filter_id : str | None, optional
+            The string to use as the filter, by default None
+        order_by : OrderBy | None, optional
+            The order to sort the results by, by default None
+
+        Returns
+        -------
+        list[Pricing]
+            A list of Pricing entities matching the provided parameters.
+        """
         params = {
             "parentId": inventory_id,
             "groupBy": group_by,
@@ -61,6 +114,13 @@ class PricingCollection(BaseCollection):
         return [Pricing(**x) for x in items]
 
     def delete(self, *, id: str) -> None:
+        """Deletes a Pricing entity by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the Pricing entity to delete.
+        """
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
@@ -82,6 +142,18 @@ class PricingCollection(BaseCollection):
         return patch_payload
 
     def update(self, *, pricing: Pricing) -> Pricing:
+        """Updates a Pricing entity.
+
+        Parameters
+        ----------
+        pricing : Pricing
+            The updated Pricing entity.
+
+        Returns
+        -------
+        Pricing
+            The updated Pricing entity as it appears in Albert.
+        """
         current_pricing = self.get_by_id(id=pricing.id)
         patch_payload = self._pricing_patch_payload(existing=current_pricing, updated=pricing)
         self.session.patch(

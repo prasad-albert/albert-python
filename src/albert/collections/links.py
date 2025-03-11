@@ -7,6 +7,8 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class LinksCollection(BaseCollection):
+    """LinksCollection is a collection class for managing Link entities in the Albert platform."""
+
     _api_version = "v3"
     _updatable_attributes = {}  # No updatable attributes for links
 
