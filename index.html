@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#welcome-to-mkdocs" class="md-skip">
+        <a href="#albert-python-sdk" class="md-skip">
           Skip to content
         </a>
       
@@ -239,20 +239,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
-      Commands
+      Installation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#project-layout" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Project layout
+      Overview
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-collections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Collections
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1213,20 +1237,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
-      Commands
+      Installation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#project-layout" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Project layout
+      Overview
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Models
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-collections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Collections
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1246,21 +1294,29 @@
 
 
 
-<h1 id="welcome-to-mkdocs">Welcome to MkDocs</h1>
-<p>For full documentation visit <a href="https://www.mkdocs.org">mkdocs.org</a>.</p>
-<h2 id="commands">Commands</h2>
-<ul>
-<li><code>mkdocs new [dir-name]</code> - Create a new project.</li>
-<li><code>mkdocs serve</code> - Start the live-reloading docs server.</li>
-<li><code>mkdocs build</code> - Build the documentation site.</li>
-<li><code>mkdocs -h</code> - Print help message and exit.</li>
-</ul>
-<h2 id="project-layout">Project layout</h2>
-<pre><code>mkdocs.yml    # The configuration file.
-docs/
-    index.md  # The documentation homepage.
-    ...       # Other markdown pages, images and other files.
-</code></pre>
+<h1 id="albert-python-sdk">Albert Python SDK</h1>
+<p>The Albert Python SDK provides a comprehensive and easy-to-use interface for interacting with the Albert API. The SDK is designed to simplify the process of working with various resources such as inventories, projects, companies, and tags by providing Resource Collections and Resource Models.</p>
+<blockquote>
+<p>[!WARNING]
+The Albert SDK is still in the early phases of development. As such, patterns may change, and methods may not work as expected. Do not use this package unless you are comfortable with these limitations.</p>
+</blockquote>
+<h2 id="installation">Installation</h2>
+<p>TODO: Add installation instructions from PyPI once published</p>
+<p>For developers, please see the CONTRIBUTING.MD for local installation instructions.</p>
+<h2 id="overview">Overview</h2>
+<p>The SDK is built around two main concepts:</p>
+<ol>
+<li>
+<p><em>Resource Models</em>: Represent individual entities like InventoryItem, Project, Company, and Tag. These are all controlled using Pydantic.</p>
+</li>
+<li>
+<p><em>Resource Collections</em>: Provide methods to interact with the API endpoints related to a specific resource, such as listing, creating, updating, and deleting resources.</p>
+</li>
+</ol>
+<h3 id="resource-models">Resource Models</h3>
+<p>Resource Models represent the data structure of individual resources. They encapsulate the attributes and behaviors of a single resource. For example, an <code>InventoryItem</code> has attributes like <code>name</code>, <code>description</code>, <code>category</code>, and <code>tags</code>.</p>
+<h3 id="resource-collections">Resource Collections</h3>
+<p>Resource Collections act as managers for Resource Models. They provide methods for performing CRUD operations (Create, Read, Update, Delete) on the resources. For example, the <code>InventoryCollection</code> class has methods like create, <code>get_by_id()</code>, <code>list()</code>, <code>update()</code>, and <code>delete()</code>. <code>list()</code> methods generally accept parameters to narrow the query to use it like a search.</p>
 
 
 
