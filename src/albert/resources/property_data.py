@@ -181,23 +181,6 @@ class TaskPropertyCreate(BaseResource):
     This class is used to create new task properties. Users can use the `Workflowe.get_interval_id`
     method to find the correct interval given the names and setpoints of the parameters.
 
-    Parameters
-    ----------
-    entity : Literal[DataEntity.TASK]
-        The entity type, which is always `DataEntity.TASK` for task properties.
-    interval_combination : str
-        The interval combination, which can be found using `Workflowe.get_interval_id`.
-        Examples include "default", "ROW4XROW2", "ROW2".
-    data_column : TaskDataColumn
-        The data column associated with the task property.
-    value : str, optional
-        The value of the task property, by default None.
-    visible_trial_number : int, optional
-        The visible trial number, by default None. This can always be left empty.
-    trial_number : int, optional
-        The trial number, by default None. Leave this blank to create a new row/trial.
-    data_template : SerializeAsEntityLink[DataTemplate]
-        The data template associated with the task property.
 
     Notes
     -----
@@ -207,17 +190,31 @@ class TaskPropertyCreate(BaseResource):
     - `visible_trial_number` can always be left empty.
     """
 
-    entity: Literal[DataEntity.TASK] = Field(default=DataEntity.TASK)
+    entity: Literal[DataEntity.TASK] = Field(
+        default=DataEntity.TASK,
+        description="The entity type, which is always `DataEntity.TASK` for task properties.",
+    )
     interval_combination: str = Field(
         alias="intervalCombination",
         examples=["default", "ROW4XROW2", "ROW2"],
         default="default",
+        description="The interval combination, which can be found using `Workflow.get_interval_id`.",
     )
-    data_column: TaskDataColumn = Field(..., alias="DataColumns")
-    value: str | None = Field(default=None)
-    visible_trial_number: int | None = Field(alias="visibleTrialNo", default=None)
-    trial_number: int = Field(alias="trialNo", default=None)
-    data_template: SerializeAsEntityLink[DataTemplate] = Field(..., alias="DataTemplate")
+    data_column: TaskDataColumn = Field(
+        ..., alias="DataColumns", description="The data column associated with the task property."
+    )
+    value: str | None = Field(default=None, description="The value of the task property.")
+    trial_number: int = Field(
+        alias="trialNo",
+        default=None,
+        description="The trial number/ row number. Leave blank to create a new row/trial.",
+    )
+    data_template: SerializeAsEntityLink[DataTemplate] = Field(
+        ...,
+        alias="DataTemplate",
+        description="The data template associated with the task property.",
+    )
+    visible_trial_number: int | None = Field(alias="visibleTrialNo", default=None, exclude=True)
 
     @model_validator(mode="after")
     def set_visible_trial_number(self) -> "TaskPropertyCreate":

@@ -75,8 +75,8 @@ class DataTemplateCollection(BaseCollection):
             The order by which to sort the results, by default OrderBy.DESCENDING.
         name : Union[str, None], optional
             The name of the data template to filter by, by default None.
-        exact_match : bool, optional
-            Whether to match the name exactly, by default True.
+        user_id : str, optional
+            user_id to filter by, by default None.
 
         Returns
         -------

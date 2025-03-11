@@ -81,6 +81,33 @@ jobs:
           command: |
             uv publish --publish-url $ALBERT_PYPI_URL --username $UV_INDEX_ALBERT_USERNAME \
               --password $UV_INDEX_ALBERT_PASSWORD
+    
+    deploy_docs:
+      executor:
+        name: python/default
+        tag: "3.10.15"
+      steps:
+        - attach_workspace:
+            at: /home/circleci
+        - run:
+            name: Install dependencies
+            command: uv sync
+        - run:
+            name: Build Documentation
+            command: |
+              uv run mkdocs build --clean
+        - run:
+            name: Deploy to GitHub Pages
+            command: |
+              git config --global user.email "circleci@users.noreply.github.com"
+              git config --global user.name "CircleCI"
+              git clone --branch gh-pages --single-branch https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git gh-pages
+              rm -rf gh-pages/*
+              cp -r site/* gh-pages/
+              cd gh-pages
+              git add .
+              git commit -m "Auto-update documentation [skip ci]" || echo "No changes to commit"
+              git push origin gh-pages
 
   validate_version_bump:
     executor:
@@ -137,3 +164,42 @@ workflows:
           filters:
             branches:
               only: ["main"]
+      - workflows:
+  main:
+    jobs:
+      - setup:
+          name: Setup
+          context: ds-dev
+      - test:
+          name: Test
+          context: ds-dev
+          requires:
+            - Setup
+      - validate_version_bump:
+          name: Validate Version Bump
+          context: ds-dev
+          requires:
+            - Setup
+      - snyk_app_scan:
+          name: Snyk App Scan
+          context: dev
+          requires:
+            - Setup
+      - publish:
+          name: Publish
+          context: ds-dev
+          requires:
+            - Setup
+          filters:
+            branches:
+              only: ["main"]
+      - deploy_docs:
+          name: Deploy Docs
+          context: ds-dev
+          requires:
+            - publish
+          filters:
+            branches:
+              only: ["main"]
+
+              

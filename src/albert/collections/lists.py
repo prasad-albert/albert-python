@@ -39,11 +39,10 @@ class ListsCollection(BaseCollection):
             The maximum number of list entities to return.
         order_by : OrderBy, optional
             The order in which to return list entities.
-        name : str, optional
-            The name of the list entity to retrieve.
-        exact_match : bool, optional
-            Whether to perform an exact match on the list name.
-
+        names : list[str], optional
+            A list of names of the list entity to retrieve.
+        category : ListItemCategory, optional
+            The category of the list entity to retrieve.
         Returns
         ------
         Iterator[ListItem]
