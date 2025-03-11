@@ -214,7 +214,7 @@ class TaskPropertyCreate(BaseResource):
         alias="DataTemplate",
         description="The data template associated with the task property.",
     )
-    visible_trial_number: int | None = Field(alias="visibleTrialNo", default=None, exclude=True)
+    visible_trial_number: int | None = Field(alias="visibleTrialNo", default=None)
 
     @model_validator(mode="after")
     def set_visible_trial_number(self) -> "TaskPropertyCreate":
