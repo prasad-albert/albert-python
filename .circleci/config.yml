@@ -87,6 +87,8 @@ jobs:
       name: python/default
       tag: "3.10.15"
     steps:
+      - attach_workspace:
+          at: /home/circleci
       - run:
           name: Install dependencies
           command: uv sync
