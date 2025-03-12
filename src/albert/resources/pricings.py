@@ -48,14 +48,17 @@ class Pricing(BaseResource):
     """
 
     id: str | None = Field(default=None, alias="albertId")
-    inventory_id: str = Field(default=None, alias="parentId")
+    inventory_id: str | None = Field(default=None, alias="parentId")
     company: SerializeAsEntityLink[Company] = Field(alias="Company")
     location: SerializeAsEntityLink[Location] = Field(alias="Location")
     description: str | None = Field(default=None)
     pack_size: str | None = Field(default=None, alias="packSize")
     price: float = Field(ge=0, le=9999999999)
     currency: str = Field(default="USD", alias="currency")
-    fob: str = Field(default=None)
+    fob: str | None = Field(default=None)
     lead_time: int | None = Field(default=None, alias="leadTime")
     lead_time_unit: LeadTimeUnit | None = Field(default=None, alias="leadTimeUnit")
     expiration_date: str | None = Field(default=None, alias="expirationDate")
+
+    # Read-only fields
+    default: int | None = Field(default=None, exclude=True, frozen=True)
