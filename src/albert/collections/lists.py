@@ -7,6 +7,8 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class ListsCollection(BaseCollection):
+    """ListsCollection is a collection class for managing ListItem entities in the Albert platform."""
+
     _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
@@ -37,12 +39,12 @@ class ListsCollection(BaseCollection):
         ----------
         limit : int, optional
             The maximum number of list entities to return.
-        order_by : OrderBy, optional
-            The order in which to return list entities.
         names : list[str], optional
             A list of names of the list entity to retrieve.
         category : ListItemCategory, optional
             The category of the list entity to retrieve.
+        list_type : str, optional
+            The type of list entity to retrieve.
         Returns
         ------
         Iterator[ListItem]
@@ -117,6 +119,20 @@ class ListsCollection(BaseCollection):
         self.session.delete(url)
 
     def get_matching_item(self, *, name: str, list_type: str) -> ListItem | None:
+        """Get a list item by name and list type.
+
+        Parameters
+        ----------
+        name : str
+            The name of it item to retrieve.
+        list_type : str
+            The type of list (can be the name of the custom field)
+
+        Returns
+        -------
+        ListItem | None
+            A list item with the provided name and list type, or None if not found.
+        """
         for list_item in self.list(names=[name], list_type=list_type):
             if list_item.name.lower() == name.lower():
                 return list_item

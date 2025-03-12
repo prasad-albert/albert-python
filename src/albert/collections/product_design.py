@@ -9,6 +9,8 @@ from albert.session import AlbertSession
 
 
 class ProductDesignCollection(BaseCollection):
+    """ProductDesignCollection is a collection class for managing Product Design entities in the Albert platform."""
+
     _updatable_attributes = {}
     _api_version = "v3"
 

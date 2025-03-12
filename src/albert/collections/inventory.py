@@ -26,32 +26,7 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class InventoryCollection(BaseCollection):
-    """
-    InventoryCollection is a collection class for managing inventory items.
-
-    Parameters
-    ----------
-    session : Albert
-        The Albert session instance.
-
-    Attributes
-    ----------
-    base_path : str
-        The base URL for inventory API requests.
-
-    Methods
-    -------
-    create(inventory_item: InventoryItem, avoid_duplicates: bool = True) -> InventoryItem
-        Creates a new inventory item.
-    get_by_id(inventory_id: str) -> Optional[InventoryItem]
-        Retrieves an inventory item by its ID.
-    update(inventory_id: str, patch_data: dict) -> bool
-        Updates an inventory item by its ID.
-    delete(inventory_id: str) -> bool
-        Deletes an inventory item by its ID.
-    list(limit: int, start_key: Optional[str], name: Optional[List[str]], category: Optional[str], order_by: OrderBy, exact_match: bool) -> Optional[List[InventoryItem]]
-        Lists inventory items with optional filters.
-    """
+    """InventoryCollection is a collection class for managing Inventory Item entities in the Albert platform."""
 
     _api_version = "v3"
     _updatable_attributes = {
@@ -64,6 +39,14 @@ class InventoryCollection(BaseCollection):
     }
 
     def __init__(self, *, session: AlbertSession):
+        """
+        InventoryCollection is a collection class for managing inventory items.
+
+        Parameters
+        ----------
+        session : Albert
+            The Albert session instance.
+        """
         super().__init__(session=session)
         self.base_path = f"/api/{InventoryCollection._api_version}/inventories"
 
@@ -251,6 +234,18 @@ class InventoryCollection(BaseCollection):
 
     @validate_call
     def get_specs(self, *, ids: list[InventoryId]) -> list[InventorySpecList]:
+        """Get the specs for a list of inventory items.
+
+        Parameters
+        ----------
+        ids : list[InventoryId]
+            List of Inventory IDs to get the specs for.
+
+        Returns
+        -------
+        list[InventorySpecList]
+            A list of InventorySpecList objects, each containing the specs for an inventory item.
+        """
         url = f"{self.base_path}/specs"
         batches = [ids[i : i + 250] for i in range(0, len(ids), 250)]
         ta = TypeAdapter(InventorySpecList)

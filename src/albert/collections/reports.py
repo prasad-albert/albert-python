@@ -6,6 +6,8 @@ from albert.session import AlbertSession
 
 
 class ReportCollection(BaseCollection):
+    """ReportCollection is a collection class for managing Report entities in the Albert platform."""
+
     _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):

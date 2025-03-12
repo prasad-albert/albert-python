@@ -8,7 +8,7 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class DataColumnCollection(BaseCollection):
-    """A collection for interacting with Data Columns in Albert."""
+    """DataColumnCollection is a collection class for managing DataColumn entities in the Albert platform."""
 
     _api_version = "v3"
     _updatable_attributes = {"name", "metadata"}
@@ -58,13 +58,13 @@ class DataColumnCollection(BaseCollection):
     def list(
         self,
         *,
-        limit: int = 100,
         order_by: OrderBy = OrderBy.DESCENDING,
         ids: str | list[str] | None = None,
         name: str | list[str] | None = None,
         exact_match: bool | None = None,
         default: bool | None = None,
         start_key: str | None = None,
+        limit: int = 100,
     ) -> Iterator[DataColumn]:
         """
         Lists data column entities with optional filters.
@@ -85,7 +85,7 @@ class DataColumnCollection(BaseCollection):
         Returns
         -------
         Iterator[DataColumn]
-            An iterator of DataColumns.
+            An iterator of DataColumns matching the provided criteria.
         """
         params = {
             "limit": limit,
@@ -154,6 +154,18 @@ class DataColumnCollection(BaseCollection):
         return isinstance(existing, list) or isinstance(updated, list)
 
     def update(self, *, data_column: DataColumn) -> DataColumn:
+        """Update a data column entity.
+
+        Parameters
+        ----------
+        data_column : DataColumn
+            The updated data column object. The ID must be set and match an existing data column.
+
+        Returns
+        -------
+        DataColumn
+            The updated data column object as registered in Albert.
+        """
         existing = self.get_by_id(id=data_column.id)
         payload = self._generate_patch_payload(
             existing=existing,

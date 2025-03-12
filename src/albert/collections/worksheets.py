@@ -4,6 +4,8 @@ from albert.session import AlbertSession
 
 
 class WorksheetCollection(BaseCollection):
+    """WorksheetCollection is a collection class for managing Worksheet entities in the Albert platform."""
+
     _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
@@ -20,6 +22,18 @@ class WorksheetCollection(BaseCollection):
         return response_json
 
     def get_by_project_id(self, *, project_id: str) -> Worksheet:
+        """Retrieve a worksheet by its project ID. Projects and Worksheets are 1:1 in the Albert platform.
+
+        Parameters
+        ----------
+        project_id : str
+            The project ID to retrieve the worksheet for.
+
+        Returns
+        -------
+        Worksheet
+            The Worksheet object for that project.
+        """
         if not project_id.startswith("PRO"):
             project_id = "PRO" + project_id
         params = {"type": "project", "id": project_id}
@@ -33,6 +47,20 @@ class WorksheetCollection(BaseCollection):
         return Worksheet(**response_json)
 
     def setup_worksheet(self, *, project_id: str, add_sheet=False) -> Worksheet:
+        """Setup a new worksheet for a project.
+
+        Parameters
+        ----------
+        project_id : str
+            The project ID to setup the worksheet for.
+        add_sheet : bool, optional
+            Whether to add a blank sheet to the worksheet, by default False
+
+        Returns
+        -------
+        Worksheet
+            The Worksheet object for the project.
+        """
         if not project_id.startswith("PRO"):
             project_id = f"PRO{project_id}"
         params = {"sheets": str(add_sheet).lower()}
@@ -40,20 +68,25 @@ class WorksheetCollection(BaseCollection):
         self.session.post(path, json=params)
         return self.get_by_project_id(project_id=project_id)
 
-    def setup_new_worksheet_blank(
-        self, *, project_id: str, sheet_name: str | None = None
-    ) -> Worksheet:
-        payload = {"name": sheet_name}
-        payload = {k: v for k, v in payload.items() if v is not None}
-        if not project_id.startswith("PRO"):
-            project_id = "PRO" + project_id
-        path = f"{self.base_path}/project/{project_id}/sheets"
-        self.session.post(path, json=payload)
-        return self.get_by_project_id(project_id=project_id)
-
-    def setup_new_worksheet_from_template(
+    def setup_new_sheet_from_template(
         self, *, project_id: str, sheet_template_id: str, sheet_name: str
-    ):
+    ) -> Worksheet:
+        """Create a new sheet in the Worksheet related to the specified Project from a template.
+
+        Parameters
+        ----------
+        project_id : str
+            _description_
+        sheet_template_id : str
+            _description_
+        sheet_name : str
+            _description_
+
+        Returns
+        -------
+        Worksheet
+            The Worksheet object for the project.
+        """
         payload = {"name": sheet_name}
         params = {"templateId": sheet_template_id}
         if not project_id.startswith("PRO"):
@@ -63,6 +96,20 @@ class WorksheetCollection(BaseCollection):
         return self.get_by_project_id(project_id=project_id)
 
     def add_sheet(self, *, project_id: str, sheet_name: str) -> Worksheet:
+        """Create a new blank sheet in the Worksheet with the specified name.
+
+        Parameters
+        ----------
+        project_id : str
+            The project ID for the Worksheet to add the sheet to.
+        sheet_name : str
+            The name of the new sheet.
+
+        Returns
+        -------
+        Worksheet
+            The Worksheet object for the project.
+        """
         payload = {"name": sheet_name}
         project_id = "PRO" + project_id if not project_id.startswith("PRO") else project_id
         url = f"{self.base_path}/project/{project_id}/sheets"
