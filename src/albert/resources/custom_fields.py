@@ -23,6 +23,8 @@ class ServiceType(str, Enum):
     USERS = "users"
     PARAMETERS = "parameters"
     DATA_COLUMNS = "datacolumns"
+    DATA_TEMPLATES = "datatemplates"
+    PARAMETER_GROUPS = "parametergroups"
 
 
 class FieldCategory(str, Enum):
