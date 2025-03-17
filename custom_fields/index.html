@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.9">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4af4bdda.min.css">
       
       
 
@@ -819,6 +819,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#albert.collections.custom_fields.ServiceType.DATA_TEMPLATES" class="md-nav__link">
+    <span class="md-ellipsis">
+      DATA_TEMPLATES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#albert.collections.custom_fields.ServiceType.INVENTORIES" class="md-nav__link">
     <span class="md-ellipsis">
       INVENTORIES
@@ -840,6 +849,15 @@
   <a href="#albert.collections.custom_fields.ServiceType.PARAMETERS" class="md-nav__link">
     <span class="md-ellipsis">
       PARAMETERS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#albert.collections.custom_fields.ServiceType.PARAMETER_GROUPS" class="md-nav__link">
+    <span class="md-ellipsis">
+      PARAMETER_GROUPS
     </span>
   </a>
   
@@ -1882,6 +1900,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#albert.collections.custom_fields.ServiceType.DATA_TEMPLATES" class="md-nav__link">
+    <span class="md-ellipsis">
+      DATA_TEMPLATES
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#albert.collections.custom_fields.ServiceType.INVENTORIES" class="md-nav__link">
     <span class="md-ellipsis">
       INVENTORIES
@@ -1903,6 +1930,15 @@
   <a href="#albert.collections.custom_fields.ServiceType.PARAMETERS" class="md-nav__link">
     <span class="md-ellipsis">
       PARAMETERS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#albert.collections.custom_fields.ServiceType.PARAMETER_GROUPS" class="md-nav__link">
+    <span class="md-ellipsis">
+      PARAMETER_GROUPS
     </span>
   </a>
   
@@ -3055,23 +3091,23 @@
 
             <details class="quote">
               <summary>Source code in <code>src/albert/resources/custom_fields.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-108">108</a></span>
-<span class="normal"><a href="#__codelineno-0-109">109</a></span>
-<span class="normal"><a href="#__codelineno-0-110">110</a></span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-110">110</a></span>
 <span class="normal"><a href="#__codelineno-0-111">111</a></span>
 <span class="normal"><a href="#__codelineno-0-112">112</a></span>
 <span class="normal"><a href="#__codelineno-0-113">113</a></span>
 <span class="normal"><a href="#__codelineno-0-114">114</a></span>
 <span class="normal"><a href="#__codelineno-0-115">115</a></span>
-<span class="normal"><a href="#__codelineno-0-116">116</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-108"><a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
-</span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="k">def</span><span class="w"> </span><span class="nf">confirm_field_compatability</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CustomField&quot;</span><span class="p">:</span>
-</span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_type</span> <span class="o">==</span> <span class="n">FieldType</span><span class="o">.</span><span class="n">LIST</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Category must be set for list fields&quot;</span><span class="p">)</span>
-</span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">!=</span> <span class="n">ServiceType</span><span class="o">.</span><span class="n">INVENTORIES</span><span class="p">:</span>
-</span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lookup column is only allowed for inventories&quot;</span><span class="p">)</span>
-</span><span id="__span-0-114"><a id="__codelineno-0-114" name="__codelineno-0-114"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">!=</span> <span class="n">ServiceType</span><span class="o">.</span><span class="n">INVENTORIES</span><span class="p">:</span>
-</span><span id="__span-0-115"><a id="__codelineno-0-115" name="__codelineno-0-115"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lookup row is only allowed for formulas in inventories&quot;</span><span class="p">)</span>
-</span><span id="__span-0-116"><a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="k">return</span> <span class="bp">self</span>
+<span class="normal"><a href="#__codelineno-0-116">116</a></span>
+<span class="normal"><a href="#__codelineno-0-117">117</a></span>
+<span class="normal"><a href="#__codelineno-0-118">118</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+</span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="k">def</span><span class="w"> </span><span class="nf">confirm_field_compatability</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CustomField&quot;</span><span class="p">:</span>
+</span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_type</span> <span class="o">==</span> <span class="n">FieldType</span><span class="o">.</span><span class="n">LIST</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Category must be set for list fields&quot;</span><span class="p">)</span>
+</span><span id="__span-0-114"><a id="__codelineno-0-114" name="__codelineno-0-114"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">!=</span> <span class="n">ServiceType</span><span class="o">.</span><span class="n">INVENTORIES</span><span class="p">:</span>
+</span><span id="__span-0-115"><a id="__codelineno-0-115" name="__codelineno-0-115"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lookup column is only allowed for inventories&quot;</span><span class="p">)</span>
+</span><span id="__span-0-116"><a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lookup_row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">!=</span> <span class="n">ServiceType</span><span class="o">.</span><span class="n">INVENTORIES</span><span class="p">:</span>
+</span><span id="__span-0-117"><a id="__codelineno-0-117" name="__codelineno-0-117"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lookup row is only allowed for formulas in inventories&quot;</span><span class="p">)</span>
+</span><span id="__span-0-118"><a id="__codelineno-0-118" name="__codelineno-0-118"></a>    <span class="k">return</span> <span class="bp">self</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4047,6 +4083,29 @@
 
 
 
+<h3 id="albert.collections.custom_fields.ServiceType.DATA_TEMPLATES" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">DATA_TEMPLATES</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">DATA_TEMPLATES</span> <span class="o">=</span> <span class="s1">&#39;datatemplates&#39;</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h3 id="albert.collections.custom_fields.ServiceType.INVENTORIES" class="doc doc-heading">
             <span class="doc doc-object-name doc-attribute-name">INVENTORIES</span>
 
@@ -4104,6 +4163,29 @@
 
 </h3>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">PARAMETERS</span> <span class="o">=</span> <span class="s1">&#39;parameters&#39;</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="albert.collections.custom_fields.ServiceType.PARAMETER_GROUPS" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">PARAMETER_GROUPS</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">PARAMETER_GROUPS</span> <span class="o">=</span> <span class="s1">&#39;parametergroups&#39;</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
