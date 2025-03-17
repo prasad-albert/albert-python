@@ -10,7 +10,7 @@ class ParameterGroupCollection(BaseCollection):
     """ParameterGroupCollection is a collection class for managing ParameterGroup entities in the Albert platform."""
 
     _api_version = "v3"
-    _updatable_attributes = {"name", "shortName"}
+    _updatable_attributes = {"name", "description", "metadata"}
     # To do: Add the rest of the allowed attributes
 
     def __init__(self, *, session: AlbertSession):
@@ -160,5 +160,5 @@ class ParameterGroupCollection(BaseCollection):
         existing = self.get_by_id(id=parameter_group.id)
         path = f"{self.base_path}/{existing.id}"
         payload = self._generate_patch_payload(existing=existing, updated=parameter_group)
-        response = self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
-        return ParameterGroup(**response.json())
+        self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
+        return self.get_by_id(id=parameter_group.id)

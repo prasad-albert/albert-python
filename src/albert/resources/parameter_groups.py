@@ -3,7 +3,12 @@ from typing import Any
 
 from pydantic import Field, field_validator, model_validator
 
-from albert.resources.base import AuditFields, BaseEntityLink, BaseResource, SecurityClass
+from albert.resources.base import (
+    AuditFields,
+    BaseEntityLink,
+    MetadataItem,
+    SecurityClass,
+)
 from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import SerializeAsEntityLink
@@ -35,12 +40,6 @@ class Operator(str, Enum):
     GREATER_THAN_OR_EQUAL = "gte"
     GREATER_THAN = "gt"
     EQUALS = "eq"
-
-
-class PGMetadata(BaseResource):
-    """The metadata of a parameter group"""
-
-    standards: list[BaseEntityLink] = Field(alias="Standards")
 
 
 class ValueValidation(BaseAlbertModel):
@@ -109,13 +108,15 @@ class ParameterValue(BaseAlbertModel):
 
 
 class ParameterGroup(BaseTaggedEntity):
+    """Use 'Standards' key in metadata to store standards"""
+
     name: str
     type: PGType | None = Field(default=None)
     id: str | None = Field(None, alias="albertId")
     description: str | None = Field(default=None)
     security_class: SecurityClass = Field(default=SecurityClass.RESTRICTED, alias="class")
     acl: list[SerializeAsEntityLink[User]] | None = Field(default=None, alias="ACL")
-    metadata: PGMetadata | None = Field(alias="Metadata", default=None)
+    metadata: dict[str, MetadataItem] = Field(alias="Metadata", default_factory=dict)
     parameters: list[ParameterValue] = Field(default_factory=list, alias="Parameters")
 
     # Read-only fields

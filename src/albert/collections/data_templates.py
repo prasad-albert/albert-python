@@ -12,7 +12,7 @@ class DataTemplateCollection(BaseCollection):
     """DataTemplateCollection is a collection class for managing DataTemplate entities in the Albert platform."""
 
     _api_version = "v3"
-    _updatable_attributes = {"name", "description"}
+    _updatable_attributes = {"name", "description", "metadata"}
 
     def __init__(self, *, session: AlbertSession):
         super().__init__(session=session)
