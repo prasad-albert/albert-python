@@ -89,8 +89,11 @@ class ParameterValue(BaseAlbertModel):
 
     @field_validator("value", mode="before")
     @classmethod
-    def validate_empty_value_dict(cls, value: Any) -> Any:
-        if isinstance(value, dict) and not value:
+    def validate_parameter_value(cls, value: Any) -> Any:
+        # Bug in ParameterGroups sometimes returns incorrect JSON from batch endpoint
+        # Set to None if value is a dict but no ID field
+        # Reference: https://linear.app/albert-invent/issue/IN-10
+        if isinstance(value, dict) and "id" not in value:
             return None
         return value
 
