@@ -41,7 +41,6 @@ from albert.resources.tasks import (
     BatchSizeUnit,
     BatchTask,
     Block,
-    GeneralTask,
     InventoryInformation,
     PropertyTask,
     TaskCategory,
@@ -841,22 +840,15 @@ def generate_workflow_seeds(
     ]
 
 
-def generate_notebook_seeds(
-    seed_prefix: str, seed_projects: list[Project], seed_tasks: list[BaseTask]
-) -> list[Notebook]:
+def generate_notebook_seeds(seed_prefix: str, seed_projects: list[Project]) -> list[Notebook]:
     seed_project = seed_projects[0]
-    seed_general_task = [task for task in seed_tasks if isinstance(task, GeneralTask)][0]
     return [
         Notebook(
             name=f"{seed_prefix} - Project Notebook 1",
             parent_id=seed_project.id,
             blocks=[],
         ),
-        Notebook(
-            name=f"{seed_prefix} - General Task Notebook 1",
-            parent_id=seed_general_task.id,
-            blocks=[],
-        ),
+        # TODO: Add another notebook with a General Task parent
     ]
 
 
@@ -977,7 +969,6 @@ def generate_task_seeds(
             start_date="2024-10-01",
             due_date="2024-10-31",
         ),
-        GeneralTask(name=f"{seed_prefix} - General Task 1"),
     ]
 
 
