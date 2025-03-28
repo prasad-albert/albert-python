@@ -67,6 +67,7 @@ nav:
     - Lists: lists.md
     - Locations: locations.md
     - Lots: lots.md
+    - Notebooks: notebooks.md
     - Notes: notes.md
     - Parameter Groups: parameter_groups.md
     - Parameters: parameters.md
