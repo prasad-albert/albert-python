@@ -24,6 +24,29 @@ from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
 )
+from albert.resources.notebooks import (
+    AttachesBlock,
+    AttachesContent,
+    BulletedListBlock,
+    BulletedListContent,
+    ChecklistBlock,
+    ChecklistContent,
+    ChecklistItem,
+    HeaderBlock,
+    HeaderContent,
+    ImageBlock,
+    ImageContent,
+    KetcherBlock,
+    KetcherContent,
+    Notebook,
+    NotebookListItem,
+    NumberedListBlock,
+    NumberedListContent,
+    ParagraphBlock,
+    ParagraphContent,
+    TableBlock,
+    TableContent,
+)
 from albert.resources.notes import Note
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
@@ -40,6 +63,7 @@ from albert.resources.tasks import (
     BatchSizeUnit,
     BatchTask,
     Block,
+    GeneralTask,
     InventoryInformation,
     PropertyTask,
     TaskCategory,
@@ -839,6 +863,25 @@ def generate_workflow_seeds(
     ]
 
 
+def generate_notebook_seeds(
+    seed_prefix: str, seed_projects: list[Project], seed_tasks: list[BaseTask]
+) -> list[Notebook]:
+    seed_project = seed_projects[0]
+    seed_general_task = [task for task in seed_tasks if isinstance(task, GeneralTask)][0]
+    return [
+        Notebook(
+            name=f"{seed_prefix} - Project Notebook 1",
+            parent_id=seed_project.id,
+            blocks=[],
+        ),
+        Notebook(
+            name=f"{seed_prefix} - General Task Notebook 1",
+            parent_id=seed_general_task.id,
+            blocks=[],
+        ),
+    ]
+
+
 def generate_task_seeds(
     seed_prefix: str,
     user: User,
@@ -956,6 +999,7 @@ def generate_task_seeds(
             start_date="2024-10-01",
             due_date="2024-10-31",
         ),
+        GeneralTask(name=f"{seed_prefix} - General Task 1"),
     ]
 
 
