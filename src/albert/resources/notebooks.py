@@ -166,5 +166,5 @@ class Notebook(BaseResource):
         | TableBlock
         | BulletedListBlock
         | NumberedListBlock
-    ] = Field(default=list())
+    ] = Field(default_factory=list)
     links: list[NotebookLink] | None = Field(default=None)
