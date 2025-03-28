@@ -24,29 +24,7 @@ from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
 )
-from albert.resources.notebooks import (
-    AttachesBlock,
-    AttachesContent,
-    BulletedListBlock,
-    BulletedListContent,
-    ChecklistBlock,
-    ChecklistContent,
-    ChecklistItem,
-    HeaderBlock,
-    HeaderContent,
-    ImageBlock,
-    ImageContent,
-    KetcherBlock,
-    KetcherContent,
-    Notebook,
-    NotebookListItem,
-    NumberedListBlock,
-    NumberedListContent,
-    ParagraphBlock,
-    ParagraphContent,
-    TableBlock,
-    TableContent,
-)
+from albert.resources.notebooks import Notebook
 from albert.resources.notes import Note
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
