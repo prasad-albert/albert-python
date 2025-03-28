@@ -840,8 +840,8 @@ def generate_workflow_seeds(
     ]
 
 
-def generate_notebook_seeds(seed_prefix: str, seed_projects: list[Project]) -> list[Notebook]:
-    seed_project = seed_projects[0]
+def generate_notebook_seeds(seed_prefix: str, seeded_projects: list[Project]) -> list[Notebook]:
+    seed_project = seeded_projects[0]
     return [
         Notebook(
             name=f"{seed_prefix} - Project Notebook 1",

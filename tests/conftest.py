@@ -483,7 +483,7 @@ def seeded_notebooks(
 ):
     seeded = []
     all_notebooks = generate_notebook_seeds(seeded_projects=seeded_projects)
-    seeded = client.notebooks.create(notebooks=all_notebooks)
+    seeded = [client.notebooks.create(notebook=nb) for nb in all_notebooks]
     yield seeded
     for notebook in seeded:
         with suppress(NotFoundError):
