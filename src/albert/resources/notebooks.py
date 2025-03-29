@@ -35,7 +35,7 @@ class HeaderContent(BaseAlbertModel):
 
 
 class HeaderBlock(BaseBlock):
-    block_type: Literal[BlockType.HEADER] = Field(default=BlockType.HEADER, alias="blockType")
+    type: Literal[BlockType.HEADER] = Field(default=BlockType.HEADER, alias="blockType")
     content: HeaderContent
 
 
@@ -44,9 +44,7 @@ class ParagraphContent(BaseAlbertModel):
 
 
 class ParagraphBlock(BaseBlock):
-    block_type: Literal[BlockType.PARAGRAPH] = Field(
-        default=BlockType.PARAGRAPH, alias="blockType"
-    )
+    type: Literal[BlockType.PARAGRAPH] = Field(default=BlockType.PARAGRAPH, alias="blockType")
     content: ParagraphContent
 
 
@@ -60,9 +58,7 @@ class ChecklistContent(BaseAlbertModel):
 
 
 class ChecklistBlock(BaseBlock):
-    block_type: Literal[BlockType.CHECKLIST] = Field(
-        default=BlockType.CHECKLIST, alias="blockType"
-    )
+    type: Literal[BlockType.CHECKLIST] = Field(default=BlockType.CHECKLIST, alias="blockType")
     content: ChecklistContent
 
 
@@ -75,7 +71,7 @@ class AttachesContent(BaseAlbertModel):
 
 
 class AttachesBlock(BaseBlock):
-    block_type: Literal[BlockType.ATTACHES] = Field(default=BlockType.ATTACHES, alias="blockType")
+    type: Literal[BlockType.ATTACHES] = Field(default=BlockType.ATTACHES, alias="blockType")
     content: AttachesContent
 
 
@@ -90,7 +86,7 @@ class ImageContent(BaseAlbertModel):
 
 
 class ImageBlock(BaseBlock):
-    block_type: Literal[BlockType.IMAGE] = Field(default=BlockType.IMAGE, alias="blockType")
+    type: Literal[BlockType.IMAGE] = Field(default=BlockType.IMAGE, alias="blockType")
     content: ImageContent
 
 
@@ -107,7 +103,7 @@ class KetcherContent(BaseAlbertModel):
 
 
 class KetcherBlock(BaseBlock):
-    block_type: Literal[BlockType.KETCHER] = Field(default=BlockType.KETCHER, alias="blockType")
+    type: Literal[BlockType.KETCHER] = Field(default=BlockType.KETCHER, alias="blockType")
     content: KetcherContent
 
 
@@ -117,7 +113,7 @@ class TableContent(BaseAlbertModel):
 
 
 class TableBlock(BaseBlock):
-    block_type: Literal[BlockType.TABLE] = Field(default=BlockType.TABLE, alias="blockType")
+    type: Literal[BlockType.TABLE] = Field(default=BlockType.TABLE, alias="blockType")
     content: TableContent
 
 
@@ -141,7 +137,7 @@ ListContent = Annotated[_ListContentUnion, Field(discriminator="style")]
 
 
 class ListBlock(BaseBlock):
-    block_type: Literal[BlockType.LIST] = Field(default=BlockType.LIST, alias="blockType")
+    type: Literal[BlockType.LIST] = Field(default=BlockType.LIST, alias="blockType")
     content: ListContent
 
 
@@ -160,7 +156,7 @@ _NotebookBlockUnion = (
     | TableBlock
     | ListBlock
 )
-NotebookBlock = Annotated[_NotebookBlockUnion, Field(discriminator="block_type")]
+NotebookBlock = Annotated[_NotebookBlockUnion, Field(discriminator="type")]
 
 
 class Notebook(BaseResource):
