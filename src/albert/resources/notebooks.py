@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -131,19 +131,18 @@ class BulletedListContent(BaseAlbertModel):
     style: Literal[ListBlockStyles.UNORDERED] = ListBlockStyles.UNORDERED
 
 
-class BulletedListBlock(BaseBlock):
-    block_type: Literal[BlockType.LIST] = Field(default=BlockType.LIST, alias="blockType")
-    content: BulletedListContent
-
-
 class NumberedListContent(BaseAlbertModel):
     items: list[NotebookListItem]
     style: Literal[ListBlockStyles.ORDERED] = ListBlockStyles.ORDERED
 
 
-class NumberedListBlock(BaseBlock):
+_ListContentUnion = NumberedListContent | BulletedListContent
+ListContent = Annotated[_ListContentUnion, Field(discriminator="style")]
+
+
+class ListBlock(BaseBlock):
     block_type: Literal[BlockType.LIST] = Field(default=BlockType.LIST, alias="blockType")
-    content: NumberedListContent
+    content: ListContent
 
 
 class NotebookLink(BaseAlbertModel):
@@ -151,20 +150,23 @@ class NotebookLink(BaseAlbertModel):
     child: BaseEntityLink = Field(..., alias="Child")
 
 
+_NotebookBlockUnion = (
+    HeaderBlock
+    | ParagraphBlock
+    | ChecklistBlock
+    | AttachesBlock
+    | ImageBlock
+    | KetcherBlock
+    | TableBlock
+    | ListBlock
+)
+NotebookBlock = Annotated[_NotebookBlockUnion, Field(discriminator="block_type")]
+
+
 class Notebook(BaseResource):
     id: NotebookId | None = Field(default=None, alias="albertId")
     name: str = Field(default="Untitled Notebook")
     parent_id: ProjectId | TaskId = Field(..., alias="parentId")
     version: datetime | None = Field(default=None)
-    blocks: list[
-        HeaderBlock
-        | ParagraphBlock
-        | ChecklistBlock
-        | AttachesBlock
-        | ImageBlock
-        | KetcherBlock
-        | TableBlock
-        | BulletedListBlock
-        | NumberedListBlock
-    ] = Field(default_factory=list)
+    blocks: list[NotebookBlock] = Field(default_factory=list)
     links: list[NotebookLink] | None = Field(default=None)
