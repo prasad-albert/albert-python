@@ -7,12 +7,15 @@ _ALBERT_PREFIXES = {
     "DataColumnId": "DAC",
     "DataTemplateId": "DAT",
     "InventoryId": "INV",
+    "LinkId": "LNK",
     "LotId": "LOT",
+    "NotebookId": "NTB",
     "ParameterGroupId": "PRG",
     "ParameterId": "PRM",
     "ProjectId": "PRO",
     "PropertyDataId": "PTD",
     "RowId": "ROW",
+    "SynthesisId": "SYN",
     "TagId": "TAG",
     "TaskId": "TAS",
     "UnitId": "UNI",
@@ -172,11 +175,32 @@ def ensure_project_search_id(id: str) -> str:
 SearchProjectId = Annotated[str, AfterValidator(ensure_project_search_id)]
 
 
+def ensure_link_id(id: str) -> str:
+    return _ensure_albert_id(id, "LinkId")
+
+
+LinkId = Annotated[str, AfterValidator(ensure_link_id)]
+
+
 def ensure_lot_id(id: str) -> str:
     return _ensure_albert_id(id, "LotId")
 
 
 LotId = Annotated[str, AfterValidator(ensure_lot_id)]
+
+
+def ensure_notebook_id(id: str) -> str:
+    return _ensure_albert_id(id, "NotebookId")
+
+
+NotebookId = Annotated[str, AfterValidator(ensure_notebook_id)]
+
+
+def ensure_synthesis_id(id: str) -> str:
+    return _ensure_albert_id(id, "SynthesisId")
+
+
+SynthesisId = Annotated[str, AfterValidator(ensure_synthesis_id)]
 
 
 def ensure_tag_id(id: str) -> str:

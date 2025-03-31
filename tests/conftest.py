@@ -45,6 +45,7 @@ from tests.seeding import (
     generate_location_seeds,
     generate_lot_seeds,
     generate_note_seeds,
+    generate_notebook_seeds,
     generate_parameter_group_seeds,
     generate_parameter_seeds,
     generate_pricing_seeds,
@@ -473,6 +474,23 @@ def seeded_lots(
     for lot in seeded:
         with suppress(NotFoundError):
             client.lots.delete(id=lot.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_notebooks(
+    client: Albert,
+    seed_prefix: str,
+    seeded_projects,
+):
+    seeded = []
+    all_notebooks = generate_notebook_seeds(
+        seed_prefix=seed_prefix, seeded_projects=seeded_projects
+    )
+    seeded = [client.notebooks.create(notebook=nb) for nb in all_notebooks]
+    yield seeded
+    for notebook in seeded:
+        with suppress(NotFoundError):
+            client.notebooks.delete(id=notebook.id)
 
 
 @pytest.fixture(scope="session")

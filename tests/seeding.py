@@ -24,6 +24,7 @@ from albert.resources.locations import Location
 from albert.resources.lots import (
     Lot,
 )
+from albert.resources.notebooks import Notebook
 from albert.resources.notes import Note
 from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
 from albert.resources.parameters import Parameter, ParameterCategory
@@ -836,6 +837,18 @@ def generate_workflow_seeds(
                 )
             ],
         ),
+    ]
+
+
+def generate_notebook_seeds(seed_prefix: str, seeded_projects: list[Project]) -> list[Notebook]:
+    seed_project = seeded_projects[0]
+    return [
+        Notebook(
+            name=f"{seed_prefix} - Project Notebook 1",
+            parent_id=seed_project.id,
+            blocks=[],
+        ),
+        # TODO: Add another notebook with a General Task parent
     ]
 
 

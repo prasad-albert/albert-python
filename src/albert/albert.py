@@ -16,6 +16,7 @@ from albert.collections.links import LinksCollection
 from albert.collections.lists import ListsCollection
 from albert.collections.locations import LocationCollection
 from albert.collections.lots import LotCollection
+from albert.collections.notebooks import NotebookCollection
 from albert.collections.notes import NotesCollection
 from albert.collections.parameter_groups import ParameterGroupCollection
 from albert.collections.parameters import ParameterCollection
@@ -138,6 +139,10 @@ class Albert:
     @property
     def lists(self) -> ListsCollection:
         return ListsCollection(session=self.session)
+
+    @property
+    def notebooks(self) -> NotebookCollection:
+        return NotebookCollection(session=self.session)
 
     @property
     def notes(self) -> NotesCollection:
