@@ -8,7 +8,7 @@ from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
 from albert.resources.identifiers import LinkId, NotebookId, ProjectId, SynthesisId, TaskId
 
 
-class ListBlockStyles(str, Enum):
+class ListBlockStyle(str, Enum):
     ORDERED = "ordered"
     UNORDERED = "unordered"
 
@@ -124,12 +124,12 @@ class NotebookListItem(BaseModel):
 
 class BulletedListContent(BaseAlbertModel):
     items: list[NotebookListItem]
-    style: Literal[ListBlockStyles.UNORDERED] = ListBlockStyles.UNORDERED
+    style: Literal[ListBlockStyle.UNORDERED] = ListBlockStyle.UNORDERED
 
 
 class NumberedListContent(BaseAlbertModel):
     items: list[NotebookListItem]
-    style: Literal[ListBlockStyles.ORDERED] = ListBlockStyles.ORDERED
+    style: Literal[ListBlockStyle.ORDERED] = ListBlockStyle.ORDERED
 
 
 _ListContentUnion = NumberedListContent | BulletedListContent
