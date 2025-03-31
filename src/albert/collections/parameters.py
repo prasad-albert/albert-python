@@ -3,8 +3,10 @@ import logging
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
+from albert.exceptions import AlbertHTTPError
 from albert.resources.parameters import Parameter
 from albert.session import AlbertSession
+from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -106,6 +108,15 @@ class ParameterCollection(BaseCollection):
         Iterator[Parameter]
             An iterator of Parameters matching the given criteria.
         """
+
+        def deserialize(items: list[dict]) -> Iterator[Parameter]:
+            for item in items:
+                id = item["albertId"]
+                try:
+                    yield self.get_by_id(id=id)
+                except AlbertHTTPError as e:
+                    logger.warning(f"Error fetching Parameter '{id}': {e}")
+
         params = {"limit": limit, "orderBy": order_by, "parameters": ids, "startKey": start_key}
         if names:
             params["name"] = [names] if isinstance(names, str) else names
@@ -116,7 +127,7 @@ class ParameterCollection(BaseCollection):
             path=self.base_path,
             session=self.session,
             params=params,
-            deserialize=lambda items: [Parameter(**item) for item in items],
+            deserialize=deserialize,
         )
 
     def _is_metadata_item_list(

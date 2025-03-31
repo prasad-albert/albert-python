@@ -2,8 +2,10 @@ import json
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
+from albert.exceptions import AlbertHTTPError
 from albert.resources.data_columns import DataColumn
 from albert.session import AlbertSession
+from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -87,6 +89,15 @@ class DataColumnCollection(BaseCollection):
         Iterator[DataColumn]
             An iterator of DataColumns matching the provided criteria.
         """
+
+        def deserialize(items: list[dict]) -> Iterator[DataColumn]:
+            for item in items:
+                id = item["albertId"]
+                try:
+                    yield self.get_by_id(id=id)
+                except AlbertHTTPError as e:
+                    logger.warning(f"Error fetching Data Column '{id}': {e}")
+
         params = {
             "limit": limit,
             "orderBy": order_by.value,
@@ -101,7 +112,7 @@ class DataColumnCollection(BaseCollection):
             path=self.base_path,
             session=self.session,
             params=params,
-            deserialize=lambda items: [DataColumn(**item) for item in items],
+            deserialize=deserialize,
         )
 
     def create(self, *, data_column: DataColumn) -> DataColumn:
