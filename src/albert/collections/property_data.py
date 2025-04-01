@@ -454,7 +454,7 @@ class PropertyDataCollection(BaseCollection):
     ) -> list[TaskPropertyData]:
         """
         Bulk load task properties for a given task. WARNING: This will overwrite any existing properties!
-        DataFrame column names must exactly match the names of the data columns (Case Sensitive) and the index should be 0...n.
+        BulkPropertyData column names must exactly match the names of the data columns (Case Sensitive).
 
         Parameters
         ----------
