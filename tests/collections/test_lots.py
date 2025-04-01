@@ -36,9 +36,13 @@ def test_get_by_ids(client: Albert, seeded_lots: list[Lot]):
         assert l.id in seeded_ids
 
 
-def test_update(client: Albert, seeded_lots: list[Lot]):
-    manufacturing_lot_number = "ventura-inc-1"
-    old_lot = seeded_lots[0]
-    old_lot.manufacturer_lot_number = manufacturing_lot_number
-    updated_lot = client.lots.update(lot=old_lot)
-    assert updated_lot.manufacturer_lot_number == manufacturing_lot_number
+def test_update(client: Albert, static_lot: Lot):
+    lot = static_lot.model_copy()
+
+    marker = "TEST"
+    lot.manufacturer_lot_number = marker
+    lot.location = marker
+
+    updated_lot = client.lots.update(lot=lot)
+    assert updated_lot.manufacturer_lot_number == lot.manufacturer_lot_number
+    assert updated_lot.location == lot.location
