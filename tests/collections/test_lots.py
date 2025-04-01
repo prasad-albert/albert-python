@@ -41,8 +41,6 @@ def test_update(client: Albert, seeded_lot: Lot):
 
     marker = "TEST"
     lot.manufacturer_lot_number = marker
-    lot.notes = marker
 
     updated_lot = client.lots.update(lot=lot)
     assert updated_lot.manufacturer_lot_number == lot.manufacturer_lot_number
-    assert updated_lot.notes == lot.notes

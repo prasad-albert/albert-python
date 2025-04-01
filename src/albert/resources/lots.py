@@ -66,7 +66,6 @@ class Lot(BaseResource):
     id: LotId | None = Field(None, alias="albertId")
     inventory_id: InventoryId = Field(alias="parentId")
     task_id: str | None = Field(default=None, alias="taskId")
-    notes: str | None = Field(default=None)
     expiration_date: str | None = Field(None, alias="expirationDate")
     manufacturer_lot_number: str | None = Field(None, alias="manufacturerLotNumber")
     storage_location: SerializeAsEntityLink[StorageLocation] | None = Field(
