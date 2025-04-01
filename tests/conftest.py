@@ -191,14 +191,6 @@ def static_btmodel(static_btmodelsession: BTModelSession) -> BTModel:
     return static_btmodelsession.models.get_by_id(id="MDL1")
 
 
-@pytest.fixture(scope="function")
-def seeded_lot(client: Albert, seeded_inventory: list[InventoryItem]) -> Generator[Lot]:
-    new_lot = Lot(inventory_id=seeded_inventory[0].id, inventory_on_hand=1)
-    lot = client.lots.create(lots=[new_lot])[0]
-    yield lot
-    client.lots.delete(lot.id)
-
-
 ### SEEDED RESOURCES -- CREATED ONCE PER SESSION, CAN BE DELETED
 
 
@@ -483,6 +475,23 @@ def seeded_lots(
     for lot in seeded:
         with suppress(NotFoundError):
             client.lots.delete(id=lot.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_lot(
+    client: Albert,
+    seeded_inventory,
+    seeded_storage_locations,
+    seeded_locations,
+):
+    lot = generate_lot_seeds(
+        seeded_inventory=seeded_inventory,
+        seeded_storage_locations=seeded_storage_locations,
+        seeded_locations=seeded_locations,
+    )[0]
+    seeded = client.lots.create(lots=[lot])
+    yield seeded
+    client.lots.delete(id=seeded.id)
 
 
 @pytest.fixture(scope="session")
