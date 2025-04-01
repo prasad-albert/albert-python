@@ -190,6 +190,11 @@ def static_btmodel(static_btmodelsession: BTModelSession) -> BTModel:
     return static_btmodelsession.models.get_by_id(id="MDL1")
 
 
+@pytest.fixture(scope="session")
+def static_lot(client: Albert) -> BTModelSession:
+    return client.lots.get_by_id(id="LOT10")
+
+
 ### SEEDED RESOURCES -- CREATED ONCE PER SESSION, CAN BE DELETED
 
 
