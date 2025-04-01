@@ -1,6 +1,6 @@
 import time
 import uuid
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from contextlib import suppress
 
 import jwt
@@ -21,6 +21,7 @@ from albert.resources.files import FileCategory, FileInfo, FileNamespace
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
+from albert.resources.lots import Lot
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
@@ -190,9 +191,12 @@ def static_btmodel(static_btmodelsession: BTModelSession) -> BTModel:
     return static_btmodelsession.models.get_by_id(id="MDL1")
 
 
-@pytest.fixture(scope="session")
-def static_lot(client: Albert) -> BTModelSession:
-    return client.lots.get_by_id(id="LOT1")
+@pytest.fixture(scope="function")
+def seeded_lot(client: Albert, seeded_inventory: list[InventoryItem]) -> Generator[Lot]:
+    new_lot = Lot(inventory_id=seeded_inventory[0].id, inventory_on_hand=1)
+    lot = client.lots.create(lots=[new_lot])[0]
+    yield lot
+    client.lots.delete(lot.id)
 
 
 ### SEEDED RESOURCES -- CREATED ONCE PER SESSION, CAN BE DELETED
