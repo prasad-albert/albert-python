@@ -476,6 +476,16 @@ class PropertyDataCollection(BaseCollection):
         list[TaskPropertyData]
             The updated or newly created task properties.
 
+        Example
+        -------
+
+        >>> res = dev_client.property_data.bulk_load_task_properties(
+        ...    block_id="BLK1",
+        ...    inventory_id="INVEXP102748-042",
+        ...    property_data=BulkPropertyData.from_dataframe(df=my_dataframe),
+        ...    task_id="TASFOR291760",
+        ... )
+        [TaskPropertyData(id="TASFOR291760", ...)]
         """
         property_df = pd.DataFrame(
             {x.data_column_name: x.data_series for x in property_data.columns}
