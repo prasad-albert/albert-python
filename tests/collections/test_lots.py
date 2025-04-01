@@ -1,5 +1,27 @@
+from collections.abc import Iterator
+
+import pytest
+
 from albert.albert import Albert
 from albert.resources.lots import Lot
+from tests.seeding import generate_lot_seeds
+
+
+@pytest.fixture(scope="function")
+def seeded_lot(
+    client: Albert,
+    seeded_inventory,
+    seeded_storage_locations,
+    seeded_locations,
+) -> Iterator[Lot]:
+    lot = generate_lot_seeds(
+        seeded_inventory=seeded_inventory,
+        seeded_storage_locations=seeded_storage_locations,
+        seeded_locations=seeded_locations,
+    )[0]
+    seeded = client.lots.create(lots=[lot])[0]
+    yield seeded
+    client.lots.delete(id=seeded.id)
 
 
 def _list_asserts(returned_list):

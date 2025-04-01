@@ -477,23 +477,6 @@ def seeded_lots(
             client.lots.delete(id=lot.id)
 
 
-@pytest.fixture(scope="function")
-def seeded_lot(
-    client: Albert,
-    seeded_inventory,
-    seeded_storage_locations,
-    seeded_locations,
-) -> Iterator[Lot]:
-    lot = generate_lot_seeds(
-        seeded_inventory=seeded_inventory,
-        seeded_storage_locations=seeded_storage_locations,
-        seeded_locations=seeded_locations,
-    )[0]
-    seeded = client.lots.create(lots=[lot])[0]
-    yield seeded
-    client.lots.delete(id=seeded.id)
-
-
 @pytest.fixture(scope="session")
 def seeded_notebooks(
     client: Albert,
