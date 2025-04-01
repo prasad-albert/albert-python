@@ -1,6 +1,6 @@
 import time
 import uuid
-from collections.abc import Generator, Iterator
+from collections.abc import Iterator
 from contextlib import suppress
 
 import jwt
@@ -477,7 +477,7 @@ def seeded_lots(
             client.lots.delete(id=lot.id)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def seeded_lot(
     client: Albert,
     seeded_inventory,
