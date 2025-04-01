@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Literal
 
+import pandas as pd
 from pydantic import Field, field_validator, model_validator
 
 from albert.resources.base import BaseAlbertModel, BaseResource
@@ -136,6 +137,52 @@ class TaskPropertyData(BaseResource):
     block_id: str | None = Field(alias="blockId", default=None)
 
 
+class BulkPropertyDataColumn(BaseResource):
+    """A Simple Data Structure representing all the rows of data in a block's data column."""
+
+    data_column_name: str = Field(
+        default=None, description="The name of the data column (case sensitive)."
+    )
+    data_series: list[str] = Field(
+        default_factory=list,
+        description="The values, in order of row number, for the data column.",
+    )
+
+
+class BulkPropertyData(BaseAlbertModel):
+    """A Simple Data Structure representing all the columns of data in a block's data column."""
+
+    columns: list[BulkPropertyDataColumn] = Field(
+        default_factory=list,
+        description="The columns of data in the block's data column.",
+    )
+
+    @classmethod
+    def from_dataframe(cls, df: pd.DataFrame) -> "BulkPropertyData":
+        """
+        Converts a DataFrame to a BulkPropertyData object.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The DataFrame to convert.
+
+        Returns
+        -------
+        BulkPropertyData
+            The BulkPropertyData object that represents the data in the DataFrame.
+        """
+        # Convert all the values to strings, since all albert values are string typed in Albert
+        df = df.astype(str)
+        columns = []
+        for column in df.columns:
+            data_column = BulkPropertyDataColumn(
+                data_column_name=column, data_series=df[column].tolist()
+            )
+            columns.append(data_column)
+        return BulkPropertyData(columns=columns)
+
+
 ########################## Supporting POST Classes ##########################
 
 
@@ -187,7 +234,7 @@ class TaskPropertyCreate(BaseResource):
     - Users can use `Workflow.get_interval_id(parameter_values={"name1":"value1", "name2":"value2"})`
       to find the correct interval given the names and setpoints of the parameters.
     - Leave `trial_number` blank to create a new row/trial.
-    - `visible_trial_number` can always be left empty.
+    - `visible_trial_number` can be used to set the relative row number, allowing you to pass multiple rows of data at once.
     """
 
     entity: Literal[DataEntity.TASK] = Field(
@@ -214,7 +261,11 @@ class TaskPropertyCreate(BaseResource):
         alias="DataTemplate",
         description="The data template associated with the task property.",
     )
-    visible_trial_number: int | None = Field(alias="visibleTrialNo", default=None)
+    visible_trial_number: int | None = Field(
+        alias="visibleTrialNo",
+        default=None,
+        description="Can be used to set the relative row number, allowing you to pass multiple rows of data at once.",
+    )
 
     @model_validator(mode="after")
     def set_visible_trial_number(self) -> "TaskPropertyCreate":

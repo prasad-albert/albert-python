@@ -1,10 +1,12 @@
 import re
 from collections.abc import Iterator
 
+import pandas as pd
 from pydantic import validate_call
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.tasks import TaskCollection
+from albert.resources.base import BaseEntityLink
 from albert.resources.identifiers import (
     BlockId,
     DataColumnId,
@@ -18,6 +20,7 @@ from albert.resources.identifiers import (
     UserId,
 )
 from albert.resources.property_data import (
+    BulkPropertyData,
     CheckPropertyData,
     DataEntity,
     InventoryDataColumn,
@@ -26,6 +29,7 @@ from albert.resources.property_data import (
     PropertyDataPatchDatum,
     PropertyDataSearchItem,
     PropertyValue,
+    TaskDataColumn,
     TaskPropertyCreate,
     TaskPropertyData,
     Trial,
@@ -437,6 +441,144 @@ class PropertyDataCollection(BaseCollection):
             )
         else:
             return self.update_property_on_task(task_id=task_id, patch_payload=all_patches)
+
+    def bulk_load_task_properties(
+        self,
+        *,
+        inventory_id: InventoryId,
+        task_id: TaskId,
+        block_id: BlockId,
+        property_data: BulkPropertyData,
+        interval="default",
+        lot_id: LotId = None,
+    ) -> list[TaskPropertyData]:
+        """
+        Bulk load task properties for a given task. WARNING: This will overwrite any existing properties!
+        DataFrame column names must exactly match the names of the data columns (Case Sensitive) and the index should be 0...n.
+
+        Parameters
+        ----------
+        inventory_id : InventoryId
+            The ID of the inventory.
+        task_id : TaskId
+            The ID of the task.
+        block_id : BlockId
+            The ID of the block.
+        lot_id : LotId, optional
+            The ID of the lot, by default None.
+        interval : str, optional
+            The interval to use for the properties, by default "default". Can be obtained using Workflow.get_interval_id().
+        property_data : BulkPropertyData
+            A list of columnwise data containing all your rows of data for a single interval. Can be created using BulkPropertyData.from_dataframe().
+
+        Returns
+        -------
+        list[TaskPropertyData]
+            The updated or newly created task properties.
+
+        """
+        property_df = pd.DataFrame(
+            {x.data_column_name: x.data_series for x in property_data.columns}
+        )
+
+        def _get_column_map(dataframe: pd.DataFrame, property_data: TaskPropertyData):
+            data_col_info = property_data.data[0].trials[0].data_columns  # PropertyValue
+            column_map = {}
+            for col in dataframe.columns:
+                column = [x for x in data_col_info if x.name == col]
+                if len(column) == 1:
+                    column_map[col] = column[0]
+                else:
+                    raise ValueError(
+                        f"Column '{col}' not found in block data columns or multiple matches found."
+                    )
+            return column_map
+
+        def _df_to_task_prop_create_list(
+            dataframe: pd.DataFrame,
+            column_map: dict[str, PropertyValue],
+            data_template_id: DataTemplateId,
+        ) -> list[TaskPropertyCreate]:
+            task_prop_create_list = []
+            for i, row in dataframe.iterrows():
+                for col_name, col_info in column_map.items():
+                    if col_name not in dataframe.columns:
+                        raise ValueError(f"Column '{col_name}' not found in DataFrame.")
+
+                    task_prop_create = TaskPropertyCreate(
+                        data_column=TaskDataColumn(
+                            data_column_id=col_info.id,
+                            column_sequence=col_info.sequence,
+                        ),
+                        value=str(row[col_name]),
+                        visible_trial_number=i + 1,
+                        interval_combination=interval,
+                        data_template=BaseEntityLink(id=data_template_id),
+                    )
+                    task_prop_create_list.append(task_prop_create)
+            return task_prop_create_list
+
+        task_prop_data = self.get_task_block_properties(
+            inventory_id=inventory_id, task_id=task_id, block_id=block_id, lot_id=lot_id
+        )
+        column_map = _get_column_map(property_df, task_prop_data)
+        all_task_prop_create = _df_to_task_prop_create_list(
+            dataframe=property_df,
+            column_map=column_map,
+            data_template_id=task_prop_data.data_template.id,
+        )
+        self.bulk_delete_task_data(
+            task_id=task_id,
+            block_id=block_id,
+            inventory_id=inventory_id,
+            lot_id=lot_id,
+            interval_id=interval,
+        )
+        return self.add_properties_to_task(
+            inventory_id=inventory_id,
+            task_id=task_id,
+            block_id=block_id,
+            lot_id=lot_id,
+            properties=all_task_prop_create,
+        )
+
+    def bulk_delete_task_data(
+        self,
+        *,
+        task_id: TaskId,
+        block_id: BlockId,
+        inventory_id: InventoryId,
+        lot_id: LotId | None = None,
+        interval_id=None,
+    ) -> None:
+        """
+        Bulk delete task data for a given task.
+
+        Parameters
+        ----------
+        task_id : TaskId
+            The ID of the task.
+        block_id : BlockId
+            The ID of the block.
+        inventory_id : InventoryId
+            The ID of the inventory.
+        lot_id : LotId, optional
+            The ID of the lot, by default None.
+        interval_id : IntervalId, optional
+            The ID of the interval, by default None. If provided, will delete data for this specific interval.
+
+        Returns
+        -------
+        None
+        """
+        params = {
+            "inventoryId": inventory_id,
+            "blockId": block_id,
+            "lotId": lot_id,
+            "intervalRow": interval_id if interval_id != "default" else None,
+        }
+        params = {k: v for k, v in params.items() if v is not None}
+        self.session.delete(f"{self.base_path}/{task_id}", params=params)
 
     ################### Methods to support Updated Row Value patches #################
 
