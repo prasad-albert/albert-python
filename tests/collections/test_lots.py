@@ -34,3 +34,11 @@ def test_get_by_ids(client: Albert, seeded_lots: list[Lot]):
     seeded_ids = [l.id for l in seeded_lots]
     for l in got_lots:
         assert l.id in seeded_ids
+
+
+def test_update(client: Albert, seeded_lots: list[Lot]):
+    manufacturing_lot_number = "ventura-inc-1"
+    old_lot = seeded_lots[0]
+    old_lot.manufacturer_lot_number = manufacturing_lot_number
+    updated_lot = client.lots.update(lot=old_lot)
+    assert updated_lot.manufacturer_lot_number == manufacturing_lot_number
