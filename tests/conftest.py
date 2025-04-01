@@ -463,7 +463,7 @@ def seeded_lots(
     seeded_inventory,
     seeded_storage_locations,
     seeded_locations,
-):
+) -> Iterator[list[Lot]]:
     seeded = []
     all_lots = generate_lot_seeds(
         seeded_inventory=seeded_inventory,
@@ -483,13 +483,13 @@ def seeded_lot(
     seeded_inventory,
     seeded_storage_locations,
     seeded_locations,
-):
+) -> Iterator[Lot]:
     lot = generate_lot_seeds(
         seeded_inventory=seeded_inventory,
         seeded_storage_locations=seeded_storage_locations,
         seeded_locations=seeded_locations,
     )[0]
-    seeded = client.lots.create(lots=[lot])
+    seeded = client.lots.create(lots=[lot])[0]
     yield seeded
     client.lots.delete(id=seeded.id)
 
