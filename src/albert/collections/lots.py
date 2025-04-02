@@ -11,7 +11,17 @@ class LotCollection(BaseCollection):
     """LotCollection is a collection class for managing Lot entities in the Albert platform."""
 
     _api_version = "v3"
-    _updatable_attributes = {"metadata"}
+    _updatable_attributes = {
+        "metadata",
+        "storage_location",
+        "manufacturer_lot_number",
+        "expiration_date",
+        "initial_quantity",
+        "inventory_on_hand",
+        "cost",
+        "status",
+        "pack_size",
+    }
 
     def __init__(self, *, session: AlbertSession):
         """A collection for interacting with Lots in Albert.
@@ -144,3 +154,24 @@ class LotCollection(BaseCollection):
             params=params,
             deserialize=lambda items: [Lot(**item) for item in items],
         )
+
+    def update(self, *, lot: Lot) -> Lot:
+        """Update a lot.
+
+        Parameters
+        ----------
+        lot : Lot
+            The updated lot object.
+
+        Returns
+        -------
+        Lot
+            The updated lot object as returned by the server.
+        """
+        existing_lot = self.get_by_id(id=lot.id)
+        patch_data = self._generate_patch_payload(existing=existing_lot, updated=lot)
+        url = f"{self.base_path}/{lot.id}"
+
+        self.session.patch(url, json=patch_data.model_dump(mode="json", by_alias=True))
+
+        return self.get_by_id(id=lot.id)

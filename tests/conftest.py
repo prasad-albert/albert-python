@@ -21,6 +21,7 @@ from albert.resources.files import FileCategory, FileInfo, FileNamespace
 from albert.resources.inventory import InventoryCategory, InventoryItem
 from albert.resources.lists import ListItem
 from albert.resources.locations import Location
+from albert.resources.lots import Lot
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
@@ -462,7 +463,7 @@ def seeded_lots(
     seeded_inventory,
     seeded_storage_locations,
     seeded_locations,
-):
+) -> Iterator[list[Lot]]:
     seeded = []
     all_lots = generate_lot_seeds(
         seeded_inventory=seeded_inventory,
