@@ -137,7 +137,7 @@ class TaskPropertyData(BaseResource):
     block_id: str | None = Field(alias="blockId", default=None)
 
 
-class BulkPropertyDataColumn(BaseResource):
+class BulkPropertyDataColumn(BaseAlbertModel):
     """A Simple Data Structure representing all the rows of data in a block's data column."""
 
     data_column_name: str = Field(
