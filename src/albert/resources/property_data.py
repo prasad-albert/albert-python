@@ -173,7 +173,7 @@ class BulkPropertyData(BaseAlbertModel):
             The BulkPropertyData object that represents the data in the DataFrame.
         """
         # Convert all the values to strings, since all albert values are string typed in Albert
-        df = df.astype(str)
+        df = df.fillna("").astype(str)
         columns = []
         for column in df.columns:
             data_column = BulkPropertyDataColumn(
