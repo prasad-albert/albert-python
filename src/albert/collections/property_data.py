@@ -483,8 +483,8 @@ class PropertyDataCollection(BaseCollection):
 
         ```python
         from albert.resources.property_data import BulkPropertyData
-        data = BulkPropertyData.from_dataframe(df=my_dataframe)
 
+        data = BulkPropertyData.from_dataframe(df=my_dataframe)
         res = client.property_data.bulk_load_task_properties(
             block_id="BLK1",
             inventory_id="INVEXP102748-042",
