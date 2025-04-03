@@ -1,11 +1,13 @@
 import re
 from collections.abc import Iterator
+from contextlib import suppress
 
 import pandas as pd
 from pydantic import validate_call
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.collections.tasks import TaskCollection
+from albert.exceptions import NotFoundError
 from albert.resources.base import BaseEntityLink
 from albert.resources.identifiers import (
     BlockId,
@@ -537,13 +539,15 @@ class PropertyDataCollection(BaseCollection):
             column_map=column_map,
             data_template_id=task_prop_data.data_template.id,
         )
-        self.bulk_delete_task_data(
-            task_id=task_id,
-            block_id=block_id,
-            inventory_id=inventory_id,
-            lot_id=lot_id,
-            interval_id=interval,
-        )
+        with suppress(NotFoundError):
+            # This is expected if the task is new and has no data yet.
+            self.bulk_delete_task_data(
+                task_id=task_id,
+                block_id=block_id,
+                inventory_id=inventory_id,
+                lot_id=lot_id,
+                interval_id=interval,
+            )
         return self.add_properties_to_task(
             inventory_id=inventory_id,
             task_id=task_id,
