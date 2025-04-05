@@ -1,6 +1,7 @@
 import os
 
 from albert.collections.attachments import AttachmentCollection
+from albert.collections.batch_data import BatchDataCollection
 from albert.collections.btdataset import BTDatasetCollection
 from albert.collections.btinsight import BTInsightCollection
 from albert.collections.btmodel import BTModelCollection, BTModelSessionCollection
@@ -226,3 +227,7 @@ class Albert:
     @property
     def links(self) -> LinksCollection:
         return LinksCollection(session=self.session)
+
+    @property
+    def batch_data(self) -> BatchDataCollection:
+        return BatchDataCollection(session=self.session)
