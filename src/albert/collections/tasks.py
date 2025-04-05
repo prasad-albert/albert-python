@@ -327,6 +327,65 @@ class TaskCollection(BaseCollection):
             params=params,
         )
 
+    def _generate_adv_patch_payload(self, *, updated: BaseTask) -> dict:
+        """Generate a patch payload for updating a task.
+
+        Parameters
+        ----------
+        existing : BaseTask
+            The existing Task object.
+        updated : BaseTask
+            The updated Task object.
+
+        Returns
+        -------
+        dict
+            The patch payload for updating the task.
+        """
+        _updatable_attributes_special = {"inventory_information"}
+        existing = self.get_by_id(id=updated.id)
+        patch_payload_obj = self._generate_patch_payload(
+            existing=existing,
+            updated=updated,
+        )
+        patch_payload = patch_payload_obj.model_dump(mode="json", by_alias=True)
+        patch_payload["id"] = updated.id
+
+        for attribute in _updatable_attributes_special:
+            old_value = getattr(existing, attribute)
+            new_value = getattr(updated, attribute)
+            if attribute == "inventory_information":
+                inv_to_remove = []
+                for inv in old_value:
+                    if inv not in new_value:
+                        inv_to_remove.append(
+                            inv.model_dump(mode="json", by_alias=True, exclude_none=True)
+                        )
+                if len(inv_to_remove) > 0:
+                    patch_payload["data"].append(
+                        {
+                            "operation": "delete",
+                            "attribute": "inventory",
+                            "oldValue": inv_to_remove,
+                        }
+                    )
+                inv_to_add = []
+                for inv in new_value:
+                    if inv not in old_value:
+                        inv_to_add.append(
+                            inv.model_dump(mode="json", by_alias=True, exclude_none=True)
+                        )
+                if len(inv_to_add) > 0:
+                    patch_payload["data"].append(
+                        {
+                            "operation": "add",
+                            "attribute": "inventory",
+                            "newValue": inv_to_add,
+                        }
+                    )
+
+        return [patch_payload]
+
     def update(self, *, task: BaseTask) -> BaseTask:
         """Update a task.
 
@@ -340,12 +399,7 @@ class TaskCollection(BaseCollection):
         BaseTask
             The updated Task object as it exists in the Albert platform.
         """
-        patch_payload_obj = self._generate_patch_payload(
-            existing=self.get_by_id(id=task.id),
-            updated=task,
-        )
-        patch_payload = [patch_payload_obj.model_dump(mode="json", by_alias=True)]
-        patch_payload[0]["id"] = task.id
+        patch_payload = self._generate_adv_patch_payload(updated=task)
         self.session.patch(
             url=f"{self.base_path}/{task.id}",
             json=patch_payload,
