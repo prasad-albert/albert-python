@@ -58,5 +58,4 @@ class BatchDataCollection(BaseCollection):
             "orderBy": order_by,
         }
         response = self.session.get(self.base_path, params=params)
-        return response.json()
-        # return BatchData(**response.json())
+        return BatchData(**response.json())
