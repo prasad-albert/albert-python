@@ -51,6 +51,7 @@ nav:
   - SDK Reference:
     - Albert Client: albert.md
     - Attachments: attachments.md
+    - Batch Data: batch_data.md
     - Breakthrough:
       - Breakthrough Datasets: btdataset.md
       - Breakthrough Insights: btinsight.md
