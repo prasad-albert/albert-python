@@ -5,6 +5,7 @@ from pydantic import Field, TypeAdapter
 
 from albert.resources.base import BaseAlbertModel, MetadataItem, SecurityClass
 from albert.resources.data_templates import DataTemplate
+from albert.resources.identifiers import InventoryId, LotId
 from albert.resources.locations import Location
 from albert.resources.projects import Project
 from albert.resources.serialization import SerializeAsEntityLink
@@ -93,8 +94,8 @@ class InventoryInformation(BaseAlbertModel):
         Whether the lot is selected for the task. Default is None.
     """
 
-    inventory_id: str = Field(alias="id")
-    lot_id: str | None = Field(alias="lotId", default=None)
+    inventory_id: InventoryId = Field(alias="id")
+    lot_id: LotId | None = Field(alias="lotId", default=None)
     inv_lot_unique_id: str | None = Field(alias="invLotUniqueId", default=None)
     batch_size: float | None = Field(alias="batchSize", default=None)
     selected_lot: bool | None = Field(alias="selectedLot", exclude=True, frozen=True, default=None)
