@@ -1,6 +1,7 @@
 from pydantic import TypeAdapter
 
 from albert.collections.base import BaseCollection
+from albert.exceptions import NotFoundError
 from albert.resources.notebooks import (
     Notebook,
     NotebookBlock,
@@ -141,10 +142,26 @@ class NotebookCollection(BaseCollection):
 
     def _generate_put_block_payload(self, *, notebook: Notebook) -> PutPayload:
         data = list()
-        ids_to_keep = list()
+        seen_ids = set()
         previous_block_id = ""
         # Update the Blocks in the Notebook
         for block in notebook.blocks:
+            if block.id in seen_ids:
+                # This check keeps a user from corrupting the Notebook data.
+                raise ValueError(f"You have Notebook blocks with duplicate ids. [id={block.id}]")
+            try:
+                existing_block = self.get_block_by_id(notebook_id=notebook.id, block_id=block.id)
+                if type(block) is not type(existing_block):
+                    # This check keeps a user from corrupting the Notebook data.
+                    msg = (
+                        f"Cannot convert an existing block type into another block type. "
+                        f"Instead, please instantiate a new block, and remove the old block "
+                        f"from the Notebook object. [existing_block_type={type(existing_block)}, "
+                        f"new_block_type={type(block)}]"
+                    )
+                    raise ValueError(msg)
+            except NotFoundError:
+                pass
             put_datum = PutDatum(
                 id=block.id,
                 type=block.type,
@@ -152,14 +169,14 @@ class NotebookCollection(BaseCollection):
                 operation=PutOperation.UPDATE,
                 previous_block_id=previous_block_id,
             )
-            ids_to_keep.append(put_datum.id)
+            seen_ids.add(put_datum.id)
             previous_block_id = put_datum.id  # Ensure the Block ordering is consecutive
             data.append(put_datum)
 
         # Delete the Blocks not present in the new Notebook object
         existing_notebook = self.get_by_id(id=notebook.id)
         for block in existing_notebook.blocks:
-            if block.id not in ids_to_keep:
+            if block.id not in seen_ids:
                 data.append(PutDatum(id=block.id, operation=PutOperation.DELETE))
 
         return PutPayload(data=data)
