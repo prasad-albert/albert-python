@@ -33,6 +33,7 @@ from albert.resources.notebooks import (
     HeaderContent,
     ListBlock,
     Notebook,
+    NotebookBlock,
     NotebookListItem,
     NumberedListContent,
     ParagraphBlock,
@@ -855,78 +856,74 @@ def generate_workflow_seeds(
     ]
 
 
+def generate_notebook_block_seeds() -> list[NotebookBlock]:
+    return [
+        HeaderBlock(content=HeaderContent(level=1, text="I am a header1 block.")),
+        HeaderBlock(content=HeaderContent(level=2, text="I am a header2 block.")),
+        HeaderBlock(content=HeaderContent(level=3, text="I am a header3 block.")),
+        ParagraphBlock(content=ParagraphContent(text="I am a paragraph block.")),
+        TableBlock(
+            content=TableContent(
+                content=[
+                    ["row1-col1", None, "row1-col3"],
+                    [None, "row2-col2", None],
+                    ["row3-col1", None, "row3-col3"],
+                ]
+            )
+        ),
+        ChecklistBlock(
+            content=ChecklistContent(
+                items=[
+                    ChecklistItem(checked=True, text="I am checked."),
+                    ChecklistItem(checked=False, text="I am not checked."),
+                    ChecklistItem(checked=True, text="I am also checked."),
+                ]
+            )
+        ),
+        ListBlock(
+            content=BulletedListContent(
+                items=[
+                    NotebookListItem(content="I", items=[NotebookListItem(content="subbullet 1")]),
+                    NotebookListItem(
+                        content="am", items=[NotebookListItem(content="subbullet 2")]
+                    ),
+                    NotebookListItem(content="a", items=[NotebookListItem(content="subbullet 3")]),
+                    NotebookListItem(
+                        content="bulleted", items=[NotebookListItem(content="subbullet 4")]
+                    ),
+                    NotebookListItem(
+                        content="list", items=[NotebookListItem(content="subbullet 5")]
+                    ),
+                ]
+            )
+        ),
+        ListBlock(
+            content=NumberedListContent(
+                items=[
+                    NotebookListItem(content="I", items=[NotebookListItem(content="subnumber 1")]),
+                    NotebookListItem(
+                        content="am", items=[NotebookListItem(content="subnumber 2")]
+                    ),
+                    NotebookListItem(content="a", items=[NotebookListItem(content="subnumber 3")]),
+                    NotebookListItem(
+                        content="numbered", items=[NotebookListItem(content="subnumber 4")]
+                    ),
+                    NotebookListItem(
+                        content="list", items=[NotebookListItem(content="subnumber 5")]
+                    ),
+                ]
+            )
+        ),
+    ]
+
+
 def generate_notebook_seeds(seed_prefix: str, seeded_projects: list[Project]) -> list[Notebook]:
     seed_project = seeded_projects[0]
     return [
         Notebook(
             name=f"{seed_prefix} - Project Notebook 1",
             parent_id=seed_project.id,
-            blocks=[
-                HeaderBlock(content=HeaderContent(level=1, text="I am a header1 block.")),
-                HeaderBlock(content=HeaderContent(level=2, text="I am a header2 block.")),
-                HeaderBlock(content=HeaderContent(level=3, text="I am a header3 block.")),
-                ParagraphBlock(content=ParagraphContent(text="I am a paragraph block.")),
-                TableBlock(
-                    content=TableContent(
-                        content=[
-                            ["row1-col1", None, "row1-col3"],
-                            [None, "row2-col2", None],
-                            ["row3-col1", None, "row3-col3"],
-                        ]
-                    )
-                ),
-                ChecklistBlock(
-                    content=ChecklistContent(
-                        items=[
-                            ChecklistItem(checked=True, text="I am checked."),
-                            ChecklistItem(checked=False, text="I am not checked."),
-                            ChecklistItem(checked=True, text="I am also checked."),
-                        ]
-                    )
-                ),
-                ListBlock(
-                    content=BulletedListContent(
-                        items=[
-                            NotebookListItem(
-                                content="I", items=[NotebookListItem(content="subbullet 1")]
-                            ),
-                            NotebookListItem(
-                                content="am", items=[NotebookListItem(content="subbullet 2")]
-                            ),
-                            NotebookListItem(
-                                content="a", items=[NotebookListItem(content="subbullet 3")]
-                            ),
-                            NotebookListItem(
-                                content="bulleted", items=[NotebookListItem(content="subbullet 4")]
-                            ),
-                            NotebookListItem(
-                                content="list", items=[NotebookListItem(content="subbullet 5")]
-                            ),
-                        ]
-                    )
-                ),
-                ListBlock(
-                    content=NumberedListContent(
-                        items=[
-                            NotebookListItem(
-                                content="I", items=[NotebookListItem(content="subnumber 1")]
-                            ),
-                            NotebookListItem(
-                                content="am", items=[NotebookListItem(content="subnumber 2")]
-                            ),
-                            NotebookListItem(
-                                content="a", items=[NotebookListItem(content="subnumber 3")]
-                            ),
-                            NotebookListItem(
-                                content="numbered", items=[NotebookListItem(content="subnumber 4")]
-                            ),
-                            NotebookListItem(
-                                content="list", items=[NotebookListItem(content="subnumber 5")]
-                            ),
-                        ]
-                    )
-                ),
-            ],
+            blocks=[],
         ),
         # TODO: Add another notebook with a General Task parent
     ]
