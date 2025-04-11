@@ -1,5 +1,15 @@
+from pydantic import TypeAdapter
+
 from albert.collections.base import BaseCollection
-from albert.resources.notebooks import Notebook
+from albert.exceptions import NotFoundError
+from albert.resources.notebooks import (
+    Notebook,
+    NotebookBlock,
+    PutDatum,
+    PutOperation,
+    PutPayload,
+    _NotebookBlockUnion,
+)
 from albert.session import AlbertSession
 
 
@@ -7,6 +17,7 @@ class NotebookCollection(BaseCollection):
     """NotebookCollection is a collection class for managing Notebook entities in the Albert platform."""
 
     _api_version = "v3"
+    _updatable_attributes = {"name"}
 
     def __init__(self, *, session: AlbertSession):
         """
@@ -67,3 +78,89 @@ class NotebookCollection(BaseCollection):
             The ID of the notebook to delete.
         """
         self.session.delete(f"{self.base_path}/{id}")
+
+    def update(self, *, notebook: Notebook) -> Notebook:
+        """Update a notebook.
+
+        Parameters
+        ----------
+        notebook : Notebook
+            The updated notebook object.
+
+        Returns
+        -------
+        Notebook
+            The updated notebook object as returned by the server.
+        """
+        existing_notebook = self.get_by_id(id=notebook.id)
+        patch_data = self._generate_patch_payload(existing=existing_notebook, updated=notebook)
+        url = f"{self.base_path}/{notebook.id}"
+
+        self.session.patch(url, json=patch_data.model_dump(mode="json", by_alias=True))
+
+        return self.get_by_id(id=notebook.id)
+
+    def update_block_content(self, *, notebook: Notebook) -> Notebook:
+        """
+        Updates the block content of a Notebook. This does not update the notebook name (use .update for that).
+        If a block in the Notebook does not already exist on Albert, it will be created.
+        *Note: The order of the Blocks in your Notebook matter and will be used in the updated Notebook!*
+
+
+        Parameters
+        ----------
+        notebook : Notebook
+            The updated notebook object.
+
+        Returns
+        -------
+        Notebook
+            The updated notebook object as returned by the server.
+        """
+        put_data = self._generate_put_block_payload(notebook=notebook)
+        url = f"{self.base_path}/{notebook.id}/content"
+
+        self.session.put(url, json=put_data.model_dump(mode="json", by_alias=True))
+
+        return self.get_by_id(id=notebook.id)
+
+    def get_block_by_id(self, *, notebook_id: str, block_id: str) -> NotebookBlock:
+        """Retrieve a Notebook Block by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the Notebook Block to retrieve.
+
+        Returns
+        -------
+        NotebookBlock
+            The NotebookBlock object.
+        """
+        response = self.session.get(f"{self.base_path}/{notebook_id}/blocks/{block_id}")
+        return TypeAdapter(_NotebookBlockUnion).validate_python(response.json())
+
+    def _generate_put_block_payload(self, *, notebook: Notebook) -> PutPayload:
+        data = list()
+        ids_to_keep = list()
+        previous_block_id = ""
+        # Update the Blocks in the Notebook
+        for block in notebook.blocks:
+            put_datum = PutDatum(
+                id=block.id,
+                type=block.type,
+                content=block.content,
+                operation=PutOperation.UPDATE,
+                previous_block_id=previous_block_id,
+            )
+            ids_to_keep.append(put_datum.id)
+            previous_block_id = put_datum.id  # Ensure the Block ordering is consecutive
+            data.append(put_datum)
+
+        # Delete the Blocks not present in the new Notebook object
+        existing_notebook = self.get_by_id(id=notebook.id)
+        for block in existing_notebook.blocks:
+            if block.id not in ids_to_keep:
+                data.append(PutDatum(id=block.id, operation=PutOperation.DELETE))
+
+        return PutPayload(data=data)
