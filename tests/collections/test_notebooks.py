@@ -44,6 +44,7 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
 
 
 def test_get_block_by_id(client: Albert, seeded_notebooks: list[Notebook]):
-    block = seeded_notebooks[0].blocks[0]
-    retrieved_block = client.notebooks.get_block_by_id(id=block.id)
+    nb = seeded_notebooks[0]
+    block = nb.blocks[0]
+    retrieved_block = client.notebooks.get_block_by_id(notebook_id=nb.id, block_id=block.id)
     assert retrieved_block.id == block.id
