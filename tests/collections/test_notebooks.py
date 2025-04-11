@@ -8,18 +8,9 @@ from tests.seeding import generate_notebook_seeds
 
 
 @pytest.fixture(scope="function")
-def seeded_notebook(
-    client: Albert,
-    seeded_inventory,
-    seeded_storage_locations,
-    seeded_locations,
-) -> Iterator[Notebook]:
-    notebook = generate_notebook_seeds(
-        seeded_inventory=seeded_inventory,
-        seeded_storage_locations=seeded_storage_locations,
-        seeded_locations=seeded_locations,
-    )[0]
-    seeded = client.notebooks.create(notebooks=[notebook])[0]
+def seeded_notebook(client: Albert, seed_prefix, seeded_projects) -> Iterator[Notebook]:
+    notebook = generate_notebook_seeds(seed_prefix=seed_prefix, seeded_projects=seeded_projects)[0]
+    seeded = client.notebooks.create(notebook=notebook)
     yield seeded
     client.notebooks.delete(id=seeded.id)
 
