@@ -1,7 +1,6 @@
 from pydantic import TypeAdapter
 
 from albert.collections.base import BaseCollection
-from albert.exceptions import NotFoundError
 from albert.resources.notebooks import (
     Notebook,
     NotebookBlock,
