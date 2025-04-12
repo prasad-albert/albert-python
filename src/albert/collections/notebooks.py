@@ -61,6 +61,14 @@ class NotebookCollection(BaseCollection):
         Notebook
             A list of created or found Notebook objects.
         """
+        if notebook.blocks:
+            # This check keeps a user from corrupting the Notebook data.
+            msg = (
+                "Cannot create a Notebook with pre-filled blocks. "
+                "Set `blocks=[]` (or do not set it) when creating it. "
+                "Use `.update_block_content()` afterward to add, update, or delete blocks."
+            )
+            raise ValueError(msg)
         response = self.session.post(
             url=self.base_path,
             json=notebook.model_dump(mode="json", by_alias=True, exclude_none=True),

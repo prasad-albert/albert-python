@@ -84,3 +84,12 @@ def test_get_block_by_id(client: Albert, seeded_notebooks: list[Notebook]):
     block = nb.blocks[0]
     retrieved_block = client.notebooks.get_block_by_id(notebook_id=nb.id, block_id=block.id)
     assert retrieved_block.id == block.id
+
+
+def test_create_validation(client: Albert, seeded_projects):
+    notebook = Notebook(
+        parent_id=seeded_projects[0].id,
+        blocks=[ParagraphBlock(content=ParagraphContent(text="test"))],
+    )
+    with pytest.raises(ValueError, match="Cannot create a Notebook with pre-filled blocks."):
+        client.notebooks.create(notebook=notebook)
