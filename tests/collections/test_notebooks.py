@@ -40,7 +40,6 @@ def test_update(client: Albert, seeded_notebook: Notebook):
 
 def test_update_block_content(client: Albert, seeded_notebook: Notebook):
     notebook = seeded_notebook.model_copy()
-
     marker = list(notebook.blocks)
     marker[0] = ParagraphBlock(content=ParagraphContent(text="Converted block."))  # Replace block
     marker = marker[::-1]  # reverse blocks
@@ -53,6 +52,7 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
         assert updated.content == existing.content
 
     # Try to change the type of a notebook block
+    notebook = seeded_notebook.model_copy()
     header_block = HeaderBlock(content=HeaderContent(level=1, text="Header block"))
     notebook.blocks.append(header_block)
     notebook = client.notebooks.update_block_content(notebook=notebook)
@@ -62,6 +62,7 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
         client.notebooks.update_block_content(notebook=notebook)
 
     # Try to create notebook blocks with duplicate ids
+    notebook = seeded_notebook.model_copy()
     header_block1 = HeaderBlock(content=HeaderContent(level=1, text="Header block 1"))
     header_block2 = HeaderBlock(
         id=header_block1.id, content=HeaderContent(level=1, text="Header block 2")
