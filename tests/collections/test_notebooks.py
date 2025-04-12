@@ -71,6 +71,13 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
     with pytest.raises(ValueError, match="You have Notebook blocks with duplicate ids"):
         client.notebooks.update_block_content(notebook=notebook)
 
+    # Ensure we can enter blocks with None Fields
+    notebook = seeded_notebook.model_copy()
+    header_block = HeaderBlock(content=HeaderContent(level=1, text=None))
+    notebook.blocks.append(header_block)
+    updated_notebook = client.notebooks.update_block_content(notebook=notebook)
+    assert updated_notebook.blocks[-1].content.text is None
+
 
 def test_get_block_by_id(client: Albert, seeded_notebooks: list[Notebook]):
     nb = seeded_notebooks[0]
