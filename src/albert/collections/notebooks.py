@@ -121,7 +121,7 @@ class NotebookCollection(BaseCollection):
         url = f"{self.base_path}/{notebook.id}/content"
 
         self.session.put(
-            url, json=put_data.model_dump(mode="json", by_alias=True, exclude_unset=True)
+            url, json=put_data.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
 
         return self.get_by_id(id=notebook.id)

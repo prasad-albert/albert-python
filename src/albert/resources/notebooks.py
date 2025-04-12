@@ -218,8 +218,8 @@ class PutDatum(BaseAlbertModel):
         return self
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
-        # Default to exclude_unset=True to remove type/content/previous_block_id values when not explicitly set
-        kwargs.setdefault("exclude_unset", True)
+        # Default to exclude_none=True to remove type/content/previous_block_id values when they're None
+        kwargs.setdefault("exclude_none", True)
         return super().model_dump(**kwargs)
 
 
