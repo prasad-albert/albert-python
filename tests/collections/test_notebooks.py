@@ -51,6 +51,13 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
         assert updated.id == existing.id
         assert updated.content == existing.content
 
+    # Ensure we can enter blocks with None Fields
+    notebook = seeded_notebook.model_copy()
+    header_block = HeaderBlock(content=HeaderContent(level=1, text=None))
+    notebook.blocks.append(header_block)
+    updated_notebook = client.notebooks.update_block_content(notebook=notebook)
+    assert updated_notebook.blocks[-1].content.text is None
+
     # Try to change the type of a notebook block
     notebook = seeded_notebook.model_copy()
     header_block = HeaderBlock(content=HeaderContent(level=1, text="Header block"))
@@ -70,13 +77,6 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
     notebook.blocks.extend([header_block1, header_block2])
     with pytest.raises(ValueError, match="You have Notebook blocks with duplicate ids"):
         client.notebooks.update_block_content(notebook=notebook)
-
-    # Ensure we can enter blocks with None Fields
-    notebook = seeded_notebook.model_copy()
-    header_block = HeaderBlock(content=HeaderContent(level=1, text=None))
-    notebook.blocks.append(header_block)
-    updated_notebook = client.notebooks.update_block_content(notebook=notebook)
-    assert updated_notebook.blocks[-1].content.text is None
 
 
 def test_get_block_by_id(client: Albert, seeded_notebooks: list[Notebook]):
