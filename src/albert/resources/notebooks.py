@@ -218,10 +218,17 @@ class PutDatum(BaseAlbertModel):
         return self
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
-        # Default to exclude_none=True to remove type/content/previous_block_id values when they're None
-        kwargs.setdefault("exclude_none", True)
-        return super().model_dump(**kwargs)
+        """
+        Shallow model_dump to exclude None values (None only removed from top level).
+        This ensures required attrs are not removed.
+        """
+        base = super().model_dump(**kwargs)
+        return {k: v for k, v in base.items() if v is not None}
 
 
 class PutPayload(BaseAlbertModel):
     data: list[PutDatum]
+
+    def model_dump(self, **kwargs) -> dict[str, Any]:
+        """model_dump to ensure only top-level None attrs are removed on PutDatum."""
+        return {"data": [item.model_dump(**kwargs) for item in self.data]}
