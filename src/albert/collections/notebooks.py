@@ -120,7 +120,9 @@ class NotebookCollection(BaseCollection):
         put_data = self._generate_put_block_payload(notebook=notebook)
         url = f"{self.base_path}/{notebook.id}/content"
 
-        self.session.put(url, json=put_data.model_dump(mode="json", by_alias=True))
+        self.session.put(
+            url, json=put_data.model_dump(mode="json", by_alias=True, exclude_unset=True)
+        )
 
         return self.get_by_id(id=notebook.id)
 
