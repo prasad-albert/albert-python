@@ -46,6 +46,7 @@ from tests.seeding import (
     generate_location_seeds,
     generate_lot_seeds,
     generate_note_seeds,
+    generate_notebook_block_seeds,
     generate_notebook_seeds,
     generate_parameter_group_seeds,
     generate_parameter_seeds,
@@ -487,7 +488,10 @@ def seeded_notebooks(
     all_notebooks = generate_notebook_seeds(
         seed_prefix=seed_prefix, seeded_projects=seeded_projects
     )
-    seeded = [client.notebooks.create(notebook=nb) for nb in all_notebooks]
+    for nb in all_notebooks:
+        seed = client.notebooks.create(notebook=nb)
+        seed.blocks = generate_notebook_block_seeds()  # generate each iteration for new block ids
+        seeded.append(client.notebooks.update_block_content(notebook=seed))
     yield seeded
     for notebook in seeded:
         with suppress(NotFoundError):
