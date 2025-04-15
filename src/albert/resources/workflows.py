@@ -110,7 +110,7 @@ class ParameterSetpoint(BaseAlbertModel):
     intervals: list[Interval] | None = Field(default=None, alias="Intervals")
     category: ParameterCategory | None = Field(default=None)
     short_name: str | None = Field(default=None, alias="shortName")
-    name: str | None = Field(default=None)
+    name: str | None = Field(default=None, exclude=True)
     row_id: RowId | None = Field(default=None, alias="rowId")
 
     def model_post_init(self, __context) -> None:
