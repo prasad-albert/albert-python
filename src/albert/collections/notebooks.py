@@ -1,14 +1,13 @@
 from pydantic import TypeAdapter
 
 from albert.collections.base import BaseCollection
-from albert.exceptions import NotFoundError
+from albert.exceptions import AlbertException, NotFoundError
 from albert.resources.notebooks import (
     Notebook,
     NotebookBlock,
-    PutDatum,
+    PutBlockDatum,
+    PutBlockPayload,
     PutOperation,
-    PutPayload,
-    _NotebookBlockUnion,
 )
 from albert.session import AlbertSession
 
@@ -68,7 +67,7 @@ class NotebookCollection(BaseCollection):
                 "Set `blocks=[]` (or do not set it) when creating it. "
                 "Use `.update_block_content()` afterward to add, update, or delete blocks."
             )
-            raise ValueError(msg)
+            raise AlbertException(msg)
         response = self.session.post(
             url=self.base_path,
             json=notebook.model_dump(mode="json", by_alias=True, exclude_none=True),
@@ -146,9 +145,9 @@ class NotebookCollection(BaseCollection):
             The NotebookBlock object.
         """
         response = self.session.get(f"{self.base_path}/{notebook_id}/blocks/{block_id}")
-        return TypeAdapter(_NotebookBlockUnion).validate_python(response.json())
+        return TypeAdapter(NotebookBlock).validate_python(response.json())
 
-    def _generate_put_block_payload(self, *, notebook: Notebook) -> PutPayload:
+    def _generate_put_block_payload(self, *, notebook: Notebook) -> PutBlockPayload:
         data = list()
         seen_ids = set()
         previous_block_id = ""
@@ -156,7 +155,8 @@ class NotebookCollection(BaseCollection):
         for block in notebook.blocks:
             if block.id in seen_ids:
                 # This check keeps a user from corrupting the Notebook data.
-                raise ValueError(f"You have Notebook blocks with duplicate ids. [id={block.id}]")
+                msg = f"You have Notebook blocks with duplicate ids. [id={block.id}]"
+                raise AlbertException(msg)
             try:
                 existing_block = self.get_block_by_id(notebook_id=notebook.id, block_id=block.id)
                 if type(block) is not type(existing_block):
@@ -167,10 +167,10 @@ class NotebookCollection(BaseCollection):
                         f"from the Notebook object. [existing_block_type={type(existing_block)}, "
                         f"new_block_type={type(block)}]"
                     )
-                    raise ValueError(msg)
+                    raise AlbertException(msg)
             except NotFoundError:
                 pass
-            put_datum = PutDatum(
+            put_datum = PutBlockDatum(
                 id=block.id,
                 type=block.type,
                 content=block.content,
@@ -185,6 +185,6 @@ class NotebookCollection(BaseCollection):
         existing_notebook = self.get_by_id(id=notebook.id)
         for block in existing_notebook.blocks:
             if block.id not in seen_ids:
-                data.append(PutDatum(id=block.id, operation=PutOperation.DELETE))
+                data.append(PutBlockDatum(id=block.id, operation=PutOperation.DELETE))
 
-        return PutPayload(data=data)
+        return PutBlockPayload(data=data)

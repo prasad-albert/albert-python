@@ -3,6 +3,7 @@ from collections.abc import Iterator
 import pytest
 
 from albert import Albert
+from albert.exceptions import AlbertException
 from albert.resources.notebooks import (
     HeaderBlock,
     HeaderContent,
@@ -65,7 +66,7 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
     notebook = client.notebooks.update_block_content(notebook=notebook)
     paragraph_content = ParagraphContent(text="HeaderBlock to ParagraphBlock")
     notebook.blocks[-1] = ParagraphBlock(id=header_block.id, content=paragraph_content)
-    with pytest.raises(ValueError, match="Cannot convert an existing block type"):
+    with pytest.raises(AlbertException, match="Cannot convert an existing block type"):
         client.notebooks.update_block_content(notebook=notebook)
 
     # Try to create notebook blocks with duplicate ids
@@ -75,7 +76,7 @@ def test_update_block_content(client: Albert, seeded_notebook: Notebook):
         id=header_block1.id, content=HeaderContent(level=1, text="Header block 2")
     )
     notebook.blocks.extend([header_block1, header_block2])
-    with pytest.raises(ValueError, match="You have Notebook blocks with duplicate ids"):
+    with pytest.raises(AlbertException, match="You have Notebook blocks with duplicate ids"):
         client.notebooks.update_block_content(notebook=notebook)
 
 
@@ -91,5 +92,5 @@ def test_create_validation(client: Albert, seeded_projects):
         parent_id=seeded_projects[0].id,
         blocks=[ParagraphBlock(content=ParagraphContent(text="test"))],
     )
-    with pytest.raises(ValueError, match="Cannot create a Notebook with pre-filled blocks."):
+    with pytest.raises(AlbertException, match="Cannot create a Notebook with pre-filled blocks."):
         client.notebooks.create(notebook=notebook)

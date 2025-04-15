@@ -5,6 +5,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+from albert.exceptions import AlbertException
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
 from albert.resources.identifiers import LinkId, NotebookId, ProjectId, SynthesisId, TaskId
 
@@ -134,8 +135,7 @@ class NumberedListContent(BaseAlbertModel):
     style: Literal[ListBlockStyle.ORDERED] = Field(default=ListBlockStyle.ORDERED)
 
 
-_ListContentUnion = NumberedListContent | BulletedListContent
-ListContent = Annotated[_ListContentUnion, Field(discriminator="style")]
+ListContent = Annotated[NumberedListContent | BulletedListContent, Field(discriminator="style")]
 
 
 class ListBlock(BaseBlock):
@@ -182,7 +182,7 @@ NotebookContent = (
     | NumberedListContent
 )
 
-content_type_mapping = {
+allowed_notebook_contents = {
     BlockType.HEADER: HeaderContent,
     BlockType.PARAGRAPH: ParagraphContent,
     BlockType.CHECKLIST: ChecklistContent,
@@ -199,7 +199,7 @@ class PutOperation(str, Enum):
     DELETE = "delete"
 
 
-class PutDatum(BaseAlbertModel):
+class PutBlockDatum(BaseAlbertModel):
     id: str
     operation: PutOperation
     type: BlockType | None = Field(default=None, alias="blockType")
@@ -207,14 +207,14 @@ class PutDatum(BaseAlbertModel):
     previous_block_id: str | None = Field(default=None, alias="previousBlockId")
 
     @model_validator(mode="after")
-    def content_matches_type(self) -> "PutDatum":
+    def content_matches_type(self) -> "PutBlockDatum":
         if self.content is None:
             return self  # skip check if there's no content
 
-        content_type = content_type_mapping.get(self.type)
+        content_type = allowed_notebook_contents.get(self.type)
         if content_type and not isinstance(self.content, content_type):
             msg = f"The content type and block type do not match. [content_type={type(self.content)}, block_type={self.type}]"
-            raise ValueError(msg)
+            raise AlbertException(msg)
         return self
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
@@ -226,9 +226,9 @@ class PutDatum(BaseAlbertModel):
         return {k: v for k, v in base.items() if v is not None}
 
 
-class PutPayload(BaseAlbertModel):
-    data: list[PutDatum]
+class PutBlockPayload(BaseAlbertModel):
+    data: list[PutBlockDatum]
 
     def model_dump(self, **kwargs) -> dict[str, Any]:
-        """model_dump to ensure only top-level None attrs are removed on PutDatum."""
+        """model_dump to ensure only top-level None attrs are removed on PutBlockDatum."""
         return {"data": [item.model_dump(**kwargs) for item in self.data]}
