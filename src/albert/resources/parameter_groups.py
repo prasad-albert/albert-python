@@ -15,7 +15,24 @@ from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.units import Unit
 from albert.resources.users import User
+from albert.utils.patches import PatchDatum, PatchPayload
 from albert.utils.types import BaseAlbertModel
+
+
+class PGPatchDatum(PatchDatum):
+    rowId: str | None = Field(default=None)
+
+
+class PGPatchPayload(PatchPayload):
+    """A payload for a PATCH request to update a parameter group.
+
+    Attributes
+    ----------
+    data : list[PGPatchDatum]
+        The data to be updated in the parameter group.
+    """
+
+    data: list[PGPatchDatum] = Field(default_factory=list)
 
 
 class PGType(str, Enum):

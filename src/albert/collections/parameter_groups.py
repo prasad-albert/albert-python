@@ -1,7 +1,13 @@
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.resources.parameter_groups import EnumValidationValue, ParameterGroup, PGType
+from albert.resources.parameter_groups import (
+    EnumValidationValue,
+    ParameterGroup,
+    PGPatchDatum,
+    PGPatchPayload,
+    PGType,
+)
 from albert.session import AlbertSession
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
@@ -66,11 +72,7 @@ class ParameterGroupCollection(BaseCollection):
                     if sequence not in enum_patches:
                         enum_patches[sequence] = []
                     new_patches.append(
-                        {
-                            "operation": "delete",
-                            "attribute": "parameters",
-                            "oldValue": sequence,
-                        }
+                        PGPatchDatum(operation="delete", attribute="parameters", oldValue=sequence)
                     )
                 # Update existing parameters
                 for sequence in to_update:
@@ -87,7 +89,7 @@ class ParameterGroupCollection(BaseCollection):
                         existing_param_value.validation != updated_param_value.validation
                         and isinstance(updated_param_value.validation[0].value, list)
                     ):
-                        exiting_enums = (
+                        existing_enums = (
                             []
                             if existing_param_value.validation is None
                             or not isinstance(existing_param_value.validation[0].value, list)
@@ -100,7 +102,7 @@ class ParameterGroupCollection(BaseCollection):
                         )
 
                         existing_enum_names = [
-                            x.text for x in exiting_enums if isinstance(x, EnumValidationValue)
+                            x.text for x in existing_enums if isinstance(x, EnumValidationValue)
                         ]
                         updated_enum_names = [
                             x.text for x in updated_enums if isinstance(x, EnumValidationValue)
@@ -115,7 +117,7 @@ class ParameterGroupCollection(BaseCollection):
                                 }
                             )
                         for deleted_enum in deleted_enum_names:
-                            deleted_enum = [x for x in exiting_enums if x.text == deleted_enum][0]
+                            deleted_enum = [x for x in existing_enums if x.text == deleted_enum][0]
                             enum_patches[sequence].append(
                                 {
                                     "operation": "delete",
@@ -125,75 +127,75 @@ class ParameterGroupCollection(BaseCollection):
 
                     elif existing_param_value.validation != updated_param_value.validation:
                         new_patches.append(
-                            {
-                                "operation": "update",
-                                "attribute": "validation",
-                                "newValue": [
+                            PGPatchDatum(
+                                operation="update",
+                                attribute="validation",
+                                newValue=[
                                     x.model_dump(mode="json", by_alias=True, exclude_none=True)
                                     for x in updated_param_value.validation
                                 ],
-                                "rowId": existing_param_value.sequence,
-                            }
+                                rowId=existing_param_value.sequence,
+                            )
                         )
                     if existing_param_value.unit != updated_param_value.unit:
                         if existing_param_value.unit is None:
                             new_patches.append(
-                                {
-                                    "operation": "add",
-                                    "attribute": "unitId",
-                                    "newValue": updated_param_value.unit.id,
-                                    "rowId": existing_param_value.sequence,
-                                }
+                                PGPatchDatum(
+                                    operation="add",
+                                    attribute="unitId",
+                                    newValue=updated_param_value.unit.id,
+                                    rowId=existing_param_value.sequence,
+                                )
                             )
                         elif updated_param_value.unit is None:
                             # For some reason, our backend blocks this, but I think it's best to let the backend error raise to make this clear to the user
                             new_patches.append(
-                                {
-                                    "operation": "delete",
-                                    "attribute": "unitId",
-                                    "oldValue": existing_param_value.unit.id,
-                                    "rowId": existing_param_value.sequence,
-                                }
+                                PGPatchDatum(
+                                    operation="delete",
+                                    attribute="unitId",
+                                    oldValue=existing_param_value.unit.id,
+                                    rowId=existing_param_value.sequence,
+                                )
                             )
                         elif existing_param_value.unit.id != updated_param_value.unit.id:
                             new_patches.append(
-                                {
-                                    "operation": "update",
-                                    "attribute": "unitId",
-                                    "oldValue": existing_param_value.unit.id,
-                                    "newValue": updated_param_value.unit.id,
-                                    "rowId": existing_param_value.sequence,
-                                }
+                                PGPatchDatum(
+                                    operation="update",
+                                    attribute="unitId",
+                                    oldValue=existing_param_value.unit.id,
+                                    newValue=updated_param_value.unit.id,
+                                    rowId=existing_param_value.sequence,
+                                )
                             )
                     if existing_param_value.value != updated_param_value.value:
                         if existing_param_value.value is None:
                             new_patches.append(
-                                {
-                                    "operation": "add",
-                                    "attribute": "value",
-                                    "newValue": updated_param_value.value,
-                                    "rowId": updated_param_value.sequence,
-                                }
+                                PGPatchDatum(
+                                    operation="add",
+                                    attribute="value",
+                                    newValue=updated_param_value.value,
+                                    rowId=updated_param_value.sequence,
+                                )
                             )
 
                         elif updated_param_value.value is None:
                             new_patches.append(
-                                {
-                                    "operation": "delete",
-                                    "attribute": "value",
-                                    "oldValue": existing_param_value.value,
-                                    "rowId": existing_param_value.sequence,
-                                }
+                                PGPatchDatum(
+                                    operation="delete",
+                                    attribute="value",
+                                    oldValue=existing_param_value.value,
+                                    rowId=existing_param_value.sequence,
+                                )
                             )
                         else:
                             new_patches.append(
-                                {
-                                    "operation": "update",
-                                    "attribute": "value",
-                                    "oldValue": existing_param_value.value,
-                                    "newValue": updated_param_value.value,
-                                    "rowId": existing_param_value.sequence,
-                                }
+                                PGPatchDatum(
+                                    operation="update",
+                                    attribute="value",
+                                    oldValue=existing_param_value.value,
+                                    newValue=updated_param_value.value,
+                                    rowId=existing_param_value.sequence,
+                                )
                             )
         return (new_patches, enum_patches, new_param_patches)
 
@@ -336,15 +338,22 @@ class ParameterGroupCollection(BaseCollection):
         path = f"{self.base_path}/{existing.id}"
 
         payload = self._generate_patch_payload(existing=existing, updated=parameter_group)
+        # need to use a different payload for the special update parameters
+        payload = PGPatchPayload(
+            data=payload.data,
+        )
+
         # Handle special update parameters
         special_patches, special_enum_patches, new_param_patches = (
             self._handle_special_update_parameters(existing=existing, updated=parameter_group)
         )
-        # dump first because the special patch payloads are not in the model
-        paylod_json = payload.model_dump(mode="json", by_alias=True, exclude_none=True)
-        paylod_json["data"].extend(special_patches)
-        if len(paylod_json["data"]) > 0:
-            self.session.patch(path, json=paylod_json)
+
+        payload.data.extend(special_patches)
+        if len(payload.data) > 0:
+            self.session.patch(
+                path, json=payload.model_dump(mode="json", by_alias=True, exclude_none=True)
+            )
+
         # handle adding new parameters
         if len(new_param_patches) > 0:
             self.session.put(
