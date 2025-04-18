@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
+from albert.exceptions import AlbertHTTPError
 from albert.resources.data_templates import DataColumnValue, DataTemplate
 from albert.resources.identifiers import DataTemplateId
 from albert.session import AlbertSession
@@ -148,8 +149,15 @@ class DataTemplateCollection(BaseCollection):
             An iterator of DataTemplate objects matching the provided criteria.
         """
 
-        def deserialize(items: list[dict]) -> list[DataTemplate]:
-            return self.get_by_ids(ids=[x["albertId"] for x in items])
+        def deserialize(items: list[dict]) -> Iterator[DataTemplate]:
+            for item in items:
+                id = item["albertId"]
+                try:
+                    yield self.get_by_id(id=id)
+                except AlbertHTTPError as e:
+                    logger.warning(f"Error fetching parameter group {id}: {e}")
+            # get by ids is not currently returning metadata correctly, so temp fixing this
+            # return self.get_by_ids(ids=[x["albertId"] for x in items])
 
         params = {
             "limit": limit,
