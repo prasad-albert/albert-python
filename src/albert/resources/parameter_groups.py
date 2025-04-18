@@ -32,7 +32,7 @@ class PGPatchPayload(PatchPayload):
         The data to be updated in the parameter group.
     """
 
-    data: list[PGPatchDatum] = Field(default_factory=list)
+    data: list[PGPatchDatum | PatchDatum] = Field(default_factory=list)
 
 
 class PGType(str, Enum):
