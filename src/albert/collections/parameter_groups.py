@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
+from albert.exceptions import AlbertHTTPError
 from albert.resources.parameter_groups import (
     EnumValidationValue,
     ParameterGroup,
@@ -9,6 +10,7 @@ from albert.resources.parameter_groups import (
     PGType,
 )
 from albert.session import AlbertSession
+from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
@@ -251,8 +253,15 @@ class ParameterGroupCollection(BaseCollection):
             An iterator of Parameter Groups matching the given criteria.
         """
 
-        def deserialize(items: list[dict]) -> list[ParameterGroup]:
-            return self.get_by_ids(ids=[x["albertId"] for x in items])
+        def deserialize(items: list[dict]) -> Iterator[ParameterGroup]:
+            for item in items:
+                id = item["albertId"]
+                try:
+                    yield self.get_by_id(id=id)
+                except AlbertHTTPError as e:
+                    logger.warning(f"Error fetching parameter group {id}: {e}")
+            # Currently, the API is not returning metadata for the list_by_ids endpoint, so we need to fetch individually until that is fixed
+            # return self.get_by_ids(ids=[x["albertId"] for x in items])
 
         params = {
             "limit": limit,
