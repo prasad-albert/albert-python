@@ -181,7 +181,6 @@ class Design(BaseSessionResource):
                 row[f"{col_id}#{name}"] = this_cell
             all_rows.append(row)
         for i, state in enumerate(grid_response["Formulas"]):
-            print(state)
             if state.get("state", None) is None or state["state"].get("pinned", None) is None:
                 self._leftmost_pinned_column = grid_response["Formulas"][i - 1]["colId"]
                 break
@@ -534,8 +533,6 @@ class Sheet(BaseSessionResource):  # noqa:F811
                     "position": starting_position["position"],
                 }
             )
-        print("PAYLOAD")
-        print(payload)
         response = self.session.post(endpoint, json=payload)
 
         self.grid = None
@@ -790,8 +787,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 "position": position["position"],
             }
         ]
-        print("PAYLOAD")
-        print(payload)
+
         response = self.session.post(endpoint, json=payload)
 
         data = response.json()
