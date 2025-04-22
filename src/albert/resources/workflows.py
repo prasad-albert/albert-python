@@ -219,9 +219,7 @@ class Workflow(BaseResource):
                                 interval_param_name=parameter_setpoint.name,
                                 interval_id=interval.row_id,
                                 interval_value=interval.value,
-                                interval_unit=None
-                                if interval.unit is None
-                                else interval.unit.name,
+                                interval_unit=interval.unit.name,
                             )
                         )
         return self
