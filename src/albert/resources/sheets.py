@@ -157,6 +157,7 @@ class Design(BaseSessionResource):
     _rows: list["Row"] | None = PrivateAttr(default=None)
     _columns: list["Column"] | None = PrivateAttr(default=None)
     _sheet: Union["Sheet", None] = PrivateAttr(default=None)  # noqa
+    _leftmost_pinned_column: str | None = PrivateAttr(default=None)
 
     def _grid_to_cell_df(self, *, grid_response):
         all_rows = []
@@ -179,6 +180,11 @@ class Design(BaseSessionResource):
                 name = c.get("name", c.get("id", None))
                 row[f"{col_id}#{name}"] = this_cell
             all_rows.append(row)
+        for i, state in enumerate(grid_response["Formulas"]):
+            print(state)
+            if state.get("state", None) is None or state["state"].get("pinned", None) is None:
+                self._leftmost_pinned_column = grid_response["Formulas"][i - 1]["colId"]
+                break
         return pd.DataFrame.from_records(all_rows, index=all_index)
 
     @property
@@ -286,6 +292,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
     designs: list[Design] = Field(alias="Designs")
     project_id: str
     _grid: pd.DataFrame = PrivateAttr(default=None)
+    _leftmost_pinned_column: str | None = PrivateAttr(default=None)
 
     @model_validator(mode="after")
     def set_session(self):
@@ -340,6 +347,14 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 design._columns = None
         else:
             raise NotImplementedError("grid is a read-only property")
+
+    @property
+    def leftmost_pinned_column(self):
+        """The leftmost pinned column in the sheet"""
+        if self._leftmost_pinned_column is None:
+            self._leftmost_pinned_column = self.app_design._leftmost_pinned_column
+
+        return self._leftmost_pinned_column
 
     @property
     def columns(self) -> list["Column"]:
@@ -493,7 +508,10 @@ class Sheet(BaseSessionResource):  # noqa:F811
         starting_position: dict | None = None,
     ) -> list["Column"]:
         if starting_position is None:
-            starting_position = {"reference_id": "COL5", "position": "rightOf"}
+            starting_position = {
+                "reference_id": self.leftmost_pinned_column,
+                "position": "rightOf",
+            }
         sheet_id = self.id
 
         endpoint = f"/api/v3/worksheet/sheet/{sheet_id}/columns"
@@ -516,7 +534,8 @@ class Sheet(BaseSessionResource):  # noqa:F811
                     "position": starting_position["position"],
                 }
             )
-
+        print("PAYLOAD")
+        print(payload)
         response = self.session.post(endpoint, json=payload)
 
         self.grid = None
@@ -761,7 +780,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
 
     def add_blank_column(self, *, name: str, position: dict = None):
         if position is None:
-            position = {"reference_id": "COL5", "position": "rightOf"}
+            position = {"reference_id": self.leftmost_pinned_column, "position": "rightOf"}
         endpoint = f"/api/v3/worksheet/sheet/{self.id}/columns"
         payload = [
             {
@@ -771,6 +790,8 @@ class Sheet(BaseSessionResource):  # noqa:F811
                 "position": position["position"],
             }
         ]
+        print("PAYLOAD")
+        print(payload)
         response = self.session.post(endpoint, json=payload)
 
         data = response.json()
