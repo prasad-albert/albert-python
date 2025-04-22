@@ -15,7 +15,24 @@ from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.units import Unit
 from albert.resources.users import User
+from albert.utils.patches import PatchDatum, PatchPayload
 from albert.utils.types import BaseAlbertModel
+
+
+class PGPatchDatum(PatchDatum):
+    rowId: str | None = Field(default=None)
+
+
+class PGPatchPayload(PatchPayload):
+    """A payload for a PATCH request to update a parameter group.
+
+    Attributes
+    ----------
+    data : list[PGPatchDatum]
+        The data to be updated in the parameter group.
+    """
+
+    data: list[PGPatchDatum | PatchDatum] = Field(default_factory=list)
 
 
 class PGType(str, Enum):
@@ -42,10 +59,30 @@ class Operator(str, Enum):
     EQUALS = "eq"
 
 
+class EnumValidationValue(BaseAlbertModel):
+    """Represents a value for an enum type validation.
+
+    Attributes
+    ----------
+    text : str
+        The text of the enum value.
+    id : str | None
+        The ID of the enum value. If not provided, the ID will be generated upon creation.
+    """
+
+    text: str = Field()
+
+    id: str | None = Field(default=None)
+    # read only field
+    original_text: str | None = Field(
+        default=None, exclude=True, frozen=True, alias="originalText"
+    )
+
+
 class ValueValidation(BaseAlbertModel):
     # We may want to abstract this out if we end up reusing on Data Templates
     datatype: DataType = Field(...)
-    value: str | list[dict] | None = Field(default=None)
+    value: str | list[EnumValidationValue] | None = Field(default=None)
     min: str | None = Field(default=None)
     max: str | None = Field(default=None)
     operator: Operator | None = Field(default=None)
