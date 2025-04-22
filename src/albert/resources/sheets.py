@@ -177,8 +177,14 @@ class Design(BaseSessionResource):
                 c["inventory_id"] = c.get("id", None)
                 this_cell = Cell(**c)
                 col_id = c["colId"]
-                name = c.get("name", c.get("id", None))
-                row[f"{col_id}#{name}"] = this_cell
+                inv_id = c.get("id", None)
+                if inv_id is not None and not inv_id.startswith("INV"):
+                    inv_id = "INV" + inv_id
+
+                name = c.get("name", inv_id)
+                if inv_id is None:
+                    inv_id = name
+                row[f"{col_id}#{inv_id}"] = this_cell
             all_rows.append(row)
         for i, state in enumerate(grid_response["Formulas"]):
             if state.get("state", None) is None or state["state"].get("pinned", None) is None:
@@ -203,14 +209,19 @@ class Design(BaseSessionResource):
             return []
         first_row = grid_response["Items"][0]
         for v in first_row["Values"]:
+            inv_id = v.get("id", None)
+            if inv_id is not None and not inv_id.startswith("INV"):
+                inv_id = "INV" + inv_id
+            if inv_id is None:
+                inv_id = v.get("name", None)
             columns.append(
                 Column(
                     colId=v["colId"],
-                    name=v.get("name", None),
+                    name=inv_id,
                     type=v["type"],
                     session=self.session,
                     sheet=self.sheet,
-                    inventory_id=v.get("id", None),
+                    inventory_id=inv_id,
                 )
             )
         return columns
@@ -834,6 +845,9 @@ class Sheet(BaseSessionResource):  # noqa:F811
         else:
             matching_series = self._find_column(column_id=column_id, column_name=column_name)
             first_item = matching_series.iloc[0]
+            inv_id = first_item.inventory_id
+            if inv_id is not None and not inv_id.startswith("INV"):
+                inv_id = "INV" + inv_id
             return Column(
                 name=first_item.name,
                 colId=first_item.column_id,
@@ -872,6 +886,8 @@ class Column(BaseSessionResource):  # noqa:F811
 
     @property
     def df_name(self):
+        if self.inventory_id is not None:
+            return f"{self.column_id}#{self.inventory_id}"
         return f"{self.column_id}#{self.name}"
 
     @property
