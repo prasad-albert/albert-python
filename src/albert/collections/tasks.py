@@ -400,6 +400,9 @@ class TaskCollection(BaseCollection):
             The updated Task object as it exists in the Albert platform.
         """
         patch_payload = self._generate_adv_patch_payload(updated=task)
+        if len(patch_payload[0]["data"]) == 0:
+            logger.info(f"Task {task.id} is already up to date")
+            return task
         self.session.patch(
             url=f"{self.base_path}/{task.id}",
             json=patch_payload,

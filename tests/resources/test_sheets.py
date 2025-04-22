@@ -69,7 +69,6 @@ def test_property_reads(seeded_sheet: Sheet):
     for col in seeded_sheet.columns:
         if col.type == "Formula":
             break
-
     for c in col.cells:
         assert isinstance(c, Cell)
 
