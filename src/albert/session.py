@@ -68,8 +68,9 @@ class AlbertSession(requests.Session):
             raise ValueError("Either client credentials or token must be specified.")
 
         # Set up retry logic
+        retries = retries if retries is not None else 3
         retry = Retry(
-            total=retries if retries is not None else 3,
+            total=retries,
             read=retries,
             connect=retries,
             backoff_factor=0.3,
