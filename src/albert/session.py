@@ -69,7 +69,7 @@ class AlbertSession(requests.Session):
 
         # Set up retry logic
         retry = Retry(
-            total=retries,
+            total=retries if retries is not None else 3,
             read=retries,
             connect=retries,
             backoff_factor=0.3,
