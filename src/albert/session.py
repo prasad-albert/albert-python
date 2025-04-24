@@ -46,7 +46,7 @@ class AlbertSession(requests.Session):
         if token is None and client_credentials is None:
             raise ValueError("Either client credentials or token must be specified.")
 
-        self._token = token
+        self._access_token = token
         self._credentials_manager = (
             CredentialsManager(base_url, client_credentials)
             if client_credentials is not None
@@ -69,8 +69,8 @@ class AlbertSession(requests.Session):
     def request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
         token = (
             self._credentials_manager.get_access_token()
-            if self._credentials_manager
-            else self._token
+            if self._credentials_manager is not None
+            else self._access_token
         )
         self.headers["Authorization"] = f"Bearer {token}"
         full_url = urljoin(self.base_url, path) if not path.startswith("http") else path
