@@ -46,7 +46,7 @@ class AlbertSession(requests.Session):
         if token is None and client_credentials is None:
             raise ValueError("Either client credentials or token must be specified.")
 
-        self._access_token = token
+        self._provided_token = token
         self._token_manager = (
             TokenManager(base_url, client_credentials) if client_credentials is not None else None
         )
@@ -64,13 +64,15 @@ class AlbertSession(requests.Session):
         self.mount("http://", adapter)
         self.mount("https://", adapter)
 
+    @property
+    def _access_token(self) -> str | None:
+        """Get the access token from the token manager or provided token."""
+        if self._token_manager is not None:
+            return self._token_manager.get_access_token()
+        return self._provided_token
+
     def request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
-        token = (
-            self._token_manager.get_access_token()
-            if self._token_manager is not None
-            else self._access_token
-        )
-        self.headers["Authorization"] = f"Bearer {token}"
+        self.headers["Authorization"] = f"Bearer {self._access_token}"
         full_url = urljoin(self.base_url, path) if not path.startswith("http") else path
         response = super().request(method, full_url, *args, **kwargs)
         handle_http_error(response)
