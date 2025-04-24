@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
 from albert.exceptions import AlbertHTTPError
+from albert.resources.base import BaseEntityLink
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.session import AlbertSession
@@ -81,7 +82,9 @@ class StorageLocationsCollection(BaseCollection):
 
         params = {
             "limit": limit,
-            "locationId": location.id if isinstance(location, Location) else location,
+            "locationId": location.id
+            if isinstance(location, Location | BaseEntityLink)
+            else location,
             "startKey": start_key,
         }
         if name:

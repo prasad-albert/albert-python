@@ -290,13 +290,13 @@ def generate_storage_location_seeds(seeded_locations: list[Location]) -> list[St
         ),
         # Storage location with required fields but without the country
         StorageLocation(
-            name=seeded_locations[0].name,
+            name=seeded_locations[2].name,
             location=BaseEntityLink(id=seeded_locations[0].id),
             address="10 Storage Lane, Paris",
         ),
         # Another storage location with all fields
         StorageLocation(
-            name=seeded_locations[1].name,
+            name=seeded_locations[3].name,
             location=BaseEntityLink(id=seeded_locations[1].id),
             address="Test Storage Facility, London",
             country="GB",
