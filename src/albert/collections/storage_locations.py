@@ -109,7 +109,7 @@ class StorageLocationsCollection(BaseCollection):
         StorageLocation
             The created storage location.
         """
-        matching = self.list(name=storage_location.name, exact_match=True)
+        matching = self.list(name=storage_location.name, location=storage_location.location, exact_match=True)
         for m in matching:
             if m.name.lower() == storage_location.name.lower():
                 logging.warning(
