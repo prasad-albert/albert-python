@@ -6,7 +6,7 @@ from urllib3.util.retry import Retry
 
 import albert
 from albert.exceptions import handle_http_error
-from albert.utils.credentials import ClientCredentials, CredentialsManager
+from albert.utils.credentials import ClientCredentials, TokenManager
 
 
 class AlbertSession(requests.Session):
@@ -47,10 +47,8 @@ class AlbertSession(requests.Session):
             raise ValueError("Either client credentials or token must be specified.")
 
         self._access_token = token
-        self._credentials_manager = (
-            CredentialsManager(base_url, client_credentials)
-            if client_credentials is not None
-            else None
+        self._token_manager = (
+            TokenManager(base_url, client_credentials) if client_credentials is not None else None
         )
 
         # Set up retry logic
@@ -68,8 +66,8 @@ class AlbertSession(requests.Session):
 
     def request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
         token = (
-            self._credentials_manager.get_access_token()
-            if self._credentials_manager is not None
+            self._token_manager.get_access_token()
+            if self._token_manager is not None
             else self._access_token
         )
         self.headers["Authorization"] = f"Bearer {token}"

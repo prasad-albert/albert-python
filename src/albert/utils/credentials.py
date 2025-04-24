@@ -61,7 +61,7 @@ class OAuthTokenInfo(BaseAlbertModel):
     expires_in: int
 
 
-class CredentialsManager:
+class TokenManager:
     """Helper to manage refreshing an access token from OAuth endpoint."""
 
     oauth_token_path: str = "/api/v3/login/oauth/token"
