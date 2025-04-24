@@ -6,7 +6,7 @@ from contextlib import suppress
 import jwt
 import pytest
 
-from albert import Albert
+from albert import Albert, ClientCredentials
 from albert.collections.worksheets import WorksheetCollection
 from albert.exceptions import BadRequestError, ForbiddenError, NotFoundError
 from albert.resources.btdataset import BTDataset
@@ -33,7 +33,6 @@ from albert.resources.units import Unit
 from albert.resources.users import User
 from albert.resources.workflows import Workflow
 from albert.resources.worksheets import Worksheet
-from albert.utils.client_credentials import ClientCredentials
 from tests.seeding import (
     generate_cas_seeds,
     generate_company_seeds,
@@ -116,9 +115,10 @@ def static_sds_file(client: Albert) -> FileInfo:
 
 @pytest.fixture(scope="session")
 def static_user(client: Albert) -> User:
-    # Users cannot be deleted, so we just pull the SDK client user for testing
+    # Users cannot be deleted, so we just pull the SDK Bot user for testing
     # Do not write to/modify this resource since it is shared across all test runs
-    claims = jwt.decode(client.session._access_token, options={"verify_signature": False})
+    token = client.session._token_manager.get_access_token()
+    claims = jwt.decode(token, options={"verify_signature": False})
     user_id = claims["id"]
     return client.users.get_by_id(id=user_id)
 
