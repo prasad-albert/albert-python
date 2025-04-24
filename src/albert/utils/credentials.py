@@ -84,11 +84,12 @@ class CredentialsManager:
             data=payload.model_dump(mode="json"),
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-
         self._token_info = OAuthTokenInfo(**response.json())
-
-        expire_time = datetime.now(timezone.utc) + timedelta(seconds=self._token_info.expires_in)
-        self._refresh_time = expire_time - timedelta(minutes=1)
+        self._refresh_time = (
+            datetime.now(timezone.utc)
+            + timedelta(seconds=self._token_info.expires_in)
+            - timedelta(minutes=1)  # Buffer to avoid token expiration
+        )
 
     def _requires_refresh(self) -> bool:
         return (
