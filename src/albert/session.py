@@ -67,14 +67,12 @@ class AlbertSession(requests.Session):
         self.mount("https://", adapter)
 
     def request(self, method: str, path: str, *args, **kwargs) -> requests.Response:
-        # Get or set token
         token = (
             self._credentials_manager.get_access_token()
             if self._credentials_manager
             else self._token
         )
         self.headers["Authorization"] = f"Bearer {token}"
-
         full_url = urljoin(self.base_url, path) if not path.startswith("http") else path
         response = super().request(method, full_url, *args, **kwargs)
         handle_http_error(response)
