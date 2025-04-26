@@ -21,6 +21,7 @@ class LotCollection(BaseCollection):
         "cost",
         "status",
         "pack_size",
+        "barcode_id",
     }
 
     def __init__(self, *, session: AlbertSession):
@@ -172,6 +173,7 @@ class LotCollection(BaseCollection):
         patch_data = self._generate_patch_payload(existing=existing_lot, updated=lot)
         url = f"{self.base_path}/{lot.id}"
 
+        print(patch_data.model_dump(mode="json", by_alias=True))
         self.session.patch(url, json=patch_data.model_dump(mode="json", by_alias=True))
 
         return self.get_by_id(id=lot.id)
