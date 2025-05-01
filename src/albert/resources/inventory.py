@@ -257,9 +257,9 @@ class InventorySpecList(BaseAlbertModel):
 # and see if this is unique to the search endpoint or a
 # common resource
 class InventorySearchPictogramItem(BaseAlbertModel):
-    name: str
     id: str
-    status: str
+    name: str
+    status: str | None = Field(default=None)
 
 
 # This class is very similar to the UnNumber class,
