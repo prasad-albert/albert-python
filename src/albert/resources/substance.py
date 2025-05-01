@@ -259,7 +259,7 @@ class Hazard(BaseAlbertModel):
     """
 
     h_code: str | None = Field(None, alias="hCode")
-    category: str | None = None
+    category: int | str | None = None
     class_: str | None = Field(None, alias="class")
     sub_category: str | None = Field(None, alias="subCategory")
 
