@@ -6,7 +6,7 @@ from pydantic import Field, field_validator, model_validator
 from albert.collections.cas import Cas
 from albert.collections.companies import Company
 from albert.resources.acls import ACL
-from albert.resources.base import MetadataItem, SecurityClass, Status
+from albert.resources.base import MetadataItem, SecurityClass
 from albert.resources.identifiers import InventoryId
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
@@ -259,7 +259,7 @@ class InventorySpecList(BaseAlbertModel):
 class InventorySearchPictogramItem(BaseAlbertModel):
     name: str
     id: str
-    status: Status
+    status: str
 
 
 # This class is very similar to the UnNumber class,
@@ -283,9 +283,8 @@ class InventorySearchItem(BaseAlbertModel):
     lots: list[dict[str, Any]] = Field(default_factory=list)
     tags: list[Tag] = Field(default_factory=list)
     pictogram: list[InventorySearchPictogramItem] = Field(default_factory=list)
-    inventory_on_hand: float = Field(
-        default=0.0, alias="inventoryOnHand"
-    )  # missing element implies none on hand
+    # missing element implies none on hand
+    inventory_on_hand: float = Field(default=0.0, alias="inventoryOnHand")
     sds: InventorySearchSDSItem | None = Field(default=None, alias="SDS")
 
 
