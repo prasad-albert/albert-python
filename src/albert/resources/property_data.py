@@ -104,10 +104,10 @@ class InventoryInformation(BaseAlbertModel):
 
 class CheckPropertyData(BaseResource):
     block_id: str | None = Field(default=None, alias="blockId")
-    interval_id: str | None = Field(default=None, alias="intervalId")
+    interval_id: str | None = Field(default=None, alias="interval")
     inventory_id: str | None = Field(default=None, alias="inventoryId")
     lot_id: str | None = Field(default=None, alias="lotId")
-    data_exists: bool | None = Field(default=None, alias="dataExists")
+    data_exists: bool | None = Field(default=None, alias="dataExist")
     message: str | None = Field(default=None)
 
 
