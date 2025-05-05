@@ -21,6 +21,7 @@ class LotCollection(BaseCollection):
         "cost",
         "status",
         "pack_size",
+        "barcode_id",
     }
 
     def __init__(self, *, session: AlbertSession):
