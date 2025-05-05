@@ -4,6 +4,7 @@ from collections.abc import Generator, Iterator
 
 from albert.collections.base import BaseCollection
 from albert.exceptions import AlbertHTTPError
+from albert.resources.base import BaseEntityLink
 from albert.resources.locations import Location
 from albert.resources.storage_locations import StorageLocation
 from albert.session import AlbertSession
@@ -81,7 +82,9 @@ class StorageLocationsCollection(BaseCollection):
 
         params = {
             "limit": limit,
-            "locationId": location.id if isinstance(location, Location) else location,
+            "locationId": location.id
+            if isinstance(location, Location | BaseEntityLink)
+            else location,
             "startKey": start_key,
         }
         if name:
@@ -109,7 +112,9 @@ class StorageLocationsCollection(BaseCollection):
         StorageLocation
             The created storage location.
         """
-        matching = self.list(name=storage_location.name, exact_match=True)
+        matching = self.list(
+            name=storage_location.name, location=storage_location.location, exact_match=True
+        )
         for m in matching:
             if m.name.lower() == storage_location.name.lower():
                 logging.warning(
