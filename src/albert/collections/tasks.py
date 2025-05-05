@@ -355,11 +355,13 @@ class TaskCollection(BaseCollection):
             old_value = getattr(existing, attribute)
             new_value = getattr(updated, attribute)
             if attribute == "inventory_information":
+                existing_unique = [f"{x.inventory_id}#{x.lot_id}" for x in old_value]
+                updated_unique = [f"{x.inventory_id}#{x.lot_id}" for x in new_value]
                 inv_to_remove = []
-                for inv in old_value:
-                    if inv not in new_value:
+                for i, inv in enumerate(existing_unique):
+                    if inv not in updated_unique:
                         inv_to_remove.append(
-                            inv.model_dump(mode="json", by_alias=True, exclude_none=True)
+                            old_value[i].model_dump(mode="json", by_alias=True, exclude_none=True)
                         )
                 if len(inv_to_remove) > 0:
                     patch_payload["data"].append(
@@ -370,10 +372,10 @@ class TaskCollection(BaseCollection):
                         }
                     )
                 inv_to_add = []
-                for inv in new_value:
-                    if inv not in old_value:
+                for i, inv in enumerate(updated_unique):
+                    if inv not in existing_unique:
                         inv_to_add.append(
-                            inv.model_dump(mode="json", by_alias=True, exclude_none=True)
+                            new_value[i].model_dump(mode="json", by_alias=True, exclude_none=True)
                         )
                 if len(inv_to_add) > 0:
                     patch_payload["data"].append(
