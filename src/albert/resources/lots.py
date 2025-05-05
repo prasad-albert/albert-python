@@ -105,7 +105,7 @@ class Lot(BaseResource):
         exclude=True,
         frozen=True,
     )
-    barcode_id: str | None = Field(default=None, alias="barcodeId", exclude=True, frozen=True)
+    barcode_id: str | None = Field(default=None, alias="barcodeId")
 
     @field_validator("has_notes", mode="before")
     def validate_has_notes(cls, value: Any) -> Any:
