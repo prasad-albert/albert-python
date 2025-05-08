@@ -9,8 +9,6 @@ from albert.resources.identifiers import TaskId
 class BatchValuePatchDatum(BaseAlbertModel):
     attribute: str = Field(default="lotId")
     lot_id: str | None = Field(default=None, alias="lotId")
-    # row_id: str = Field(alias="rowId")
-    # col_id: str | None = Field(alias="colId")
     new_value: str | None = Field(default=None, alias="newValue")
     old_value: str | None = Field(default=None, alias="oldValue")
     operation: str
