@@ -72,23 +72,24 @@ class AttachmentCollection(BaseCollection):
     def upload_and_attach_file_as_note(
         self, parent_id: str, file_data: IO, note_text: str = "", file_name: str = ""
     ) -> Note:
-        """Uploads a file and attaches it to a new note.
+        """Uploads a file and attaches it to a new note. A user can be tagged in the note_text string by using f-string and the User.to_note_mention() method.
+        This allows for easy tagging and referencing of users within notes. example: f"Hello {tagged_user.to_note_mention()}!"
 
-        Parameters
-        ----------
-        parent_id : str
-            The ID of the parent entity onto which the note will be attached.
-        file_data : IO
-            The file data to upload.
-        note_text : str, optional
-            Any additional text to add to the note, by default ""
-        file_name : str, optional
-            The name of the file, by default ""
+            Parameters
+            ----------
+            parent_id : str
+                The ID of the parent entity onto which the note will be attached.
+            file_data : IO
+                The file data to upload.
+            note_text : str, optional
+                Any additional text to add to the note, by default ""
+            file_name : str, optional
+                The name of the file, by default ""
 
-        Returns
-        -------
-        Note
-            The created note.
+            Returns
+            -------
+            Note
+                The created note.
         """
         file_type = mimetypes.guess_type(file_name)[0]
         file_collection = self._get_file_collection()
