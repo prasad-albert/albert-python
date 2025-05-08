@@ -1,16 +1,35 @@
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from albert.resources.base import BaseResource, Status
+from albert.resources.base import BaseAlbertModel, BaseResource, Status
 from albert.resources.identifiers import TaskId
+
+
+class BatchValuePatchDatum(BaseAlbertModel):
+    attribute: str = Field(default="lotId")
+    lot_id: str | None = Field(default=None, alias="lotId")
+    new_value: str | None = Field(default=None, alias="newValue")
+    old_value: str | None = Field(default=None, alias="oldValue")
+    operation: str
+
+
+class BatchValueId(BaseAlbertModel):
+    col_id: str | None = Field(default=None, alias="colId")
+    row_id: str = Field(alias="rowId")
+
+
+class BatchValuePatchPayload(BaseAlbertModel):
+    id: BatchValueId = Field(alias="Id")
+    data: list[BatchValuePatchDatum] = Field(default_factory=list)
+    lot_id: str | None = Field(default=None, alias="lotId")
 
 
 class BatchDataType(str, Enum):
     TASK_ID = "taskId"
 
 
-class BatchDataValue(BaseModel):
+class BatchDataValue(BaseAlbertModel):
     # TODO: Once SignatureOverrideMeta removed, use BaseAlbertModel instead of BaseModel
     id: str | None = Field(default=None)
     col_id: str | None = Field(default=None, alias="colId")
@@ -22,7 +41,7 @@ class BatchDataValue(BaseModel):
     reference_value: str | None = Field(default=None, alias="referenceValue")
 
 
-class BatchDataRow(BaseModel):
+class BatchDataRow(BaseAlbertModel):
     # TODO: Once SignatureOverrideMeta removed, use BaseAlbertModel instead of BaseModel
     id: str | None = Field(default=None)
     row_id: str | None = Field(default=None, alias="rowId")
@@ -37,7 +56,7 @@ class BatchDataRow(BaseModel):
     child_rows: list["BatchDataRow"] = Field(default_factory=list, alias="ChildRows")
 
 
-class BatchDataColumn(BaseModel):
+class BatchDataColumn(BaseAlbertModel):
     # TODO: Once SignatureOverrideMeta removed, use BaseAlbertModel instead of BaseModel
     id: str | None = Field(default=None)
     name: str | None = Field(default=None)
