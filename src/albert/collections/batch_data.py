@@ -1,5 +1,5 @@
 from albert.collections.base import BaseCollection, OrderBy
-from albert.resources.batch_data import BatchData, BatchDataType
+from albert.resources.batch_data import BatchData, BatchDataType, BatchValuePatchPayload
 from albert.resources.identifiers import TaskId
 from albert.session import AlbertSession
 
@@ -20,6 +20,24 @@ class BatchDataCollection(BaseCollection):
         """
         super().__init__(session=session)
         self.base_path = f"/api/{BatchDataCollection._api_version}/batchdata"
+
+    def create_batch_data(self, *, task_id: TaskId):
+        """
+        Create a new batch data entry.
+
+        Parameters
+        ----------
+        task_id : TaskId
+            The ID of the task for which the batch data is being created.
+
+        Returns
+        -------
+        BatchData
+            The created BatchData object.
+        """
+        url = f"{self.base_path}"
+        response = self.session.post(url, json={"parentId": task_id})
+        return BatchData(**response.json())
 
     def get(
         self,
@@ -59,3 +77,30 @@ class BatchDataCollection(BaseCollection):
         }
         response = self.session.get(self.base_path, params=params)
         return BatchData(**response.json())
+
+    def update_used_batch_amounts(
+        self, *, task_id: str, patches=list[BatchValuePatchPayload]
+    ) -> None:
+        """
+        Update the used batch amounts for a given task ID.
+
+        Parameters
+        ----------
+        task_id : str
+            The ID of the task to update.
+        patch : BatchValuePatchPayload
+            The patch payload containing the data to update.
+
+        Returns
+        -------
+        None
+            This method does not return anything.
+        """
+        url = f"{self.base_path}/{task_id}/values"
+        self.session.patch(
+            url,
+            json=[
+                patch.model_dump(exclude_none=True, by_alias=True, mode="json")
+                for patch in patches
+            ],
+        )
