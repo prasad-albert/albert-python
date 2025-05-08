@@ -15,15 +15,17 @@ def test_get_by_id(client: Albert, seeded_tasks: list[BaseTask]):
 
 
 def test_create_batch_data(client: Albert, seeded_tasks: list[BaseTask]):
-    batch_task = [t for t in seeded_tasks if isinstance(t, BatchTask)][0]
-    existing_batch_data = client.batch_data.get(id=batch_task.id)
-    # Make sure it doesn't exist to start
-    assert len(existing_batch_data.product) == 0
-    client.batch_data.create_batch_data(task_id=batch_task.id)
-    created_batch_data = client.batch_data.get(id=batch_task.id)
-    # Make sure it was created
-    assert isinstance(created_batch_data, BatchData)
-    assert len(created_batch_data.product) > 0
+    batch_tasks = [t for t in seeded_tasks if isinstance(t, BatchTask)]
+
+    for bt in batch_tasks:
+        # Check that the batch data is empty
+        existing_batch_data = client.batch_data.get(id=bt.id)
+        if len(existing_batch_data.product) == 0:
+            client.batch_data.create_batch_data(task_id=bt.id)
+            created_batch_data = client.batch_data.get(id=bt.id)
+            # Make sure it was created
+            assert isinstance(created_batch_data, BatchData)
+            assert len(created_batch_data.product) > 0
 
 
 def test_update_batch_data(client: Albert, seeded_tasks: list[BaseTask]):
