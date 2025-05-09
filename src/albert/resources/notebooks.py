@@ -76,7 +76,7 @@ class ChecklistBlock(BaseBlock):
 
         Returns
         -------
-        bool
+        bool | None
             The checked state of the target entry identified by name.
         """
         # loop items
