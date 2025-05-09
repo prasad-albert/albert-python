@@ -143,7 +143,7 @@ class TableBlock(BaseBlock):
     type: Literal[BlockType.TABLE] = Field(default=BlockType.TABLE, alias="blockType")
     content: TableContent
 
-    def to_df(self, infer_header: bool = True) -> DataFrame:
+    def to_df(self, *, infer_header: bool = True) -> DataFrame:
         """Convert the TableBlock's content to a pd.DataFrame.
 
         Returns
