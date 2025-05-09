@@ -66,6 +66,28 @@ class ChecklistBlock(BaseBlock):
     type: Literal[BlockType.CHECKLIST] = Field(default=BlockType.CHECKLIST, alias="blockType")
     content: ChecklistContent
 
+    def is_checked(self, *, target_text: str) -> bool | None:
+        """Get checked state of a checklist item
+
+         Parameters
+        ----------
+        target_text : str
+            The value/text of a checklist entry.
+
+        Returns
+        -------
+        bool
+            The checked state of the target entry identified by name.
+        """
+        # loop items
+        for i in self.content.items:
+            if i.text == target_text:
+                # return check state
+                return i.checked
+
+        # return None if no match
+        return
+
 
 class AttachesContent(BaseAlbertModel):
     title: str
