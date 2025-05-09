@@ -93,3 +93,17 @@ class BTDatasetCollection(BaseCollection):
         )
         self.session.patch(path, json=payload.model_dump(mode="json", by_alias=True))
         return self.get_by_id(id=dataset.id)
+
+    def delete(self, *, id: str) -> None:
+        """Delete a BTDataset by ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the BTDataset to delete.
+
+        Returns
+        -------
+        None
+        """
+        self.session.delete(f"{self.base_path}/{id}")
