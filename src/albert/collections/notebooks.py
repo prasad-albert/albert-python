@@ -56,7 +56,7 @@ class NotebookCollection(BaseCollection):
 
         Returns
         -------
-        list
+        list[Notebook]
             list of notebook references.
 
         """
