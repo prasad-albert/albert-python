@@ -46,7 +46,7 @@ class NotebookCollection(BaseCollection):
         response = self.session.get(f"{self.base_path}/{id}")
         return Notebook(**response.json())
 
-    def get_by_parent_id(self, *, parent_id: str) -> list:
+    def list_by_parent_id(self, *, parent_id: str) -> list[Notebook]:
         """Retrieve a Notebook by parent ID.
 
         Parameters
