@@ -64,7 +64,7 @@ class NotebookCollection(BaseCollection):
         # search
         response = self.session.get(f"{self.base_path}/{parent_id}/search")
         # return
-        return [Notebook(**x) for x in response.json()["Items"]]
+        return [self.get_by_id(id=x["id"]) for x in response.json()["Items"]]
 
     def create(self, *, notebook: Notebook) -> Notebook:
         """Create or return notebook for the provided notebook.
