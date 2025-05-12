@@ -1,6 +1,9 @@
 from uuid import uuid4
 
 from albert.resources.base import BaseEntityLink, SecurityClass
+from albert.resources.btdataset import BTDataset
+from albert.resources.btinsight import BTInsight, BTInsightCategory
+from albert.resources.btmodel import BTModel, BTModelCategory, BTModelSession, BTModelState
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
 from albert.resources.custom_fields import (
@@ -1075,3 +1078,40 @@ def generate_link_seeds(seeded_tasks: list[BaseTask]):
             )
         )
     return links
+
+
+def generate_btdataset_seed(seed_prefix: str) -> BTDataset:
+    return BTDataset(
+        name=f"{seed_prefix} - Test BT Dataset",
+    )
+
+
+def generate_btmodelsession_seed(seed_prefix: str, seeded_btdataset: BTDataset) -> BTModelSession:
+    return BTModelSession(
+        name=f"{seed_prefix} - Test BT Model Session",
+        category=BTModelCategory.ALBERT_MODEL,
+        dataset_id=seeded_btdataset.id,
+    )
+
+
+def generate_btmodel_seed(seed_prefix: str, seeded_btdataset: BTDataset) -> BTModel:
+    return BTModel(
+        name=f"{seed_prefix} - Test BT Model",
+        target=["output1", "output2"],
+        state=BTModelState.QUEUED,
+        dataset_id=seeded_btdataset.id,
+    )
+
+
+def generate_btinsight_seed(
+    seed_prefix: str,
+    seeded_btdataset: BTDataset,
+    seeded_btmodelsession: BTModelSession,
+) -> BTInsight:
+    return BTInsight(
+        name=f"{seed_prefix} - Test BT Insight",
+        dataset_id=seeded_btdataset.id,
+        model_session_id=seeded_btmodelsession.id,
+        category=BTInsightCategory.CUSTOM_OPTIMIZER,
+        metadata={},
+    )

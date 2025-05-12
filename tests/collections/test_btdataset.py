@@ -1,19 +1,5 @@
-from collections.abc import Iterator
-
-import pytest
-
 from albert import Albert
 from albert.resources.btdataset import BTDataset
-from tests.helpers import suppress_http_errors
-
-
-@pytest.fixture
-def seeded_btdataset(client: Albert) -> Iterator[BTDataset]:
-    dataset = BTDataset(name="Test Dataset")
-    dataset = client.btdatasets.create(dataset=dataset)
-    yield dataset
-    with suppress_http_errors():
-        client.btdatasets.delete(id=dataset.id)
 
 
 def test_update(client: Albert, seeded_btdataset: BTDataset):

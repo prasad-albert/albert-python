@@ -34,6 +34,10 @@ from albert.resources.users import User
 from albert.resources.workflows import Workflow
 from albert.resources.worksheets import Worksheet
 from tests.seeding import (
+    generate_btdataset_seed,
+    generate_btinsight_seed,
+    generate_btmodel_seed,
+    generate_btmodelsession_seed,
     generate_cas_seeds,
     generate_company_seeds,
     generate_custom_fields,
@@ -169,26 +173,6 @@ def static_lists(
                 raise e
         seeded.append(created_list)
     return seeded
-
-
-@pytest.fixture(scope="session")
-def static_btdataset(client: Albert) -> BTDataset:
-    return client.btdatasets.get_by_id(id="DST1")
-
-
-@pytest.fixture(scope="session")
-def static_btinsight(client: Albert) -> BTInsight:
-    return client.btinsights.get_by_id(id="INS10")
-
-
-@pytest.fixture(scope="session")
-def static_btmodelsession(client: Albert) -> BTModelSession:
-    return client.btmodelsessions.get_by_id(id="MDS1")
-
-
-@pytest.fixture(scope="session")
-def static_btmodel(static_btmodelsession: BTModelSession) -> BTModel:
-    return static_btmodelsession.models.get_by_id(id="MDL1")
 
 
 ### SEEDED RESOURCES -- CREATED ONCE PER SESSION, CAN BE DELETED
@@ -617,3 +601,53 @@ def seeded_links(client: Albert, seeded_tasks: list[BaseTask]):
     for link in seeded:
         with suppress(NotFoundError):
             client.links.delete(id=link.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btdataset(client: Albert, seed_prefix: str) -> Iterator[BTDataset]:
+    dataset = generate_btdataset_seed(seed_prefix)
+    dataset = client.btdatasets.create(dataset=dataset)
+    yield dataset
+    with suppress(BadRequestError, NotFoundError):
+        client.btdatasets.delete(id=dataset.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btmodelsession(
+    client: Albert,
+    seed_prefix: str,
+    seeded_btdataset: BTDataset,
+) -> Iterator[BTModelSession]:
+    model_session = generate_btmodelsession_seed(seed_prefix, seeded_btdataset)
+    model_session = client.btmodelsessions.create(model_session=model_session)
+    yield model_session
+    with suppress(BadRequestError, NotFoundError):
+        client.btmodelsessions.delete(id=model_session.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btmodel(
+    client: Albert,
+    seed_prefix: str,
+    seeded_btdataset: BTDataset,
+    seeded_btmodelsession: BTModelSession,
+) -> Iterator[BTModel]:
+    model = generate_btmodel_seed(seed_prefix, seeded_btdataset)
+    model = client.btmodels(parent_id=seeded_btmodelsession.id).create(model=model)
+    yield model
+    with suppress(BadRequestError, NotFoundError):
+        client.btmodels(parent_id=seeded_btmodelsession.id).delete(id=model.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btinsight(
+    client: Albert,
+    seed_prefix: str,
+    seeded_btdataset: BTDataset,
+    seeded_btmodelsession: BTModelSession,
+) -> Iterator[BTInsight]:
+    ins = generate_btinsight_seed(seed_prefix, seeded_btdataset, seeded_btmodelsession)
+    ins = client.btinsights.create(insight=ins)
+    yield ins
+    with suppress(BadRequestError, NotFoundError):
+        client.btinsights.delete(id=ins.id)
