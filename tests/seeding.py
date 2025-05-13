@@ -42,7 +42,15 @@ from albert.resources.notebooks import (
     TableContent,
 )
 from albert.resources.notes import Note
-from albert.resources.parameter_groups import ParameterGroup, ParameterValue, PGType
+from albert.resources.parameter_groups import (
+    DataType,
+    EnumValidationValue,
+    Operator,
+    ParameterGroup,
+    ParameterValue,
+    PGType,
+    ValueValidation,
+)
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.pricings import Pricing
 from albert.resources.projects import (
@@ -454,11 +462,34 @@ def generate_data_template_seeds(
     user: User,
     seeded_data_columns: list[DataColumn],
     seeded_units: list[Unit],
+    seeded_tags: list[Tag],
 ) -> list[DataTemplate]:
+    """
+    Generates a list of DataTemplate seed objects for testing with enhanced complexity.
+
+    Parameters
+    ----------
+    seed_prefix : str
+        A prefix for naming the seeds.
+    user : User
+        The user associated with the data templates.
+    seeded_data_columns : list[DataColumn]
+        A list of seeded DataColumn objects.
+    seeded_units : list[Unit]
+        A list of seeded Unit objects.
+    seeded_tags : list[Tag]
+        A list of seeded Tag objects.
+
+    Returns
+    -------
+    list[DataTemplate]
+        A list of DataTemplate objects with enhanced complexity.
+    """
     return [
+        # Basic Data Template with a single column and no validations
         DataTemplate(
             name=f"{seed_prefix} - Basic Data Template",
-            description="A basic data template with no metadata.",
+            description="A basic data template with no validations or tags.",
             data_column_values=[
                 DataColumnValue(
                     data_column=seeded_data_columns[0],
@@ -466,31 +497,133 @@ def generate_data_template_seeds(
                     unit=BaseEntityLink(id=seeded_units[0].id),
                 )
             ],
+            tags=[seeded_tags[0]],
         ),
+        # Data Template with ACL and multiple columns
         DataTemplate(
             name=f"{seed_prefix} - ACL Data Template",
-            description="A basic data template with no metadata.",
+            description="A data template with ACL and multiple columns.",
             data_column_values=[
                 DataColumnValue(
                     data_column=seeded_data_columns[0],
                     value="45.0",
-                    unit=seeded_units[0],
-                )
-            ],
-            users_with_access=[user],
-        ),
-        DataTemplate(
-            name=f"{seed_prefix} - Data Template with Calculations",
-            description="A data template with calculations.",
-            data_column_values=[
-                DataColumnValue(
-                    data_column_id=seeded_data_columns[0].id,
-                    unit=seeded_units[0],
+                    unit=BaseEntityLink(id=seeded_units[0].id),
                 ),
                 DataColumnValue(
                     data_column=seeded_data_columns[1],
-                    calculation=f"={seeded_data_columns[0].name}/2",
-                    unit=seeded_units[0],
+                    value="100.0",
+                    unit=BaseEntityLink(id=seeded_units[1].id),
+                ),
+            ],
+            users_with_access=[user],
+        ),
+        # Data Template with ENUM validation and tags
+        DataTemplate(
+            name=f"{seed_prefix} - Enum Validation Template",
+            description="A data template with enum validation and tags.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column=seeded_data_columns[0],
+                    value="Option1",
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.ENUM,
+                            value=[
+                                EnumValidationValue(text="Option1"),
+                                EnumValidationValue(text="Option2"),
+                            ],
+                        )
+                    ],
+                )
+            ],
+            tags=seeded_tags[:2],
+        ),
+        # Data Template with NUMBER validation and a calculation
+        DataTemplate(
+            name=f"{seed_prefix} - Number Validation Template",
+            description="A data template with number validation and a calculation.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column=seeded_data_columns[1],
+                    value="50",
+                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    calculation="Pressure = Force / Area",
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.NUMBER,
+                            min="0",
+                            max="100",
+                            operator=Operator.BETWEEN,
+                        )
+                    ],
+                )
+            ],
+            tags=[seeded_tags[1], seeded_tags[2]],
+        ),
+        # Data Template with STRING validation
+        DataTemplate(
+            name=f"{seed_prefix} - String Validation Template",
+            description="A data template with string validation.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column=seeded_data_columns[2],
+                    value="Test String",
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.STRING,
+                        )
+                    ],
+                )
+            ],
+        ),
+        # Data Template with multiple validations and tags
+        DataTemplate(
+            name=f"{seed_prefix} - Complex Validation Template",
+            description="A data template with multiple validations and tags.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column=seeded_data_columns[0],
+                    value="Option1",
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.ENUM,
+                            value=[
+                                EnumValidationValue(text="Option1"),
+                                EnumValidationValue(text="Option2"),
+                            ],
+                        )
+                    ],
+                ),
+                DataColumnValue(
+                    data_column=seeded_data_columns[1],
+                    value="75.0",
+                    unit=BaseEntityLink(id=seeded_units[1].id),
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.NUMBER,
+                            min="50",
+                            max="100",
+                            operator=Operator.BETWEEN,
+                        )
+                    ],
+                ),
+            ],
+            tags=[seeded_tags[0]],
+        ),
+        # Data Template with calculations and no validations
+        DataTemplate(
+            name=f"{seed_prefix} - Calculation Template",
+            description="A data template with calculations and no validations.",
+            data_column_values=[
+                DataColumnValue(
+                    data_column=seeded_data_columns[0],
+                    calculation="=A1 + B1",
+                    unit=BaseEntityLink(id=seeded_units[0].id),
+                ),
+                DataColumnValue(
+                    data_column=seeded_data_columns[1],
+                    calculation="=C1 / 2",
+                    unit=BaseEntityLink(id=seeded_units[1].id),
                 ),
             ],
         ),
@@ -560,9 +693,76 @@ def generate_parameter_group_seeds(
                 )
             ],
         ),
-        # ParameterGroup with all fields filled out
         ParameterGroup(
-            name=f"{seed_prefix} - Batch Parameters",
+            name=f"{seed_prefix} - Enums Parameter Group",
+            type=PGType.GENERAL,
+            description="A general parameter group with validations and tags.",
+            parameters=[
+                ParameterValue(
+                    parameter=seeded_parameters[0],
+                    value="10",
+                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.NUMBER,
+                            min="0",
+                            max="100",
+                            operator=Operator.BETWEEN,
+                        )
+                    ],
+                ),
+                ParameterValue(
+                    parameter=seeded_parameters[1],
+                    value="Option1",
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.ENUM,
+                            value=[
+                                EnumValidationValue(text="Option1"),
+                                EnumValidationValue(text="Option2"),
+                            ],
+                        )
+                    ],
+                ),
+            ],
+            tags=seeded_tags[:2],
+        ),
+        ParameterGroup(
+            name=f"{seed_prefix} - Numbers Parameter Group",
+            type=PGType.GENERAL,
+            description="A general parameter group with validations and tags.",
+            parameters=[
+                ParameterValue(
+                    parameter=seeded_parameters[0],
+                    value="10",
+                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.NUMBER,
+                            min="0",
+                            max="100",
+                            operator=Operator.BETWEEN,
+                        )
+                    ],
+                )
+            ],
+            tags=seeded_tags[:2],
+        ),
+        ParameterGroup(
+            name=f"{seed_prefix} - Batch Parameter Group",
+            type=PGType.BATCH,
+            description="A batch parameter group with no validations.",
+            parameters=[
+                ParameterValue(
+                    parameter=seeded_parameters[1],
+                    value="Test Value",
+                    unit=BaseEntityLink(id=seeded_units[1].id),
+                )
+            ],
+            tags=seeded_tags[2:],
+        ),
+        ParameterGroup(
+            name=f"{seed_prefix} - Batch Parameters with a consumeable",
             description="Parameters for batch processing",
             type=PGType.BATCH,
             security_class=SecurityClass.RESTRICTED,
@@ -576,6 +776,13 @@ def generate_parameter_group_seeds(
                     parameter=seeded_parameters[2],
                     value="500.0",
                     unit=seeded_units[2],
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.NUMBER,
+                            operator=Operator.GREATER_THAN_OR_EQUAL,
+                            value="0.0",
+                        )
+                    ],
                 ),
                 ParameterValue(
                     parameter=static_consumeable_parameter, category=ParameterCategory.SPECIAL
@@ -585,7 +792,7 @@ def generate_parameter_group_seeds(
         ),
         # ParameterGroup with no tags or metadata
         ParameterGroup(
-            name=f"{seed_prefix} - Property Parameters",
+            name=f"{seed_prefix} - Simple Property Parameters",
             type=PGType.PROPERTY,
             parameters=[
                 ParameterValue(

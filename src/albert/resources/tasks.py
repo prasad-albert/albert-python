@@ -43,6 +43,32 @@ class TaskPriority(str, Enum):
     LOW = "Low"
 
 
+class IntervalId(BaseAlbertModel):
+    id: str
+
+
+class BlockLevelInventoryInformation(BaseAlbertModel):
+    id: str | None = Field(default=None)
+    lot_id: str | None = Field(default=None, alias="lotId")
+    inv_lot_unique_id: str | None = Field(default=None, alias="invLotUniqueId")
+
+
+class BlockState(BaseAlbertModel):
+    id: str | None = Field(default=None, description="The ID of the block.")
+    expanded: bool | None = Field(default=None, alias="expand")
+    intervals: list[IntervalId] | None = Field(
+        default=None,
+        alias="Interval",
+        description="The IDs of the interval (e.g., id: ROW2XROW4)",
+    )
+    inventory: list[BlockLevelInventoryInformation] | None = Field(default=None, alias="Inventory")
+
+
+class PageState(BaseAlbertModel):
+    left_panel_expanded: bool | None = Field(default=None, alias="leftPanelExpand")
+    blocks: list[BlockState] | None = Field(default=None, alias="Block")
+
+
 class Target(BaseAlbertModel):
     data_column_unique_id: str | None = Field(alias="dataColumnUniqueId", default=None)
     value: str | None = Field(default=None)
@@ -167,6 +193,10 @@ class BaseTask(BaseTaggedEntity):
         default=None, alias="Project"
     )
     assigned_to: SerializeAsEntityLink[User] | None = Field(default=None, alias="AssignedTo")
+    page_state: PageState | None = Field(
+        alias="PageState",
+        default=None,
+    )
 
 
 class PropertyTask(BaseTask):
