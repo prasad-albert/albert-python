@@ -1,8 +1,10 @@
+import re
 import uuid
 from datetime import datetime
 from enum import Enum
 from typing import Annotated, Any, Literal
 
+from pandas import DataFrame
 from pydantic import BaseModel, Field, model_validator
 
 from albert.exceptions import AlbertException
@@ -64,6 +66,28 @@ class ChecklistBlock(BaseBlock):
     type: Literal[BlockType.CHECKLIST] = Field(default=BlockType.CHECKLIST, alias="blockType")
     content: ChecklistContent
 
+    def is_checked(self, *, target_text: str) -> bool | None:
+        """Get checked state of a checklist item
+
+         Parameters
+        ----------
+        target_text : str
+            The value/text of a checklist entry.
+
+        Returns
+        -------
+        bool | None
+            The checked state of the target entry identified by name.
+        """
+        # loop items
+        for i in self.content.items:
+            if i.text == target_text:
+                # return check state
+                return i.checked
+
+        # return None if no match
+        return
+
 
 class AttachesContent(BaseAlbertModel):
     title: str
@@ -118,6 +142,28 @@ class TableContent(BaseAlbertModel):
 class TableBlock(BaseBlock):
     type: Literal[BlockType.TABLE] = Field(default=BlockType.TABLE, alias="blockType")
     content: TableContent
+
+    def to_df(self, *, infer_header: bool = True) -> DataFrame:
+        """Convert the TableBlock's content to a pd.DataFrame.
+
+        Returns
+        -------
+        DataFrame
+            The block's content as a pd.DataFrame.
+        """
+
+        # convert to df
+        df = DataFrame(self.content.content)
+
+        if infer_header:
+            # clean df -> column name w/o formatting
+            df.columns = df.iloc[0, :]
+            df.columns = [re.sub(r"<.*?>", "", x) for x in df.columns]
+            # discard first
+            df = df.iloc[1:, :].reset_index(drop=True)
+
+        # return df
+        return df
 
 
 class NotebookListItem(BaseModel):

@@ -46,6 +46,26 @@ class NotebookCollection(BaseCollection):
         response = self.session.get(f"{self.base_path}/{id}")
         return Notebook(**response.json())
 
+    def list_by_parent_id(self, *, parent_id: str) -> list[Notebook]:
+        """Retrieve a Notebook by parent ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the parent ID, e.g. task.
+
+        Returns
+        -------
+        list[Notebook]
+            list of notebook references.
+
+        """
+
+        # search
+        response = self.session.get(f"{self.base_path}/{parent_id}/search")
+        # return
+        return [self.get_by_id(id=x["id"]) for x in response.json()["Items"]]
+
     def create(self, *, notebook: Notebook) -> Notebook:
         """Create or return notebook for the provided notebook.
         This endpoint automatically tries to find an existing notebook with the same parameter setpoints, and will either return the existing notebook or create a new one.
