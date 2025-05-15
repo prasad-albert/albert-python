@@ -119,4 +119,9 @@ def test_copy(client: Albert, seeded_notebook: Notebook, seeded_projects: Iterat
     notebook_copy = client.notebooks.copy(
         notebook_copy_info=np_copy_info, type=NotebookCopyType.PROJECT
     )
-    assert notebook_copy.name == notebook.name
+
+    blocks = notebook.blocks
+    block_copies = notebook_copy.blocks
+    assert len(blocks) == len(block_copies)
+    for block, block_copy in zip(blocks, block_copies, strict=True):
+        assert type(block) == type(block_copy)
