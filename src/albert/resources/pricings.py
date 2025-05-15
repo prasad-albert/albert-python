@@ -4,8 +4,10 @@ from pydantic import Field
 
 from albert.resources.base import BaseResource
 from albert.resources.companies import Company
+from albert.resources.identifiers import InventoryId
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
+from albert.utils.types import BaseAlbertModel
 
 
 class LeadTimeUnit(str, Enum):
@@ -62,3 +64,18 @@ class Pricing(BaseResource):
 
     # Read-only fields
     default: int | None = Field(default=None, exclude=True, frozen=True)
+
+
+class InventoryPricings(BaseAlbertModel):
+    """Pricings for a given InventoryItem.
+
+    Attributes
+    ----------
+    inventory_id : Inventory
+        The inventory ID the pricings belong to.
+    pricings : list[Pricing]
+        The list of pricings.
+    """
+
+    inventory_id: InventoryId = Field(..., alias="id")
+    pricings: list[Pricing]
