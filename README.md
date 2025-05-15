@@ -8,7 +8,7 @@ The Albert SDK provides a comprehensive and easy-to-use interface for interactin
 
 TODO: Add installation instructions from PyPI once published
 
-For developers, please see the [contributing guide](CONTRIBUTING.mD) for local installation instructions.
+For developers, please see the [contributing guide](CONTRIBUTING.md) for local installation instructions.
 
 ## Overview
 The SDK is built around two main concepts:
