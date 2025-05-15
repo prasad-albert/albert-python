@@ -6,6 +6,7 @@ from albert.resources.base import BaseResource
 from albert.resources.companies import Company
 from albert.resources.locations import Location
 from albert.resources.serialization import SerializeAsEntityLink
+from albert.utils.types import BaseAlbertModel
 
 
 class LeadTimeUnit(str, Enum):
@@ -62,3 +63,8 @@ class Pricing(BaseResource):
 
     # Read-only fields
     default: int | None = Field(default=None, exclude=True, frozen=True)
+
+
+class InventoryPricings(BaseAlbertModel):
+    inventory_id: str = Field(..., alias="id")
+    pricings: list[Pricing]
