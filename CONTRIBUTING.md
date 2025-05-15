@@ -21,12 +21,17 @@ Follow the documentation on the [uv website](https://docs.astral.sh/uv/concepts/
 for additional project features such as managing dependencies, managing environments, 
 and configuring Python project metadata.
 
-### Dynamic Versioning
+## Dynamic Versioning
 
 The package version is defined in the `src/albert/__init__.py` file
 and read dynamically when building distributions.
 
+## Releasing
 
+Releasing the package is triggered manually through the creation of a GitHub Release.
+When a GitHub Release is created with a version tag matching the form `v{version}`,
+a CircleCI workflow is triggered that publishes the package to PyPI and builds the documentation.
+Generally, releases are only created against the `main` branch on a cadence determined by the development team.
 
 ## Code Style
 
