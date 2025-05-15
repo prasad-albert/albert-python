@@ -26,9 +26,7 @@ and configuring Python project metadata.
 The package version is defined in the `src/albert/__init__.py` file
 and read dynamically when building distributions.
 
-### Publishing
 
-TODO
 
 ## Code Style
 
@@ -58,6 +56,7 @@ uv run ruff check . --fix
 For VSCode users, there is also base workspace settings defined in `.vscode/settings.json` that enable
 automatic fomatting and import sorting on-save using the
 [Ruff for VSCode](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) extension.
+
 
 ## Documentation
 
@@ -156,3 +155,57 @@ git pull origin main
 uv run mkdocs build --clean
 git push origin gh-pages
 ```
+
+
+
+# Python SDK Release Process
+
+This document outlines the process for releasing the Albert Python SDK to [PyPI](https://pypi.org/), building and publishing documentation, and managing permissions related to the release workflow.
+
+---
+
+## Project Overview
+
+- **Build Tool:** [`uv`](https://docs.astral.sh/uv/) using `hatchling` as the build backend  
+- **Versioning:** Dynamic semantic versioning (pre-1.0.0)  
+- **Release Target:** PyPI (Test PyPI is not used)  
+- **CI/CD System:** CircleCI  
+- **Source Control Workflow:** `feature` → `main` with enforced reviews and checks  
+- **Documentation:** Built and published during the release process via MKDocs and GitHubPages
+- **Permissions:** Release permissions are limited to designated users within the Albert team  
+
+---
+
+## Release Workflow
+
+### 1. Pre-Release Preparation
+
+- Confirm that all changes are merged into `main` via a pull request.
+  - All required status checks (version increment, vulnerability scan, tests) and reviews must be completed.
+- Ensure that public-facing documentation and examples are up to date.
+
+### 2. Creating a Release on GitHub
+
+1. Go to the **Releases** section of the repository.
+2. Click **"Draft a new release"**.
+3. Select the `main` branch as the target.
+4. Create a new tag using the format: `vX.Y.Z`
+Example: `v0.3.0`
+
+Only tags matching the regular expression `^v0\.\d+\.\d+$` will trigger a release via CircleCI.
+
+5. Click the **"Generate release notes"** button.
+- Modify the auto-generated notes as needed for clarity and emphasis if desired.
+6. Publish the release.
+
+Publishing the release tag will automatically initiate the release pipeline in CircleCI.
+
+---
+
+## CircleCI Workflow for Releases
+
+When a matching release tag is pushed:
+
+1. The SDK is built using `uv` and `hatchling`.
+2. The package is uploaded to PyPI using `twine`.
+3. Project documentation is built and published.

@@ -46,8 +46,7 @@ plugins:
             show_docstring_attributes: true
 
 nav:
-  - Home: index.md
-  - Getting Started: getting-started.md
+  - Getting Started: index.md
   - SDK Reference:
     - Albert Client: albert.md
     - Attachments: attachments.md
