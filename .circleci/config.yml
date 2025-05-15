@@ -4,28 +4,21 @@ orbs:
   python: circleci/python@3.1.0
   snyk: snyk/snyk@2.3.0
 
-jobs:
-  setup:
-    executor:
-      name: python/default
-      tag: "3.10.15"
+commands:
+  install_uv:
     steps:
-      - checkout
       - run:
           name: Install uv
           command: curl -LsSf https://astral.sh/uv/install.sh | sh
-      - persist_to_workspace:
-          root: /home/circleci
-          paths:
-            - "*"
 
+jobs:
   snyk_app_scan:
     executor:
       name: python/default
       tag: "3.10.15"
     steps:
-      - attach_workspace:
-          at: /home/circleci
+      - checkout
+      - install_uv
       - run:
           name: Export dependencies
           command: |
@@ -44,8 +37,8 @@ jobs:
       name: python/default
       tag: "3.10.15"
     steps:
-      - attach_workspace:
-          at: /home/circleci
+      - checkout
+      - install_uv
       - run:
           name: Install dependencies
           command: uv sync
@@ -71,8 +64,7 @@ jobs:
       name: python/default
       tag: "3.10.15"
     steps:
-      - attach_workspace:
-          at: /home/circleci
+      - checkout
       - run:
           name: Validate version bump
           command: |
@@ -100,8 +92,8 @@ jobs:
       name: python/default
       tag: "3.10.15"
     steps:
-      - attach_workspace:
-          at: /home/circleci
+      - checkout
+      - install_uv
       - run:
           name: Build package
           command: uv build
@@ -116,8 +108,8 @@ jobs:
       name: python/default
       tag: "3.10.15"
     steps:
-      - attach_workspace:
-          at: /home/circleci
+      - checkout
+      - install_uv
       - run:
           name: Install dependencies
           command: uv sync
@@ -141,44 +133,35 @@ jobs:
 workflows:
   main:
     jobs:
-      - setup:
-          name: Setup
       - snyk_app_scan:
           name: Snyk App Scan
           context: dev
-          requires:
-            - Setup
       - test:
           name: Test
           context: ds-dev
-          requires:
-            - Setup
       - validate_version_bump:
           name: Validate Version Bump
           context: ds-dev
-          requires:
-            - Setup
           filters:
             branches:
               ignore: ["main"]
 
   release:
+    # Only kick off workflow on release version tags
     jobs:
-      - setup:
-          name: Setup
-          # Only kick off workflow on release version tags
+      - publish:
+          name: Publish to PyPI
+          context: ds-dev
           filters:
             tags:
               only: /^v.+$/
             branches:
               ignore: /.*/
-      - publish:
-          name: Publish to PyPI
-          context: ds-dev
-          requires:
-            - Setup
       - deploy_docs:
           name: Deploy Docs
           context: ds-dev
-          requires:
-            - Setup
+          filters:
+            tags:
+              only: /^v.+$/
+            branches:
+              ignore: /.*/
