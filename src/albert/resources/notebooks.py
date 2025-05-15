@@ -8,6 +8,7 @@ from pandas import DataFrame
 from pydantic import BaseModel, Field, model_validator
 
 from albert.exceptions import AlbertException
+from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
 from albert.resources.identifiers import LinkId, NotebookId, ProjectId, SynthesisId, TaskId
 
@@ -26,6 +27,14 @@ class BlockType(str, Enum):
     ATTACHES = "attaches"
     KETCHER = "ketcher"
     TABLE = "table"
+
+
+class NotebookCopyType(str, Enum):
+    TEMPLATE = "template"
+    TASK = "Task"
+    PROJECT = "Project"
+    RESTORE_TEMPLATE = "restoreTemplate"
+    GEN_TASK_TEMPLATE = "genTaskTemplate"
 
 
 class BaseBlock(BaseAlbertModel):
@@ -278,3 +287,16 @@ class PutBlockPayload(BaseAlbertModel):
     def model_dump(self, **kwargs) -> dict[str, Any]:
         """model_dump to ensure only top-level None attrs are removed on PutBlockDatum."""
         return {"data": [item.model_dump(**kwargs) for item in self.data]}
+
+
+class NotebookCopyACL(BaseResource):
+    fgclist: list[ACL] = Field(default=None)
+    acl_class: str = Field(alias="class")
+
+
+class NotebookCopyInfo(BaseAlbertModel):
+    id: NotebookId
+    parent_id: str = Field(alias="parentId")
+    notebook_name: str | None = Field(default=None, alias="notebookName")
+    name: str | None = Field(default=None)
+    acl: NotebookCopyACL | None = Field(default=None)
