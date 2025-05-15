@@ -224,7 +224,7 @@ class NotebookCollection(BaseCollection):
         Returns
         -------
         Notebook
-            _description_
+            The result of the copied Notebook.
         """
         response = self.session.post(
             url=f"{self.base_path}/copy",
