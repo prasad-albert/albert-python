@@ -11,9 +11,13 @@ on the supported resources and usage patterns here (TODO: link to docs).
 
 ## Installation
 
-TODO: Add installation instructions from public PyPI once published
+`pip install albert`
 
-For developers, please see the [contributing guide](CONTRIBUTING.md) for local installation instructions.
+This installs the latest stable release from PyPI.
+
+### Developer Installation
+
+For developers, please see the [contributing guide](CONTRIBUTING.md), which includes setup instructions, testing, and linting guidelines.
 
 ## Quick Start
 

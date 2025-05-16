@@ -1,8 +1,8 @@
 
-# The Albert Python SDK
+# Albert Python
 
 ## Overview
-The SDK is built around two main concepts:
+Albert Python is built around two main concepts:
 
 1. *Resource Models*: Represent individual entities like InventoryItem, Project, Company, and Tag. These are all controlled using Pydantic.
 
@@ -16,7 +16,7 @@ Resource Collections act as managers for Resource Models. They provide methods f
 
 ## Usage
 ### Initialization
-To use the SDK, you need to initialize the Albert client with your base URL and either a bearer token (which will expire) or client credientals, which will enable automatic token refresh.
+To use Albert Python, you need to initialize the Albert client with your base URL and either a bearer token (which will expire) or client credientals, which will enable automatic token refresh.
 
 ```python
 from albert import Albert, ClientCredentials
