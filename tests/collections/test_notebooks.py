@@ -8,6 +8,8 @@ from albert.resources.notebooks import (
     HeaderBlock,
     HeaderContent,
     Notebook,
+    NotebookCopyInfo,
+    NotebookCopyType,
     ParagraphBlock,
     ParagraphContent,
 )
@@ -103,3 +105,23 @@ def test_create_validation(client: Albert, seeded_projects: Iterator[list[Projec
     )
     with pytest.raises(AlbertException, match="Cannot create a Notebook with pre-filled blocks."):
         client.notebooks.create(notebook=notebook)
+
+
+def test_copy(client: Albert, seeded_notebook: Notebook, seeded_projects: Iterator[list[Project]]):
+    notebook = seeded_notebook.model_copy()
+
+    project: Project = seeded_projects[0]
+    np_copy_info = NotebookCopyInfo(
+        id=notebook.id,
+        parent_id=project.id,
+    )
+
+    notebook_copy = client.notebooks.copy(
+        notebook_copy_info=np_copy_info, type=NotebookCopyType.PROJECT
+    )
+
+    blocks = notebook.blocks
+    block_copies = notebook_copy.blocks
+    assert len(blocks) == len(block_copies)
+    for block, block_copy in zip(blocks, block_copies, strict=True):
+        assert type(block) == type(block_copy)

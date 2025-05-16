@@ -5,6 +5,8 @@ from albert.exceptions import AlbertException, NotFoundError
 from albert.resources.notebooks import (
     Notebook,
     NotebookBlock,
+    NotebookCopyInfo,
+    NotebookCopyType,
     PutBlockDatum,
     PutBlockPayload,
     PutOperation,
@@ -208,3 +210,25 @@ class NotebookCollection(BaseCollection):
                 data.append(PutBlockDatum(id=block.id, operation=PutOperation.DELETE))
 
         return PutBlockPayload(data=data)
+
+    def copy(self, *, notebook_copy_info: NotebookCopyInfo, type: NotebookCopyType) -> Notebook:
+        """Create a copy of a Notebook into a specified parent
+
+        Parameters
+        ----------
+        notebook_copy_info : NotebookCopyInfo
+            The copy information for the Notebook copy
+        type : NotebookCopyType
+            Differentiate whether copy is for templates, task, project or restoreTemplate
+
+        Returns
+        -------
+        Notebook
+            The result of the copied Notebook.
+        """
+        response = self.session.post(
+            url=f"{self.base_path}/copy",
+            json=notebook_copy_info.model_dump(mode="json", by_alias=True, exclude_none=True),
+            params={"type": type, "parentId": notebook_copy_info.parent_id},
+        )
+        return Notebook(**response.json())
