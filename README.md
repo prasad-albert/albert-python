@@ -13,7 +13,7 @@ on the supported resources and usage patterns here (TODO: link to docs).
 
 `pip install albert`
 
-This installs the latest stable release from PyPI.
+This installs the latest stable release from [PyPI](https://pypi.org/).
 
 ### Developer Installation
 
