@@ -89,6 +89,7 @@ class ParameterGroupCollection(BaseCollection):
 
                     if (
                         existing_param_value.validation != updated_param_value.validation
+                        and updated_param_value.validation is not None
                         and isinstance(updated_param_value.validation[0].value, list)
                     ):
                         existing_enums = (
@@ -135,7 +136,9 @@ class ParameterGroupCollection(BaseCollection):
                                 newValue=[
                                     x.model_dump(mode="json", by_alias=True, exclude_none=True)
                                     for x in updated_param_value.validation
-                                ],
+                                ]
+                                if updated_param_value.validation is not None
+                                else [],
                                 rowId=existing_param_value.sequence,
                             )
                         )
@@ -258,7 +261,7 @@ class ParameterGroupCollection(BaseCollection):
                 id = item["albertId"]
                 try:
                     yield self.get_by_id(id=id)
-                except AlbertHTTPError as e:
+                except AlbertHTTPError as e:  # pragma: no cover
                     logger.warning(f"Error fetching parameter group {id}: {e}")
             # Currently, the API is not returning metadata for the list_by_ids endpoint, so we need to fetch individually until that is fixed
             # return self.get_by_ids(ids=[x["albertId"] for x in items])
