@@ -87,6 +87,22 @@ jobs:
               echo "Skipping version bump check for non-production base branch '${BASE_BRANCH}'"
             fi
 
+  validate_release_tag:
+    executor:
+      name: python/default
+      tag: "3.10.15"
+    steps:
+      - checkout
+      - run:
+          name: Validate release tag
+          command: |
+            PACKAGE_VERSION=$(grep -oP "__version__\s*=\s*['\"]\K[0-9a-zA-Z\.\-]+" src/albert/__init__.py)
+            RELEASE_TAG="${CIRCLE_TAG#v}"
+            if [ "${PACKAGE_VERSION}" != "${RELEASE_TAG}" ]; then
+              echo "Error: Release tag '${RELEASE_TAG}' does not match version '${PACKAGE_VERSION}' in __init__.py"
+              exit 1
+            fi
+
   publish:
     executor:
       name: python/default
@@ -149,9 +165,19 @@ workflows:
   release:
     # Only kick off workflow on release version tags
     jobs:
+      - validate_release_tag:
+          name: Validate Tag
+          context: ds-dev
+          filters:
+            tags:
+              only: /^v.+$/
+            branches:
+              ignore: /.*/
       - publish:
           name: Publish to PyPI
           context: ds-dev
+          requires:
+            - Validate Tag
           filters:
             tags:
               only: /^v.+$/
@@ -160,6 +186,8 @@ workflows:
       - deploy_docs:
           name: Deploy Docs
           context: ds-dev
+          requires:
+            - Validate Tag
           filters:
             tags:
               only: /^v.+$/
