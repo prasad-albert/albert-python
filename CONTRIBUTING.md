@@ -198,7 +198,7 @@ Generally, releases are only created against the `main` branch on a cadence dete
 4. Create a new tag using the format: `vX.Y.Z`
 Example: `v0.3.0`
 
-Only tags matching the regular expression `^v0\.\d+\.\d+$` will trigger a release via CircleCI.
+Only tags matching the regular expression `^v0\.\d+\.\d+$` and the current package version (found in the `src/albert/__init__.py` file) will trigger a release via CircleCI.
 
 5. Click the **"Generate release notes"** button.
 - Modify the auto-generated notes as needed for clarity and emphasis if desired.
