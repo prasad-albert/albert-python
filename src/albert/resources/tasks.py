@@ -1,5 +1,6 @@
+from datetime import datetime
 from enum import Enum
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, TypeAdapter
 
@@ -41,6 +42,10 @@ class TaskPriority(str, Enum):
     HIGH = "High"
     MEDIUM = "Medium"
     LOW = "Low"
+
+
+class HistoryEntity(str, Enum):
+    WORKFLOW = "workflow"
 
 
 class Target(BaseAlbertModel):
@@ -306,3 +311,16 @@ class GeneralTask(BaseTask):
 
 TaskUnion = Annotated[PropertyTask | BatchTask | GeneralTask, Field(..., discriminator="category")]
 TaskAdapter = TypeAdapter(TaskUnion)
+
+
+class TaskHistoryEvent(BaseAlbertModel):
+    state: str
+    action: str
+    action_at: datetime = Field(alias="actionAt")
+    user: SerializeAsEntityLink[User] = Field(alias="User")
+    old_value: Any | None = Field(default=None, alias="oldValue")
+    new_value: Any | None = Field(default=None, alias="newValue")
+
+
+class TaskHistory(BaseAlbertModel):
+    items: list[TaskHistoryEvent] = Field(alias="Items")

@@ -11,7 +11,14 @@ from albert.resources.identifiers import (
     TaskId,
     WorkflowId,
 )
-from albert.resources.tasks import BaseTask, PropertyTask, TaskAdapter, TaskCategory
+from albert.resources.tasks import (
+    BaseTask,
+    HistoryEntity,
+    PropertyTask,
+    TaskAdapter,
+    TaskCategory,
+    TaskHistory,
+)
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
@@ -410,3 +417,24 @@ class TaskCollection(BaseCollection):
             json=patch_payload,
         )
         return self.get_by_id(id=task.id)
+
+    def get_history(
+        self,
+        *,
+        id: TaskId,
+        order: OrderBy = OrderBy.DESCENDING,
+        limit: int = 1000,
+        entity: HistoryEntity | None = None,
+        blockId: str | None = None,
+        startKey: str | None = None,
+    ) -> TaskHistory:
+        params = {
+            "limit": limit,
+            "orderBy": OrderBy(order).value if order else None,
+            "entity": entity,
+            "blockId": blockId,
+            "startKey": startKey,
+        }
+        url = f"{self.base_path}/{id}/history"
+        response = self.session.get(url, params=params)
+        return TaskHistory(**response.json())
