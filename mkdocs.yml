@@ -1,6 +1,8 @@
 site_name: "Albert Python SDK Docs"
 theme:
   name: "material"
+  font:
+    text: Poppins
 
 markdown_extensions:
   - admonition
@@ -40,6 +42,13 @@ plugins:
               attributes: false
               functions: true
               modules: false #I'm not sure what this one does, honestly
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_root_full_path: true
+            heading_level: 2
+            show_bases: true
+
           import:
             - url: https://docs.python.org/3/objects.inv
               domains: [py, std]

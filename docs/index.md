@@ -4,9 +4,9 @@
 ## Overview
 Albert Python is built around two main concepts:
 
-1. *Resource Models*: Represent individual entities like InventoryItem, Project, Company, and Tag. These are all controlled using Pydantic.
+1. **Resource Models**: Represent individual entities like `InventoryItem`, `Project`, `Company`, and `Tag`. These are all controlled using [Pydantic](https://docs.pydantic.dev/).
 
-2. *Resource Collections*: Provide methods to interact with the API endpoints related to a specific resource, such as listing, creating, updating, and deleting resources.
+2. **Resource Collections**: Provide methods to interact with the API endpoints related to a specific resource, such as listing, creating, updating, and deleting resources.
 
 ### Resource Models
 Resource Models represent the data structure of individual resources. They encapsulate the attributes and behaviors of a single resource. For example, an `InventoryItem` has attributes like `name`, `description`, `category`, and `tags`.
@@ -37,14 +37,14 @@ client = Albert(
     )
 )
 
-#  By default, if environment variables `ALBERT_CLIENT_ID` and `ALBERT_CLIENT_SECRET` are set you can simply do:
+#  By default, if environment variables `ALBERT_CLIENT_ID` and `ALBERT_CLIENT_SECRET` are set, you can simply do:
 
 client = Albert()
 ```
 
 ## Working with Resource Collections and Models
 ### Example: Inventory Collection
-You can interact with inventory items using the InventoryCollection class. Here is an example of how to create a new inventory item, list all inventory items, and fetch an inventory item by its ID.
+You can interact with inventory items using the `InventoryCollection` class. Here is an example of how to create a new inventory item, list all inventory items, and fetch an inventory item by its ID.
 
 ```python
 from albert import Albert
@@ -76,7 +76,7 @@ inventory_item = inventory_collection.list(name="Acetone")
 
 ## BaseEntityLink / SerializeAsEntityLink
 
-We introduced the concept of a `BaseEntityLink` to represent the foreign key references you can find around the Albert API. Payloads to the API expect these refrences in the BaseEntityLink format (e.g., `{"id":x}`). However, as a convenience, you will see some value types defined as `SerializeAsEntityLink`, and then another resource name (e.g., `SerializeAsEntityLink[Location]`). This allows a user to make that reference either to a base and link or to the actual other entity, and the SDK will handle the serialization for you! For example:
+We introduced the concept of a `BaseEntityLink` to represent the foreign key references you can find around the Albert API. Payloads to the API expect these refrences in the `BaseEntityLink` format (e.g., `{"id":x}`). However, as a convenience, you will see some value types defined as `SerializeAsEntityLink`, and then another resource name (e.g., `SerializeAsEntityLink[Location]`). This allows a user to make that reference either to a base and link or to the actual other entity, and the SDK will handle the serialization for you! For example:
 
 ```python
 from albert import Albert
@@ -97,5 +97,12 @@ p = Project(
 p = Project(
     description="Example project",
     locations=[BaseEntityLink(id=my_location.id)]
+)
+
+# Equivalent to
+
+p = Project(
+    description="Example project",
+    locations=[my_location.to_entity_link()]
 )
 ```

@@ -7,7 +7,7 @@ You can find the latest, most up-to-date documentation
 on the supported resources and usage patterns here (TODO: link to docs).
 
 > [!WARNING]
-> Albert Python is still in the early phases of development. As such, patterns may change, and methods may not work as expected. Do not use this package unless you are comfortable with these limitations.
+> Albert Python is still in late Alpha. As such, patterns may change, and methods may not work as expected. Do not use this package unless you are comfortable with these limitations.
 
 ## Installation
 
