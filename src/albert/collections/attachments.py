@@ -106,7 +106,7 @@ class AttachmentCollection(BaseCollection):
         )
         note = Note(
             parent_id=parent_id,
-            text=note_text,
+            note=note_text,
         )
         registered_note = note_collection.create(note=note)
         self.attach_file_to_note(
