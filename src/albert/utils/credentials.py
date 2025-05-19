@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 import requests
 from pydantic import SecretStr
 
+from albert.exceptions import handle_http_error
 from albert.utils.types import BaseAlbertModel
 
 
@@ -84,6 +85,7 @@ class TokenManager:
             data=payload.model_dump(mode="json"),
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
+        handle_http_error(response)
         self._token_info = OAuthTokenInfo(**response.json())
         self._refresh_time = (
             datetime.now(timezone.utc)

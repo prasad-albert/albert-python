@@ -1,11 +1,14 @@
+import re
 import uuid
 from datetime import datetime
 from enum import Enum
 from typing import Annotated, Any, Literal
 
+from pandas import DataFrame
 from pydantic import BaseModel, Field, model_validator
 
 from albert.exceptions import AlbertException
+from albert.resources.acls import ACL
 from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
 from albert.resources.identifiers import LinkId, NotebookId, ProjectId, SynthesisId, TaskId
 
@@ -24,6 +27,14 @@ class BlockType(str, Enum):
     ATTACHES = "attaches"
     KETCHER = "ketcher"
     TABLE = "table"
+
+
+class NotebookCopyType(str, Enum):
+    TEMPLATE = "template"
+    TASK = "Task"
+    PROJECT = "Project"
+    RESTORE_TEMPLATE = "restoreTemplate"
+    GEN_TASK_TEMPLATE = "genTaskTemplate"
 
 
 class BaseBlock(BaseAlbertModel):
@@ -63,6 +74,28 @@ class ChecklistContent(BaseAlbertModel):
 class ChecklistBlock(BaseBlock):
     type: Literal[BlockType.CHECKLIST] = Field(default=BlockType.CHECKLIST, alias="blockType")
     content: ChecklistContent
+
+    def is_checked(self, *, target_text: str) -> bool | None:
+        """Get checked state of a checklist item
+
+         Parameters
+        ----------
+        target_text : str
+            The value/text of a checklist entry.
+
+        Returns
+        -------
+        bool | None
+            The checked state of the target entry identified by name.
+        """
+        # loop items
+        for i in self.content.items:
+            if i.text == target_text:
+                # return check state
+                return i.checked
+
+        # return None if no match
+        return
 
 
 class AttachesContent(BaseAlbertModel):
@@ -118,6 +151,28 @@ class TableContent(BaseAlbertModel):
 class TableBlock(BaseBlock):
     type: Literal[BlockType.TABLE] = Field(default=BlockType.TABLE, alias="blockType")
     content: TableContent
+
+    def to_df(self, *, infer_header: bool = True) -> DataFrame:
+        """Convert the TableBlock's content to a pd.DataFrame.
+
+        Returns
+        -------
+        DataFrame
+            The block's content as a pd.DataFrame.
+        """
+
+        # convert to df
+        df = DataFrame(self.content.content)
+
+        if infer_header:
+            # clean df -> column name w/o formatting
+            df.columns = df.iloc[0, :]
+            df.columns = [re.sub(r"<.*?>", "", x) for x in df.columns]
+            # discard first
+            df = df.iloc[1:, :].reset_index(drop=True)
+
+        # return df
+        return df
 
 
 class NotebookListItem(BaseModel):
@@ -232,3 +287,16 @@ class PutBlockPayload(BaseAlbertModel):
     def model_dump(self, **kwargs) -> dict[str, Any]:
         """model_dump to ensure only top-level None attrs are removed on PutBlockDatum."""
         return {"data": [item.model_dump(**kwargs) for item in self.data]}
+
+
+class NotebookCopyACL(BaseResource):
+    fgclist: list[ACL] = Field(default=None)
+    acl_class: str = Field(alias="class")
+
+
+class NotebookCopyInfo(BaseAlbertModel):
+    id: NotebookId
+    parent_id: str = Field(alias="parentId")
+    notebook_name: str | None = Field(default=None, alias="notebookName")
+    name: str | None = Field(default=None)
+    acl: NotebookCopyACL | None = Field(default=None)

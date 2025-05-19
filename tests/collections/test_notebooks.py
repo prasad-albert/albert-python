@@ -8,14 +8,19 @@ from albert.resources.notebooks import (
     HeaderBlock,
     HeaderContent,
     Notebook,
+    NotebookCopyInfo,
+    NotebookCopyType,
     ParagraphBlock,
     ParagraphContent,
 )
+from albert.resources.projects import Project
 from tests.seeding import generate_notebook_block_seeds, generate_notebook_seeds
 
 
 @pytest.fixture(scope="function")
-def seeded_notebook(client: Albert, seed_prefix, seeded_projects) -> Iterator[Notebook]:
+def seeded_notebook(
+    client: Albert, seed_prefix: str, seeded_projects: Iterator[list[Project]]
+) -> Iterator[Notebook]:
     notebook = generate_notebook_seeds(seed_prefix=seed_prefix, seeded_projects=seeded_projects)[0]
     seeded = client.notebooks.create(notebook=notebook)
     seeded.blocks = generate_notebook_block_seeds()
@@ -27,6 +32,12 @@ def test_get_by_id(client: Albert, seeded_notebooks: list[Notebook]):
     nb = seeded_notebooks[0]
     retrieved_nb = client.notebooks.get_by_id(id=nb.id)
     assert retrieved_nb.id == nb.id
+
+
+def test_list_by_parent_id(client: Albert, seeded_notebooks: list[Notebook]):
+    nb = seeded_notebooks[0]
+    retrieved_nb = client.notebooks.list_by_parent_id(parent_id=nb.parent_id)[0]
+    assert nb.name == retrieved_nb.name
 
 
 def test_update(client: Albert, seeded_notebook: Notebook):
@@ -87,10 +98,30 @@ def test_get_block_by_id(client: Albert, seeded_notebooks: list[Notebook]):
     assert retrieved_block.id == block.id
 
 
-def test_create_validation(client: Albert, seeded_projects):
+def test_create_validation(client: Albert, seeded_projects: Iterator[list[Project]]):
     notebook = Notebook(
         parent_id=seeded_projects[0].id,
         blocks=[ParagraphBlock(content=ParagraphContent(text="test"))],
     )
     with pytest.raises(AlbertException, match="Cannot create a Notebook with pre-filled blocks."):
         client.notebooks.create(notebook=notebook)
+
+
+def test_copy(client: Albert, seeded_notebook: Notebook, seeded_projects: Iterator[list[Project]]):
+    notebook = seeded_notebook.model_copy()
+
+    project: Project = seeded_projects[0]
+    np_copy_info = NotebookCopyInfo(
+        id=notebook.id,
+        parent_id=project.id,
+    )
+
+    notebook_copy = client.notebooks.copy(
+        notebook_copy_info=np_copy_info, type=NotebookCopyType.PROJECT
+    )
+
+    blocks = notebook.blocks
+    block_copies = notebook_copy.blocks
+    assert len(blocks) == len(block_copies)
+    for block, block_copy in zip(blocks, block_copies, strict=True):
+        assert type(block) == type(block_copy)

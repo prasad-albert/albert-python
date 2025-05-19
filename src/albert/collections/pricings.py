@@ -1,7 +1,10 @@
 from enum import Enum
 
+from pydantic import validate_call
+
 from albert.collections.base import BaseCollection, OrderBy
-from albert.resources.pricings import Pricing
+from albert.resources.identifiers import InventoryId
+from albert.resources.pricings import InventoryPricings, Pricing
 from albert.session import AlbertSession
 from albert.utils.patches import PatchDatum, PatchOperation, PatchPayload
 
@@ -112,6 +115,24 @@ class PricingCollection(BaseCollection):
         response = self.session.get(self.base_path, params=params)
         items = response.json().get("Items", [])
         return [Pricing(**x) for x in items]
+
+    @validate_call
+    def get_by_inventory_ids(self, *, inventory_ids: list[InventoryId]) -> list[InventoryPricings]:
+        """Returns a list of Pricing resources for each parent inventory ID.
+
+        Parameters
+        ----------
+        inventory_ids : list[str]
+            The list of inventory IDs to retrieve pricings for.
+
+        Returns
+        -------
+        list[InventoryPricing]
+            A list of InventoryPricing objects matching the provided inventory.
+        """
+        params = {"id": inventory_ids}
+        response = self.session.get(f"{self.base_path}/ids", params=params)
+        return [InventoryPricings(**x) for x in response.json()["Items"]]
 
     def delete(self, *, id: str) -> None:
         """Deletes a Pricing entity by its ID.

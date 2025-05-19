@@ -436,6 +436,8 @@ def seeded_parameter_groups(
     seeded_tags,
     seeded_units,
     static_consumeable_parameter: Parameter,
+    static_custom_fields: list[CustomField],
+    static_lists: list[ListItem],
 ) -> Iterator[list[ParameterGroup]]:
     seeded = []
     for parameter_group in generate_parameter_group_seeds(
@@ -444,6 +446,8 @@ def seeded_parameter_groups(
         seeded_tags=seeded_tags,
         seeded_units=seeded_units,
         static_consumeable_parameter=static_consumeable_parameter,
+        static_custom_fields=static_custom_fields,
+        static_lists=static_lists,
     ):
         created_parameter_group = client.parameter_groups.create(parameter_group=parameter_group)
         seeded.append(created_parameter_group)
@@ -573,6 +577,8 @@ def seeded_tasks(
     seeded_data_templates,
     seeded_workflows,
     seeded_products,
+    static_lists: list[ListItem],
+    static_custom_fields: list[CustomField],
 ):
     seeded = []
     all_tasks = generate_task_seeds(
@@ -585,6 +591,8 @@ def seeded_tasks(
         seeded_data_templates=seeded_data_templates,
         seeded_workflows=seeded_workflows,
         seeded_products=seeded_products,
+        static_lists=static_lists,
+        static_custom_fields=static_custom_fields,
     )
     for t in all_tasks:
         seeded.append(client.tasks.create(task=t))

@@ -153,6 +153,13 @@ class BaseCollection:
         for attribute in self._updatable_attributes:
             old_value = getattr(existing, attribute, None)
             new_value = getattr(updated, attribute, None)
+            # Sometimes None and empty lists/dicts are serilized/deserilized to the same value, but wont look the same here
+            if old_value is None and (new_value == [] or new_value == {}):
+                # Avoid updating None to an empty list
+                new_value = None
+            elif (old_value == [] or old_value == {}) and new_value is None:
+                # Avoid updating an empty list to None
+                old_value = None
             if attribute == "metadata" and generate_metadata_diff:
                 data.extend(
                     self._generate_metadata_diff(
