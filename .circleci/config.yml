@@ -95,13 +95,7 @@ jobs:
       - checkout
       - run:
           name: Validate release tag
-          command: |
-            PACKAGE_VERSION=$(grep -oP "__version__\s*=\s*['\"]\K[0-9a-zA-Z\.\-]+" src/albert/__init__.py)
-            RELEASE_TAG="${CIRCLE_TAG#v}"
-            if [ "${PACKAGE_VERSION}" != "${RELEASE_TAG}" ]; then
-              echo "Error: Release tag '${RELEASE_TAG}' does not match version '${PACKAGE_VERSION}' in __init__.py"
-              exit 1
-            fi
+          command: python scripts/validate_release_tag.py --tag ${CIRCLE_TAG}
 
   publish:
     executor:
