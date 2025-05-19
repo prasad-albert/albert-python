@@ -1,10 +1,3 @@
-# import pytest
-
-# pytestmark = pytest.mark.xfail(
-#     reason="Bug in Albert API -- https://support.albertinvent.com/hc/en-us/requests/8339"
-# )
-
-
 from albert.albert import Albert
 from albert.resources.custom_fields import CustomField
 
