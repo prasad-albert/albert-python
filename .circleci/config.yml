@@ -27,7 +27,7 @@ jobs:
             uv pip compile requirements_lock.txt > requirements.txt
             uv pip install --system -r requirements.txt
       - snyk/scan:
-          fail-on-issues: false
+          fail-on-issues: true
           monitor-on-build: true
           severity-threshold: high
           token-variable: SNYK_TOKEN

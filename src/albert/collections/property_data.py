@@ -138,7 +138,15 @@ class PropertyDataCollection(BaseCollection):
         existing_value = None
         for p in existing_properties.custom_property_data:
             if p.data_column.data_column_id == property_data.data_column_id:
-                existing_value = p.data_column.property_data.value
+                existing_value = (
+                    p.data_column.property_data.value
+                    if p.data_column.property_data.value is not None
+                    else p.data_column.property_data.string_value
+                    if p.data_column.property_data.string_value is not None
+                    else str(p.data_column.property_data.numeric_value)
+                    if p.data_column.property_data.numeric_value is not None
+                    else None
+                )
                 existing_id = p.data_column.property_data.id
                 break
         if existing_value is not None:
