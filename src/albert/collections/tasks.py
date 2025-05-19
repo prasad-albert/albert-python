@@ -18,7 +18,6 @@ from albert.resources.tasks import (
     TaskAdapter,
     TaskCategory,
     TaskHistory,
-    TaskHistoryEvent,
 )
 from albert.session import AlbertSession
 from albert.utils.logging import logger
