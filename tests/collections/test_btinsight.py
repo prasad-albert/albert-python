@@ -1,5 +1,16 @@
 from albert import Albert
-from albert.resources.btinsight import BTInsight, BTInsightRegistry
+from albert.resources.btinsight import BTInsight, BTInsightCategory, BTInsightRegistry
+
+
+def test_get_by_id(client: Albert, seeded_btinsight: BTInsight):
+    fetched_insight = client.btinsights.get_by_id(id=seeded_btinsight.id)
+    assert fetched_insight.id == seeded_btinsight.id
+
+
+def test_list(client: Albert):
+    ins = next(client.btinsights.list(category=BTInsightCategory.CUSTOM_OPTIMIZER), None)
+    assert ins is not None
+    assert ins.category == BTInsightCategory.CUSTOM_OPTIMIZER
 
 
 def test_update(client: Albert, seeded_btinsight: BTInsight):

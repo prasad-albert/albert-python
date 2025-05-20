@@ -2,12 +2,22 @@ from albert import Albert
 from albert.resources.btmodel import BTModel, BTModelRegistry, BTModelSession
 
 
+def test_get_model_session_by_id(client: Albert, seeded_btmodelsession: BTModelSession):
+    fetched_model_session = client.btmodelsessions.get_by_id(id=seeded_btmodelsession.id)
+    assert fetched_model_session.id == seeded_btmodelsession.id
+
+
 def test_update_model_session(client: Albert, seeded_btmodelsession: BTModelSession):
     marker = "TEST"
     seeded_btmodelsession.registry = BTModelRegistry(build_logs={"status": marker})
 
     updated_model_session = client.btmodelsessions.update(model_session=seeded_btmodelsession)
     assert updated_model_session.registry == seeded_btmodelsession.registry
+
+
+def test_get_model_by_id(seeded_btmodelsession: BTModelSession, seeded_btmodel: BTModel):
+    fetched_model = seeded_btmodelsession.models.get_by_id(id=seeded_btmodel.id)
+    assert fetched_model.id == seeded_btmodel.id
 
 
 def test_update_model(seeded_btmodelsession: BTModelSession, seeded_btmodel: BTModel):
