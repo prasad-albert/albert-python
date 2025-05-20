@@ -87,14 +87,14 @@ inventory_item = client.inventory.get_by_id(inventory_id=inventory_id)
 inventory_item = inventory_collection.list(name="Acetone")
 ```
 
-## BaseEntityLink / SerializeAsEntityLink
+## EntityLink / SerializeAsEntityLink
 
-We introduced the concept of a `BaseEntityLink` to represent the foreign key references you can find around the Albert API. Payloads to the API expect these refrences in the `BaseEntityLink` format (e.g., `{"id":x}`). However, as a convenience, you will see some value types defined as `SerializeAsEntityLink`, and then another resource name (e.g., `SerializeAsEntityLink[Location]`). This allows a user to make that reference either to a base and link or to the actual other entity, and the SDK will handle the serialization for you! For example:
+We introduced the concept of a `EntityLink` to represent the foreign key references you can find around the Albert API. Payloads to the API expect these refrences in the `EntityLink` format (e.g., `{"id":x}`). However, as a convenience, you will see some value types defined as `SerializeAsEntityLink`, and then another resource name (e.g., `SerializeAsEntityLink[Location]`). This allows a user to make that reference either to a base and link or to the actual other entity, and the SDK will handle the serialization for you! For example:
 
 ```python
 from albert import Albert
 from albert.resources.project import Project
-from albert.resources.base import BaseEntityLink
+from albert.resources.base import EntityLink
 
 client = Albert()
 
@@ -109,7 +109,7 @@ p = Project(
 
 p = Project(
     description="Example project",
-    locations=[BaseEntityLink(id=my_location.id)]
+    locations=[EntityLink(id=my_location.id)]
 )
 
 # Equivalent to
