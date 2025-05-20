@@ -40,10 +40,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MoleculeEngineering/albert-sdk"
-Documentation = "https://glowing-sniffle-8jy8mwz.pages.github.io/"
-Repository = "https://github.com/MoleculeEngineering/albert-sdk"
-Issues = "https://github.com/MoleculeEngineering/albert-sdk/issues"
+Homepage = "https://github.com/MoleculeEngineering/albert-python"
+Documentation = "https://docs.developer.albertinvent.com/albert-python"
+Repository = "https://github.com/MoleculeEngineering/albert-python"
+Issues = "https://github.com/MoleculeEngineering/albert-python/issues"
 
 [tool.hatch.version]
 path = "src/albert/__init__.py"
