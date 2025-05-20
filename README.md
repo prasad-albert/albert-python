@@ -32,4 +32,4 @@ projects = client.projects.list()
 
 ## Documentation
 
-[Full Documentation can be found here](https://glowing-sniffle-8jy8mwz.pages.github.io/)
+[Full Documentation can be found here](https://docs.developer.albertinvent.com/albert-python)
