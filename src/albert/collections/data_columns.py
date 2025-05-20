@@ -39,7 +39,7 @@ class DataColumnCollection(BaseCollection):
                 return dc
         return None
 
-    def get_by_id(self, *, id) -> DataColumn | None:
+    def get_by_id(self, *, id) -> DataColumn:
         """
         Get a data column by its ID.
 

@@ -25,6 +25,7 @@ def test_basic_list(client: Albert, seeded_data_columns: list[DataColumn]):
 def test_get_by_name(client: Albert, seeded_data_columns: list[DataColumn]):
     name = seeded_data_columns[0].name
     dc = client.data_columns.get_by_name(name=name)
+    assert dc is not None
     assert dc.name == name
     assert dc.id == seeded_data_columns[0].id
 
