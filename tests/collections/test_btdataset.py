@@ -7,6 +7,13 @@ def test_get_by_id(client: Albert, seeded_btdataset: BTDataset):
     assert fetched_dataset.id == seeded_btdataset.id
 
 
+def test_list_by_user(client: Albert):
+    user = client.users.get_current_user()
+    dataset = next(client.btdatasets.list(created_by=user.id), None)
+    assert dataset is not None
+    assert dataset.created.by == user.id
+
+
 def test_update(client: Albert, seeded_btdataset: BTDataset):
     marker = "TEST"
     seeded_btdataset.key = marker
