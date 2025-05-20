@@ -30,9 +30,9 @@ class BTInsightPayloadType(str, Enum):
 
 
 class BTInsightRegistry(BaseAlbertModel):
-    """Registry information for the BTInsight.
+    """Registry for the BTInsight.
 
-    Registry constains additional settings/metrics metadata for the BTInsight.
+    Registry contains result metadata for the BTInsight.
     Additional attributes can be added to the registry as needed.
     """
 
