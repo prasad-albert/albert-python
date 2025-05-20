@@ -32,6 +32,7 @@ class BTInsightPayloadType(str, Enum):
 class BTInsightRegistry(BaseAlbertModel):
     build_logs: dict[str, Any] | None = Field(default=None, alias="BuildLogs")
     metrics: dict[str, Any] | None = Field(default=None, alias="Metrics")
+    settings: dict[str, Any] | None = Field(default=None, alias="Settings")
 
 
 class BTInsight(BaseResource, protected_namespaces=()):
