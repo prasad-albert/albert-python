@@ -19,7 +19,7 @@ class Link(BaseResource):
     ----------
     parent : EntityLink
         The parent entity of the link.
-    child : BaseEntity
+    child : EntityLink
         The child entity of the link.
     category : LinkCategory
         The category of the link. Allowed values are `mention`, `linkedTask`, and `synthesis`.
