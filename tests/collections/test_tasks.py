@@ -60,3 +60,8 @@ def test_update_block_workflow(
     assert len(updated_task.blocks) == starting_blocks
     updated_block = [x for x in updated_task.blocks if x.id == block_id][0]
     assert new_workflow.id in [x.id for x in updated_block.workflow]
+
+
+def test_task_get_history(client: Albert, seeded_tasks):
+    task_history = client.tasks.get_history(id=seeded_tasks[0].id)
+    assert isinstance(task_history.items, list)
