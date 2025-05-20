@@ -1,10 +1,18 @@
+# Albert Python
 
 <div align="center">
     <img src="assets/Wordmark_Black.png" alt="Albert Logo" style="max-width: 300px; margin-bottom: 4rem;">
 </div>
 
+## Installation
 
-# Albert Python
+You can install Albert Python using pip:
+
+```bash
+pip install albert
+```
+
+The latest stable release is available on [PyPI](https://pypi.org/project/albert/).
 
 ## Overview
 Albert Python is built around two main concepts:
