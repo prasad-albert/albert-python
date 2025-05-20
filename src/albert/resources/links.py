@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import Field
 
-from albert.resources.base import BaseEntityLink, BaseResource
+from albert.resources.base import BaseResource, EntityLink
 
 
 class LinkCategory(str, Enum):
@@ -30,8 +30,8 @@ class Link(BaseResource):
 
     """
 
-    parent: BaseEntityLink = Field(..., alias="Parent")
-    child: BaseEntityLink = Field(..., alias="Child")
+    parent: EntityLink = Field(..., alias="Parent")
+    child: EntityLink = Field(..., alias="Child")
     category: LinkCategory = Field(...)
     counter: int | None = Field(default=None)
 

@@ -1,7 +1,7 @@
 from pydantic import AliasChoices, Field, PrivateAttr, model_validator
 
 from albert.exceptions import AlbertException
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
+from albert.resources.base import BaseAlbertModel, BaseResource, EntityLink
 from albert.resources.identifiers import IntervalId, ParameterGroupId, ParameterId, RowId
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter, ParameterCategory
@@ -104,7 +104,7 @@ class ParameterSetpoint(BaseAlbertModel):
     """
 
     parameter: Parameter | None = Field(exclude=True, default=None)
-    value: str | BaseEntityLink | None = Field(default=None)
+    value: str | EntityLink | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
     parameter_id: ParameterId | None = Field(alias="id", default=None)
     intervals: list[Interval] | None = Field(default=None, alias="Intervals")

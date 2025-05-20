@@ -1,4 +1,4 @@
-from albert.resources.base import BaseEntityLink, BaseResource
+from albert.resources.base import BaseResource, EntityLink
 from albert.resources.serialization import SerializeAsEntityLink
 
 
@@ -22,9 +22,9 @@ def test_serialize_as_entity_link():
     container = FakeResource(**container.model_dump(mode="json"))
 
     # FakeEntity values are converted to BaseEntityLink after round-trip serialization
-    assert isinstance(container.entity, BaseEntityLink)
+    assert isinstance(container.entity, EntityLink)
     for entity in container.entity_list:
-        assert isinstance(entity, BaseEntityLink)
+        assert isinstance(entity, EntityLink)
 
     # Test with optional values
     container = FakeResource(entity=None, entity_list=[])
