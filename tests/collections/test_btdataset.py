@@ -1,5 +1,6 @@
 from albert import Albert
 from albert.resources.btdataset import BTDataset
+from albert.resources.users import User
 
 
 def test_get_by_id(client: Albert, seeded_btdataset: BTDataset):
@@ -7,11 +8,10 @@ def test_get_by_id(client: Albert, seeded_btdataset: BTDataset):
     assert fetched_dataset.id == seeded_btdataset.id
 
 
-def test_list_by_user(client: Albert):
-    user = client.users.get_current_user()
-    dataset = next(client.btdatasets.list(created_by=user.id), None)
+def test_list_by_user(client: Albert, static_user: User):
+    dataset = next(client.btdatasets.list(created_by=static_user.id), None)
     assert dataset is not None
-    assert dataset.created.by == user.id
+    assert dataset.created.by == static_user.id
 
 
 def test_update(client: Albert, seeded_btdataset: BTDataset):

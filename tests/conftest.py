@@ -84,6 +84,13 @@ def seed_prefix() -> str:
 
 
 @pytest.fixture(scope="session")
+def static_user(client: Albert) -> User:
+    # Users cannot be deleted, so we just pull the SDK Bot user for testing
+    # Do not write to/modify this resource since it is shared across all test runs
+    return client.users.get_current_user()
+
+
+@pytest.fixture(scope="session")
 def static_image_file(client: Albert) -> FileInfo:
     try:
         r = client.files.get_by_name(name="dontpanic.jpg", namespace=FileNamespace.RESULT)
@@ -114,13 +121,6 @@ def static_sds_file(client: Albert) -> FileInfo:
             )
         r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT)
     return r
-
-
-@pytest.fixture(scope="session")
-def static_user(client: Albert) -> User:
-    # Users cannot be deleted, so we just pull the SDK Bot user for testing
-    # Do not write to/modify this resource since it is shared across all test runs
-    return client.users.get_current_user()
 
 
 @pytest.fixture(scope="session")
