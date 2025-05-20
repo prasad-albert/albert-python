@@ -177,7 +177,7 @@ class CustomTemplate(BaseTaggedEntity):
         The Albert ID of the template. Set when the template is retrieved from Albert.
     category : TemplateCategory
         The category of the template. Allowed values are `Property Task`, `Property`, `Batch`, `Sheet`, `Notebook`, and `General`.
-    metadata : Dict[str, str | List[BaseEntityLink] | BaseEntityLink] | None
+    metadata : Dict[str, str | List[EntityLink] | EntityLink] | None
         The metadata of the template. Allowed Metadata fields can be found using Custim Fields.
     data : CustomTemplateData | None
         The data of the template.

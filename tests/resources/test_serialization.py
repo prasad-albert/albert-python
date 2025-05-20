@@ -21,7 +21,7 @@ def test_serialize_as_entity_link():
     container = FakeResource(entity=entity, entity_list=[entity, link])
     container = FakeResource(**container.model_dump(mode="json"))
 
-    # FakeEntity values are converted to BaseEntityLink after round-trip serialization
+    # FakeEntity values are converted to EntityLink after round-trip serialization
     assert isinstance(container.entity, EntityLink)
     for entity in container.entity_list:
         assert isinstance(entity, EntityLink)

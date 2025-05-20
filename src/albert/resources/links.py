@@ -17,7 +17,7 @@ class Link(BaseResource):
 
     Attributes
     ----------
-    parent : BaseEntityLink
+    parent : EntityLink
         The parent entity of the link.
     child : BaseEntity
         The child entity of the link.

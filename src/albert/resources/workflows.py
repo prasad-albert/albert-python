@@ -89,8 +89,8 @@ class ParameterSetpoint(BaseAlbertModel):
         The parameter to set the setpoint on. Provide either a parameter or a parameter_id.
     parameter_id : ParameterId
         The id of the parameter. Provide either a parameter or a parameter_id.
-    value : str | BaseEntityLink
-        The value of the setpoint. If the parameter is a InventoryItem, provide the BaseEntityLink of the InventoryItem.
+    value : str | EntityLink
+        The value of the setpoint. If the parameter is a InventoryItem, provide the EntityLink of the InventoryItem.
     unit : Unit
         The unit of the setpoint.
     intervals : list[Interval]

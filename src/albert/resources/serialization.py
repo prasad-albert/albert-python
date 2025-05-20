@@ -17,4 +17,4 @@ SerializeAsEntityLink = Annotated[
     EntityType | EntityLink,
     PlainSerializer(convert_to_entity_link),
 ]
-"""Type representing a union of `EntityType | BaseEntityLink` that is serialized as a link."""
+"""Type representing a union of `EntityType | EntityLink` that is serialized as a link."""
