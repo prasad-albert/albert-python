@@ -9,6 +9,7 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 class ListsCollection(BaseCollection):
     """ListsCollection is a collection class for managing ListItem entities in the Albert platform."""
 
+    _updatable_attributes = {"name"}
     _api_version = "v3"
 
     def __init__(self, *, session: AlbertSession):
@@ -137,3 +138,28 @@ class ListsCollection(BaseCollection):
             if list_item.name.lower() == name.lower():
                 return list_item
         return None
+
+    def update(self, *, list_item=ListItem) -> ListItem:
+        """Update a list item.
+
+        Parameters
+        ----------
+        list_item : ListItem
+            The list item to update.
+
+        Returns
+        -------
+        ListItem
+            The updated list item.
+        """
+        existing = self.get_by_id(id=list_item.id)
+        patches = self._generate_patch_payload(
+            existing=existing, updated=list_item, generate_metadata_diff=False
+        )
+        if len(patches.data) == 0:
+            return existing
+        self.session.patch(
+            url=f"{self.base_path}/{list_item.id}",
+            json=patches.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        return self.get_by_id(id=list_item.id)

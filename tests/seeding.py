@@ -535,6 +535,8 @@ def generate_parameter_group_seeds(
     seeded_tags: list[Tag],
     seeded_units: list[Unit],
     static_consumeable_parameter: Parameter,
+    static_custom_fields: CustomField,
+    static_lists: list[ListItem],
 ) -> list[ParameterGroup]:
     """
     Generates a list of ParameterGroup seed objects for testing without IDs.
@@ -549,6 +551,23 @@ def generate_parameter_group_seeds(
     List[ParameterGroup]
         A list of ParameterGroup objects with different permutations.
     """
+    pg_string_custom_fields = [
+        x
+        for x in static_custom_fields
+        if x.service == ServiceType.PARAMETER_GROUPS and x.field_type == FieldType.STRING
+    ]
+    pg_list_custom_fields = [
+        x
+        for x in static_custom_fields
+        if x.service == ServiceType.PARAMETER_GROUPS and x.field_type == FieldType.LIST
+    ]
+
+    faux_metadata = {}
+    for i, custom_field in enumerate(pg_string_custom_fields):
+        faux_metadata[custom_field.name] = f"{seed_prefix} - {custom_field.display_name} {i}"
+    for i, custom_field in enumerate(pg_list_custom_fields):
+        list_items = [x for x in static_lists if x.list_type == custom_field.name]
+        faux_metadata[custom_field.name] = [list_items[i].to_entity_link()]
 
     return [
         # Basic ParameterGroup with required fields
@@ -604,6 +623,25 @@ def generate_parameter_group_seeds(
                     category=ParameterCategory.NORMAL,
                 ),
             ],
+        ),
+        ParameterGroup(
+            name=f"{seed_prefix} - PG with Metadata",
+            type=PGType.PROPERTY,
+            parameters=[
+                ParameterValue(
+                    parameter=seeded_parameters[3],
+                    value="75.0",
+                    unit=seeded_units[0],
+                    category=ParameterCategory.NORMAL,
+                ),
+                ParameterValue(
+                    parameter=seeded_parameters[4],
+                    value="2.5",
+                    unit=seeded_units[3],
+                    category=ParameterCategory.NORMAL,
+                ),
+            ],
+            metadata=faux_metadata,
         ),
     ]
 
@@ -942,7 +980,26 @@ def generate_task_seeds(
     seeded_data_templates,
     seeded_workflows,
     seeded_products,
+    static_lists: list[ListItem],
+    static_custom_fields: list[CustomField],
 ) -> list[BaseTask]:
+    task_string_custom_fields = [
+        x
+        for x in static_custom_fields
+        if x.service == ServiceType.PARAMETER_GROUPS and x.field_type == FieldType.STRING
+    ]
+    task_list_custom_fields = [
+        x
+        for x in static_custom_fields
+        if x.service == ServiceType.PARAMETER_GROUPS and x.field_type == FieldType.LIST
+    ]
+    faux_metadata = {}
+    for i, custom_field in enumerate(task_string_custom_fields):
+        faux_metadata[custom_field.name] = f"{seed_prefix} - {custom_field.display_name} {i}"
+    for i, custom_field in enumerate(task_list_custom_fields):
+        list_items = [x for x in static_lists if x.list_type == custom_field.name]
+        faux_metadata[custom_field.name] = [list_items[i].to_entity_link()]
+
     formulation_proj = [x for x in seeded_projects if x.id == seeded_products[2].project_id][0]
     return [
         # Property Task 1
@@ -992,7 +1049,7 @@ def generate_task_seeds(
         ),
         # Property Task 3
         PropertyTask(
-            name=f"{seed_prefix} - Property Task 3",
+            name=f"{seed_prefix} - Property Task with metadata",
             category=TaskCategory.PROPERTY,
             inventory_information=[
                 InventoryInformation(
@@ -1008,6 +1065,7 @@ def generate_task_seeds(
             ],
             due_date="2024-10-31",
             location=seeded_locations[1],
+            metadata=faux_metadata,
         ),
         # Batch Task 1
         # Use the Formulations used in #tests/resources/test_sheets/py defined as seeded_products

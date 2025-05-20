@@ -52,6 +52,7 @@ class PropertyValue(BaseAlbertModel):
     calculation: str | None = Field(default=None)
     numeric_value: float | None = Field(default=None, alias="valueNumeric")
     string_value: str | None = Field(default=None, alias="valueString")
+    value: str | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | dict = Field(default_factory=dict, alias="Unit")
     property_data: PropertyData | None = Field(default=None, alias="PropertyData")
     data_column_unique_id: str | None = Field(default=None, alias="dataColumnUniqueId")
