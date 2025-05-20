@@ -3,6 +3,8 @@ theme:
   name: "material"
   font:
     text: Poppins
+  logo: assets/Wordmark_White.png
+  favicon: assets/Vector_Favicon_Blue.svg
 
 markdown_extensions:
   - admonition

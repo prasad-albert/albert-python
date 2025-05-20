@@ -1,4 +1,9 @@
 
+<div align="center">
+    <img src="assets/Wordmark_Black.png" alt="Albert Logo" style="max-width: 300px; margin-bottom: 4rem;">
+</div>
+
+
 # Albert Python
 
 ## Overview
