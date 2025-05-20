@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from albert.resources.base import BaseEntityLink, BaseResource
+from albert.resources.base import BaseResource, EntityLink
 
 
 class BTDataset(BaseResource):
@@ -8,4 +8,4 @@ class BTDataset(BaseResource):
     id: str | None = Field(default=None, alias="albertId")
     key: str | None = Field(default=None)
     file_name: str | None = Field(default=None, alias="fileName")
-    report: BaseEntityLink | None = Field(default=None, alias="Report")
+    report: EntityLink | None = Field(default=None, alias="Report")
