@@ -101,17 +101,32 @@ jobs:
     executor:
       name: python/default
       tag: "3.10.15"
+    parameters:
+      internal:
+        type: boolean
+        default: false
     steps:
       - checkout
       - install_uv
       - run:
           name: Build package
           command: uv build
-      - run:
-          name: Publish package
-          command: |
-            uv publish --publish-url $ALBERT_PYPI_URL --username $UV_INDEX_ALBERT_USERNAME \
-              --password $UV_INDEX_ALBERT_PASSWORD
+      - when:
+          condition: << parameters.internal >>
+          steps:
+            - run:
+                name: Publish to Albert PyPI
+                command: |
+                  uv publish --publish-url $ALBERT_PYPI_URL --username $UV_INDEX_ALBERT_USERNAME \
+                    --password $UV_INDEX_ALBERT_PASSWORD
+      - when:
+          condition:
+            not: << parameters.internal >>
+          steps:
+            - run:
+                name: Publish to PyPI
+                command: |
+                  uv publish --token $PYPI_TOKEN_ALBERT
 
   deploy_docs:
     executor:
@@ -170,6 +185,7 @@ workflows:
       - publish:
           name: Publish to PyPI
           context: ds-dev
+          internal: false
           requires:
             - Validate Release Tag
           filters:

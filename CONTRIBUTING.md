@@ -155,10 +155,6 @@ uv run mkdocs build --clean
 git push origin gh-pages
 ```
 
-
-
-# Python SDK Release Process
-
 ## Creating a Release
 
 1. Ensure the version in `src/albert/__init__.py` is updated to the desired release version
