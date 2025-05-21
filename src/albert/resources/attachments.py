@@ -1,9 +1,20 @@
 from enum import Enum
 from typing import Literal
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from albert.resources.base import BaseResource
+
+
+class HazardStatement(BaseModel):
+    name: str
+    id: str
+
+
+class Symbol(BaseModel):
+    name: str
+    id: str
+    status: str
 
 
 class AttachmentCategory(str, Enum):
@@ -32,4 +43,15 @@ class Attachment(BaseResource):
     )
 
 
-# TO DO: Script and SDS attachment
+# TO DO: Script
+
+
+class AttachmentSDS(Attachment):
+    """
+    Used for attaching an pdf as an SDS
+    """
+
+    category: Literal[AttachmentCategory.SDS] | None
+    metadata: dict[str, str | list[HazardStatement] | list[Symbol]] | None = Field(
+        default=None, alias="Metadata", exclude=True, frozen=True
+    )
