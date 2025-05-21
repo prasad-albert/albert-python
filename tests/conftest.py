@@ -653,6 +653,7 @@ def seeded_btinsight(
 ) -> Iterator[BTInsight]:
     ins = generate_btinsight_seed(seed_prefix, seeded_btdataset, seeded_btmodelsession)
     ins = client.btinsights.create(insight=ins)
+    time.sleep(1.0)
     yield ins
     with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
         client.btinsights.delete(id=ins.id)

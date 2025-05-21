@@ -26,12 +26,6 @@ and configuring Python project metadata.
 The package version is defined in the `src/albert/__init__.py` file
 and read dynamically when building distributions.
 
-## Releasing
-
-Releasing the package is triggered manually through the creation of a GitHub Release.
-When a GitHub Release is created with a version tag matching the form `v{version}`,
-a CircleCI workflow is triggered that publishes the package to PyPI and builds the documentation.
-Generally, releases are only created against the `main` branch on a cadence determined by the development team.
 
 ## Code Style
 
@@ -61,6 +55,7 @@ uv run ruff check . --fix
 For VSCode users, there is also base workspace settings defined in `.vscode/settings.json` that enable
 automatic fomatting and import sorting on-save using the
 [Ruff for VSCode](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) extension.
+
 
 ## Documentation
 
@@ -159,3 +154,18 @@ git pull origin main
 uv run mkdocs build --clean
 git push origin gh-pages
 ```
+
+## Creating a Release
+
+1. Ensure the version in `src/albert/__init__.py` is updated to the desired release version
+2. Go to the **Releases** section of the repository
+3. Click **"Draft a new release"**
+4. Create a new tag matching the version in `__init__.py` (e.g., if `__init__.py` has `__version__ = "0.3.0"`, use tag `v0.3.0`)
+5. Click **"Generate release notes"** and review/edit as needed
+6. Publish the release
+
+The release will automatically trigger the CircleCI workflow to:
+- Build and publish the package to PyPI
+- Build and deploy the documentation
+
+Note: Only designated Albert team members have permissions to create releases.
