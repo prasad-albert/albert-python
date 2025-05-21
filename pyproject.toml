@@ -40,10 +40,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MoleculeEngineering/albert-python"
+Homepage = "https://www.albertinvent.com/"
 Documentation = "https://docs.developer.albertinvent.com/albert-python"
-Repository = "https://github.com/MoleculeEngineering/albert-python"
-Issues = "https://github.com/MoleculeEngineering/albert-python/issues"
+Repository = "https://github.com/Albert-Solutions/albert-python"
+Issues = "https://github.com/Albert-Solutions/albert-python/issues"
 
 [tool.hatch.version]
 path = "src/albert/__init__.py"
