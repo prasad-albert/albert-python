@@ -136,6 +136,7 @@ jobs:
             mkdir -p gh-pages/albert-python
             rm -rf gh-pages/albert-python/*
             cp -r site/* gh-pages/albert-python/
+            echo "" > gh-pages/index.html
 
             cd gh-pages
             git add .
