@@ -1,4 +1,6 @@
 site_name: "Albert Python SDK Docs"
+site_url: https://docs.developer.albertinvent.com/albert-python/
+use_directory_urls: true
 theme:
   name: "material"
   font:
