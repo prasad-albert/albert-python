@@ -73,7 +73,7 @@ jobs:
               BASE_BRANCH="main"
             else
               GITHUB_PR_URL=$(echo https://api.github.com/repos/${CIRCLE_PULL_REQUEST:19} | sed "s/\/pull\//\/pulls\//")
-              BASE_BRANCH=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" ${GITHUB_PR_URL} | jq ".base.ref" | tr -d "\042")
+              BASE_BRANCH=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN_ALBERT_PYTHON}" ${GITHUB_PR_URL} | jq ".base.ref" | tr -d "\042")
               if [[ -z ${BASE_BRANCH} ]]; then
                 echo "Could not determine base branch from PR, defaulting to main"
                 BASE_BRANCH="main"
@@ -101,32 +101,16 @@ jobs:
     executor:
       name: python/default
       tag: "3.10.15"
-    parameters:
-      internal:
-        type: boolean
-        default: false
     steps:
       - checkout
       - install_uv
       - run:
           name: Build package
           command: uv build
-      - when:
-          condition: << parameters.internal >>
-          steps:
-            - run:
-                name: Publish to Albert PyPI
-                command: |
-                  uv publish --publish-url $ALBERT_PYPI_URL --username $UV_INDEX_ALBERT_USERNAME \
-                    --password $UV_INDEX_ALBERT_PASSWORD
-      - when:
-          condition:
-            not: << parameters.internal >>
-          steps:
-            - run:
-                name: Publish to PyPI
-                command: |
-                  uv publish --token $PYPI_TOKEN_ALBERT
+      - run:
+          name: Publish to PyPI
+          command: |
+            uv publish --token $PYPI_TOKEN_ALBERT
 
   deploy_docs:
     executor:
@@ -158,19 +142,18 @@ jobs:
             git commit -m "Auto-update documentation to /albert-python [skip ci]" || echo "No changes to commit"
             git push origin gh-pages
 
-
 workflows:
   main:
     jobs:
       - snyk_app_scan:
           name: Snyk App Scan
-          context: dev
+          context: sdk
       - test:
           name: Test
-          context: ds-dev
+          context: sdk
       - validate_version_bump:
           name: Validate Version Bump
-          context: ds-dev
+          context: sdk
           filters:
             branches:
               ignore: ["main"]
@@ -180,7 +163,7 @@ workflows:
     jobs:
       - validate_release_tag:
           name: Validate Release Tag
-          context: ds-dev
+          context: sdk
           filters:
             tags:
               only: /^v.+$/
@@ -188,8 +171,7 @@ workflows:
               ignore: /.*/
       - publish:
           name: Publish to PyPI
-          context: ds-dev
-          internal: false
+          context: sdk
           requires:
             - Validate Release Tag
           filters:
@@ -199,7 +181,7 @@ workflows:
               ignore: /.*/
       - deploy_docs:
           name: Deploy Docs
-          context: ds-dev
+          context: sdk
           requires:
             - Validate Release Tag
           filters:
