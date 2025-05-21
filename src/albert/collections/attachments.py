@@ -1,6 +1,8 @@
 import mimetypes
 from typing import IO
 
+import requests
+
 from albert.collections.base import BaseCollection
 from albert.collections.files import FileCollection
 from albert.collections.notes import NotesCollection
@@ -23,6 +25,30 @@ class AttachmentCollection(BaseCollection):
 
     def _get_note_collection(self):
         return NotesCollection(session=self.session)
+
+    def list_by_parent_id(self, *, parent_id: str) -> list[Attachment]:
+        """Retrieve Attachments by parent ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the parent ID, e.g. a Raw Material.
+
+        Returns
+        -------
+        list[Attachment]
+            list of Attachments references.
+
+        """
+
+        # define parameters
+        params = {"parentId": parent_id}
+
+        # search
+        response = self.session.get(f"{self.base_path}", params=params)
+
+        # return
+        return response.json()["Items"]
 
     def attach_file_to_note(
         self,
@@ -115,3 +141,34 @@ class AttachmentCollection(BaseCollection):
             file_key=file_info.name,
         )
         return note_collection.get_by_id(id=registered_note.id)
+
+    def download_by_id(self, *, attachment_id: str) -> None:
+        """
+        Downloads an attachmend by attachment id and saves it under the uploaded name
+
+        Parameters
+            ----------
+            attachment_id : str
+                The ID of the attachment.
+
+            Returns
+            -------
+            None
+        """
+
+        # get signed URL
+        _attachment = self.session.get(f"{self.base_path}/{attachment_id}")
+
+        # get url and name
+        signed_url = _attachment.json()["signedURL"]
+        name = _attachment.json()["name"]
+
+        # Send GET request
+        response = requests.get(signed_url)
+
+        # Check response and write file
+        if response.status_code == 200:
+            with open(name, "wb") as f:
+                # write to file
+                f.write(response.content)
+            print("PDF downloaded successfully.")
