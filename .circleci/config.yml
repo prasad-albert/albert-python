@@ -148,12 +148,17 @@ jobs:
             git config --global user.email "circleci@users.noreply.github.com"
             git config --global user.name "CircleCI"
             git clone --branch gh-pages --single-branch https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git gh-pages
-            rm -rf gh-pages/*
-            cp -r site/* gh-pages/
+            
+
+            mkdir -p gh-pages/albert-python
+            rm -rf gh-pages/albert-python/*
+            cp -r site/* gh-pages/albert-python/
+
             cd gh-pages
             git add .
-            git commit -m "Auto-update documentation [skip ci]" || echo "No changes to commit"
+            git commit -m "Auto-update documentation to /albert-python [skip ci]" || echo "No changes to commit"
             git push origin gh-pages
+
 
 workflows:
   main:
