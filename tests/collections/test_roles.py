@@ -1,7 +1,5 @@
 import json
 
-import pytest
-
 from albert.albert import Albert
 from albert.resources.roles import Role
 
