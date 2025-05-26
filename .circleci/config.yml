@@ -110,7 +110,7 @@ jobs:
       - run:
           name: Publish to PyPI
           command: |
-            uv publish --token $PYPI_TOKEN_ALBERT
+            uv publish --token $PYPI_TOKEN_ALBERT_PYTHON
 
   deploy_docs:
     executor:
@@ -148,13 +148,13 @@ workflows:
     jobs:
       - snyk_app_scan:
           name: Snyk App Scan
-          context: sdk
+          context: dev
       - test:
           name: Test
-          context: sdk
+          context: dev
       - validate_version_bump:
           name: Validate Version Bump
-          context: sdk
+          context: dev
           filters:
             branches:
               ignore: ["main"]
@@ -164,7 +164,7 @@ workflows:
     jobs:
       - validate_release_tag:
           name: Validate Release Tag
-          context: sdk
+          context: dev
           filters:
             tags:
               only: /^v.+$/
@@ -172,7 +172,7 @@ workflows:
               ignore: /.*/
       - publish:
           name: Publish to PyPI
-          context: sdk
+          context: dev
           requires:
             - Validate Release Tag
           filters:
@@ -182,7 +182,7 @@ workflows:
               ignore: /.*/
       - deploy_docs:
           name: Deploy Docs
-          context: sdk
+          context: dev
           requires:
             - Validate Release Tag
           filters:
