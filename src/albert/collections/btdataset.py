@@ -22,7 +22,7 @@ class BTDatasetCollection(BaseCollection):
     """
 
     _api_version = "v3"
-    _updatable_attributes = {"name", "key", "file_name"}
+    _updatable_attributes = {"name", "key", "file_name", "references"}
 
     def __init__(self, *, session: AlbertSession):
         """
