@@ -15,10 +15,16 @@ def test_list_by_user(client: Albert, static_user: User):
 
 
 def test_update(client: Albert, seeded_btdataset: BTDataset):
-    marker = "TEST"
-    seeded_btdataset.key = marker
-    seeded_btdataset.file_name = marker
+    seeded_btdataset.key = "test-key"
+    seeded_btdataset.file_name = "test-file-name.json"
+
+    # TODO: Uncomment when references are implemented in prod
+    # seeded_btdataset.references = BTDatasetReferences(
+    #     project_ids=["PRO123"],
+    #     data_column_ids=["DAT123_DAC123"],
+    # )
 
     updated_dataset = client.btdatasets.update(dataset=seeded_btdataset)
     assert updated_dataset.key == seeded_btdataset.key
     assert updated_dataset.file_name == seeded_btdataset.file_name
+    assert updated_dataset.references == seeded_btdataset.references
