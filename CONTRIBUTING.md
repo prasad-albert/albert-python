@@ -1,31 +1,34 @@
+# Contributing to Albert SDK for Python
+
 ## Installation for Local Development
 
 The package is built using the [uv](https://docs.astral.sh/uv/getting-started/installation/) build tool.
-To get started, install uv on your system by running
+To get started, install `uv` on your system by running
 
-```
+```bash
 # For Mac OS users
 brew install uv
 # or
 curl -LsSf https://astral.sh/uv/install.sh | sh
+# or
+pip install uv
 ```
 
 After that, the package and its dependencies can be installed
 in your local virtual environment by running
 
-```
+```bash
 uv sync
 ```
 
-Follow the documentation on the [uv website](https://docs.astral.sh/uv/concepts/projects/) 
-for additional project features such as managing dependencies, managing environments, 
+Follow the documentation on the [uv website](https://docs.astral.sh/uv/concepts/projects/)
+for additional project features such as managing dependencies, managing environments,
 and configuring Python project metadata.
 
 ## Dynamic Versioning
 
 The package version is defined in the `src/albert/__init__.py` file
 and read dynamically when building distributions.
-
 
 ## Code Style
 
@@ -34,7 +37,7 @@ Formatting and linting rules are enforced in the CI process.
 
 To check (or fix) your code formatting, you can run the commands
 
-```
+```bash
 # Check
 uv run ruff format . --check
 
@@ -44,7 +47,7 @@ uv run ruff format .
 
 To check (or fix) your code linting, you can run the commands
 
-```
+```bash
 # Check
 uv run ruff check .
 
@@ -55,7 +58,6 @@ uv run ruff check . --fix
 For VSCode users, there is also base workspace settings defined in `.vscode/settings.json` that enable
 automatic fomatting and import sorting on-save using the
 [Ruff for VSCode](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) extension.
-
 
 ## Documentation
 
@@ -95,45 +97,47 @@ class Cas:
         return cls(number=number)
 ```
 
-
 When contributing new classes or methods, ensure *all public members* have properly formatted Numpy-style docstrings.
 
 ### Adding New Classes
 
 To add coverage for a new microservice, you can add a page by doing the following:
+
  1. in the `docs/` folder make a new markdown file following the pattern of the others.
     For example:
+
     ```
     # cas.md
 
     ::: albert.collections.cas
     ```
 
-2. In `mkdocs.yml` add a link to the `nav` section (Alphabetically Sorted) following the existing pattern.
+ 2. In `mkdocs.yml` add a link to the `nav` section (Alphabetically Sorted) following the existing pattern.
 
 ### Testing Documentation Locally
 
 Before pushing documentation changes, verify that everything is rendering correctly.
 
-#### 1. Install dependencies (if not already installed):
+#### 1. Install dependencies (if not already installed)
 
-```
+```bash
 uv sync
 ```
 
-#### 2. Build and serve the documentation locally:
+#### 2. Build and serve the documentation locally
 
-```
+```bash
 uv run mkdocs serve
 ```
 
-#### 3. Open http://127.0.0.1:8000/ (or specified address) in your browser and navigate through the docs to confirm that:
+#### 3. Open <http://127.0.0.1:8000/> (or specified address) in your browser and navigate through the docs to confirm that
 
 - All references and links are resolving correctly.
 - Docstrings are properly formatted.
 - No missing or broken sections exist.
 
 ### Deploying Documentation
+
 The documentation is automatically built and deployed to GitHub Pages when a pull request is merged into main.
 
 #### How It Works
@@ -146,9 +150,10 @@ The documentation is automatically built and deployed to GitHub Pages when a pul
     - GitHub Pages automatically serves the latest docs
 
 #### Manually Triggering a Docs Deployment
+
 If needed, you can manually re-deploy the docs by running:
 
-```
+```bash
 git checkout main
 git pull origin main
 uv run mkdocs build --clean
@@ -165,6 +170,7 @@ git push origin gh-pages
 6. Publish the release
 
 The release will automatically trigger the CircleCI workflow to:
+
 - Build and publish the package to PyPI
 - Build and deploy the documentation
 

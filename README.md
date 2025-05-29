@@ -1,7 +1,12 @@
 # Albert Python SDK
+
+[![PyPI version](https://img.shields.io/pypi/v/albert.svg)](https://pypi.org/project/albert/)
+[![Python versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Downloads per month](https://img.shields.io/pypi/dm/albert.svg)](https://pypi.org/project/albert/)
+
 Albert Python is the official Albert Invent Software Development Kit (SDK) for Python
-that provides a comprehensive and easy-to-use interface for interacting with the Albert Platform. 
-The SDK allows Python developers to write software that interacts with various platform resources, 
+that provides a comprehensive and easy-to-use interface for interacting with the Albert Platform.
+The SDK allows Python developers to write software that interacts with various platform resources,
 such as inventories, projects, companies, tags, and many more.
 You can find the latest, most up-to-date documentation
 on the supported resources and usage patterns [here](https://docs.developer.albertinvent.com/albert-python).
