@@ -1,5 +1,5 @@
 from albert import Albert
-from albert.resources.btdataset import BTDataset
+from albert.resources.btdataset import BTDataset, BTDatasetReferences
 from albert.resources.users import User
 
 
@@ -17,12 +17,10 @@ def test_list_by_user(client: Albert, static_user: User):
 def test_update(client: Albert, seeded_btdataset: BTDataset):
     seeded_btdataset.key = "test-key"
     seeded_btdataset.file_name = "test-file-name.json"
-
-    # TODO: Uncomment when references are implemented in prod
-    # seeded_btdataset.references = BTDatasetReferences(
-    #     project_ids=["PRO123"],
-    #     data_column_ids=["DAT123_DAC123"],
-    # )
+    seeded_btdataset.references = BTDatasetReferences(
+        project_ids=["PRO123"],
+        data_column_ids=["DAT123_DAC123"],
+    )
 
     updated_dataset = client.btdatasets.update(dataset=seeded_btdataset)
     assert updated_dataset.key == seeded_btdataset.key
