@@ -32,6 +32,8 @@ Resource Collections act as managers for Resource Models. They provide methods f
 To use Albert Python, you need to initialize the Albert client with your base URL and either a bearer token (which will expire) or client credientals, which will enable automatic token refresh.
 
 ```python
+import os
+
 from albert import Albert, ClientCredentials
 
 # Initialize the client using a JWT token
