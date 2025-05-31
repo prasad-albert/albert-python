@@ -58,3 +58,10 @@ def test_update(client: Albert, seeded_data_columns: list[DataColumn], seed_pref
     updated_dc = client.data_columns.update(data_column=dc)
     assert updated_dc.name == new_name
     assert updated_dc.id == dc.id
+
+
+def test_list_partial(client: Albert, seeded_data_columns: list[DataColumn]):
+    ids = [x.id for x in seeded_data_columns]
+    fetched_items = list(client.data_columns.list(ids=ids, return_full=False))
+    assert len(fetched_items) == len(ids)
+    assert {x.id for x in fetched_items} == set(ids)
