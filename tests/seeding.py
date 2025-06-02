@@ -87,6 +87,7 @@ def generate_custom_fields() -> list[CustomField]:
         ServiceType.PROJECTS,
         ServiceType.TASKS,
         ServiceType.USERS,
+        ServiceType.PARAMETER_GROUPS,
     ]
 
     seeds = []

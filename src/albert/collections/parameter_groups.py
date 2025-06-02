@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
@@ -345,14 +347,12 @@ class ParameterGroupCollection(BaseCollection):
         ParameterGroup
             The updated ParameterGroup as returned by the server.
         """
-
         existing = self.get_by_id(id=parameter_group.id)
         path = f"{self.base_path}/{existing.id}"
 
-        payload = self._generate_patch_payload(existing=existing, updated=parameter_group)
-        # need to use a different payload for the special update parameters
-        payload = PGPatchPayload(
-            data=payload.data,
+        base_payload, list_metadata_updates = self._generate_patch_payload(
+            existing=existing,
+            updated=parameter_group,
         )
 
         # Handle special update parameters
@@ -360,11 +360,30 @@ class ParameterGroupCollection(BaseCollection):
             self._handle_special_update_parameters(existing=existing, updated=parameter_group)
         )
 
-        payload.data.extend(special_patches)
-        if len(payload.data) > 0:
+        patch_operations = list(base_payload.data) + special_patches
+
+        for datum in patch_operations:
+            patch_payload = PGPatchPayload(data=[datum])
             self.session.patch(
-                path, json=payload.model_dump(mode="json", by_alias=True, exclude_none=True)
+                path, json=patch_payload.model_dump(mode="json", by_alias=True, exclude_none=True)
             )
+
+        # handle metadata list updates separately
+        for attribute, values in list_metadata_updates.items():
+            clear_payload = PGPatchPayload(
+                data=[PGPatchDatum(operation="update", attribute=attribute, newValue=None)]
+            )
+            self.session.patch(
+                path, json=clear_payload.model_dump(mode="json", by_alias=True, exclude_none=True)
+            )
+            if values:
+                update_payload = PGPatchPayload(
+                    data=[PGPatchDatum(operation="update", attribute=attribute, newValue=values)]
+                )
+                self.session.patch(
+                    path,
+                    json=update_payload.model_dump(mode="json", by_alias=True, exclude_none=True),
+                )
 
         # handle adding new parameters
         if len(new_param_patches) > 0:
@@ -379,3 +398,69 @@ class ParameterGroupCollection(BaseCollection):
             enum_path = f"{self.base_path}/{existing.id}/parameters/{sequence}/enums"
             self.session.put(enum_path, json=enum_patches)
         return self.get_by_id(id=parameter_group.id)
+
+    def _is_metadata_item_list(
+        self,
+        *,
+        existing_object: ParameterGroup,
+        updated_object: ParameterGroup,
+        metadata_field: str,
+    ) -> bool:
+        """Return True if the metadata field is a list type on either object."""
+
+        if not metadata_field.startswith("Metadata."):
+            return False
+
+        metadata_field = metadata_field.split(".")[1]
+
+        if existing_object.metadata is None:
+            existing_object.metadata = {}
+        if updated_object.metadata is None:
+            updated_object.metadata = {}
+
+        existing = existing_object.metadata.get(metadata_field, None)
+        updated = updated_object.metadata.get(metadata_field, None)
+
+        return isinstance(existing, list) or isinstance(updated, list)
+
+    def _generate_patch_payload(
+        self,
+        *,
+        existing: ParameterGroup,
+        updated: ParameterGroup,
+    ) -> tuple[PGPatchPayload, dict[str, list[str]]]:
+        """Generate a patch payload and capture metadata list updates."""
+
+        base_payload = super()._generate_patch_payload(
+            existing=existing,
+            updated=updated,
+        )
+
+        new_data: list[PGPatchDatum] = []
+        list_metadata_updates: dict[str, list[str]] = {}
+
+        for datum in base_payload.data:
+            if self._is_metadata_item_list(
+                existing_object=existing,
+                updated_object=updated,
+                metadata_field=datum.attribute,
+            ):
+                key = datum.attribute.split(".", 1)[1]
+                updated_list = updated.metadata.get(key) or []
+                list_values: list[str] = [
+                    item.id if hasattr(item, "id") else item for item in updated_list
+                ]
+
+                list_metadata_updates[datum.attribute] = list_values
+                continue
+
+            new_data.append(
+                PGPatchDatum(
+                    operation=datum.operation,
+                    attribute=datum.attribute,
+                    newValue=datum.new_value,
+                    oldValue=datum.old_value,
+                )
+            )
+
+        return PGPatchPayload(data=new_data), list_metadata_updates
