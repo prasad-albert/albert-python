@@ -14,6 +14,7 @@ from albert.resources.parameter_groups import (
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
+from albert.utils.patches import PatchOperation
 
 
 class ParameterGroupCollection(BaseCollection):
@@ -133,7 +134,7 @@ class ParameterGroupCollection(BaseCollection):
                     elif existing_param_value.validation != updated_param_value.validation:
                         new_patches.append(
                             PGPatchDatum(
-                                operation="update",
+                                operation=PatchOperation.UPDATE,
                                 attribute="validation",
                                 newValue=[
                                     x.model_dump(mode="json", by_alias=True, exclude_none=True)
@@ -148,7 +149,7 @@ class ParameterGroupCollection(BaseCollection):
                         if existing_param_value.unit is None:
                             new_patches.append(
                                 PGPatchDatum(
-                                    operation="add",
+                                    operation=PatchOperation.ADD,
                                     attribute="unitId",
                                     newValue=updated_param_value.unit.id,
                                     rowId=existing_param_value.sequence,
@@ -158,7 +159,7 @@ class ParameterGroupCollection(BaseCollection):
                             # For some reason, our backend blocks this, but I think it's best to let the backend error raise to make this clear to the user
                             new_patches.append(
                                 PGPatchDatum(
-                                    operation="delete",
+                                    operation=PatchOperation.DELETE,
                                     attribute="unitId",
                                     oldValue=existing_param_value.unit.id,
                                     rowId=existing_param_value.sequence,
@@ -167,7 +168,7 @@ class ParameterGroupCollection(BaseCollection):
                         elif existing_param_value.unit.id != updated_param_value.unit.id:
                             new_patches.append(
                                 PGPatchDatum(
-                                    operation="update",
+                                    operation=PatchOperation.UPDATE,
                                     attribute="unitId",
                                     oldValue=existing_param_value.unit.id,
                                     newValue=updated_param_value.unit.id,
@@ -178,7 +179,7 @@ class ParameterGroupCollection(BaseCollection):
                         if existing_param_value.value is None:
                             new_patches.append(
                                 PGPatchDatum(
-                                    operation="add",
+                                    operation=PatchOperation.ADD,
                                     attribute="value",
                                     newValue=updated_param_value.value,
                                     rowId=updated_param_value.sequence,
@@ -188,7 +189,7 @@ class ParameterGroupCollection(BaseCollection):
                         elif updated_param_value.value is None:
                             new_patches.append(
                                 PGPatchDatum(
-                                    operation="delete",
+                                    operation=PatchOperation.DELETE,
                                     attribute="value",
                                     oldValue=existing_param_value.value,
                                     rowId=existing_param_value.sequence,
@@ -197,7 +198,7 @@ class ParameterGroupCollection(BaseCollection):
                         else:
                             new_patches.append(
                                 PGPatchDatum(
-                                    operation="update",
+                                    operation=PatchOperation.UPDATE,
                                     attribute="value",
                                     oldValue=existing_param_value.value,
                                     newValue=updated_param_value.value,
@@ -368,7 +369,8 @@ class ParameterGroupCollection(BaseCollection):
                 path, json=patch_payload.model_dump(mode="json", by_alias=True, exclude_none=True)
             )
 
-        # handle metadata list updates separately
+        # For metadata list field updates, we clear, then update
+        # since duplicate attribute values are not allowed in single patch request.
         for attribute, values in list_metadata_updates.items():
             clear_payload = PGPatchPayload(
                 data=[PGPatchDatum(operation="update", attribute=attribute, newValue=None)]

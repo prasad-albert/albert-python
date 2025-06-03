@@ -60,6 +60,7 @@ from albert.resources.tasks import (
     BatchSizeUnit,
     BatchTask,
     Block,
+    GeneralTask,
     InventoryInformation,
     PropertyTask,
     TaskCategory,
@@ -987,12 +988,12 @@ def generate_task_seeds(
     task_string_custom_fields = [
         x
         for x in static_custom_fields
-        if x.service == ServiceType.PARAMETER_GROUPS and x.field_type == FieldType.STRING
+        if x.service == ServiceType.TASKS and x.field_type == FieldType.STRING
     ]
     task_list_custom_fields = [
         x
         for x in static_custom_fields
-        if x.service == ServiceType.PARAMETER_GROUPS and x.field_type == FieldType.LIST
+        if x.service == ServiceType.TASKS and x.field_type == FieldType.LIST
     ]
     faux_metadata = {}
     for i, custom_field in enumerate(task_string_custom_fields):
@@ -1048,22 +1049,16 @@ def generate_task_seeds(
             due_date="2024-10-31",
             location=seeded_locations[1],
         ),
-        # Property Task 3
-        PropertyTask(
-            name=f"{seed_prefix} - Property Task with metadata",
-            category=TaskCategory.PROPERTY,
+        # General Task 1
+        GeneralTask(
+            name=f"{seed_prefix} - General Task with metadata",
+            category=TaskCategory.GENERAL,
             inventory_information=[
                 InventoryInformation(
                     inventory_id=seeded_inventory[2].id,
                 )
             ],
             priority=TaskPriority.HIGH,
-            blocks=[
-                Block(
-                    workflow=[seeded_workflows[1]],
-                    data_template=[seeded_data_templates[1]],
-                )
-            ],
             due_date="2024-10-31",
             location=seeded_locations[1],
             metadata=faux_metadata,
