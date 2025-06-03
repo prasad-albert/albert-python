@@ -13,6 +13,7 @@ from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.users import User
 from albert.resources.workflows import Workflow
+from albert.utils.patches import PatchPayload
 
 
 class TaskCategory(str, Enum):
@@ -324,3 +325,15 @@ class TaskHistoryEvent(BaseAlbertModel):
 
 class TaskHistory(BaseAlbertModel):
     items: list[TaskHistoryEvent] = Field(alias="Items")
+
+
+class TaskPatchPayload(PatchPayload):
+    """A payload for a PATCH request to update a Task.
+
+    Attributes
+    ----------
+    id:  str
+        The id of the Task to be updated.
+    """
+
+    id: str

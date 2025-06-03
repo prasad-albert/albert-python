@@ -118,7 +118,7 @@ class ParameterValue(BaseAlbertModel):
     value: str | SerializeAsEntityLink[InventoryItem] | None = Field(default=None)
     unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
     added: AuditFields | None = Field(alias="Added", default=None, exclude=True)
-    validation: list[ValueValidation] | None = Field(default=None)
+    validation: list[ValueValidation] = Field(default_factory=list)
 
     # Read-only fields
     name: str | None = Field(default=None, exclude=True, frozen=True)
