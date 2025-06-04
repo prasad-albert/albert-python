@@ -79,8 +79,9 @@ def client() -> Albert:
 @pytest.fixture
 def fake_client() -> Albert:
     """Fixture to provide a fake session for testing."""
-    client = Albert(base_url="https://fake.albertinvent.com", token="fake-token")
-    client.session = FakeAlbertSession()  # Replace the session with our fake one
+    client = Albert(
+        base_url="https://fake.albertinvent.com", token="fake-token", session=FakeAlbertSession()
+    )
     return client
 
 
