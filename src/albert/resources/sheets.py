@@ -294,7 +294,7 @@ class Sheet(BaseSessionResource):  # noqa:F811
 
     id: str = Field(alias="albertId")
     name: str
-    # formulations: list[Formulations] | None = Field(None)
+    formulations: list["SheetFormulationRef"] = Field(default_factory=list, alias="Formulas")
     hidden: bool
     _app_design: Design = PrivateAttr(default=None)
     _product_design: Design = PrivateAttr(default=None)
@@ -303,6 +303,13 @@ class Sheet(BaseSessionResource):  # noqa:F811
     project_id: str
     _grid: pd.DataFrame = PrivateAttr(default=None)
     _leftmost_pinned_column: str | None = PrivateAttr(default=None)
+
+    class SheetFormulationRef(BaseResource):
+        """A reference to a formulation in a sheet"""
+
+        id: str = Field(description="The Albert ID of the inventory item that is the formulation")
+        name: str = Field(description="The name of the formulation")
+        hidden: bool = Field(description="Whether the formulation is hidden")
 
     @model_validator(mode="after")
     def set_session(self):
