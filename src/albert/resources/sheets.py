@@ -7,6 +7,7 @@ from pydantic import Field, PrivateAttr, model_validator
 from albert.exceptions import AlbertException
 from albert.resources.base import BaseResource, BaseSessionResource
 from albert.resources.inventory import InventoryItem
+from albert.utils.types import BaseAlbertModel
 
 # Define forward references
 Row = ForwardRef("Row")
@@ -268,7 +269,7 @@ class Design(BaseSessionResource):
         return self._rows
 
 
-class SheetFormulationRef(BaseResource):
+class SheetFormulationRef(BaseAlbertModel):
     """A reference to a formulation in a sheet"""
 
     id: str = Field(description="The Albert ID of the inventory item that is the formulation")
