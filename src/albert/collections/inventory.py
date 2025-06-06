@@ -224,7 +224,7 @@ class InventoryCollection(BaseCollection):
         list[InventoryItem]
             The retrieved inventory items.
         """
-        batch_size = 50  # TODO: API appears to only return 50 at a time right now
+        batch_size = 250
         batches = [ids[i : i + batch_size] for i in range(0, len(ids), batch_size)]
         inventory = []
         for batch in batches:
