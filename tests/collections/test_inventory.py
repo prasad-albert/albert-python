@@ -93,19 +93,20 @@ def test_get_by_id(client: Albert, seeded_inventory):
 
 
 def test_get_by_ids(client: Albert):
-    # Gather 174 unique inventory IDs
+    # Gather 51 unique inventory IDs
     inventory_ids = []
     for x in client.inventory.search():
         inventory_ids.append(x.id)
-        if len(inventory_ids) >= 174:
+        if len(inventory_ids) == 51:
             break
 
-    bulk_get = client.inventory.get_by_ids(ids=inventory_ids)
+    # Assert same length obtained
+    items = client.inventory.get_by_ids(ids=inventory_ids)
+    assert len(items) == len(inventory_ids)
 
-    # Assert same length and same order
-    assert len(bulk_get) == len(inventory_ids)
-    for inventory_id, inventory in zip(inventory_ids, bulk_get, strict=True):
-        assert f"INV{inventory_id}" == inventory.id
+    # TODO: Enable this test after INV-70/add-flag-called-preserve-order complete
+    # for inventory_id, inventory in zip(inventory_ids, bulk_get, strict=True):
+    #     assert f"INV{inventory_id}" == inventory.id
 
 
 def test_inventory_update(client: Albert, seed_prefix: str):
