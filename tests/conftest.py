@@ -3,7 +3,6 @@ import uuid
 from collections.abc import Iterator
 from contextlib import suppress
 
-import jwt
 import pytest
 
 from albert import Albert, ClientCredentials
@@ -34,6 +33,10 @@ from albert.resources.users import User
 from albert.resources.workflows import Workflow
 from albert.resources.worksheets import Worksheet
 from tests.seeding import (
+    generate_btdataset_seed,
+    generate_btinsight_seed,
+    generate_btmodel_seed,
+    generate_btmodelsession_seed,
     generate_cas_seeds,
     generate_company_seeds,
     generate_custom_fields,
@@ -57,6 +60,7 @@ from tests.seeding import (
     generate_unit_seeds,
     generate_workflow_seeds,
 )
+from tests.utils.fake_session import FakeAlbertSession
 
 
 @pytest.fixture(scope="session")
@@ -72,12 +76,28 @@ def client() -> Albert:
     )
 
 
+@pytest.fixture
+def fake_client() -> Albert:
+    """Fixture to provide a fake session for testing."""
+    client = Albert(
+        base_url="https://fake.albertinvent.com", token="fake-token", session=FakeAlbertSession()
+    )
+    return client
+
+
 @pytest.fixture(scope="session")
 def seed_prefix() -> str:
     return f"SDK-Test-{uuid.uuid4()}"
 
 
 ### STATIC RESOURCES -- CANNOT BE DELETED
+
+
+@pytest.fixture(scope="session")
+def static_user(client: Albert) -> User:
+    # Users cannot be deleted, so we just pull the SDK Bot user for testing
+    # Do not write to/modify this resource since it is shared across all test runs
+    return client.users.get_current_user()
 
 
 @pytest.fixture(scope="session")
@@ -111,15 +131,6 @@ def static_sds_file(client: Albert) -> FileInfo:
             )
         r = client.files.get_by_name(name="SDS_HCL.pdf", namespace=FileNamespace.RESULT)
     return r
-
-
-@pytest.fixture(scope="session")
-def static_user(client: Albert) -> User:
-    # Users cannot be deleted, so we just pull the SDK Bot user for testing
-    # Do not write to/modify this resource since it is shared across all test runs
-    claims = jwt.decode(client.session._access_token, options={"verify_signature": False})
-    user_id = claims["id"]
-    return client.users.get_by_id(id=user_id)
 
 
 @pytest.fixture(scope="session")
@@ -169,26 +180,6 @@ def static_lists(
                 raise e
         seeded.append(created_list)
     return seeded
-
-
-@pytest.fixture(scope="session")
-def static_btdataset(client: Albert) -> BTDataset:
-    return client.btdatasets.get_by_id(id="DST1")
-
-
-@pytest.fixture(scope="session")
-def static_btinsight(client: Albert) -> BTInsight:
-    return client.btinsights.get_by_id(id="INS10")
-
-
-@pytest.fixture(scope="session")
-def static_btmodelsession(client: Albert) -> BTModelSession:
-    return client.btmodelsessions.get_by_id(id="MDS1")
-
-
-@pytest.fixture(scope="session")
-def static_btmodel(static_btmodelsession: BTModelSession) -> BTModel:
-    return static_btmodelsession.models.get_by_id(id="MDL1")
 
 
 ### SEEDED RESOURCES -- CREATED ONCE PER SESSION, CAN BE DELETED
@@ -422,6 +413,7 @@ def seeded_parameters(client: Albert, seed_prefix: str) -> Iterator[list[Paramet
         created_parameter = client.parameters.create(parameter=parameter)
         # Extra get_by_id is required to populate the category field on parameter
         seeded.append(client.parameters.get_by_id(id=created_parameter.id))
+    time.sleep(1.5)
     yield seeded
     for parameter in seeded:
         with suppress(NotFoundError):
@@ -627,3 +619,54 @@ def seeded_links(client: Albert, seeded_tasks: list[BaseTask]):
     for link in seeded:
         with suppress(NotFoundError):
             client.links.delete(id=link.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btdataset(client: Albert, seed_prefix: str) -> Iterator[BTDataset]:
+    dataset = generate_btdataset_seed(seed_prefix)
+    dataset = client.btdatasets.create(dataset=dataset)
+    yield dataset
+    with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
+        client.btdatasets.delete(id=dataset.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btmodelsession(
+    client: Albert,
+    seed_prefix: str,
+    seeded_btdataset: BTDataset,
+) -> Iterator[BTModelSession]:
+    model_session = generate_btmodelsession_seed(seed_prefix, seeded_btdataset)
+    model_session = client.btmodelsessions.create(model_session=model_session)
+    yield model_session
+    with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
+        client.btmodelsessions.delete(id=model_session.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btmodel(
+    client: Albert,
+    seed_prefix: str,
+    seeded_btdataset: BTDataset,
+    seeded_btmodelsession: BTModelSession,
+) -> Iterator[BTModel]:
+    model = generate_btmodel_seed(seed_prefix, seeded_btdataset)
+    model = client.btmodels(parent_id=seeded_btmodelsession.id).create(model=model)
+    yield model
+    with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
+        client.btmodels(parent_id=seeded_btmodelsession.id).delete(id=model.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_btinsight(
+    client: Albert,
+    seed_prefix: str,
+    seeded_btdataset: BTDataset,
+    seeded_btmodelsession: BTModelSession,
+) -> Iterator[BTInsight]:
+    ins = generate_btinsight_seed(seed_prefix, seeded_btdataset, seeded_btmodelsession)
+    ins = client.btinsights.create(insight=ins)
+    time.sleep(3.0)
+    yield ins
+    with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
+        client.btinsights.delete(id=ins.id)

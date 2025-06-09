@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from albert.exceptions import AlbertException
 from albert.resources.acls import ACL
-from albert.resources.base import BaseAlbertModel, BaseEntityLink, BaseResource
+from albert.resources.base import BaseAlbertModel, BaseResource, EntityLink
 from albert.resources.identifiers import LinkId, NotebookId, ProjectId, SynthesisId, TaskId
 
 
@@ -99,7 +99,7 @@ class ChecklistBlock(BaseBlock):
 
 
 class AttachesContent(BaseAlbertModel):
-    title: str
+    title: str | None = Field(default=None)
     namespace: str = Field(default="result")
     file_key: str | None = Field(default=None, alias="fileKey", exclude=True, frozen=True)
     format: str | None = Field(default=None, alias="mimeType", exclude=True, frozen=True)
@@ -112,7 +112,7 @@ class AttachesBlock(BaseBlock):
 
 
 class ImageContent(BaseAlbertModel):
-    title: str
+    title: str | None = Field(default=None)
     namespace: str = Field(default="result")
     stretched: bool = Field(default=False)
     with_background: bool = Field(default=False, alias="withBackground")
@@ -200,7 +200,7 @@ class ListBlock(BaseBlock):
 
 class NotebookLink(BaseAlbertModel):
     id: LinkId | None = Field(default=None)
-    child: BaseEntityLink = Field(..., alias="Child")
+    child: EntityLink = Field(..., alias="Child")
 
 
 _NotebookBlockUnion = (
