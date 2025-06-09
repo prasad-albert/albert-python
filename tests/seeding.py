@@ -512,12 +512,12 @@ def generate_data_template_seeds(
                 DataColumnValue(
                     data_column=seeded_data_columns[0],
                     value="45.0",
-                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    unit=EntityLink(id=seeded_units[0].id),
                 ),
                 DataColumnValue(
                     data_column=seeded_data_columns[1],
                     value="100.0",
-                    unit=BaseEntityLink(id=seeded_units[1].id),
+                    unit=EntityLink(id=seeded_units[1].id),
                 ),
             ],
             users_with_access=[user],
@@ -551,7 +551,7 @@ def generate_data_template_seeds(
                 DataColumnValue(
                     data_column=seeded_data_columns[1],
                     value="50",
-                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    unit=EntityLink(id=seeded_units[0].id),
                     calculation="Pressure = Force / Area",
                     validation=[
                         ValueValidation(
@@ -602,7 +602,7 @@ def generate_data_template_seeds(
                 DataColumnValue(
                     data_column=seeded_data_columns[1],
                     value="75.0",
-                    unit=BaseEntityLink(id=seeded_units[1].id),
+                    unit=EntityLink(id=seeded_units[1].id),
                     validation=[
                         ValueValidation(
                             datatype=DataType.NUMBER,
@@ -623,12 +623,12 @@ def generate_data_template_seeds(
                 DataColumnValue(
                     data_column=seeded_data_columns[0],
                     calculation="=A1 + B1",
-                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    unit=EntityLink(id=seeded_units[0].id),
                 ),
                 DataColumnValue(
                     data_column=seeded_data_columns[1],
                     calculation="=C1 / 2",
-                    unit=BaseEntityLink(id=seeded_units[1].id),
+                    unit=EntityLink(id=seeded_units[1].id),
                 ),
             ],
         ),
@@ -725,13 +725,25 @@ def generate_parameter_group_seeds(
                 ParameterValue(
                     parameter=seeded_parameters[0],
                     value="10",
-                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    unit=EntityLink(id=seeded_units[0].id),
                     validation=[
                         ValueValidation(
                             datatype=DataType.NUMBER,
                             min="0",
                             max="100",
                             operator=Operator.BETWEEN,
+                        )
+                    ],
+                ),
+                ParameterValue(
+                    parameter=seeded_parameters[2],
+                    value="500.0",
+                    unit=seeded_units[2],
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.NUMBER,
+                            operator=Operator.GREATER_THAN_OR_EQUAL,
+                            value="0.0",
                         )
                     ],
                 ),
@@ -759,7 +771,7 @@ def generate_parameter_group_seeds(
                 ParameterValue(
                     parameter=seeded_parameters[0],
                     value="10",
-                    unit=BaseEntityLink(id=seeded_units[0].id),
+                    unit=EntityLink(id=seeded_units[0].id),
                     validation=[
                         ValueValidation(
                             datatype=DataType.NUMBER,
@@ -768,7 +780,22 @@ def generate_parameter_group_seeds(
                             operator=Operator.BETWEEN,
                         )
                     ],
-                )
+                ),
+                ParameterValue(
+                    parameter=static_consumeable_parameter, category=ParameterCategory.SPECIAL
+                ),
+                ParameterValue(
+                    parameter=seeded_parameters[2],
+                    value="500.0",
+                    unit=seeded_units[2],
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.NUMBER,
+                            operator=Operator.GREATER_THAN_OR_EQUAL,
+                            value="0.0",
+                        )
+                    ],
+                ),
             ],
             tags=seeded_tags[:2],
         ),
@@ -780,7 +807,7 @@ def generate_parameter_group_seeds(
                 ParameterValue(
                     parameter=seeded_parameters[1],
                     value="Test Value",
-                    unit=BaseEntityLink(id=seeded_units[1].id),
+                    unit=EntityLink(id=seeded_units[1].id),
                 )
             ],
             tags=seeded_tags[2:],
@@ -1044,12 +1071,12 @@ def generate_workflow_seeds(
             name=f"{seed_prefix} - Workflow 2 Equipment",
             parameter_group_setpoints=[
                 ParameterGroupSetpoints(
-                    parameter_group=seeded_parameter_groups[1],
+                    parameter_group=seeded_parameter_groups[2],
                     parameter_setpoints=[
                         ParameterSetpoint(
-                            parameter_id=seeded_parameter_groups[1].parameters[0].id,
+                            parameter_id=seeded_parameter_groups[2].parameters[0].id,
                             value="25.0",
-                            unit=seeded_parameter_groups[1].parameters[0].unit,
+                            unit=seeded_parameter_groups[2].parameters[0].unit,
                         ),
                         ParameterSetpoint(
                             parameter_id=static_consumeable_parameter.id,
@@ -1059,14 +1086,14 @@ def generate_workflow_seeds(
                         ),
                         ParameterSetpoint(
                             parameter=_get_param_from_id(
-                                seeded_parameters, seeded_parameter_groups[1].parameters[1].id
+                                seeded_parameters, seeded_parameter_groups[2].parameters[2].id
                             ),  # Make sure setting from the parameter works
                             intervals=[
                                 Interval(
-                                    value="1.1", unit=seeded_parameter_groups[1].parameters[1].unit
+                                    value="1.1", unit=seeded_parameter_groups[2].parameters[2].unit
                                 ),
                                 Interval(
-                                    value="2.2", unit=seeded_parameter_groups[1].parameters[1].unit
+                                    value="2.2", unit=seeded_parameter_groups[2].parameters[2].unit
                                 ),
                             ],
                         ),
@@ -1082,20 +1109,20 @@ def generate_workflow_seeds(
                     parameter_setpoints=[
                         ParameterSetpoint(
                             parameter=_get_param_from_id(
-                                seeded_parameters, seeded_parameter_groups[2].parameters[1].id
+                                seeded_parameters, seeded_parameter_groups[2].parameters[0].id
                             ),  # make sure setting from a parameter works
                             value="12.2",
-                            unit=seeded_parameter_groups[2].parameters[1].unit,
+                            unit=seeded_parameter_groups[2].parameters[0].unit,
                             categoty=ParameterCategory.NORMAL,
                         ),
                         ParameterSetpoint(
-                            parameter_id=seeded_parameter_groups[2].parameters[0].id,
+                            parameter_id=seeded_parameter_groups[2].parameters[1].id,
                             intervals=[
                                 Interval(
-                                    value="1.1", unit=seeded_parameter_groups[2].parameters[0].unit
+                                    value="1.1", unit=seeded_parameter_groups[2].parameters[1].unit
                                 ),
                                 Interval(
-                                    value="2.2", unit=seeded_parameter_groups[2].parameters[0].unit
+                                    value="2.2", unit=seeded_parameter_groups[2].parameters[1].unit
                                 ),
                             ],
                         ),

@@ -147,24 +147,22 @@ def _split_patch_types_for_params_and_data_cols(
         for tag in updated_tag_ids or []:
             if tag not in (existing_tag_ids or []):
                 patches.append(
-                    {
-                        "operation": "add",
-                        "attribute": attr_name,
-                        "newValue": tag,
-                        # "entityId": tag.id,
-                    }
+                    PGPatchDatum(
+                        operation="add",
+                        attribute=attr_name,
+                        newValue=tag,
+                    )
                 )
 
         # Remove old tags
         for tag in existing_tag_ids or []:
             if tag not in (updated_tag_ids or []):
                 patches.append(
-                    {
-                        "operation": "delete",
-                        "attribute": attr_name,
-                        "oldValue": tag,
-                        # "entityId": tag.id,
-                    }
+                    PGPatchDatum(
+                        operation="delete",
+                        attribute=attr_name,
+                        oldValue=tag,
+                    )
                 )
 
         return patches
@@ -176,8 +174,7 @@ def _split_patch_types_for_params_and_data_cols(
 
         existing_item = deepcopy(existing_item)
         updated_item = deepcopy(updated_item)
-        print(f"Existing item: {existing_item}")
-        print(f"Updated item: {updated_item}")
+
         # Handle enum validations
         if isinstance(updated_item.validation[0].value, list):
             existing_enums = (
@@ -427,16 +424,5 @@ def _split_patch_types_for_params_and_data_cols(
         updated.tags,
         attr_name="tagId" if isinstance(updated, ParameterGroup) else "tag",
     )
-
-    print("Deletion patches")
-    print(deletion_patches)
-    print("Update patches")
-    print(update_patches)
-    print("Tag patches")
-    print(tag_patches)
-    print("Enum patches")
-    print(enum_patches)
-    print("New param patches")
-    print(new_param_patches)
 
     return deletion_patches + update_patches + tag_patches, enum_patches, new_param_patches

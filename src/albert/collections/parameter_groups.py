@@ -390,8 +390,6 @@ class ParameterGroupCollection(BaseCollection):
 
         # handle adding new parameters
         if len(new_param_patches) > 0:
-            print("NEW PARAM PATCHES")
-            print(new_param_patches)
             self.session.put(
                 f"{self.base_path}/{existing.id}/parameters",
                 json={"Parameters": new_param_patches},
@@ -400,8 +398,6 @@ class ParameterGroupCollection(BaseCollection):
         for sequence, enum_patches in special_enum_patches.items():
             if len(enum_patches) == 0:
                 continue
-            print("SPECIAL ENUM PATCHES")
-            print(enum_patches)
             enum_path = f"{self.base_path}/{existing.id}/parameters/{sequence}/enums"
             self.session.put(enum_path, json=enum_patches)
         return self.get_by_id(id=parameter_group.id)

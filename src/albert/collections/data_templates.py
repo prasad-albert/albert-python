@@ -220,15 +220,8 @@ class DataTemplateCollection(BaseCollection):
             _split_patch_types_for_params_and_data_cols(existing=existing, updated=data_template)
         )
         payload = DCPatchDatum(data=base_payload.data)
-        print("Base Payload")
-        print(payload.model_dump(mode="json", by_alias=True, exclude_none=True))
 
         payload.data.extend(special_patches)
-
-        print("SPECIAL PATCHES")
-        print(special_patches)
-        print("FULL PAYLOAD")
-        print(payload.model_dump(mode="json", by_alias=True, exclude_none=True))
 
         # handle adding new data columns
         if len(new_param_patches) > 0:
@@ -240,8 +233,7 @@ class DataTemplateCollection(BaseCollection):
         for sequence, enum_patches in special_enum_patches.items():
             if len(enum_patches) == 0:
                 continue
-            print("SPECIAL ENUM PATCHES")
-            print(enum_patches)
+
             enum_path = f"{self.base_path}/{existing.id}/datacolumns/{sequence}/enums"
             self.session.put(enum_path, json=enum_patches)
 

@@ -1,5 +1,5 @@
 from albert import Albert
-from albert.resources.base import BaseEntityLink
+from albert.resources.base import EntityLink
 from albert.resources.data_templates import DataTemplate
 from albert.resources.parameter_groups import DataType, EnumValidationValue, ValueValidation
 from albert.resources.tags import Tag
@@ -68,7 +68,7 @@ def test_update_tags(
     original_tags = [x.tag for x in dt.tags]
 
     new_tag = [x for x in seeded_tags if x.tag not in original_tags][0]
-    dt.tags.append(new_tag)
+    dt.tags = dt.tags + [new_tag]
 
     updated_dt = client.data_templates.update(data_template=dt)
     assert updated_dt is not None
@@ -136,9 +136,7 @@ def test_enum_validation_update(client: Albert, seeded_data_templates: list[Data
         for x in dt.data_column_values
         if (len(x.validation) > 0 and x.validation[0].datatype == DataType.ENUM)
     ][0]  # Data column with enum validation
-    print(column)
     old_options = [x.text for x in column.validation[0].value]
-    print(old_options)
     # Replace the entire enum validation
     column.validation[0].value = [
         EnumValidationValue(text="NewOption1"),
@@ -167,7 +165,7 @@ def test_update_units(
 
     # Update unit
     new_unit = seeded_units[2]
-    column.unit = BaseEntityLink(id=new_unit.id)
+    column.unit = EntityLink(id=new_unit.id)
     updated_dt = client.data_templates.update(data_template=dt)
 
     assert updated_dt is not None

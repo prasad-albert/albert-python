@@ -129,8 +129,8 @@ jobs:
       - run:
           name: Deploy to GitHub Pages
           command: |
-            git config --global user.email "circleci@users.noreply.github.com"
-            git config --global user.name "CircleCI"
+            git config --global user.email "engineering@albertinvent.com"
+            git config --global user.name "Albert Invent"
             git clone --branch gh-pages --single-branch https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git gh-pages
 
             mkdir -p gh-pages/albert-python
