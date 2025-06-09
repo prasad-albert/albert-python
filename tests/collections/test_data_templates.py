@@ -57,8 +57,8 @@ def test_advanced_list(client: Albert, seeded_data_templates: list[DataTemplate]
     adv_list = client.data_templates.list(name=name)
     _list_asserts(adv_list)
 
-    # adv_list_no_match = client.data_templates.list(name="chaos tags 126485% HELLO WORLD!!!!")
-    # assert list(adv_list_no_match) == []
+    adv_list_no_match = client.data_templates.list(name="FAKEFAKEFAKEFAKEFAKEFAKE")
+    assert next(adv_list_no_match, None) == None
 
 
 def test_update_tags(

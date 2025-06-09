@@ -57,7 +57,6 @@ class DataTemplateCollection(BaseCollection):
             self.base_path,
             json=data_template.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
-        # Enums on Data Templates need to be added manually unlike Parameter Groups
         return DataTemplate(**response.json())
 
     def get_by_id(self, *, id: DataTemplateId) -> DataTemplate:
