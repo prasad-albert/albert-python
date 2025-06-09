@@ -20,7 +20,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "SHA256:C7QGlEZYFOlayguVUvJOclK+mVpUj1L769su95d+S0A"
+            - "SHA256:8xP/cfKKsXJOx9XDojfxU3nx9NRtDCEVSVm0uL6qL5I"
       - install_uv
       - run:
           name: Export dependencies
@@ -123,7 +123,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "SHA256:C7QGlEZYFOlayguVUvJOclK+mVpUj1L769su95d+S0A"
+            - "SHA256:8xP/cfKKsXJOx9XDojfxU3nx9NRtDCEVSVm0uL6qL5I"
       - install_uv
       - run:
           name: Install dependencies
