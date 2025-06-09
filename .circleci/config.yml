@@ -19,8 +19,8 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-        fingerprints:
-          - "SHA256:NV1l0BIU8hlRRO0A/HYr0c/HM46+JOv+i0UJtAnxsQM"
+          fingerprints:
+            - "SHA256:NV1l0BIU8hlRRO0A/HYr0c/HM46+JOv+i0UJtAnxsQM"
       - install_uv
       - run:
           name: Export dependencies
@@ -122,8 +122,8 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-        fingerprints:
-          - "SHA256:NV1l0BIU8hlRRO0A/HYr0c/HM46+JOv+i0UJtAnxsQM"
+          fingerprints:
+            - "SHA256:NV1l0BIU8hlRRO0A/HYr0c/HM46+JOv+i0UJtAnxsQM"
       - install_uv
       - run:
           name: Install dependencies
