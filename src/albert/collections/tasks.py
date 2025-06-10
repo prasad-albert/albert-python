@@ -25,7 +25,7 @@ from albert.resources.tasks import (
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
-from albert.utils.patches import PatchDatum, PatchOperation, PatchPayload
+from albert.utils.patch_types import PatchDatum, PatchOperation, PatchPayload
 
 
 class TaskCollection(BaseCollection):

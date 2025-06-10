@@ -14,7 +14,8 @@ from albert.resources.parameter_groups import (
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
-from albert.utils.patches import PatchOperation, _split_patch_types_for_params_and_data_cols
+from albert.utils.patch_types import PatchOperation
+from albert.utils.patches import _split_patch_types_for_params_and_data_cols
 
 
 class ParameterGroupCollection(BaseCollection):
