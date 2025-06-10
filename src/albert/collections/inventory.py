@@ -568,11 +568,11 @@ class InventoryCollection(BaseCollection):
         def deserialize(items: list[dict]) -> list[InventoryItem]:
             return self.get_by_ids(ids=[x["albertId"] for x in items])
 
-        # search_text = text if (text is None or len(text) < 50) else text[0:50]
+        search_text = text if (text is None or len(text) < 50) else text[0:50]
 
         params = self._prepare_parameters(
             limit=limit,
-            text=text,
+            text=search_text,
             cas=cas,
             category=category,
             company=company,

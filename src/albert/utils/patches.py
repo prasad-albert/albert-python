@@ -1,6 +1,4 @@
 from copy import deepcopy
-from enum import Enum
-from typing import Any
 
 from pydantic import Field
 
@@ -8,10 +6,9 @@ from albert.resources.data_templates import DataTemplate
 from albert.resources.parameter_groups import (
     EnumValidationValue,
     ParameterGroup,
-    PGPatchDatum,
     ValueValidation,
 )
-from albert.utils.types import BaseAlbertModel
+from albert.utils.patch_types import PGPatchDatum
 
 
 class GeneralPatchDatum(PGPatchDatum):
@@ -283,13 +280,6 @@ def _split_patch_types_for_params_and_data_cols(
                 patch.rowId = sequence
             elif isinstance(parent_item, DataTemplate):
                 patch.colId = sequence
-                # if isinstance(parent_item, DataTemplate):
-                #     patch = GeneralPatchDatum(
-                #         operation="add",
-                #         actions=[patch],
-                #         colId=sequence,
-                #         attribute="datacolumn",
-                #     )
                 patches.append(patch)
             else:
                 # ParameterGroup
@@ -304,16 +294,7 @@ def _split_patch_types_for_params_and_data_cols(
                 patch.rowId = sequence
             elif isinstance(parent_item, DataTemplate):
                 patch.colId = sequence
-            # if isinstance(parent_item, DataTemplate):
-            #     patch = GeneralPatchDatum(
-            #         operation="delete",
-            #         actions=[patch],
-            #         colId=sequence,
-            #         attribute="datacolumn",
-            #     )
-            #     patches.append(patch)
-            # else:
-            #     # ParameterGroup
+
             patches.append(patch)
 
         elif existing_item.unit.id != updated_item.unit.id:
@@ -429,30 +410,3 @@ def _split_patch_types_for_params_and_data_cols(
     )
 
     return deletion_patches + update_patches + tag_patches, enum_patches, new_param_patches
-
-
-class PatchOperation(str, Enum):
-    ADD = "add"
-    UPDATE = "update"
-    DELETE = "delete"
-
-
-class PatchDatum(BaseAlbertModel):
-    operation: str
-    attribute: str
-    new_value: Any | None = Field(default=None, alias="newValue")
-    old_value: Any | None = Field(default=None, alias="oldValue")
-
-    def model_dump(self, **kwargs) -> dict[str, Any]:
-        # Default to exclude_unset=True to remove old/new value when not explicitly set
-        kwargs.setdefault("exclude_unset", True)
-        return super().model_dump(**kwargs)
-
-
-class PatchPayload(BaseAlbertModel):
-    data: list[PatchDatum]
-
-    def model_dump(self, **kwargs) -> dict[str, Any]:
-        # Default to exclude_unset=True to remove old/new value when not explicitly set
-        kwargs.setdefault("exclude_unset", True)
-        return super().model_dump(**kwargs)

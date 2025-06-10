@@ -15,12 +15,8 @@ from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.units import Unit
 from albert.resources.users import User
-from albert.utils.patches import PatchDatum, PatchPayload
+from albert.utils.patch_types import PatchDatum, PatchPayload, PGPatchDatum
 from albert.utils.types import BaseAlbertModel
-
-
-class PGPatchDatum(PatchDatum):
-    rowId: str | None = Field(default=None)
 
 
 class PGPatchPayload(PatchPayload):
