@@ -13,7 +13,7 @@ from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedEntity
 from albert.resources.users import User
 from albert.resources.workflows import Workflow
-from albert.utils.patches import PatchPayload
+from albert.utils.patch_types import PatchPayload
 
 
 class TaskCategory(str, Enum):
