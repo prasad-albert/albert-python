@@ -214,7 +214,7 @@ class DataTemplateCollection(BaseCollection):
         base_payload = self._generate_patch_payload(existing=existing, updated=data_template)
 
         path = f"{self.base_path}/{existing.id}"
-        # Handle special updates Imainly for complex validations
+        # Handle special updates mainly for complex validations
         special_patches, special_enum_patches, new_param_patches = (
             _split_patch_types_for_params_and_data_cols(existing=existing, updated=data_template)
         )
