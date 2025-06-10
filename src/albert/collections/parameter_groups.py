@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.collections.patch_utils import _split_patch_types_for_params_and_data_cols
 from albert.exceptions import AlbertHTTPError
 from albert.resources.parameter_groups import (
     EnumValidationValue,
@@ -15,7 +14,7 @@ from albert.resources.parameter_groups import (
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
-from albert.utils.patches import PatchOperation
+from albert.utils.patches import PatchOperation, _split_patch_types_for_params_and_data_cols
 
 
 class ParameterGroupCollection(BaseCollection):

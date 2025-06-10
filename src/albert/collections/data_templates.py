@@ -3,10 +3,6 @@ from collections.abc import Iterator
 from pydantic import Field
 
 from albert.collections.base import BaseCollection, OrderBy
-from albert.collections.patch_utils import (
-    GeneralPatchDatum,
-    _split_patch_types_for_params_and_data_cols,
-)
 from albert.exceptions import AlbertHTTPError
 from albert.resources.data_templates import DataColumnValue, DataTemplate
 from albert.resources.identifiers import DataTemplateId
@@ -14,6 +10,10 @@ from albert.resources.parameter_groups import PGPatchPayload
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
+from albert.utils.patches import (
+    GeneralPatchDatum,
+    _split_patch_types_for_params_and_data_cols,
+)
 
 
 class DCPatchDatum(PGPatchPayload):
