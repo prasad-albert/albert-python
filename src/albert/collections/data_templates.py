@@ -10,8 +10,8 @@ from albert.resources.parameter_groups import PGPatchPayload
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
+from albert.utils.patch_types import GeneralPatchDatum
 from albert.utils.patches import (
-    GeneralPatchDatum,
     _split_patch_types_for_params_and_data_cols,
 )
 

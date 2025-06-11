@@ -35,3 +35,9 @@ class PatchPayload(BaseAlbertModel):
         # Default to exclude_unset=True to remove old/new value when not explicitly set
         kwargs.setdefault("exclude_unset", True)
         return super().model_dump(**kwargs)
+
+
+class GeneralPatchDatum(PGPatchDatum):
+    colId: str | None = Field(default=None)
+    actions: list[PGPatchDatum] | None = None
+    operation: str | None = Field(default=None)

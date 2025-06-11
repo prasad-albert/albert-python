@@ -1,20 +1,12 @@
 from copy import deepcopy
 
-from pydantic import Field
-
 from albert.resources.data_templates import DataTemplate
 from albert.resources.parameter_groups import (
     EnumValidationValue,
     ParameterGroup,
     ValueValidation,
 )
-from albert.utils.patch_types import PGPatchDatum
-
-
-class GeneralPatchDatum(PGPatchDatum):
-    colId: str | None = Field(default=None)
-    actions: list[PGPatchDatum] | None = None
-    operation: str | None = Field(default=None)
+from albert.utils.patch_types import GeneralPatchDatum, PGPatchDatum
 
 
 def _split_patch_types_for_params_and_data_cols(
