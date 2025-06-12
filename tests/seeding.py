@@ -1394,7 +1394,7 @@ def generate_btmodel_seed(seed_prefix: str, seeded_btdataset: BTDataset) -> BTMo
 def generate_btinsight_seed(
     seed_prefix: str,
     seeded_btdataset: BTDataset,
-    seeded_btmodelsession: BTModelSession,
+    seeded_btmodelsession: BTModel,
 ) -> BTInsight:
     return BTInsight(
         name=f"{seed_prefix} - Test BT Insight",
