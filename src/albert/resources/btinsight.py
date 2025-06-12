@@ -4,6 +4,7 @@ from typing import Any
 from pydantic import Field
 
 from albert.resources.base import BaseResource
+from albert.resources.identifiers import BTDatasetId, BTInsightId, BTModelId, BTModelSessionId
 from albert.utils.types import BaseAlbertModel
 
 
@@ -46,9 +47,10 @@ class BTInsight(BaseResource, protected_namespaces=()):
     category: BTInsightCategory
     metadata: dict[str, Any] = Field(alias="Metadata")
     state: BTInsightState | None = Field(default=None)
-    id: str | None = Field(default=None, alias="albertId")
-    dataset_id: str | None = Field(default=None, alias="datasetId")
-    model_session_id: str | None = Field(default=None, alias="modelSessionId")
+    id: BTInsightId | None = Field(default=None, alias="albertId")
+    dataset_id: BTDatasetId | None = Field(default=None, alias="datasetId")
+    model_session_id: BTModelSessionId | None = Field(default=None, alias="modelSessionId")
+    model_id: BTModelId | None = Field(default=None, alias="modelId")
     output_key: str | None = Field(default=None, alias="outputKey")
     start_time: str | None = Field(default=None, alias="startTime")
     end_time: str | None = Field(default=None, alias="endTime")

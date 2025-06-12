@@ -4,6 +4,10 @@ from pydantic import AfterValidator
 
 _ALBERT_PREFIXES = {
     "BlockId": "BLK",
+    "BTInsightId": "INS",
+    "BTDatasetId": "DST",
+    "BTModelId": "MDL",
+    "BTModelSessionId": "MDS",
     "CustomFieldId": "CTF",
     "DataColumnId": "DAC",
     "DataTemplateId": "DAT",
@@ -74,6 +78,34 @@ def ensure_block_id(id: str) -> str:
 
 
 BlockId = Annotated[str, AfterValidator(ensure_block_id)]
+
+
+def ensure_btinsight_id(id: str) -> str:
+    return _ensure_albert_id(id, "BTInsightId")
+
+
+BTInsightId = Annotated[str, AfterValidator(ensure_btinsight_id)]
+
+
+def ensure_btdataset_id(id: str) -> str:
+    return _ensure_albert_id(id, "BTDatasetId")
+
+
+BTDatasetId = Annotated[str, AfterValidator(ensure_btdataset_id)]
+
+
+def ensure_btmodel_id(id: str) -> str:
+    return _ensure_albert_id(id, "BTModelId")
+
+
+BTModelId = Annotated[str, AfterValidator(ensure_btmodel_id)]
+
+
+def ensure_btmodel_session_id(id: str) -> str:
+    return _ensure_albert_id(id, "BTModelSessionId")
+
+
+BTModelSessionId = Annotated[str, AfterValidator(ensure_btmodel_session_id)]
 
 
 def ensure_inventory_id(id: str) -> str:

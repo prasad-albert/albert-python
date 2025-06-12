@@ -3,9 +3,14 @@ from typing import Any
 
 from pydantic import Field
 
-from albert.exceptions import AlbertException
-from albert.resources.base import BaseResource, BaseSessionResource
+from albert.resources.base import BaseResource
+from albert.resources.identifiers import BTDatasetId, BTModelId, BTModelSessionId
 from albert.utils.types import BaseAlbertModel
+
+
+class BTModelType(str, Enum):
+    SESSION = "Session"
+    DETACHED = "Detached"
 
 
 class BTModelCategory(str, Enum):
@@ -26,11 +31,11 @@ class BTModelRegistry(BaseAlbertModel):
     metrics: dict[str, Any] | None = Field(None, alias="Metrics")
 
 
-class BTModelSession(BaseSessionResource, protected_namespaces=()):
+class BTModelSession(BaseResource, protected_namespaces=()):
     name: str
     category: BTModelCategory
-    dataset_id: str = Field(..., alias="datasetId")
-    id: str | None = Field(default=None)
+    id: BTModelSessionId | None = Field(default=None)
+    dataset_id: BTDatasetId = Field(..., alias="datasetId")
     default_model: str | None = Field(default=None, alias="defaultModel")
     total_time: str | None = Field(default=None, alias="totalTime")
     model_count: int | None = Field(default=None, alias="modelCount")
@@ -39,25 +44,15 @@ class BTModelSession(BaseSessionResource, protected_namespaces=()):
     albert_model_details: dict[str, Any] | None = Field(default=None, alias="albertModelDetails")
     flag: bool = Field(default=False)
 
-    @property
-    def models(self):
-        from albert.collections.btmodel import BTModelCollection
-
-        if self._session is None:
-            raise AlbertException("Parent entity is missing a session.")
-        if self.id is None:
-            raise AlbertException("Parent entity is missing an Albert ID.")
-
-        return BTModelCollection(session=self._session, parent_id=self.id)
-
 
 class BTModel(BaseResource, protected_namespaces=()):
     name: str
-    target: list[str]
-    state: BTModelState
-    dataset_id: str = Field(..., alias="datasetId")
-    id: str | None = Field(default=None)
-    parent_id: str | None = Field(default=None, alias="parentId")
+    id: BTModelId | None = Field(default=None)
+    dataset_id: BTDatasetId | None = Field(default=None, alias="datasetId")
+    parent_id: BTModelSessionId | None = Field(default=None, alias="parentId")
+    type: BTModelType | None = Field(default=None)
+    state: BTModelState | None = Field(default=None)
+    target: list[str] | None = Field(default=None)
     start_time: str | None = Field(default=None, alias="startTime")
     end_time: str | None = Field(default=None, alias="endTime")
     total_time: str | None = Field(default=None, alias="totalTime")
