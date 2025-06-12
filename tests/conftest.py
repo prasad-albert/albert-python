@@ -332,6 +332,7 @@ def seeded_data_templates(
     static_user: User,
     seeded_data_columns: list[DataColumn],
     seeded_units: list[Unit],
+    seeded_tags: list[Tag],
 ) -> Iterator[list[DataTemplate]]:
     seeded = []
     for data_template in generate_data_template_seeds(
@@ -339,6 +340,7 @@ def seeded_data_templates(
         seed_prefix=seed_prefix,
         seeded_data_columns=seeded_data_columns,
         seeded_units=seeded_units,
+        seeded_tags=seeded_tags,
     ):
         dt = client.data_templates.create(data_template=data_template)
         seeded.append(dt)

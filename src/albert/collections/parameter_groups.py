@@ -14,7 +14,8 @@ from albert.resources.parameter_groups import (
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
-from albert.utils.patches import PatchOperation
+from albert.utils.patch_types import PatchOperation
+from albert.utils.patches import _split_patch_types_for_params_and_data_cols
 
 
 class ParameterGroupCollection(BaseCollection):
@@ -358,7 +359,7 @@ class ParameterGroupCollection(BaseCollection):
 
         # Handle special update parameters
         special_patches, special_enum_patches, new_param_patches = (
-            self._handle_special_update_parameters(existing=existing, updated=parameter_group)
+            _split_patch_types_for_params_and_data_cols(existing=existing, updated=parameter_group)
         )
 
         patch_operations = list(base_payload.data) + special_patches
