@@ -3,7 +3,7 @@ from uuid import uuid4
 from albert.resources.base import EntityLink, SecurityClass
 from albert.resources.btdataset import BTDataset
 from albert.resources.btinsight import BTInsight, BTInsightCategory
-from albert.resources.btmodel import BTModel, BTModelCategory, BTModelSession, BTModelState
+from albert.resources.btmodel import BTModel, BTModelSession, BTModelSessionCategory, BTModelState
 from albert.resources.cas import Cas, CasCategory
 from albert.resources.companies import Company
 from albert.resources.custom_fields import (
@@ -1377,7 +1377,7 @@ def generate_btdataset_seed(seed_prefix: str) -> BTDataset:
 def generate_btmodelsession_seed(seed_prefix: str, seeded_btdataset: BTDataset) -> BTModelSession:
     return BTModelSession(
         name=f"{seed_prefix} - Test BT Model Session",
-        category=BTModelCategory.ALBERT_MODEL,
+        category=BTModelSessionCategory.ALBERT_MODEL,
         dataset_id=seeded_btdataset.id,
     )
 
@@ -1394,7 +1394,7 @@ def generate_btmodel_seed(seed_prefix: str, seeded_btdataset: BTDataset) -> BTMo
 def generate_btinsight_seed(
     seed_prefix: str,
     seeded_btdataset: BTDataset,
-    seeded_btmodelsession: BTModelSession,
+    seeded_btmodelsession: BTModel,
 ) -> BTInsight:
     return BTInsight(
         name=f"{seed_prefix} - Test BT Insight",

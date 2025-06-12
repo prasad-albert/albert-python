@@ -219,8 +219,9 @@ class Albert:
     def btmodelsessions(self) -> BTModelSessionCollection:
         return BTModelSessionCollection(session=self.session)
 
-    def btmodels(self, *, parent_id: str) -> BTModelCollection:
-        return BTModelCollection(session=self.session, parent_id=parent_id)
+    @property
+    def btmodels(self) -> BTModelCollection:
+        return BTModelCollection(session=self.session)
 
     @property
     def btinsights(self) -> BTInsightCollection:
