@@ -55,7 +55,7 @@ def _split_patch_types_for_params_and_data_cols(
     def get_attributes(obj):
         """Map attributes based on the class type."""
         if isinstance(obj, DataTemplate):
-            return obj.data_column_values, "column_sequence"
+            return obj.data_column_values, "sequence"
         elif isinstance(obj, ParameterGroup):
             return obj.parameters, "sequence"
         raise TypeError("Unsupported object type")
@@ -402,3 +402,64 @@ def _split_patch_types_for_params_and_data_cols(
     )
 
     return deletion_patches + update_patches + tag_patches, enum_patches, new_param_patches
+
+
+def generate_datatemplate_parameter_patches(
+    existing: DataTemplate,
+    updated: DataTemplate,
+) -> list[dict]:
+    """
+    Generate patch payload for PATCH /api/v3/datatemplates/{id}/parameters.
+    Compares parameter_values of two DataTemplate objects and returns a list of patch dicts.
+    """
+    existing_params = {
+        getattr(p, "id", None): p
+        for p in (existing.parameter_values or [])
+        if getattr(p, "id", None) is not None
+    }
+    updated_params = {
+        getattr(p, "id", None): p
+        for p in (updated.parameter_values or [])
+        if getattr(p, "id", None) is not None
+    }
+
+    patches = []
+
+    # Additions
+    for param_id, param in updated_params.items():
+        if param_id not in existing_params:
+            patches.append(
+                {
+                    "operation": "add",
+                    "attribute": "parameter",
+                    "newValue": param.model_dump(mode="json", by_alias=True, exclude_none=True),
+                }
+            )
+
+    # Deletions
+    for param_id, param in existing_params.items():
+        if param_id not in updated_params:
+            patches.append(
+                {
+                    "operation": "delete",
+                    "attribute": "parameter",
+                    "oldValue": param.model_dump(mode="json", by_alias=True, exclude_none=True),
+                }
+            )
+
+    # Updates
+    for param_id in set(existing_params) & set(updated_params):
+        old = existing_params[param_id]
+        new = updated_params[param_id]
+        # Compare all relevant fields for update (deep comparison)
+        if old != new:
+            patches.append(
+                {
+                    "operation": "update",
+                    "attribute": "parameter",
+                    "oldValue": old.model_dump(mode="json", by_alias=True, exclude_none=True),
+                    "newValue": new.model_dump(mode="json", by_alias=True, exclude_none=True),
+                }
+            )
+
+    return patches

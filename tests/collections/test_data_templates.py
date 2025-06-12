@@ -1,7 +1,11 @@
 from albert import Albert
 from albert.resources.base import EntityLink
 from albert.resources.data_templates import DataTemplate
-from albert.resources.parameter_groups import DataType, EnumValidationValue, ValueValidation
+from albert.resources.parameter_groups import (
+    DataType,
+    EnumValidationValue,
+    ValueValidation,
+)
 from albert.resources.tags import Tag
 from albert.resources.units import Unit
 
@@ -172,3 +176,113 @@ def test_update_units(
     updated_column = [x for x in updated_dt.data_column_values if x.unit is not None][0]
     assert updated_column.unit.id == new_unit.id
     assert updated_column.unit.id != original_unit.id
+
+
+# def test_update_parameters_and_data_columns(
+#     client: Albert, seeded_data_templates: list[DataTemplate], seeded_parameters: list[Parameter]
+# ):
+#     # Find the Parameters Data Template
+#     dt = next(
+#         (x for x in seeded_data_templates if "Parameters Data Template" in x.name),
+#         None,
+#     )
+#     print(dt)
+#     assert dt is not None
+#     # Update parameter value and validation
+#     assert dt.parameter_values and len(dt.parameter_values) > 0
+#     param = dt.parameter_values[0]
+#     param.value = "999.99"
+#     param.validation = [
+#         ValueValidation(
+#             datatype=DataType.NUMBER,
+#             min="10",
+#             max="1000",
+#             operator=None,
+#         )
+#     ]
+#     # Add a new parameter with validation
+#     new_param = ParameterValue(
+#         id=seeded_parameters[1].id,  # Use a unique id for the test
+#         name="New Test Parameter",
+#         value="555.55",
+#         validation=[
+#             ValueValidation(
+#                 datatype=DataType.NUMBER,
+#                 min="1",
+#                 max="999",
+#                 operator=None,
+#             )
+#         ],
+#     )
+#     dt.parameter_values.append(new_param)
+#     # Update data column value and validation
+#     assert dt.data_column_values and len(dt.data_column_values) > 0
+#     col = dt.data_column_values[0]
+#     col.value = "84.0"
+#     col.validation = [
+#         ValueValidation(
+#             datatype=DataType.NUMBER,
+#             min="10",
+#             max="200",
+#             operator=None,
+#         )
+#     ]
+#     updated_dt = client.data_templates.update(data_template=dt)
+#     assert updated_dt is not None
+#     # Check parameter update
+#     assert updated_dt.parameter_values[0].value == "999.99"
+#     assert updated_dt.parameter_values[0].validation[0].min == "10"
+#     assert updated_dt.parameter_values[0].validation[0].max == "1000"
+#     # Check new parameter addition
+#     found_new_param = next((p for p in updated_dt.parameter_values if p.id == "param-new-1"), None)
+#     assert found_new_param is not None
+#     assert found_new_param.value == "555.55"
+#     assert found_new_param.validation[0].min == "1"
+#     assert found_new_param.validation[0].max == "999"
+#     # Check data column update
+#     assert updated_dt.data_column_values[0].value == "84.0"
+#     assert updated_dt.data_column_values[0].validation[0].min == "10"
+#     assert updated_dt.data_column_values[0].validation[0].max == "200"
+
+
+# def test_update_enum_validations_on_data_column_and_parameter(
+#     client: Albert, seeded_data_templates: list[DataTemplate]
+# ):
+#     # Find the Enum Validation Data Template
+#     dt = next(
+#         (x for x in seeded_data_templates if "Enum Validation Data Template" in x.name),
+#         None,
+#     )
+#     assert dt is not None
+#     # Update data column enum validation
+#     col = dt.data_column_values[0]
+#     assert col.validation and col.validation[0].datatype.name == "ENUM"
+#     # Add a new enum option and change an existing one
+#     col_enum_values = col.validation[0].value
+#     assert isinstance(col_enum_values, list)
+#     col_enum_values.append(EnumValidationValue(text="OptionC"))
+#     col_enum_values[0].text = "OptionA-Updated"
+#     col.value = "OptionC"
+#     # Update parameter enum validation
+#     param = dt.parameter_values[0]
+#     assert param.validation and param.validation[0].datatype.name == "ENUM"
+#     param_enum_values = param.validation[0].value
+#     assert isinstance(param_enum_values, list)
+#     param_enum_values.append(EnumValidationValue(text="ParamOption3"))
+#     param_enum_values[0].text = "ParamOption1-Updated"
+#     param.value = "ParamOption3"
+#     # Update
+#     updated_dt = client.data_templates.update(data_template=dt)
+#     assert updated_dt is not None
+#     # Check data column enum update
+#     updated_col = updated_dt.data_column_values[0]
+#     updated_col_enum_texts = [x.text for x in updated_col.validation[0].value]
+#     assert "OptionC" in updated_col_enum_texts
+#     assert "OptionA-Updated" in updated_col_enum_texts
+#     assert updated_col.value == "OptionC"
+#     # Check parameter enum update
+#     updated_param = updated_dt.parameter_values[0]
+#     updated_param_enum_texts = [x.text for x in updated_param.validation[0].value]
+#     assert "ParamOption3" in updated_param_enum_texts
+#     assert "ParamOption1-Updated" in updated_param_enum_texts
+#     assert updated_param.value == "ParamOption3"

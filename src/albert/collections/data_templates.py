@@ -4,7 +4,7 @@ from pydantic import Field
 
 from albert.collections.base import BaseCollection, OrderBy
 from albert.exceptions import AlbertHTTPError
-from albert.resources.data_templates import DataColumnValue, DataTemplate
+from albert.resources.data_templates import DataColumnValue, DataTemplate, ParameterValue
 from albert.resources.identifiers import DataTemplateId
 from albert.resources.parameter_groups import PGPatchPayload
 from albert.session import AlbertSession
@@ -13,6 +13,7 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 from albert.utils.patch_types import GeneralPatchDatum
 from albert.utils.patches import (
     _split_patch_types_for_params_and_data_cols,
+    generate_datatemplate_parameter_patches,
 )
 
 
@@ -53,10 +54,13 @@ class DataTemplateCollection(BaseCollection):
             if isinstance(column_value.validation, list) and len(column_value.validation) == 0:
                 column_value.validation = None
 
+        print("***")
+        print(data_template.model_dump(mode="json", by_alias=True, exclude_none=True))
         response = self.session.post(
             self.base_path,
             json=data_template.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
+        print(response.json())
         return DataTemplate(**response.json())
 
     def get_by_id(self, *, id: DataTemplateId) -> DataTemplate:
@@ -139,6 +143,34 @@ class DataTemplateCollection(BaseCollection):
         }
         self.session.put(
             f"{self.base_path}/{data_template_id}/datacolumns",
+            json=payload,
+        )
+        return self.get_by_id(id=data_template_id)
+
+    def add_parameters(
+        self, *, data_template_id: str, parameters: list[ParameterValue]
+    ) -> DataTemplate:
+        """Adds parameters to a data template.
+
+        Parameters
+        ----------
+        data_template_id : str
+            The ID of the data template to add the columns to.
+        parameters : list[ParameterValue]
+            The list of ParameterValue objects to add to the data template.
+
+        Returns
+        -------
+        DataTemplate
+            The updated DataTemplate object.
+        """
+        payload = {
+            "Parameters": [
+                x.model_dump(mode="json", by_alias=True, exclude_none=True) for x in parameters
+            ]
+        }
+        self.session.put(
+            f"{self.base_path}/{data_template_id}/parameters",
             json=payload,
         )
         return self.get_by_id(id=data_template_id)
@@ -235,6 +267,14 @@ class DataTemplateCollection(BaseCollection):
 
             enum_path = f"{self.base_path}/{existing.id}/datacolumns/{sequence}/enums"
             self.session.put(enum_path, json=enum_patches)
+
+        # PATCH /parameters support: handle parameter changes
+        param_patches = generate_datatemplate_parameter_patches(existing, data_template)
+        if len(param_patches) > 0:
+            self.session.patch(
+                f"{self.base_path}/{existing.id}/parameters",
+                json=param_patches,
+            )
 
         if len(payload.data) > 0:
             self.session.patch(

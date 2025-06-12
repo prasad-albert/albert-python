@@ -12,7 +12,7 @@ from albert.resources.base import (
 from albert.resources.inventory import InventoryItem
 from albert.resources.parameters import Parameter, ParameterCategory
 from albert.resources.serialization import SerializeAsEntityLink
-from albert.resources.tagged_base import BaseTaggedEntity
+from albert.resources.tagged_base import BaseTaggedResource
 from albert.resources.units import Unit
 from albert.resources.users import User
 from albert.utils.patch_types import PatchDatum, PatchPayload, PGPatchDatum
@@ -119,6 +119,12 @@ class ParameterValue(BaseAlbertModel):
     # Read-only fields
     name: str | None = Field(default=None, exclude=True, frozen=True)
     sequence: str | None = Field(default=None, exclude=True, frozen=True)
+    original_short_name: str | None = Field(
+        default=None, alias="originalShortName", frozen=True, exclude=True
+    )
+    original_name: str | None = Field(
+        default=None, alias="originalName", frozen=True, exclude=True
+    )
 
     @field_validator("value", mode="before")
     @classmethod
@@ -143,7 +149,7 @@ class ParameterValue(BaseAlbertModel):
         return self
 
 
-class ParameterGroup(BaseTaggedEntity):
+class ParameterGroup(BaseTaggedResource):
     """Use 'Standards' key in metadata to store standards"""
 
     name: str

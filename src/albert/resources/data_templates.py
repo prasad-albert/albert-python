@@ -1,12 +1,18 @@
 from pydantic import Field, model_validator
 
-from albert.resources.base import BaseAlbertModel, MetadataItem, SecurityClass
+from albert.resources.base import (
+    BaseAlbertModel,
+    MetadataItem,
+    SecurityClass,
+)
 from albert.resources.data_columns import DataColumn
+from albert.resources.identifiers import DataTemplateId
 from albert.resources.parameter_groups import (
+    ParameterValue,
     ValueValidation,
 )
 from albert.resources.serialization import SerializeAsEntityLink
-from albert.resources.tagged_base import BaseTaggedEntity
+from albert.resources.tagged_base import BaseTaggedResource
 from albert.resources.units import Unit
 from albert.resources.users import User
 
@@ -27,7 +33,7 @@ class DataColumnValue(BaseAlbertModel):
     hidden: bool = False
     unit: SerializeAsEntityLink[Unit] | None = Field(default=None, alias="Unit")
     calculation: str | None = None
-    column_sequence: str | None = Field(default=None, alias="sequence", exclude=True)
+    sequence: str | None = Field(default=None, exclude=True)
     validation: list[ValueValidation] | None = Field(default_factory=list)
 
     @model_validator(mode="after")
@@ -45,12 +51,33 @@ class DataColumnValue(BaseAlbertModel):
         return self
 
 
-class DataTemplate(BaseTaggedEntity):
+# class ParameterValue(BaseAlbertModel):
+#     id: ParameterId = Field(..., alias="id")
+#     name: str | None = None
+#     original_name: str | None = Field(alias="originalName", frozen=True, exclude=True)
+#     category: ParameterCategory | None = None
+#     short_name: str | None = Field(
+#         alias="shortName", default=None, description="Unique name for a special parameter."
+#     )
+#     original_short_name: str | None = Field(alias="originalShortName", frozen=True, exclude=True)
+#     default: str | EntityLink | None = Field(alias="value", default=None)
+#     required: bool | None = Field(alias="required", default=None)
+#     validation: list[ValueValidation] | None = Field(alias="validation", default=None)
+#     unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
+#     sequence: str | None = Field(alias="sequence", default=None, exclude=True)
+#     added: AuditFields | None = Field(default=None, alias="Added", frozen=True, exclude=True)
+
+
+class DataTemplate(BaseTaggedResource):
     name: str
-    id: str = Field(None, alias="albertId")
+    id: DataTemplateId | None = Field(None, alias="albertId")
     description: str | None = None
     security_class: SecurityClass | None = None
     verified: bool = False
     users_with_access: list[SerializeAsEntityLink[User]] | None = Field(alias="ACL", default=None)
     data_column_values: list[DataColumnValue] | None = Field(alias="DataColumns", default=None)
+    parameter_values: list[ParameterValue] | None = Field(alias="Parameters", default=None)
+    deleted_parameters: list[ParameterValue] | None = Field(
+        alias="DeletedParameters", default=None, frozen=True, exclude=True
+    )
     metadata: dict[str, MetadataItem] | None = Field(default=None, alias="Metadata")
