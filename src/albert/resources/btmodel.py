@@ -50,6 +50,7 @@ class BTModel(BaseResource, protected_namespaces=()):
     id: BTModelId | None = Field(default=None)
     dataset_id: BTDatasetId | None = Field(default=None, alias="datasetId")
     parent_id: BTModelSessionId | None = Field(default=None, alias="parentId")
+    metadata: dict[str, Any] | None = Field(default=None, alias="Metadata")
     type: BTModelType | None = Field(default=None)
     state: BTModelState | None = Field(default=None)
     target: list[str] | None = Field(default=None)

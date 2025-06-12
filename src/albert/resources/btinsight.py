@@ -45,7 +45,7 @@ class BTInsightRegistry(BaseAlbertModel):
 class BTInsight(BaseResource, protected_namespaces=()):
     name: str
     category: BTInsightCategory
-    metadata: dict[str, Any] = Field(alias="Metadata")
+    metadata: dict[str, Any] | None = Field(default=None, alias="Metadata")
     state: BTInsightState | None = Field(default=None)
     id: BTInsightId | None = Field(default=None, alias="albertId")
     dataset_id: BTDatasetId | None = Field(default=None, alias="datasetId")

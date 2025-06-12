@@ -626,7 +626,7 @@ def seeded_btdataset(client: Albert, seed_prefix: str) -> Iterator[BTDataset]:
     dataset = generate_btdataset_seed(seed_prefix)
     dataset = client.btdatasets.create(dataset=dataset)
     yield dataset
-    with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
+    with suppress(ForbiddenError):
         client.btdatasets.delete(id=dataset.id)
 
 
@@ -639,7 +639,7 @@ def seeded_btmodelsession(
     model_session = generate_btmodelsession_seed(seed_prefix, seeded_btdataset)
     model_session = client.btmodelsessions.create(model_session=model_session)
     yield model_session
-    with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
+    with suppress(ForbiddenError):
         client.btmodelsessions.delete(id=model_session.id)
 
 
@@ -651,10 +651,10 @@ def seeded_btmodel(
     seeded_btmodelsession: BTModelSession,
 ) -> Iterator[BTModel]:
     model = generate_btmodel_seed(seed_prefix, seeded_btdataset)
-    model = client.btmodels(parent_id=seeded_btmodelsession.id).create(model=model)
+    model = client.btmodels.create(model=model, parent_id=seeded_btmodelsession.id)
     yield model
-    with suppress(ForbiddenError):  # TODO: Remove once ACL is fixed
-        client.btmodels(parent_id=seeded_btmodelsession.id).delete(id=model.id)
+    with suppress(ForbiddenError):
+        client.btmodels.delete(id=model.id, parent_id=seeded_btmodelsession.id)
 
 
 @pytest.fixture(scope="session")

@@ -83,11 +83,13 @@ class BTModelCollection(BaseCollection):
     _api_version = "v3"
     _updatable_attributes = {
         "state",
-        "target",
         "start_time",
         "end_time",
         "total_time",
         "model_binary_key",
+        "metadata",
+        "type",
+        "name",
     }
 
     def __init__(self, *, session: AlbertSession):
@@ -98,7 +100,7 @@ class BTModelCollection(BaseCollection):
         if parent_id is not None:
             return f"{api_base}/{parent_id}/model"
         else:
-            return f"{api_base}/model/detached"
+            return f"{api_base}/models/detached"
 
     @validate_call
     def create(self, *, model: BTModel, parent_id: BTModelSessionId | None = None) -> BTModel:
@@ -164,14 +166,16 @@ class BTModelCollection(BaseCollection):
         """
         base_path = self._get_base_path(parent_id)
         payload = self._generate_patch_payload(
-            existing=self.get_by_id(id=model.id),
+            existing=self.get_by_id(id=model.id, parent_id=parent_id),
             updated=model,
+            generate_metadata_diff=False,
+            stringify_values=True,
         )
         self.session.patch(
-            f"{base_path}/{id}",
+            f"{base_path}/{model.id}",
             json=payload.model_dump(mode="json", by_alias=True),
         )
-        return self.get_by_id(id=model.id)
+        return self.get_by_id(id=model.id, parent_id=parent_id)
 
     @validate_call
     def delete(self, *, id: BTModelId, parent_id: BTModelSessionId | None = None) -> None:
