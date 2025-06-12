@@ -54,13 +54,13 @@ class IntervalId(BaseAlbertModel):
 
 
 class BlockLevelInventoryInformation(BaseAlbertModel):
-    id: str | None = Field(default=None)
+    id: str
     lot_id: str | None = Field(default=None, alias="lotId")
     inv_lot_unique_id: str | None = Field(default=None, alias="invLotUniqueId")
 
 
 class BlockState(BaseAlbertModel):
-    id: str | None = Field(default=None, description="The ID of the block.")
+    id: str = Field(description="The ID of the block.")
     expanded: bool | None = Field(default=None, alias="expand")
     intervals: list[IntervalId] | None = Field(
         default=None,
