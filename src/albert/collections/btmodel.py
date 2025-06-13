@@ -88,6 +88,7 @@ class BTModelCollection(BaseCollection):
         "total_time",
         "model_binary_key",
         "metadata",
+        "target",
         "type",
         "name",
     }
@@ -169,7 +170,7 @@ class BTModelCollection(BaseCollection):
             existing=self.get_by_id(id=model.id, parent_id=parent_id),
             updated=model,
             generate_metadata_diff=False,
-            stringify_values=True,
+            stringify_values=False,
         )
         self.session.patch(
             f"{base_path}/{model.id}",
