@@ -10,7 +10,8 @@ from albert.utils.types import BaseAlbertModel
 class BTDatasetReferences(BaseAlbertModel):
     project_ids: list[str]
     data_column_ids: list[str]
-    filters: list[dict[str, Any]] = Field(..., default_factory=list)
+    sheet_ids: list[str] = Field(default_factory=list)
+    filter: dict[str, Any] | None = Field(default=None)
 
 
 class BTDataset(BaseResource):
