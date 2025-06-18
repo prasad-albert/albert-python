@@ -87,7 +87,7 @@ class Albert:
         self.session = session or AlbertSession(
             base_url=base_url or os.getenv("ALBERT_BASE_URL") or "https://app.albertinvent.com",
             token=token or os.getenv("ALBERT_TOKEN"),
-            client_credentials=client_credentials,
+            client_credentials=client_credentials or ClientCredentials.from_env(),
             retries=retries,
         )
 
