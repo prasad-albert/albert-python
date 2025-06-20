@@ -7,15 +7,15 @@ from albert.exceptions import AlbertHTTPError
 from albert.resources.parameter_groups import (
     EnumValidationValue,
     ParameterGroup,
-    PGPatchDatum,
-    PGPatchPayload,
     PGType,
 )
 from albert.session import AlbertSession
 from albert.utils.logging import logger
 from albert.utils.pagination import AlbertPaginator, PaginationMode
-from albert.utils.patch_types import PatchOperation
-from albert.utils.patches import _split_patch_types_for_params_and_data_cols
+from albert.utils.patch_types import PatchOperation, PGPatchDatum
+from albert.utils.patches import generate_parameter_group_patches
+
+# from albert.utils.patches import _split_patch_types_for_params_and_data_cols
 
 
 class ParameterGroupCollection(BaseCollection):
@@ -352,118 +352,162 @@ class ParameterGroupCollection(BaseCollection):
         existing = self.get_by_id(id=parameter_group.id)
         path = f"{self.base_path}/{existing.id}"
 
-        base_payload, list_metadata_updates = self._generate_patch_payload(
-            existing=existing,
-            updated=parameter_group,
+        base_payload = self._generate_patch_payload(
+            existing=existing, updated=parameter_group, generate_metadata_diff=True
         )
 
-        # Handle special update parameters
-        special_patches, special_enum_patches, new_param_patches = (
-            _split_patch_types_for_params_and_data_cols(existing=existing, updated=parameter_group)
+        general_patches, new_parameter_values, enum_patches = generate_parameter_group_patches(
+            initial_patches=base_payload,
+            updated_parameter_group=parameter_group,
+            existing_parameter_group=existing,
         )
+        print("GENERAL PATCHES")
+        print(general_patches)
 
-        patch_operations = list(base_payload.data) + special_patches
-
-        for datum in patch_operations:
-            patch_payload = PGPatchPayload(data=[datum])
-            self.session.patch(
-                path, json=patch_payload.model_dump(mode="json", by_alias=True, exclude_none=True)
-            )
-
-        # For metadata list field updates, we clear, then update
-        # since duplicate attribute values are not allowed in single patch request.
-        for attribute, values in list_metadata_updates.items():
-            clear_payload = PGPatchPayload(
-                data=[PGPatchDatum(operation="update", attribute=attribute, newValue=None)]
-            )
-            self.session.patch(
-                path, json=clear_payload.model_dump(mode="json", by_alias=True, exclude_none=True)
-            )
-            if values:
-                update_payload = PGPatchPayload(
-                    data=[PGPatchDatum(operation="update", attribute=attribute, newValue=values)]
-                )
-                self.session.patch(
-                    path,
-                    json=update_payload.model_dump(mode="json", by_alias=True, exclude_none=True),
-                )
-
-        # handle adding new parameters
-        if len(new_param_patches) > 0:
+        # add new parameters
+        new_param_url = f"{self.base_path}/{parameter_group.id}/parameters"
+        if len(new_parameter_values) > 0:
             self.session.put(
-                f"{self.base_path}/{existing.id}/parameters",
-                json={"Parameters": new_param_patches},
+                url=new_param_url,
+                json=[
+                    x.model_dump(mode="json", by_alias=True, exclude_none=True)
+                    for x in new_parameter_values
+                ],
             )
-        # Handle special enum update parameters
-        for sequence, enum_patches in special_enum_patches.items():
-            if len(enum_patches) == 0:
+        new_param_sequences = [x.sequence for x in new_parameter_values]
+        # handle enum updates
+        print("new parameter sequences")
+        print(new_param_sequences)
+        print("on platform PG at this point")
+        print(self.get_by_id(id=parameter_group.id))
+        print("ENUM PATCHES")
+        print(enum_patches)
+        for sequence, ep in enum_patches.items():
+            if sequence in new_param_sequences:
+                # we don't need to handle enum updates for new parameters
                 continue
-            enum_path = f"{self.base_path}/{existing.id}/parameters/{sequence}/enums"
-            self.session.put(enum_path, json=enum_patches)
+            if len(ep) > 0:
+                enum_url = f"{self.base_path}/{parameter_group.id}/parameters/{sequence}/enums"
+                self.session.put(
+                    url=enum_url,
+                    json=ep,
+                )
+        if len(general_patches.data) > 0:
+            # patch the general patches
+            print("GENERAL PATCHES 2")
+            print(general_patches)
+            print(general_patches.model_dump(mode="json", by_alias=True, exclude_none=True))
+            self.session.patch(
+                url=path,
+                json=general_patches.model_dump(mode="json", by_alias=True, exclude_none=True),
+            )
+        # # Handle special update parameters
+        # special_patches, special_enum_patches, new_param_patches = (
+        #     _split_patch_types_for_params_and_data_cols(existing=existing, updated=parameter_group)
+        # )
+
+        # patch_operations = list(base_payload.data) + special_patches
+
+        # for datum in patch_operations:
+        #     patch_payload = PGPatchPayload(data=[datum])
+        #     self.session.patch(
+        #         path, json=patch_payload.model_dump(mode="json", by_alias=True, exclude_none=True)
+        #     )
+
+        # # For metadata list field updates, we clear, then update
+        # # since duplicate attribute values are not allowed in single patch request.
+        # for attribute, values in list_metadata_updates.items():
+        #     clear_payload = PGPatchPayload(
+        #         data=[PGPatchDatum(operation="update", attribute=attribute, newValue=None)]
+        #     )
+        #     self.session.patch(
+        #         path, json=clear_payload.model_dump(mode="json", by_alias=True, exclude_none=True)
+        #     )
+        #     if values:
+        #         update_payload = PGPatchPayload(
+        #             data=[PGPatchDatum(operation="update", attribute=attribute, newValue=values)]
+        #         )
+        #         self.session.patch(
+        #             path,
+        #             json=update_payload.model_dump(mode="json", by_alias=True, exclude_none=True),
+        #         )
+
+        # # handle adding new parameters
+        # if len(new_param_patches) > 0:
+        #     self.session.put(
+        #         f"{self.base_path}/{existing.id}/parameters",
+        #         json={"Parameters": new_param_patches},
+        #     )
+        # # Handle special enum update parameters
+        # for sequence, enum_patches in special_enum_patches.items():
+        #     if len(enum_patches) == 0:
+        #         continue
+        #     enum_path = f"{self.base_path}/{existing.id}/parameters/{sequence}/enums"
+        #     self.session.put(enum_path, json=enum_patches)
         return self.get_by_id(id=parameter_group.id)
 
-    def _is_metadata_item_list(
-        self,
-        *,
-        existing_object: ParameterGroup,
-        updated_object: ParameterGroup,
-        metadata_field: str,
-    ) -> bool:
-        """Return True if the metadata field is a list type on either object."""
+    # def _is_metadata_item_list(
+    #     self,
+    #     *,
+    #     existing_object: ParameterGroup,
+    #     updated_object: ParameterGroup,
+    #     metadata_field: str,
+    # ) -> bool:
+    #     """Return True if the metadata field is a list type on either object."""
 
-        if not metadata_field.startswith("Metadata."):
-            return False
+    #     if not metadata_field.startswith("Metadata."):
+    #         return False
 
-        metadata_field = metadata_field.split(".")[1]
+    #     metadata_field = metadata_field.split(".")[1]
 
-        if existing_object.metadata is None:
-            existing_object.metadata = {}
-        if updated_object.metadata is None:
-            updated_object.metadata = {}
+    #     if existing_object.metadata is None:
+    #         existing_object.metadata = {}
+    #     if updated_object.metadata is None:
+    #         updated_object.metadata = {}
 
-        existing = existing_object.metadata.get(metadata_field, None)
-        updated = updated_object.metadata.get(metadata_field, None)
+    #     existing = existing_object.metadata.get(metadata_field, None)
+    #     updated = updated_object.metadata.get(metadata_field, None)
 
-        return isinstance(existing, list) or isinstance(updated, list)
+    #     return isinstance(existing, list) or isinstance(updated, list)
 
-    def _generate_patch_payload(
-        self,
-        *,
-        existing: ParameterGroup,
-        updated: ParameterGroup,
-    ) -> tuple[PGPatchPayload, dict[str, list[str]]]:
-        """Generate a patch payload and capture metadata list updates."""
+    # def _generate_patch_payload(
+    #     self,
+    #     *,
+    #     existing: ParameterGroup,
+    #     updated: ParameterGroup,
+    # ) -> tuple[PGPatchPayload, dict[str, list[str]]]:
+    #     """Generate a patch payload and capture metadata list updates."""
 
-        base_payload = super()._generate_patch_payload(
-            existing=existing,
-            updated=updated,
-        )
+    #     base_payload = super()._generate_patch_payload(
+    #         existing=existing,
+    #         updated=updated,
+    #     )
 
-        new_data: list[PGPatchDatum] = []
-        list_metadata_updates: dict[str, list[str]] = {}
+    #     new_data: list[PGPatchDatum] = []
+    #     list_metadata_updates: dict[str, list[str]] = {}
 
-        for datum in base_payload.data:
-            if self._is_metadata_item_list(
-                existing_object=existing,
-                updated_object=updated,
-                metadata_field=datum.attribute,
-            ):
-                key = datum.attribute.split(".", 1)[1]
-                updated_list = updated.metadata.get(key) or []
-                list_values: list[str] = [
-                    item.id if hasattr(item, "id") else item for item in updated_list
-                ]
+    #     for datum in base_payload.data:
+    #         if self._is_metadata_item_list(
+    #             existing_object=existing,
+    #             updated_object=updated,
+    #             metadata_field=datum.attribute,
+    #         ):
+    #             key = datum.attribute.split(".", 1)[1]
+    #             updated_list = updated.metadata.get(key) or []
+    #             list_values: list[str] = [
+    #                 item.id if hasattr(item, "id") else item for item in updated_list
+    #             ]
 
-                list_metadata_updates[datum.attribute] = list_values
-                continue
+    #             list_metadata_updates[datum.attribute] = list_values
+    #             continue
 
-            new_data.append(
-                PGPatchDatum(
-                    operation=datum.operation,
-                    attribute=datum.attribute,
-                    newValue=datum.new_value,
-                    oldValue=datum.old_value,
-                )
-            )
+    #         new_data.append(
+    #             PGPatchDatum(
+    #                 operation=datum.operation,
+    #                 attribute=datum.attribute,
+    #                 newValue=datum.new_value,
+    #                 oldValue=datum.old_value,
+    #             )
+    #         )
 
-        return PGPatchPayload(data=new_data), list_metadata_updates
+    #     return PGPatchPayload(data=new_data), list_metadata_updates

@@ -7,10 +7,7 @@ from albert.resources.base import (
 )
 from albert.resources.data_columns import DataColumn
 from albert.resources.identifiers import DataTemplateId
-from albert.resources.parameter_groups import (
-    ParameterValue,
-    ValueValidation,
-)
+from albert.resources.parameter_groups import ParameterValue, ValueValidation
 from albert.resources.serialization import SerializeAsEntityLink
 from albert.resources.tagged_base import BaseTaggedResource
 from albert.resources.units import Unit
@@ -49,23 +46,6 @@ class DataColumnValue(BaseAlbertModel):
         elif self.data_column_id is None:
             self.data_column_id = self.data_column.id
         return self
-
-
-# class ParameterValue(BaseAlbertModel):
-#     id: ParameterId = Field(..., alias="id")
-#     name: str | None = None
-#     original_name: str | None = Field(alias="originalName", frozen=True, exclude=True)
-#     category: ParameterCategory | None = None
-#     short_name: str | None = Field(
-#         alias="shortName", default=None, description="Unique name for a special parameter."
-#     )
-#     original_short_name: str | None = Field(alias="originalShortName", frozen=True, exclude=True)
-#     default: str | EntityLink | None = Field(alias="value", default=None)
-#     required: bool | None = Field(alias="required", default=None)
-#     validation: list[ValueValidation] | None = Field(alias="validation", default=None)
-#     unit: SerializeAsEntityLink[Unit] | None = Field(alias="Unit", default=None)
-#     sequence: str | None = Field(alias="sequence", default=None, exclude=True)
-#     added: AuditFields | None = Field(default=None, alias="Added", frozen=True, exclude=True)
 
 
 class DataTemplate(BaseTaggedResource):
