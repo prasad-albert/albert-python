@@ -1,12 +1,12 @@
+import itertools
+
 from albert import Albert
 from albert.resources.workflows import Workflow
 
 
 def test_basic_list(client: Albert, seeded_workflows: list[Workflow]):
-    for i, wf in enumerate(client.workflows.list()):
-        assert isinstance(wf, Workflow)
-        if i > 10:
-            break
+    for x in itertools.islice(client.workflows.list(), 10):
+        assert isinstance(x, Workflow)
 
 
 def test_get_by_id(client: Albert, seeded_workflows: list[Workflow]):
