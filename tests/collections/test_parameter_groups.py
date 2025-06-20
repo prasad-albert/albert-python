@@ -139,8 +139,6 @@ def test_enum_validation_addition(client: Albert, seeded_parameter_groups: list[
     assert len(updated_param.validation[0].value) == 3
     # make sure it was added to the enum
 
-    print("updated_pg params: ", updated_pg.parameters)
-
     assert "Option3" in [x.text for x in updated_param.validation[0].value]
     for param in updated_pg.parameters:
         if (
@@ -159,12 +157,10 @@ def test_enum_validation_removal(client: Albert, seeded_parameter_groups: list[P
     pg = client.parameter_groups.get_by_id(id=pg.id)
     param = pg.parameters[2]  # Parameter with enum validation
 
-    print("param1: ", param)
     initial_enum_count = len(param.validation[0].value)
 
     # Remove an enum value
     param.validation[0].value.pop(1)
-    print("param2: ", param)  # Remove "Option2"
     updated_pg = client.parameter_groups.update(parameter_group=pg)
 
     assert updated_pg is not None

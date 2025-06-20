@@ -64,31 +64,6 @@ class DataTemplateCollection(BaseCollection):
         if data_template.parameter_values is None or len(data_template.parameter_values) == 0:
             return dt
         else:
-            # print("adding parameters")
-            # print(data_template.parameter_values)
-            # initial_param_validations = {}
-            # initial_param_values = {}
-            # for param in data_template.parameter_values:
-            #     this_short_name = "" if param.short_name is None else param.short_name
-            #     initial_param_validations[param.id + this_short_name] = param.validation
-            #     param.validation = []
-            #     initial_param_values[param.id + this_short_name] = param.value
-            #     param.value = None
-
-            # dt = self.add_parameters(
-            #     data_template_id=dt.id, parameters=data_template.parameter_values
-            # )
-            # # re-add the enum values and default value
-            # # data_template.id = dt.id
-            # # re add the validation to the parameter values
-            # for param in dt.parameter_values:
-            #     param.validation = initial_param_validations[param.id + this_short_name]
-            #     param.value = initial_param_values[param.id + this_short_name]
-            # self._add_param_enums(
-            #     data_template_id=dt.id,
-            #     new_parameters=dt.parameter_values,
-            # )
-
             return self.add_parameters(
                 data_template_id=dt.id, parameters=data_template.parameter_values
             )
@@ -180,7 +155,6 @@ class DataTemplateCollection(BaseCollection):
                         )
 
                 if len(enum_patches) > 0:
-                    print("enum_patches", enum_patches)
                     self.session.put(
                         f"{self.base_path}/{data_template_id}/parameters/{this_sequence}/enums",
                         json=enum_patches,
@@ -413,97 +387,9 @@ class DataTemplateCollection(BaseCollection):
 
         existing = self.get_by_id(id=data_template.id)
 
-        print("EXISTING 1")
-        print(existing.model_dump(mode="json", by_alias=True, exclude_none=True))
-
         base_payload = self._generate_patch_payload(existing=existing, updated=data_template)
 
         path = f"{self.base_path}/{existing.id}"
-        # # Handle special updates mainly for complex validations
-        # special_patches, special_enum_patches, new_data_columns_patches = (
-        #     _split_patch_types_for_params_and_data_cols(existing=existing, updated=data_template)
-        # )
-
-        # payload = DCPatchDatum(data=base_payload.data)
-
-        # payload.data.extend(special_patches)
-
-        # # handle adding new data columns
-        # if len(new_data_columns_patches) > 0:
-        #     print("NEW DATA COLUMNS PATCHES")
-        #     print(new_data_columns_patches)
-        #     self.session.put(
-        #         f"{self.base_path}/{existing.id}/datacolumns",
-        #         json={"DataColumns": new_data_columns_patches},
-        #     )
-        # # Handle special enum update data columns
-
-        # print("getting current again2")
-        # print(self.get_by_id(id=data_template.id).data_column_values)
-
-        # for sequence, enum_patches in special_enum_patches.items():
-        #     if len(enum_patches) == 0:
-        #         continue
-        #     print("Data Column Enum PATCHES")
-        #     print(enum_patches)
-        #     enum_path = f"{self.base_path}/{existing.id}/datacolumns/{sequence}/enums"
-        #     self.session.put(enum_path, json=enum_patches)
-
-        # print("getting current again3")
-        # print(self.get_by_id(id=data_template.id).data_column_values)
-        # # PATCH /parameters support: handle parameter changes
-        # param_patches, enum_patches = generate_datatemplate_parameter_patches(
-        #     existing=existing, updated=data_template
-        # )
-        # # Handle enum changes
-
-        # for sequence, eps in enum_patches.items():
-        #     if len(eps) == 0:
-        #         continue
-        #     print("param ENUM PATCHES")
-        #     print(eps)
-
-        #     enum_path = f"{self.base_path}/{existing.id}/parameters/{sequence}/enums"
-        #     self.session.put(enum_path, json=eps)
-        # # Handle parameter changes
-
-        # print("getting current again4")
-        # print(self.get_by_id(id=data_template.id).data_column_values)
-        # existing_parameter_ids = [x.id for x in existing.parameter_values]
-        # if len(param_patches) > 0:
-        #     self.session.put(
-        #         f"{self.base_path}/{existing.id}/parameters",
-        #         json={
-        #             "Parameters": [
-        #                 x.model_dump(mode="json", by_alias=True, exclude_none=True)
-        #                 for x in data_template.parameter_values
-        #                 if x.id not in existing_parameter_ids
-        #             ]
-        #         },
-        #     )
-        #     print("PARAM PATCHES")
-        #     print(
-        #         [
-        #             x.model_dump(mode="json", by_alias=True, exclude_none=True)
-        #             for x in param_patches
-        #             if x.attribute != "validation"
-        #         ]
-        #     )
-        #     self.session.patch(
-        #         f"{self.base_path}/{existing.id}/parameters",
-        #         json={
-        #             "data": [
-        #                 x.model_dump(mode="json", by_alias=True, exclude_none=True)
-        #                 for x in param_patches
-        #                 if x.attribute != "validation"
-        #             ]
-        #         },
-        #     )
-
-        # if len(payload.data) > 0:
-        #     self.session.patch(
-        #         path, json=payload.model_dump(mode="json", by_alias=True, exclude_none=True)
-        #     )
         (
             general_patches,
             new_data_columns,
@@ -531,7 +417,6 @@ class DataTemplateCollection(BaseCollection):
             for sequence, enum_patches in data_column_enum_patches.items():
                 if len(enum_patches) == 0:
                     continue
-                print("data_column_enum_patches", enum_patches)
                 self.session.put(
                     f"{self.base_path}/{existing.id}/datacolumns/{sequence}/enums",
                     json=enum_patches,  # these are simple dicts for now
@@ -550,7 +435,6 @@ class DataTemplateCollection(BaseCollection):
             for sequence, enum_patches in parameter_enum_patches.items():
                 if len(enum_patches) == 0:
                     continue
-                print("parameter enum_patches", enum_patches)
                 self.session.put(
                     f"{self.base_path}/{existing.id}/parameters/{sequence}/enums",
                     json=enum_patches,  # these are simple dicts for now
@@ -562,11 +446,6 @@ class DataTemplateCollection(BaseCollection):
                 json=payload.model_dump(mode="json", by_alias=True, exclude_none=True),
             )
         if len(general_patches.data) > 0:
-            print("general_patches", general_patches)
-            print(
-                "general_patches dump",
-                general_patches.model_dump(mode="json", by_alias=True, exclude_none=True),
-            )
             payload = GeneralPatchPayload(data=general_patches.data)
             self.session.patch(
                 path,

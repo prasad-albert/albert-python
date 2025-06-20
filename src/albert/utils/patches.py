@@ -307,7 +307,6 @@ def generate_data_column_patches(
                 actions=these_actions,
                 colId=updated_dc.sequence,
             )
-            print("this_patch", this_patch)
             patches.append(this_patch)
 
         unit_patch = _data_column_unit_patches(initial_dc, updated_dc)
@@ -332,8 +331,6 @@ def generate_enum_patches(existing_enums, updated_enums) -> list[dict]:
     existing_enum = [x for x in existing_enums if isinstance(x, EnumValidationValue)]
     updated_enum = [x for x in updated_enums if isinstance(x, EnumValidationValue)]
 
-    print("existing_enum", existing_enum)
-    print("updated_enum", updated_enum)
     existing_enum_ids = [x.id for x in existing_enum if x.id is not None]
 
     updated_enum_ids = [x.id for x in updated_enum if x.id is not None]
@@ -384,14 +381,10 @@ def generate_parameter_patches(
         existing_param = next(
             x for x in initial_parameters if x.sequence == updated_param.sequence
         )
-        print("SEQUENCE: ", updated_param.sequence)
         unit_patch = _parameter_unit_patches(existing_param, updated_param)
         value_patch = _parameter_value_patches(existing_param, updated_param)
-        print("VALUE PATCH")
-        print(value_patch)
         validation_patch = parameter_validation_patch(existing_param, updated_param)
-        print("VALIDATION PATCH")
-        print(validation_patch)
+
         if unit_patch:
             parameter_patches.append(unit_patch)
         if value_patch:
@@ -413,17 +406,10 @@ def generate_parameter_patches(
 def handle_tags(existing_tags, updated_tags, attribute_name: str = "tag") -> list[PatchDatum]:
     """Handle tags updates."""
     patches = []
-    print("EXISTING TAGS")
-    print(existing_tags)
-    print("UPDATED TAGS")
-    print(updated_tags)
+
     existing_tag_ids = [x.id for x in existing_tags] if existing_tags is not None else []
     updated_tag_ids = [x.id for x in updated_tags] if updated_tags is not None else []
     # Add new tags
-    print("EXISTING TAG IDS")
-    print(existing_tag_ids)
-    print("UPDATED TAG IDS")
-    print(updated_tag_ids)
     for tag in updated_tag_ids:
         if tag not in (existing_tag_ids):
             patches.append(
@@ -455,24 +441,19 @@ def generate_data_template_patches(
 ):
     # First handle the data columns
     general_patches = initial_patches
-    # print("initial_patches", initial_patches)
     patches, new_data_columns, data_column_enum_patches = generate_data_column_patches(
         initial_data_column=existing_data_template.data_column_values,
         updated_data_column=updated_data_template.data_column_values,
     )
-    # print("patches", patches)
-    # print("new_data_columns", new_data_columns)
-    # print("data_column_enum_patches", data_column_enum_patches)
+
     tag_patches = handle_tags(
         existing_tags=existing_data_template.tags,
         updated_tags=updated_data_template.tags,
         attribute_name="tag",
     )
     # add the general patches
-    # print("tag_patches", tag_patches)
     general_patches.data.extend(patches)
     general_patches.data.extend(tag_patches)
-    # print("general_patches", general_patches)
 
     parameter_patches, new_parameters, parameter_enum_patches = generate_parameter_patches(
         initial_parameters=existing_data_template.parameter_values,
@@ -506,7 +487,6 @@ def generate_parameter_group_patches(
         attribute_name="tagId",
     )
     # add to the general patches
-
     general_patches.data.extend(parameter_patches)
     general_patches.data.extend(tag_patches)
 

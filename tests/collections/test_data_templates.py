@@ -34,15 +34,15 @@ def test_basic_list(client: Albert, seeded_data_templates: list[DataTemplate]):
     _list_asserts(data_templates)
 
 
-# def test_get_by_name(client: Albert, seeded_data_templates: list[DataTemplate]):
-#     name = seeded_data_templates[0].name
-#     dt = client.data_templates.get_by_name(name=name)
-#     assert dt is not None
-#     assert dt.name == name
-#     assert dt.id == seeded_data_templates[0].id
-#     chaos_name = "thisIsNotAValidNamethisIsNotAValidNamethisIsNotAValidNamethisIsNotAValidName"
-#     dt = client.data_templates.get_by_name(name=chaos_name)
-#     assert dt is None
+def test_get_by_name(client: Albert, seeded_data_templates: list[DataTemplate]):
+    name = seeded_data_templates[0].name
+    dt = client.data_templates.get_by_name(name=name)
+    assert dt is not None
+    assert dt.name == name
+    assert dt.id == seeded_data_templates[0].id
+    chaos_name = "thisIsNotAValidNamethisIsNotAValidNamethisIsNotAValidNamethisIsNotAValidName"
+    dt = client.data_templates.get_by_name(name=chaos_name)
+    assert dt is None
 
 
 def test_get_by_id(client: Albert, seeded_data_templates: list[DataTemplate]):
@@ -194,7 +194,6 @@ def test_update_parameters_and_data_columns(
         None,
     )
     assert dt is not None
-    print("incoming dt", dt)
     # Update parameter value and validation
     assert dt.parameter_values and len(dt.parameter_values) > 0
 
@@ -237,11 +236,7 @@ def test_update_parameters_and_data_columns(
     ]
     # col_sequence = col.sequence
 
-    print("DT modified in memory")
-    print(dt)
     updated_dt = client.data_templates.update(data_template=dt)
-    print("UPDATED DT")
-    print(updated_dt)
 
     assert updated_dt is not None
     # Check parameter update
