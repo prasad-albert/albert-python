@@ -267,29 +267,43 @@ def test_update_enum_validations_on_data_column_and_parameter(
 ):
     # Find the Enum Validation Data Template
     dt = next(
-        (x for x in seeded_data_templates if "Enum Validation Data Template" in x.name),
+        (
+            x
+            for x in seeded_data_templates
+            if "Enum Validation Data Template With Parameter" in x.name
+        ),
         None,
     )
+
     assert dt is not None
     # Update data column enum validation
-    col = next(x for x in dt.data_column_values if x.data_column_id == seeded_data_columns[1].id)
+    col = next(
+        x
+        for x in dt.data_column_values
+        if x.validation and x.validation[0].datatype.name == "ENUM"
+    )
+
     assert col.validation is not None and col.validation[0].datatype.name == "ENUM"
     # Add a new enum option and change an existing one
     col_enum_values = col.validation[0].value
 
     assert isinstance(col_enum_values, list)
     col_enum_values.append(EnumValidationValue(text="OptionC"))
-    col_enum_values[0].text = "OptionA-Updated"
-    # col.value = "OptionC"
+    col_enum_values[1].text = "OptionB-Updated"
 
     # Update parameter enum validation
-    param = next(x for x in dt.parameter_values if x.id == seeded_parameters[2].id)
+    param = next(
+        x
+        for x in dt.parameter_values
+        if (x.validation and x.validation[0].datatype.name == "ENUM")
+    )
     assert param.validation and param.validation[0].datatype.name == "ENUM"
     param_enum_values = param.validation[0].value
-    param_enum_values[0].text = "ParamOption1-Updated"
+    param_enum_values[1].text = "ParamOption2-Updated"
     param.value = param_enum_values[0].text
     assert isinstance(param_enum_values, list)
     param_enum_values.append(EnumValidationValue(text="ParamOption3"))
+    param.value = "ParamOption3"
 
     updated_dt = client.data_templates.update(data_template=dt)
     assert updated_dt is not None
@@ -299,11 +313,10 @@ def test_update_enum_validations_on_data_column_and_parameter(
     )
     updated_col_enum_texts = [x.text for x in updated_col.validation[0].value]
     assert "OptionC" in updated_col_enum_texts
-    assert "OptionA-Updated" in updated_col_enum_texts
-    # assert updated_col.value == "OptionC"
+    assert "OptionB-Updated" in updated_col_enum_texts
     # Check parameter enum update
     updated_param = next(x for x in updated_dt.parameter_values if x.id == seeded_parameters[2].id)
     updated_param_enum_texts = [x.text for x in updated_param.validation[0].value]
     assert "ParamOption3" in updated_param_enum_texts
-    assert "ParamOption1-Updated" in updated_param_enum_texts
-    # assert updated_param.value == "ParamOption3"
+    assert "ParamOption2-Updated" in updated_param_enum_texts
+    assert updated_param.value == "ParamOption3"

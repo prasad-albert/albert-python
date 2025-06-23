@@ -674,7 +674,7 @@ def generate_data_template_seeds(
         ),
         # Data Template with ENUM validations on both a data column and a parameter
         DataTemplate(
-            name=f"{seed_prefix} - Enum Validation Data Template",
+            name=f"{seed_prefix} - Enum Validation Data Template With Parameter",
             description="A data template with ENUM validations on both a data column and a parameter.",
             data_column_values=[
                 DataColumnValue(
@@ -705,7 +705,21 @@ def generate_data_template_seeds(
                             ],
                         )
                     ],
-                )
+                ),
+                ParameterValue(
+                    id=seeded_parameters[3].id,
+                    name="Enum Parameter two",
+                    value="ParamOption1-1",
+                    validation=[
+                        ValueValidation(
+                            datatype=DataType.ENUM,
+                            value=[
+                                EnumValidationValue(text="ParamOption1-1"),
+                                EnumValidationValue(text="ParamOption1-2"),
+                            ],
+                        )
+                    ],
+                ),
             ],
             tags=[seeded_tags[1]],
         ),

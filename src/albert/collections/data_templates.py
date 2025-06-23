@@ -217,7 +217,7 @@ class DataTemplateCollection(BaseCollection):
         return None
 
     def add_data_columns(
-        self, *, data_template_id: str, data_columns: list[DataColumnValue]
+        self, *, data_template_id: DataTemplateId, data_columns: list[DataColumnValue]
     ) -> DataTemplate:
         """Adds data columns to a data template.
 
@@ -260,7 +260,7 @@ class DataTemplateCollection(BaseCollection):
         return self.get_by_id(id=data_template_id)
 
     def add_parameters(
-        self, *, data_template_id: str, parameters: list[ParameterValue]
+        self, *, data_template_id: DataTemplateId, parameters: list[ParameterValue]
     ) -> DataTemplate:
         """Adds parameters to a data template.
 
@@ -305,7 +305,6 @@ class DataTemplateCollection(BaseCollection):
             if i in initial_enum_values:
                 param.validation[0].value = initial_enum_values[i]
                 param.validation[0].datatype = DataType.ENUM
-
         self._add_param_enums(
             data_template_id=data_template_id,
             new_parameters=returned_parameters,
@@ -453,7 +452,7 @@ class DataTemplateCollection(BaseCollection):
             )
         return self.get_by_id(id=data_template.id)
 
-    def delete(self, *, id: str) -> None:
+    def delete(self, *, id: DataTemplateId) -> None:
         """Deletes a data template by its ID.
 
         Parameters

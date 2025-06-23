@@ -7,6 +7,7 @@ from albert.resources.parameter_groups import (
     ParameterGroup,
     ParameterValue,
 )
+from albert.resources.tags import Tag
 from albert.utils.patch_types import (
     DTPatchDatum,
     GeneralPatchDatum,
@@ -17,7 +18,7 @@ from albert.utils.patch_types import (
 )
 
 
-def _normalize_validation(validation):
+def _normalize_validation(validation: list[EnumValidationValue]) -> list[EnumValidationValue]:
     """Normalize validation objects for comparison. Ignore original_text for enum values."""
     normalized = []
     for v in validation:
@@ -325,7 +326,9 @@ def generate_data_column_patches(
     return patches, new_data_columns, enum_patches
 
 
-def generate_enum_patches(existing_enums, updated_enums) -> list[dict]:
+def generate_enum_patches(
+    existing_enums: list[EnumValidationValue], updated_enums: list[EnumValidationValue]
+) -> list[dict]:
     """Generate enum patches for a data column or parameter validation."""
     enum_patches = []
     existing_enum = [x for x in existing_enums if isinstance(x, EnumValidationValue)]
@@ -403,7 +406,9 @@ def generate_parameter_patches(
     return parameter_patches, new_parameters, enum_patches
 
 
-def handle_tags(existing_tags, updated_tags, attribute_name: str = "tag") -> list[PatchDatum]:
+def handle_tags(
+    existing_tags: list[Tag], updated_tags: list[Tag], attribute_name: str = "tag"
+) -> list[PatchDatum]:
     """Handle tags updates."""
     patches = []
 
