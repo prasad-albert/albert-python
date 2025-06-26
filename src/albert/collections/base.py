@@ -49,14 +49,17 @@ class BaseCollection:
                         )
                     )
                 elif isinstance(value, list):
-                    for v in value:
-                        data.append(
-                            PatchDatum(
-                                attribute=attribute,
-                                operation=PatchOperation.DELETE,
-                                old_value=v.id,
-                            )
+                    all_ids = [x.id for x in value]
+                    if len(all_ids) == 0:
+                        continue
+
+                    data.append(
+                        PatchDatum(
+                            attribute=attribute,
+                            operation=PatchOperation.DELETE,
+                            old_value=all_ids,
                         )
+                    )
                 else:
                     data.append(
                         PatchDatum(
@@ -81,20 +84,20 @@ class BaseCollection:
                     to_add = updated_id - existing_id
                     to_remove = existing_id - updated_id
 
-                    for v in to_add:
+                    if len(to_add) > 0:
                         data.append(
                             PatchDatum(
                                 attribute=attribute,
                                 operation=PatchOperation.ADD,
-                                new_value=v,
+                                new_value=to_add,
                             )
                         )
-                    for v in to_remove:
+                    if len(to_remove) > 0:
                         data.append(
                             PatchDatum(
                                 attribute=attribute,
                                 operation=PatchOperation.DELETE,
-                                old_value=v,
+                                old_value=to_remove,
                             )
                         )
                 else:
@@ -118,14 +121,16 @@ class BaseCollection:
                         )
                     )
                 elif isinstance(value, list):
-                    for v in value:
-                        data.append(
-                            PatchDatum(
-                                attribute=attribute,
-                                operation=PatchOperation.ADD,
-                                new_value=v.id,
-                            )
+                    all_ids = [x.id for x in value]
+                    if len(all_ids) == 0:
+                        continue
+                    data.append(
+                        PatchDatum(
+                            attribute=attribute,
+                            operation=PatchOperation.ADD,
+                            new_value=all_ids,
                         )
+                    )
                 else:
                     data.append(
                         PatchDatum(
