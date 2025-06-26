@@ -57,7 +57,7 @@ class BaseCollection:
                         PatchDatum(
                             attribute=attribute,
                             operation=PatchOperation.DELETE,
-                            old_value=all_ids,
+                            old_value=all_ids[0] if len(all_ids) == 1 else all_ids,
                         )
                     )
                 else:
@@ -81,25 +81,70 @@ class BaseCollection:
                 elif isinstance(updated_metadata[key], list):
                     existing_id = {v.id for v in value} if isinstance(value, list) else {value.id}
                     updated_id = {v.id for v in updated_metadata[key]}
-                    to_add = updated_id - existing_id
-                    to_remove = existing_id - updated_id
+                    to_add = list(updated_id - existing_id)
+                    to_remove = list(existing_id - updated_id)
+                    if len(to_add + to_remove) == 0:  # if there are no changes, skip
+                        continue
+                    if len(to_add) > 0 and len(to_remove) > 0:
+                        data.append(
+                            PatchDatum(
+                                attribute=attribute,
+                                operation=PatchOperation.UPDATE,
+                                old_value=existing_id,
+                                new_value=updated_id,
+                            )
+                        )
+                    elif len(to_add) > 0:
+                        data.extend(
+                            [
+                                PatchDatum(
+                                    attribute=attribute, operation=PatchOperation.ADD, new_value=a
+                                )
+                                for a in to_add
+                            ]
+                        )
+                        # data.append(
+                        #     PatchDatum(
+                        #         attribute=attribute,
+                        #         operation=PatchOperation.ADD,
+                        #         new_value=to_add[0] if len(to_add) == 1 else to_add,
+                        #     )
+                        # )
+                    elif len(to_remove) > 0:
+                        # data.append(
+                        #     PatchDatum(
+                        #         attribute=attribute,
+                        #         operation=PatchOperation.DELETE,
+                        #         old_value=to_remove[0] if len(to_remove) == 1 else to_remove,
+                        #     )
+                        # )
+                        data.extend(
+                            [
+                                PatchDatum(
+                                    attribute=attribute,
+                                    operation=PatchOperation.DELETE,
+                                    old_value=r,
+                                )
+                                for r in to_remove
+                            ]
+                        )
 
-                    if len(to_add) > 0:
-                        data.append(
-                            PatchDatum(
-                                attribute=attribute,
-                                operation=PatchOperation.ADD,
-                                new_value=to_add,
-                            )
-                        )
-                    if len(to_remove) > 0:
-                        data.append(
-                            PatchDatum(
-                                attribute=attribute,
-                                operation=PatchOperation.DELETE,
-                                old_value=to_remove,
-                            )
-                        )
+                    # if len(to_add) > 0:
+                    #     data.append(
+                    #         PatchDatum(
+                    #             attribute=attribute,
+                    #             operation=PatchOperation.ADD,
+                    #             new_value=to_add[0] if len(to_add) == 1 else to_add,
+                    #         )
+                    #     )
+                    # if len(to_remove) > 0:
+                    #     data.append(
+                    #         PatchDatum(
+                    #             attribute=attribute,
+                    #             operation=PatchOperation.DELETE,
+                    #             old_value=to_remove[0] if len(to_remove) == 1 else to_remove,
+                    #         )
+                    #     )
                 else:
                     data.append(
                         PatchDatum(
@@ -128,7 +173,7 @@ class BaseCollection:
                         PatchDatum(
                             attribute=attribute,
                             operation=PatchOperation.ADD,
-                            new_value=all_ids,
+                            new_value=all_ids[0] if len(all_ids) == 1 else all_ids,
                         )
                     )
                 else:

@@ -180,7 +180,12 @@ class DataTemplateCollection(BaseCollection):
             The data template object on match or None
         """
         response = self.session.get(f"{self.base_path}/{id}")
-        return DataTemplate(**response.json())
+        try:
+            return DataTemplate(**response.json())
+        except Exception as e:
+            logger.warning(response.json())
+            logger.error(f"Error fetching data template {id}: {e}")
+            raise e
 
     def get_by_ids(self, *, ids: list[DataTemplateId]) -> list[DataTemplate]:
         """Get a list of data templates by their IDs.
