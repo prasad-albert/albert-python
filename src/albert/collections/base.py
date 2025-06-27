@@ -103,21 +103,8 @@ class BaseCollection:
                                 for a in to_add
                             ]
                         )
-                        # data.append(
-                        #     PatchDatum(
-                        #         attribute=attribute,
-                        #         operation=PatchOperation.ADD,
-                        #         new_value=to_add[0] if len(to_add) == 1 else to_add,
-                        #     )
-                        # )
+
                     elif len(to_remove) > 0:
-                        # data.append(
-                        #     PatchDatum(
-                        #         attribute=attribute,
-                        #         operation=PatchOperation.DELETE,
-                        #         old_value=to_remove[0] if len(to_remove) == 1 else to_remove,
-                        #     )
-                        # )
                         data.extend(
                             [
                                 PatchDatum(
@@ -129,22 +116,6 @@ class BaseCollection:
                             ]
                         )
 
-                    # if len(to_add) > 0:
-                    #     data.append(
-                    #         PatchDatum(
-                    #             attribute=attribute,
-                    #             operation=PatchOperation.ADD,
-                    #             new_value=to_add[0] if len(to_add) == 1 else to_add,
-                    #         )
-                    #     )
-                    # if len(to_remove) > 0:
-                    #     data.append(
-                    #         PatchDatum(
-                    #             attribute=attribute,
-                    #             operation=PatchOperation.DELETE,
-                    #             old_value=to_remove[0] if len(to_remove) == 1 else to_remove,
-                    #         )
-                    #     )
                 else:
                     data.append(
                         PatchDatum(
