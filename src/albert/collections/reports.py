@@ -79,8 +79,6 @@ class ReportCollection(BaseCollection):
             Additional input data for generating the report
             (e.g., project IDs and unique IDs).
 
-
-
         Returns
         -------
         ReportInfo
