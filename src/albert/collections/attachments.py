@@ -24,6 +24,35 @@ class AttachmentCollection(BaseCollection):
     def _get_note_collection(self):
         return NotesCollection(session=self.session)
 
+    def get_by_parent_ids(self, *, parent_ids: list[str]) -> dict[str, list[Attachment]]:
+        """Retrieves attachments by their parent IDs.
+
+        Note: This method returns a dictionary where the keys are parent IDs
+        and the values are lists of Attachment objects associated with each parent ID.
+        If the parent ID has no attachments, it will not be included in the dictionary.
+
+        If no attachments are found for any of the provided parent IDs,
+        the API response will be an error.
+
+        Parameters
+        ----------
+        parent_ids : list[str]
+            Parent IDs of the objects to which the attachments are linked.
+
+        Returns
+        -------
+        dict[str, list[Attachment]]
+            A dictionary mapping parent IDs to lists of Attachment objects associated with each parent ID.
+        """
+        response = self.session.get(url=f"{self.base_path}/parents", params={"id": parent_ids})
+        response_data = response.json()
+        return {
+            parent["parentId"]: [
+                Attachment(**item, parent_id=parent["parentId"]) for item in parent["Items"]
+            ]
+            for parent in response_data
+        }
+
     def attach_file_to_note(
         self,
         *,
