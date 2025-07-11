@@ -24,6 +24,22 @@ class AttachmentCollection(BaseCollection):
     def _get_note_collection(self):
         return NotesCollection(session=self.session)
 
+    def get_by_id(self, *, id: str) -> Attachment:
+        """Retrieves an attachment by its ID.
+
+        Parameters
+        ----------
+        id : str
+            The ID of the attachment to retrieve.
+
+        Returns
+        -------
+        Attachment
+            The Attachment object corresponding to the provided ID.
+        """
+        response = self.session.get(url=f"{self.base_path}/{id}")
+        return Attachment(**response.json())
+
     def get_by_parent_ids(self, *, parent_ids: list[str]) -> dict[str, list[Attachment]]:
         """Retrieves attachments by their parent IDs.
 
