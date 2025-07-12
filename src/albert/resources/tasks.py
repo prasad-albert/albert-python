@@ -92,6 +92,9 @@ class Standard(BaseAlbertModel):
     standard_organization: str | None = Field(
         alias="standardOrganization", default=None, frozen=True
     )
+    standard_organization_id: int | None = Field(
+        alias="standardOrganizationId", default=None, frozen=True
+    )
 
 
 class BlockDataTemplateInfo(BaseAlbertModel):
