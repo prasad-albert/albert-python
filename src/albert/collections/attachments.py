@@ -1,11 +1,14 @@
 import mimetypes
 from typing import IO
 
+from pydantic import validate_call
+
 from albert.collections.base import BaseCollection
 from albert.collections.files import FileCollection
 from albert.collections.notes import NotesCollection
 from albert.resources.attachments import Attachment
 from albert.resources.files import FileCategory, FileNamespace
+from albert.resources.identifiers import AttachmentId
 from albert.resources.notes import Note
 
 
@@ -24,12 +27,13 @@ class AttachmentCollection(BaseCollection):
     def _get_note_collection(self):
         return NotesCollection(session=self.session)
 
-    def get_by_id(self, *, id: str) -> Attachment:
+    @validate_call
+    def get_by_id(self, *, id: AttachmentId) -> Attachment:
         """Retrieves an attachment by its ID.
 
         Parameters
         ----------
-        id : str
+        id : AttachmentId
             The ID of the attachment to retrieve.
 
         Returns

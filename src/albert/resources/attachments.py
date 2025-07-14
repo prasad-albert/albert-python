@@ -3,6 +3,7 @@ from enum import Enum
 from pydantic import Field
 
 from albert.resources.base import BaseResource, MetadataItem
+from albert.resources.identifiers import AttachmentId
 
 
 class AttachmentCategory(str, Enum):
@@ -16,7 +17,7 @@ class Attachment(BaseResource):
     """Used for attching files to Notes on Tasks, Projects, Inventory, etc.
     Key should match File.name"""
 
-    id: str | None = Field(default=None, alias="albertId")
+    id: AttachmentId | None = Field(default=None, alias="albertId")
     parent_id: str = Field(..., alias="parentId")
     name: str
     key: str
