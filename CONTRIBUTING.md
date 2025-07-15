@@ -81,8 +81,8 @@ type(scope)!: summary
 ### Examples
 
 ```text
-feat(auth): support token refresh  
-fix!: remove deprecated param handling  
+feat(auth): support token refresh
+fix!: remove deprecated param handling
 docs: clarify local dev setup
 ```
 
