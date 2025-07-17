@@ -25,7 +25,7 @@ class ActivityCollection(BaseCollection):
         super().__init__(session=session)
         self.base_path = f"/api/{ActivityCollection._api_version}/activities"
 
-    def list(
+    def get_all(
         self,
         *,
         type: ActivityType,
