@@ -74,7 +74,7 @@ class ActivityCollection(BaseCollection):
             "startDate": start_date,
             "endDate": end_date,
             "action": action,
-            "orderBy": order_by.value,
+            "orderBy": order_by,
             "operationId": operation_id,
         }
         return AlbertPaginator(
