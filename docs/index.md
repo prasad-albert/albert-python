@@ -5,17 +5,15 @@
   <img src="assets/Wordmark_Black.png" class="logo only-light" alt="Albert Logo">
 </div>
 
+[![CI](https://img.shields.io/github/actions/workflow/status/pydantic/pydantic/ci.yml?branch=main&logo=circle&label=CI)](https://github.com/pydantic/pydantic/actions?query=event%3Apush+branch%3Amain+workflow%3ACI)
+[![pypi](https://img.shields.io/pypi/v/albert.svg)](https://pypi.python.org/pypi/albert)
+[![downloads](https://img.shields.io/pypi/dm/albert.svg)](https://pypi.org/project/albert/)<br>
+[![license](https://img.shields.io/github/license/albert-labs/albert-python.svg)](https://github.com/albert-labs/albert-python/blob/main/LICENSE)
 
-
-## Installation
-
-You can install Albert Python using pip:
-
-```bash
-pip install albert
-```
-
-The latest stable release is available on [PyPI](https://pypi.org/project/albert/).
+Albert Python is the official Albert Invent Software Development Kit (SDK) for Python
+that provides a comprehensive and easy-to-use interface for interacting with the Albert Platform.
+The SDK allows Python developers to write software that interacts with various platform resources,
+such as inventories, projects, companies, tags, and many more.
 
 ## Overview
 
@@ -33,123 +31,6 @@ Resource Models represent the data structure of individual resources. They encap
 
 Resource Collections act as managers for Resource Models. They provide methods for performing CRUD operations (Create, Read, Update, Delete) on the resources. For example, the `InventoryCollection` class has methods like `create()`, `get_by_id()`, `get_all()`, `search()`, `update()`, and `delete()`. `search()` returns lightweight records for performance, while `get_all()` hydrates each item.
 
-## Usage
-
-### Authentication
-
-Albert Python SDK supports three authentication methods:
-
-* **Single Sign-On (SSO)** via browser-based OAuth2
-* **Client Credentials** using a client ID and secret
-* **Static Token** using a pre-generated token (via the `ALBERT_TOKEN` environment variable)
-
-Static token-based authentication is suitable for temporary or testing purposes and does not support token refresh.
-
-These modes are supported via the `auth_manager` or `token` argument to the `Albert` client.
-
----
-
-#### 🔐 SSO (Browser-Based Login)
-
-This is the recommended method for users authenticating interactively. It opens a browser window to authenticate using your email address and automatically manages tokens. The SSO client uses a local redirect server to complete the flow.
-
-```python
-from albert import Albert, AlbertSSOClient
-
-sso = AlbertSSOClient(
-    base_url="https://app.albertinvent.com",
-    email="your-name@albertinvent.com",
-)
-
-# IMPORTANT: You must call authenticate() to complete the login flow
-sso.authenticate()
-
-client = Albert(base_url="https://app.albertinvent.com", auth_manager=sso)
-```
-
-Alternatively, you can use the helper constructor:
-
-```python
-client = Albert.from_sso(
-    base_url="https://app.albertinvent.com",
-    email="your-name@albertinvent.com"
-)
-```
-
-!!! note
-    You **must** call `sso.authenticate()` before using the client. This method launches a local HTTP server and opens the default browser for login.
-
----
-
-#### 🔑 Client Credentials (Programmatic Access)
-
-This method implements the OAuth2 Client Credentials flow and is suitable for non-interactive usage, like backend services or automation scripts. It manages token acquisition and refresh automatically via the `AlbertClientCredentials` class.
-
-This method is ideal for server-to-server or CI/CD scenarios. You can authenticate using a client ID and secret, and the SDK will manage token fetching and refresh automatically.
-
-You can use the helper constructor:
-
-```python
-from albert import Albert, AlbertClientCredentials
-
-client = Albert.from_client_credentials(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    base_url="https://app.albertinvent.com"
-)
-```
-
-Or load credentials from environment,
-
-```python
-creds = AlbertClientCredentials.from_env()
-client = Albert(auth_manager=creds)
-```
-
-Or explicitly:
-
-```python
-from pydantic import SecretStr
-
-creds = AlbertClientCredentials(
-    id="your-client-id",
-    secret=SecretStr("your-client-secret"),
-    base_url="https://app.albertinvent.com",
-)
-client = Albert(auth_manager=creds)
-```
-
-Environment variables:
-
-* `ALBERT_CLIENT_ID`
-* `ALBERT_CLIENT_SECRET`
-* `ALBERT_BASE_URL` (optional; defaults to `https://app.albertinvent.com`
-
----
-
-#### 🧪 Token-Based Auth (For Testing Only)
-
-You can still use a static token (e.g., copied from browser dev tools or passed via env) for one-off access:
-
-```python
-# Static token (direct)
-client = Albert(
-    base_url="https://app.albertinvent.com",
-    token="your.jwt.token"
-)
-
-# Or using the helper
-client = Albert.from_token(
-    base_url="https://app.albertinvent.com",
-    token="your.jwt.token"
-)
-```
-
-!!! warning
-    This method does not support auto-refresh and should be avoided for production use.
-
----
-
 ## Working with Resource Collections and Models
 
 ### Example: Inventory Collection
@@ -160,7 +41,7 @@ You can interact with inventory items using the `InventoryCollection` class. Her
 from albert import Albert
 from albert.resources.inventory import InventoryItem, InventoryCategory, UnitCategory
 
-client = Albert(
+client = Albert.from_token(
     base_url="https://app.albertinvent.com",
     token="your.jwt.token"
 )
@@ -200,7 +81,10 @@ from albert import Albert
 from albert.resources.project import Project
 from albert.resources.base import EntityLink
 
-client = Albert()
+client = Albert.from_token(
+    base_url="https://app.albertinvent.com",
+    token="your.jwt.token"
+)
 
 my_location = next(client.locations.get_all(name="My Location")
 

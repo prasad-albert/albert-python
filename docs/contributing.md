@@ -73,7 +73,7 @@ We use the [Conventional Commits](https://www.conventionalcommits.org/) format:
 type(scope)!: summary
 ```
 
-* `type`: one of `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`
+* `type`: one of `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `build`, `ci`, `perf`, `revert`
 * `scope`: optional, a module or feature name (e.g., `auth`, `session`)
 * `!`: optional, indicates a **breaking change**
 * `summary`: short and clear — think “when applied, the SDK will…”
