@@ -43,7 +43,7 @@ class ActivityCollection(BaseCollection):
         Parameters
         ----------
         type : ActivityType
-            _description_
+           The type of Id for which activities will be fetched.
         limit : int | None, optional
             The maximum number of activities to return, by default 50.
         start_key : str | None, optional
