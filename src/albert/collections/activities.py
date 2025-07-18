@@ -8,7 +8,7 @@ from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class ActivityCollection(BaseCollection):
-    """ActivityCollection is a collection class for managing Notebook entities in the Albert platform."""
+    """ActivityCollection is a collection class for managing viewing activities across Albert platform."""
 
     _api_version = "v3"
     _updatable_attributes = {"name"}
