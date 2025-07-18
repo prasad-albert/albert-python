@@ -45,7 +45,7 @@ class ActivityCollection(BaseCollection):
         type : ActivityType
             _description_
         limit : int | None, optional
-            The maximum number of CAS entities to return, by default 50.
+            The maximum number of activities to return, by default 50.
         start_key : str | None, optional
             The primary key of the first item that this operation will evaluate.
         id : str | None, optional
