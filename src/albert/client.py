@@ -147,7 +147,6 @@ class Albert:
     def projects(self) -> ProjectCollection:
         return ProjectCollection(session=self.session)
 
-    @property
     def activities(self) -> ActivityCollection:
         return ActivityCollection(session=self.session)
 
