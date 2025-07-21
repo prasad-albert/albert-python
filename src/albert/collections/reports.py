@@ -1,8 +1,11 @@
 from typing import Any
 
+import pandas as pd
+
 from albert.collections.base import BaseCollection
 from albert.core.session import AlbertSession
-from albert.resources.reports import ReportInfo
+from albert.core.shared.identifiers import ReportId
+from albert.resources.reports import FullAnalyticalReport, ReportInfo
 
 
 class ReportCollection(BaseCollection):
@@ -135,3 +138,81 @@ class ReportCollection(BaseCollection):
             report_type_id=report_type_id,
             input_data=input_data,
         )
+
+    def get_analytics_report_table(self, *, report_id: ReportId) -> pd.DataFrame:
+        """
+        Get the JSON response from Albert.
+        """
+        url = f"https://sandbox.albertinvent.com/api/v3/reports/{report_id}?viewReport=1"
+        response = self.session.get(url)
+        return pd.DataFrame(response.json()["report"])
+
+    def get_full_report(self, *, report_id: ReportId) -> FullAnalyticalReport:
+        """Get a full analytical report by its ID.
+
+        Parameters
+        ----------
+        report_id : ReportId
+            The ID of the report to retrieve.
+
+        Returns
+        -------
+        FullAnalyticalReport
+            The full analytical report with all configuration and data.
+
+        Examples
+        --------
+        >>> report = client.reports.get_full_report(report_id="REP14")
+        """
+        path = f"{self.base_path}/{report_id}"
+        params = {"viewReport": "1"}
+
+        response = self.session.get(path, params=params)
+        return FullAnalyticalReport(**response.json())
+
+    def create_report(self, *, report: FullAnalyticalReport) -> FullAnalyticalReport:
+        """Create a new analytical report.
+
+        Parameters
+        ----------
+        report : FullAnalyticalReport
+            The report configuration to create.
+
+        Returns
+        -------
+        FullAnalyticalReport
+            The created report with the generated report_data_id.
+
+        Examples
+        --------
+        >>> new_report = FullAnalyticalReport(
+        ...     report_type_id="RET22",
+        ...     name="My New Report",
+        ...     description="A test report"
+        ... )
+        >>> created_report = client.reports.create_report(report=new_report)
+        """
+        path = self.base_path
+
+        # Prepare the data for creation (exclude read-only fields)
+        report_data = report.model_dump(
+            exclude={"report_data_id", "created_by"}, exclude_none=True
+        )
+
+        response = self.session.post(path, json=report_data)
+        return FullAnalyticalReport(**response.json())
+
+    def delete_report(self, *, report_id: ReportId) -> None:
+        """Delete an analytical report.
+
+        Parameters
+        ----------
+        report_id : ReportId
+            The ID of the report to delete.
+
+        Examples
+        --------
+        >>> client.reports.delete_report(report_id="REP14")
+        """
+        path = f"{self.base_path}/{report_id}"
+        self.session.delete(path)
