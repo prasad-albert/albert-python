@@ -1,17 +1,17 @@
 from collections.abc import Iterator
 from datetime import date
 
-from albert.collections.base import BaseCollection, OrderBy
+from albert.collections.base import BaseCollection
+from albert.core.pagination import AlbertPaginator
+from albert.core.session import AlbertSession
+from albert.core.shared.enums import OrderBy, PaginationMode
 from albert.resources.activities import Activity, ActivityAction, ActivityOperationId, ActivityType
-from albert.session import AlbertSession
-from albert.utils.pagination import AlbertPaginator, PaginationMode
 
 
 class ActivityCollection(BaseCollection):
     """ActivityCollection is a collection class for managing viewing activities across Albert platform."""
 
     _api_version = "v3"
-    _updatable_attributes = {"name"}
 
     def __init__(self, *, session: AlbertSession):
         """
