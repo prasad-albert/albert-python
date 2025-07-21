@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from albert.albert import Albert
+from albert import Albert
 from albert.resources.activities import Activity, ActivityType
 
 
