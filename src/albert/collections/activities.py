@@ -29,14 +29,15 @@ class ActivityCollection(BaseCollection):
         self,
         *,
         type: ActivityType,
-        limit: int = 50,
-        start_key: str | None = None,
         id: str | None = None,
         start_date: date | None = None,
         end_date: date | None = None,
         operation_id: ActivityOperationId | None = None,
         action: ActivityAction | None = ActivityAction.WRITE,
         order_by: OrderBy | None = OrderBy.DESCENDING,
+        start_key: str | None = None,
+        page_size: int = 50,
+        max_items: int | None = None,
     ) -> Iterator[Activity]:
         """Lists Activity entities with optional filters
 
