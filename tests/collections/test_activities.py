@@ -18,6 +18,6 @@ def test_activity_get_all(client: Albert):
         type=ActivityType.DATE_RANGE,
         start_date=start_date,
         end_date=end_date,
-        limit=None,
+        max_items=10,
     )
     _get_all_asserts(simple_list)
