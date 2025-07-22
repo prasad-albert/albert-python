@@ -84,9 +84,9 @@ class AlbertClientCredentials(BaseAlbertModel, AuthManager):
             The credentials instance if all environment variables are present;
             otherwise, None.
         """
+        base_url = os.getenv(base_url_env)
         client_id = os.getenv(client_id_env)
         client_secret = os.getenv(client_secret_env)
-        base_url = default_albert_base_url()
 
         if client_id and client_secret and base_url:
             return cls(

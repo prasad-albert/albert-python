@@ -4,6 +4,7 @@ import os
 
 from pydantic import SecretStr
 
+from albert.collections.activities import ActivityCollection
 from albert.collections.attachments import AttachmentCollection
 from albert.collections.batch_data import BatchDataCollection
 from albert.collections.btdataset import BTDatasetCollection
@@ -145,6 +146,10 @@ class Albert:
     @property
     def projects(self) -> ProjectCollection:
         return ProjectCollection(session=self.session)
+
+    @property
+    def activities(self) -> ActivityCollection:
+        return ActivityCollection(session=self.session)
 
     @property
     def attachments(self) -> AttachmentCollection:
