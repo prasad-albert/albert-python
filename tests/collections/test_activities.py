@@ -4,15 +4,11 @@ from albert import Albert
 from albert.resources.activities import Activity, ActivityType
 
 
-def _get_all_asserts(returned_list):
-    found = False
-    for i, a in enumerate(returned_list):
-        if i == 30:
-            break
+def assert_valid_activity_items(returned_list):
+    assert returned_list, "Expected at least one activities result"
+    for a in returned_list:
         assert isinstance(a, Activity)
         assert isinstance(a.id, str)
-        found = True
-    assert found
 
 
 def test_activity_get_all(client: Albert):
