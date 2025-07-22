@@ -30,6 +30,7 @@ from albert.collections.pricings import PricingCollection
 from albert.collections.product_design import ProductDesignCollection
 from albert.collections.projects import ProjectCollection
 from albert.collections.property_data import PropertyDataCollection
+from albert.collections.report_templates import ReportTemplateCollection
 from albert.collections.reports import ReportCollection
 from albert.collections.roles import RoleCollection
 from albert.collections.storage_locations import StorageLocationsCollection
@@ -218,6 +219,10 @@ class Albert:
     @property
     def reports(self) -> ReportCollection:
         return ReportCollection(session=self.session)
+
+    @property
+    def report_templates(self) -> ReportTemplateCollection:
+        return ReportTemplateCollection(session=self.session)
 
     @property
     def roles(self) -> RoleCollection:

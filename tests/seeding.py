@@ -62,6 +62,7 @@ from albert.resources.projects import (
     Project,
     ProjectClass,
 )
+from albert.resources.reports import FullAnalyticalReport
 from albert.resources.storage_locations import StorageLocation
 from albert.resources.tags import Tag
 from albert.resources.tasks import (
@@ -1495,3 +1496,35 @@ def generate_btinsight_seed(
         category=BTInsightCategory.CUSTOM_OPTIMIZER,
         metadata={},
     )
+
+
+def generate_report_seeds(
+    seed_prefix: str, seeded_projects: list[Project]
+) -> list[FullAnalyticalReport]:
+    """
+    Generates a list of FullAnalyticalReport seed objects for testing.
+
+    Parameters
+    ----------
+    seed_prefix : str
+        Prefix to use for generating unique names.
+    seeded_projects : list[Project]
+        List of seeded Project objects to reference in reports.
+
+    Returns
+    -------
+    list[FullAnalyticalReport]
+        A list of FullAnalyticalReport objects with different configurations.
+    """
+    project_ids = [project.id for project in seeded_projects]
+
+    return [
+        # Basic analytical report
+        FullAnalyticalReport(
+            report_type_id="ALB#RET42",
+            name=f"{seed_prefix} - Basic Analytical Report",
+            description=f"{seed_prefix} - A basic analytical report for testing",
+            input_data={"project": project_ids},
+            project_id=seeded_projects[0].id if seeded_projects else None,
+        ),
+    ]

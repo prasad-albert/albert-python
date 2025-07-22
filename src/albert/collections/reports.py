@@ -1,7 +1,5 @@
 from typing import Any
 
-import pandas as pd
-
 from albert.collections.base import BaseCollection
 from albert.core.session import AlbertSession
 from albert.core.shared.identifiers import ReportId
@@ -49,10 +47,9 @@ class ReportCollection(BaseCollection):
         --------
         >>> report = client.reports.get_report(
         ...     category="datascience",
-        ...     report_type_id="RET51",
+        ...     report_type_id="ALB#RET51",
         ...     input_data={
-        ...         "projectId": ["PRO123"],
-        ...         "uniqueId": ["DAT123_DAC123"]
+        ...         "project": ["PRO123"],
         ...     }
         ... )
         """
@@ -139,14 +136,6 @@ class ReportCollection(BaseCollection):
             input_data=input_data,
         )
 
-    def get_analytics_report_table(self, *, report_id: ReportId) -> pd.DataFrame:
-        """
-        Get the JSON response from Albert.
-        """
-        url = f"https://sandbox.albertinvent.com/api/v3/reports/{report_id}?viewReport=1"
-        response = self.session.get(url)
-        return pd.DataFrame(response.json()["report"])
-
     def get_full_report(self, *, report_id: ReportId) -> FullAnalyticalReport:
         """Get a full analytical report by its ID.
 
@@ -163,6 +152,7 @@ class ReportCollection(BaseCollection):
         Examples
         --------
         >>> report = client.reports.get_full_report(report_id="REP14")
+        >>> report_dataframe = report.get_raw_dataframe()
         """
         path = f"{self.base_path}/{report_id}"
         params = {"viewReport": "1"}
@@ -186,7 +176,7 @@ class ReportCollection(BaseCollection):
         Examples
         --------
         >>> new_report = FullAnalyticalReport(
-        ...     report_type_id="RET22",
+        ...     report_type_id="ALB#RET22",
         ...     name="My New Report",
         ...     description="A test report"
         ... )
@@ -196,23 +186,23 @@ class ReportCollection(BaseCollection):
 
         # Prepare the data for creation (exclude read-only fields)
         report_data = report.model_dump(
-            exclude={"report_data_id", "created_by"}, exclude_none=True
+            exclude={"report_data_id", "created_by", "report"}, exclude_none=True, by_alias=True
         )
 
         response = self.session.post(path, json=report_data)
         return FullAnalyticalReport(**response.json())
 
-    def delete_report(self, *, report_id: ReportId) -> None:
-        """Delete an analytical report.
+    def delete(self, *, id: ReportId) -> None:
+        """Delete a report.
 
         Parameters
         ----------
-        report_id : ReportId
+        id : ReportId
             The ID of the report to delete.
 
         Examples
         --------
-        >>> client.reports.delete_report(report_id="REP14")
+        >>> client.reports.delete(id="REP14")
         """
-        path = f"{self.base_path}/{report_id}"
+        path = f"{self.base_path}/{id}"
         self.session.delete(path)

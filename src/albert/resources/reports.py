@@ -1,22 +1,22 @@
 from typing import Any
 
 import pandas as pd
-from pydantic import Field
+from pydantic import AliasChoices, Field
 
 from albert.core.shared.identifiers import ProjectId, ReportId
-from albert.core.shared.models.base import BaseResource
+from albert.core.shared.models.base import BaseAlbertModel, BaseResource
 
 ReportItem = dict[str, Any] | list[dict[str, Any]] | None
 
 
-class ReportInfo(BaseResource):
+class ReportInfo(BaseAlbertModel):
     report_type_id: str = Field(..., alias="reportTypeId")
     report_type: str = Field(..., alias="reportType")
     category: str
     items: list[ReportItem] = Field(..., alias="Items")
 
 
-class ColumnState(BaseResource):
+class ColumnState(BaseAlbertModel):
     """Column State Object for reports."""
 
     col_id: str = Field(..., alias="colId")
@@ -27,47 +27,49 @@ class ColumnState(BaseResource):
     row_group: bool = Field(default=False, alias="rowGroup")
 
 
-class FilterModel(BaseResource):
+class FilterModel(BaseAlbertModel):
     """Filter Model Object for reports."""
 
     filter_type: str = Field(..., alias="filterType")
     values: list[Any] | None = Field(default=None)
 
 
-class FilterState(BaseResource):
+class FilterState(BaseAlbertModel):
     """Filters State Object for reports."""
 
     filter_models: list[FilterModel] = Field(default_factory=list, alias="filterModels")
 
 
-class MetadataState(BaseResource):
+class MetadataState(BaseAlbertModel):
     """Metadata State Object for reports."""
 
     grouped_rows: list[str] = Field(default_factory=list, alias="groupedRows")
 
 
-class ChartConfiguration(BaseResource):
+class ChartConfiguration(BaseAlbertModel):
     """Chart Configuration Object for reports."""
 
-    chart_type: str = Field(..., alias="chartType")
+    chart_type: str | None = Field(default=None, alias="chartType")
     # Add other chart configuration fields as needed
 
 
-class ChartTemplate(BaseResource):
+class ChartTemplate(BaseAlbertModel):
     """Chart Template Object for reports."""
 
     chart_type: str = Field(..., alias="chartType")
     # Add other chart template fields as needed
 
 
-class ChartModelState(BaseResource):
+class ChartModelState(BaseAlbertModel):
     """Chart State Object for reports."""
 
-    chart_template: ChartTemplate = Field(..., alias="chartTemplate")
-    chart_configuration: ChartConfiguration = Field(..., alias="chartConfiguration")
+    chart_template: ChartTemplate | None = Field(default=None, alias="chartTemplate")
+    chart_configuration: ChartConfiguration | None = Field(
+        default=None, alias="chartConfiguration"
+    )
 
 
-class ColumnMapping(BaseResource):
+class ColumnMapping(BaseAlbertModel):
     """Column Mapping Object for reports."""
 
     # Add column mapping fields as needed
@@ -121,7 +123,13 @@ class FullAnalyticalReport(BaseResource):
     """
 
     # Read-only fields
-    id: ReportId | None = Field(default=None, alias="id", exclude=True, frozen=True)
+    id: ReportId | None = Field(
+        default=None,
+        alias=AliasChoices("id", "albertId"),
+        serialization_alias="id",
+        exclude=True,
+        frozen=True,
+    )
 
     # Required fields
     report_type_id: str = Field(..., alias="reportTypeId")
@@ -146,90 +154,7 @@ class FullAnalyticalReport(BaseResource):
     source_report_id: ReportId | None = Field(default=None, alias="sourceReportId")
     created_by: str | None = Field(default=None, alias="createdBy")
 
-    # Additional fields from the working code
-    report: list[dict[str, Any]] | None = Field(default=None, exclude=True, frozen=True)
-
-    # def _get_processed_data(self) -> dict[str, Any]:
-    #     """
-    #     Get the processed report information including raw data, operations, and metadata.
-
-    #     Returns
-    #     -------
-    #     dict[str, Any]
-    #         A dictionary containing the processed report information.
-    #     """
-    #     if not self.report:
-    #         raise ValueError("Report data is not available")
-
-    #     # This would implement the logic from the working code
-    #     # For now, return a basic structure
-    #     return {
-    #         "raw_data": self.report,
-    #         "column_states": {col.col_id: col for col in (self.column_state or [])},
-    #         "filter_settings": self.filter_state,
-    #         "metadata": self.meta_data_state,
-    #         "chart_type": self.chart_model_state[0].chart_template.chart_type
-    #         if self.chart_model_state
-    #         else None,
-    #         "chart_config": self.chart_model_state[0].chart_configuration
-    #         if self.chart_model_state
-    #         else None,
-    #     }
-
-    # def get_operations(self) -> dict[str, Any]:
-    #     """
-    #     Extract operations (grouping, aggregation, pivoting) from column states.
-
-    #     Returns
-    #     -------
-    #     dict[str, Any]
-    #         A dictionary containing grouping, aggregation, and pivoting operations.
-    #     """
-    #     if not self.column_state:
-    #         return {"grouping": [], "aggregation": {}, "pivoting": []}
-
-    #     # Aggregation function mapping (from the working code)
-    #     agg_mapping = {"sum": "sum", "count": "count", "avg": "mean", "min": "min", "max": "max"}
-
-    #     operations = {
-    #         "grouping": [],
-    #         "grouping_order": [],
-    #         "aggregation": {},
-    #         "pivoting": [],
-    #         "pivoting_order": [],
-    #     }
-
-    #     for column_state in self.column_state:
-    #         if column_state.row_group:
-    #             operations["grouping"].append(column_state.col_id)
-    #             operations["grouping_order"].append(column_state.row_group_index or 0)
-    #         if column_state.agg_func:
-    #             operations["aggregation"][column_state.col_id] = agg_mapping.get(
-    #                 column_state.agg_func, column_state.agg_func
-    #             )
-    #         if column_state.pivot:
-    #             operations["pivoting"].append(column_state.col_id)
-    #             operations["pivoting_order"].append(column_state.pivot_index or 0)
-
-    #     # Sort by order
-    #     operations["grouping"] = [
-    #         x
-    #         for _, x in sorted(
-    #             zip(operations["grouping_order"], operations["grouping"], strict=False)
-    #         )
-    #     ]
-    #     operations["pivoting"] = [
-    #         x
-    #         for _, x in sorted(
-    #             zip(operations["pivoting_order"], operations["pivoting"], strict=False)
-    #         )
-    #     ]
-
-    #     # Remove order information
-    #     del operations["grouping_order"]
-    #     del operations["pivoting_order"]
-
-    #     return operations
+    report: list[dict[str, Any]] | None = Field(default=None, frozen=True)
 
     def get_raw_dataframe(self) -> pd.DataFrame:
         """
@@ -243,34 +168,3 @@ class FullAnalyticalReport(BaseResource):
         if not self.report:
             raise ValueError("Report data is not available")
         return pd.DataFrame(self.report)
-
-    def get_filtered_dataframe(self) -> pd.DataFrame:
-        """
-        Get the filtered report data as a pandas DataFrame.
-
-        Returns
-        -------
-        pd.DataFrame
-            The filtered report data.
-        """
-        if not self.report:
-            raise ValueError("Report data is not available")
-
-        df = pd.DataFrame(self.report)
-
-        if not self.filter_state:
-            return df
-
-        # Apply filters (simplified version from the working code)
-        for column_name, filter_state in self.filter_state.items():
-            if column_name not in df.columns:
-                continue
-
-            for filter_model in filter_state.filter_models:
-                if not filter_model or filter_model.filter_type != "set":
-                    continue
-
-                if filter_model.values:
-                    df = df[df[column_name].isin(filter_model.values)]
-
-        return df
