@@ -20,4 +20,4 @@ def test_activity_get_all(client: Albert):
         end_date=end_date,
         max_items=10,
     )
-    _get_all_asserts(simple_list)
+    assert_valid_activity_items(simple_list)
