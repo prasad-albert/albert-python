@@ -129,6 +129,7 @@ nav:
           - Albert Client Credentials: credentials.md
           - Albert SSO Client: sso.md
       - Collections:
+          - Activities: collections/activities.md
           - Attachments: collections/attachments.md
           - Batch Data: collections/batch_data.md
           - Base: collections/base.md
@@ -168,6 +169,7 @@ nav:
           - Workflows: collections/workflows.md
           - Worksheets: collections/worksheets.md
       - Resources:
+          - Activities: resources/activities.md
           - Attachments: resources/attachments.md
           - Batch Data: resources/batch_data.md
           - Breakthrough:
