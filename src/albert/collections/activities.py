@@ -45,8 +45,6 @@ class ActivityCollection(BaseCollection):
         ----------
         type : ActivityType
            The type of Id for which activities will be fetched.
-        limit : int | None, optional
-            The maximum number of activities to return, by default 50.
         start_key : str | None, optional
             The primary key of the first item that this operation will evaluate.
         id : str | None, optional
@@ -61,6 +59,10 @@ class ActivityCollection(BaseCollection):
             The order by which to sort the results, by default OrderBy.DESCENDING
         operation_id : ActivityOperationId | None, optional
             OperationId of id for which activities will be fetched. Applicable only for recency support of sds/bl, by default ActivityOperationId.POST_SDS
+        page_size : int, optional
+            Number of items to fetch per page. Default is 50.
+        max_items : int, optional
+            Maximum number of items to return in total. If None, fetches all available items.
 
         Returns
         -------
