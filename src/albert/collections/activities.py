@@ -71,7 +71,6 @@ class ActivityCollection(BaseCollection):
         """
         params = {
             "type": type,
-            "limit": limit,
             "startKey": start_key,
             "id": id,
             "startDate": start_date,
@@ -85,5 +84,7 @@ class ActivityCollection(BaseCollection):
             path=self.base_path,
             session=self.session,
             params=params,
+            page_size=page_size,
+            max_items=max_items,
             deserialize=lambda items: [Activity(**item) for item in items],
         )
