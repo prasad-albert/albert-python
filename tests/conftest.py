@@ -24,6 +24,7 @@ from albert.resources.lots import Lot
 from albert.resources.parameter_groups import ParameterGroup
 from albert.resources.parameters import Parameter
 from albert.resources.projects import Project
+from albert.resources.reports import FullAnalyticalReport
 from albert.resources.roles import Role
 from albert.resources.sheets import Component, Sheet
 from albert.resources.tags import Tag
@@ -54,6 +55,7 @@ from tests.seeding import (
     generate_parameter_seeds,
     generate_pricing_seeds,
     generate_project_seeds,
+    generate_report_seeds,
     generate_storage_location_seeds,
     generate_tag_seeds,
     generate_task_seeds,
@@ -671,3 +673,22 @@ def seeded_btinsight(
     time.sleep(3.0)
     yield ins
     client.btinsights.delete(id=ins.id)
+
+
+@pytest.fixture(scope="session")
+def seeded_reports(
+    client: Albert,
+    seed_prefix: str,
+    seeded_projects: list[Project],
+) -> Iterator[list[FullAnalyticalReport]]:
+    """Create seeded reports for testing."""
+    seeded = []
+    for report in generate_report_seeds(seed_prefix=seed_prefix, seeded_projects=seeded_projects):
+        created_report = client.reports.create_report(report=report)
+        seeded.append(created_report)
+
+    yield seeded
+
+    for report in seeded:
+        with suppress(NotFoundError):
+            client.reports.delete(id=report.id)

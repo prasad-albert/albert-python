@@ -21,6 +21,7 @@ _ALBERT_PREFIXES = {
     "ParameterId": "PRM",
     "ProjectId": "PRO",
     "PropertyDataId": "PTD",
+    "ReportId": "REP",
     "RowId": "ROW",
     "SynthesisId": "SYN",
     "TagId": "TAG",
@@ -299,3 +300,10 @@ def ensure_row_id(id: str) -> str:
 
 
 RowId = Annotated[str, AfterValidator(ensure_row_id)]
+
+
+def ensure_report_id(id: str) -> str:
+    return _ensure_albert_id(id, "ReportId")
+
+
+ReportId = Annotated[str, AfterValidator(ensure_report_id)]
