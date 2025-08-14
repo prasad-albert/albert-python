@@ -7,7 +7,7 @@ from albert.core.logging import logger
 from albert.core.pagination import AlbertPaginator
 from albert.core.session import AlbertSession
 from albert.core.shared.enums import OrderBy, PaginationMode
-from albert.core.shared.identifiers import ProjectId
+from albert.core.shared.identifiers import ProjectId, UserId
 from albert.exceptions import AlbertHTTPError
 from albert.resources.projects import Project, ProjectSearchItem
 
@@ -90,7 +90,8 @@ class ProjectCollection(BaseCollection):
 
         return self.get_by_id(id=project.id)
 
-    def delete(self, *, id: str) -> None:
+    @validate_call
+    def delete(self, *, id: ProjectId) -> None:
         """
         Delete a project by its ID.
 
@@ -106,6 +107,7 @@ class ProjectCollection(BaseCollection):
         url = f"{self.base_path}/{id}"
         self.session.delete(url)
 
+    @validate_call
     def search(
         self,
         *,
@@ -114,7 +116,7 @@ class ProjectCollection(BaseCollection):
         market_segment: list[str] | None = None,
         application: list[str] | None = None,
         technology: list[str] | None = None,
-        created_by: list[str] | None = None,
+        created_by: list[UserId] | None = None,
         location: list[str] | None = None,
         from_created_at: str | None = None,
         to_created_at: str | None = None,
@@ -217,6 +219,7 @@ class ProjectCollection(BaseCollection):
             ],
         )
 
+    @validate_call
     def get_all(
         self,
         *,
@@ -225,7 +228,7 @@ class ProjectCollection(BaseCollection):
         market_segment: list[str] | None = None,
         application: list[str] | None = None,
         technology: list[str] | None = None,
-        created_by: list[str] | None = None,
+        created_by: list[UserId] | None = None,
         location: list[str] | None = None,
         from_created_at: str | None = None,
         to_created_at: str | None = None,

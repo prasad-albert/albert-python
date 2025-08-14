@@ -242,6 +242,8 @@ LinkId = Annotated[str, AfterValidator(ensure_link_id)]
 
 
 def ensure_lot_id(id: str) -> str:
+    if id and "-" in id:
+        id = id.split("-", 1)[0]
     return _ensure_albert_id(id, "LotId")
 
 
