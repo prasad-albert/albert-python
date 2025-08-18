@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://github.com/prasad-albert/albert-python/compare/v1.4.8...v1.5.0) (2025-08-18)
+
+
+### Features
+
+* amazing feature ([c979ea5](https://github.com/prasad-albert/albert-python/commit/c979ea579e2ca3389433ebaf87a0d567540b8b1b))
+* **module:** another very big feature ([18e52df](https://github.com/prasad-albert/albert-python/commit/18e52dfa1715d768012bdcaeffa459c3bf5e4d9e))
+
+
+### Bug Fixes
+
+* small bug fix ([fddcd65](https://github.com/prasad-albert/albert-python/commit/fddcd650a39b93f9bc92c34f3dd8ed0255a4fa9e))
+
 ## [Unreleased]
 
 ## [1.2.0] - 2025-07-25
