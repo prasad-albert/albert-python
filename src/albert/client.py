@@ -91,6 +91,7 @@ class Albert:
     - `from_token` — Create a client using a static token.
     - `from_sso` — Create a client using interactive browser-based SSO login.
     - `from_client_credentials` — Create a client using OAuth2 client credentials.
+    + more
     """
 
     def __init__(
