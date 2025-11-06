@@ -341,6 +341,7 @@ class InventoryCollection(BaseCollection):
         lot_owner: list[User] | User | None = None,
         tags: list[str] | None = None,
         offset: int | None = None,
+        from_created_at: str | None = None,
     ):
         if isinstance(cas, Cas):
             cas = [cas]
@@ -374,6 +375,7 @@ class InventoryCollection(BaseCollection):
             "sheetId": sheet_id,
             "projectId": project_id,
             "offset": offset,
+            "fromCreatedAt": from_created_at if from_created_at is not None else None,
         }
 
         return params
@@ -489,6 +491,7 @@ class InventoryCollection(BaseCollection):
         sort_by: str | None = None,
         max_items: int | None = None,
         offset: int | None = 0,
+        from_created_at: str | None = None,
     ) -> Iterator[InventorySearchItem]:
         """
         Search for Inventory items matching the provided criteria.
@@ -530,6 +533,8 @@ class InventoryCollection(BaseCollection):
             Maximum number of items to return in total. If None, fetches all available items.
         offset : int, optional
             Offset for pagination. Default is 0.
+        from_created_at: str | None
+            Date after which the inventory has been created including that date. Specify in %Y-%m-%d format, i.e., YYYY-MM-DD.
 
         Returns
         -------
@@ -557,6 +562,7 @@ class InventoryCollection(BaseCollection):
             lot_owner=lot_owner,
             tags=tags,
             offset=offset,
+            from_created_at=from_created_at,
         )
 
         return AlbertPaginator(
@@ -590,6 +596,7 @@ class InventoryCollection(BaseCollection):
         sort_by: str | None = None,
         max_items: int | None = None,
         offset: int | None = 0,
+        from_created_at: str | None = None,
     ) -> Iterator[InventoryItem]:
         """
         Retrieve fully hydrated InventoryItem entities with optional filters.
@@ -631,6 +638,8 @@ class InventoryCollection(BaseCollection):
             Maximum number of items to return in total. If None, fetches all available items.
         offset : int, optional
             Offset for pagination. Default is 0.
+        from_created_at: str | None
+            Date after which the inventory has been created including that date. Specify in %Y-%m-%d format, i.e., YYYY-MM-DD.
 
         Returns
         -------
@@ -658,6 +667,7 @@ class InventoryCollection(BaseCollection):
             lot_owner=lot_owner,
             tags=tags,
             offset=offset,
+            from_created_at=from_created_at,
         )
 
         return AlbertPaginator(
