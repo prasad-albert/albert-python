@@ -48,6 +48,13 @@ class CellType(str, Enum):
     BTI = "BTI"
     PRM = "PRM"
     PRG = "PRG"
+    RSL = "RSL"
+    WFL = "WFL"
+    DAC = "DAC"
+    INT = "INT"
+    DAT = "DAT"
+    NDR = "NDR"
+    PIC = "PIC"
 
 
 class DesignType(str, Enum):
@@ -76,8 +83,8 @@ class Cell(BaseResource):
         The maximum allowed value for inventory cells. Optional.
     row_label_name : str, optional
         The display name of the row.
-    type : CellType
-        The type of the cell. Allowed values are `INV`, `APP`, `BLK`, `Formula`, `TAG`, `PRC`, `PDC`, `BAT`, `TOT`, `TAS`, `DEF`, `LKP`, `FOR`, and `EXTINV`.
+    type : CellType | str
+            The type of the cell. Allowed values are the same as for CellType.
     row_type : CellType, optional
         The type of the row containing this cell. Usually one of
         INV (inventory row), TOT (total row), TAS (task row), TAG, PRC, PDC, BAT or BLK.
@@ -101,8 +108,8 @@ class Cell(BaseResource):
     value: str | dict | list = ""
     min_value: str | None = Field(default=None, alias="minValue")
     max_value: str | None = Field(default=None, alias="maxValue")
-    type: CellType
-    row_type: CellType | None = Field(default=None)
+    type: CellType | str
+    row_type: CellType | str | None = Field(default=None)
     name: str | None = Field(default=None)
     calculation: str = ""
     design_id: str
@@ -182,7 +189,7 @@ class Design(BaseSessionResource):
     id : str
         The Albert ID of the design.
     design_type : DesignType
-        The type of the design. Allowed values are `apps`, `products`, and `results`.
+        The type of the design. Allowed values are the same as for DesignType.
     state : DesignState | None
         The state of the design. Optional. Default is None.
     grid : pd.DataFrame | None
@@ -1173,8 +1180,8 @@ class Column(BaseSessionResource):  # noqa:F811
         The column ID of the column.
     name : str | None
         The name of the column. Optional. Default is None.
-    type : CellType
-        The type of the column. Allowed values are `INV`, `APP`, `BLK`, `Formula`, `TAG`, `PRC`, `PDC`, `BAT`, `TOT`, `TAS`, `DEF`, `LKP`, `FOR`, and `EXTINV`.
+    type : CellType | str
+        The type of the column. Allowed values are the same as for CellType.
     sheet : Sheet
         The sheet the column is in.
     cells : list[Cell]
@@ -1185,7 +1192,7 @@ class Column(BaseSessionResource):  # noqa:F811
 
     column_id: str = Field(alias="colId")
     name: str | None = Field(default=None)
-    type: CellType
+    type: CellType | str
     sheet: Sheet
     inventory_id: str | None = Field(default=None, exclude=True)
     _cells: list[Cell] | None = PrivateAttr(default=None)
@@ -1248,8 +1255,8 @@ class Row(BaseSessionResource):  # noqa:F811
     ----------
     row_id : str
         The row ID of the row.
-    type : CellType
-        The type of the row. Allowed values are `INV`, `APP`, `BLK`, `Formula`, `TAG`, `PRC`, `PDC`, `BAT`, `TOT`, `TAS`, `DEF`, `LKP`, `FOR`, and `EXTINV`.
+    type : CellType | str
+        The type of the row. Allowed values are the same as for CellType.
     design : Design
         The design the row is in.
     sheet : Sheet
@@ -1268,7 +1275,7 @@ class Row(BaseSessionResource):  # noqa:F811
     """
 
     row_id: str = Field(alias="rowId")
-    type: CellType
+    type: CellType | str
     design: Design
     sheet: Sheet
     name: str | None = Field(default=None)
