@@ -40,6 +40,7 @@ theme:
     - navigation.sections # Sidebar sections
     - navigation.top # Scroll-to-top button
     - navigation.tracking # Highlight section in sidebar
+    - navigation.collapse
     - search.suggest # Smart search suggestions
     - toc.follow # Highlight TOC entry while scrolling
 
@@ -123,11 +124,10 @@ nav:
       - Configuration: configuration.md
       - Migration Guide: migration.md
       - Contributing: CONTRIBUTING.md
-      - Changelog: CHANGELOG.md
   - SDK Reference:
       - Clients:
           - Albert Client: albert.md
-      - Authenticaton:
+      - Authentication:
           - Albert Client Credentials: credentials.md
           - Albert SSO Client: sso.md
       - Collections:
@@ -218,6 +218,9 @@ nav:
           - Worksheets:
               - Worksheets: resources/worksheets.md
               - Sheets: resources/sheets.md
+  - Examples:
+      - Property Data: examples/property_data.md
+      - Tasks: examples/tasks.md
 
 validation:
   omitted_files: warn
