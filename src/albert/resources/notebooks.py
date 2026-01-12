@@ -4,6 +4,7 @@ import re
 import uuid
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pandas import DataFrame
@@ -106,6 +107,7 @@ class AttachesContent(BaseAlbertModel):
     namespace: str = Field(default="result")
     file_key: str | None = Field(default=None, alias="fileKey")
     format: str | None = Field(default=None, alias="mimeType")
+    file_path: str | Path | None = Field(default=None, exclude=True)
     signed_url: str | None = Field(default=None, alias="signedURL", exclude=True, frozen=True)
 
 
@@ -122,6 +124,7 @@ class ImageContent(BaseAlbertModel):
     with_border: bool = Field(default=False, alias="withBorder")
     file_key: str | None = Field(default=None, alias="fileKey")
     format: str | None = Field(default=None, alias="mimeType")
+    file_path: str | Path | None = Field(default=None, exclude=True)
     signed_url: str | None = Field(default=None, alias="signedURL", exclude=True, frozen=True)
 
 
@@ -132,14 +135,14 @@ class ImageBlock(BaseBlock):
 
 class KetcherContent(BaseAlbertModel):
     synthesis_id: SynthesisId | None = Field(default=None, alias="synthesisId")
-    name: str | None = Field(default=None)
     id: str | None = Field(default=None)
     block_id: str | None = Field(default=None, alias="blockId")
-    data: str | None = Field(default=None)
+    data: str = Field(default=None, exclude=True)
     file_key: str | None = Field(default=None, alias="fileKey")
-    s3_key: str | None = Field(default=None, alias="s3Key", exclude=True, frozen=True)
-    png: str | None = Field(default=None, exclude=True, frozen=True)
-    ketcher_url: str | None = Field(default=None, alias="ketcherUrl", exclude=True, frozen=True)
+    s3_key: str | None = Field(default=None, alias="s3Key")
+    png: str | None = Field(default=None, exclude=True)
+    state_type: str = Field(default="project", alias="stateType")
+    smiles: str | None = Field(default=None, alias="smiles", exclude=True)
 
 
 class KetcherBlock(BaseBlock):

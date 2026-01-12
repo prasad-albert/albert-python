@@ -23,7 +23,7 @@ use_directory_urls: true
 theme:
   name: "material"
   font:
-    text: Poppins
+    text: Aeonik Regular
   logo: assets/Wordmark_White.png
   favicon: assets/Vector_Favicon_Blue.svg
   features:
@@ -166,6 +166,7 @@ nav:
           - Storage Classes: collections/storage_classes.md
           - Storage Locations: collections/storage_locations.md
           - Substances: collections/substances.md
+          - Synthesis: collections/synthesis.md
           - Tags: collections/tags.md
           - Tasks: collections/tasks.md
           - UN Numbers: collections/un_numbers.md
@@ -209,6 +210,7 @@ nav:
           - Storage Classes: resources/storage_classes.md
           - Storage Locations: resources/storage_locations.md
           - Substances: resources/substances.md
+          - Synthesis: resources/synthesis.md
           - Tags: resources/tags.md
           - Tasks: resources/tasks.md
           - UN Numbers: resources/un_numbers.md
@@ -221,6 +223,7 @@ nav:
   - Examples:
       - Property Data: examples/property_data.md
       - Tasks: examples/tasks.md
+      - Notebooks: examples/notebook.md
 
 validation:
   omitted_files: warn
